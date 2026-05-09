@@ -10,22 +10,218 @@
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen">
   <div x-data="dashboard()" x-init="init()" class="max-w-6xl mx-auto p-6">
-    <header class="flex items-center justify-between mb-8">
-      <h1 class="text-3xl font-bold tracking-tight">
-        <span class="text-red-500">Crime</span> Automation
+    <header class="flex items-center justify-between mb-8 flex-wrap gap-3">
+      <h1>
+        <img src="/static/logo.png" alt="SEKT6R" class="h-12 w-auto" />
       </h1>
-      <nav class="flex gap-3 text-sm">
-        <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
+      <nav class="flex gap-2 text-sm flex-wrap items-center">
+        <a href="/" class="px-3 py-1.5 rounded bg-red-700 text-white">Dashboard</a>
+        <a href="/archive" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Archiv</a>
         <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
+        <button @click="archiveAllActive()" :disabled="archivingAll"
+                class="px-3 py-1.5 rounded bg-amber-700 hover:bg-amber-600 disabled:opacity-50 font-medium">
+          <span x-show="!archivingAll">📦 Alle archivieren</span>
+          <span x-show="archivingAll">Archiviere…</span>
+        </button>
+        <button @click="showNew = !showNew"
+                class="px-3 py-1.5 rounded bg-red-600 hover:bg-red-500 font-medium">
+          + Neue Gang
+        </button>
       </nav>
     </header>
 
-    <section class="mb-6 flex items-center justify-between">
-      <h2 class="text-xl font-semibold">Gangs</h2>
-      <button @click="showNew = !showNew"
-              class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded font-medium">
-        + Neue Gang
+    <section class="mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+      <div class="flex items-end gap-3 mb-4 flex-wrap">
+        <h2 class="text-lg font-semibold mr-2">Reaktions-Statistik</h2>
+        <div>
+          <label class="text-xs text-zinc-400 block mb-1">Stadtteil</label>
+          <select x-model="districtFilter" @change="loadStats()"
+                  class="bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-sm">
+            <option value="">Alle Stadtteile</option>
+            <template x-for="d in DISTRICTS" :key="d">
+              <option :value="d" x-text="d"></option>
+            </template>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-zinc-400 block mb-1">Gang</label>
+          <select x-model="statsFilter.crew_id" @change="loadStats()"
+                  class="bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-sm">
+            <option value="">Alle Gangs</option>
+            <template x-for="c in filteredCrews" :key="c.id">
+              <option :value="c.id" x-text="c.name"></option>
+            </template>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-zinc-400 block mb-1">Zeitraum</label>
+          <select x-model="statsFilter.range" @change="loadStats()"
+                  class="bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-sm">
+            <option value="all">Gesamt</option>
+            <option value="today">Heute</option>
+            <option value="week">7 Tage</option>
+            <option value="month">30 Tage</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <button @click="toggleStatusFilter('approved')"
+                :class="statusFilter === 'approved' ? 'ring-2 ring-green-400 bg-green-900/60' : 'bg-green-900/30'"
+                class="border border-green-700 rounded p-3 text-center transition hover:bg-green-900/50">
+          <div class="text-2xl font-bold text-green-300" x-text="stats.approved || 0"></div>
+          <div class="text-xs text-green-400 mt-1">👍 Erledigt</div>
+        </button>
+        <button @click="toggleStatusFilter('rejected')"
+                :class="statusFilter === 'rejected' ? 'ring-2 ring-red-400 bg-red-900/60' : 'bg-red-900/30'"
+                class="border border-red-700 rounded p-3 text-center transition hover:bg-red-900/50">
+          <div class="text-2xl font-bold text-red-300" x-text="stats.rejected || 0"></div>
+          <div class="text-xs text-red-400 mt-1">👎 Fehlgeschlagen</div>
+        </button>
+        <button @click="toggleStatusFilter('cancelled')"
+                :class="statusFilter === 'cancelled' ? 'ring-2 ring-yellow-400 bg-yellow-900/60' : 'bg-yellow-900/30'"
+                class="border border-yellow-700 rounded p-3 text-center transition hover:bg-yellow-900/50">
+          <div class="text-2xl font-bold text-yellow-300" x-text="stats.cancelled || 0"></div>
+          <div class="text-xs text-yellow-400 mt-1">❌ Nicht durchführbar</div>
+        </button>
+        <button @click="toggleStatusFilter('pending')"
+                :class="statusFilter === 'pending' ? 'ring-2 ring-amber-400 bg-amber-900/60' : 'bg-amber-900/30'"
+                class="border border-amber-700 rounded p-3 text-center transition hover:bg-amber-900/50">
+          <div class="text-2xl font-bold text-amber-300" x-text="stats.pending || 0"></div>
+          <div class="text-xs text-amber-400 mt-1">⏳ Wartet</div>
+        </button>
+      </div>
+      <p x-show="statusFilter" class="text-xs text-zinc-400 mt-3">
+        Card-Liste gefiltert auf: <span x-text="statusLabel(statusFilter)"></span>
+        <button @click="statusFilter = ''" class="ml-2 underline hover:text-zinc-200">zurücksetzen</button>
+      </p>
+    </section>
+
+    <section class="mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+      <button @click="showBulk = !showBulk" class="text-left w-full flex items-center justify-between">
+        <h2 class="text-lg font-semibold">📢 Massen-Auftrag senden</h2>
+        <span class="text-zinc-400 text-sm" x-text="showBulk ? '▲ schließen' : '▼ aufklappen'"></span>
       </button>
+
+      <div x-show="showBulk" x-transition class="mt-3 space-y-3">
+
+      <!-- Phase 1: Eingabe -->
+      <div x-show="bulkPhase === 'input'" class="space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-zinc-400 block mb-1">Empfänger</label>
+            <select x-model="bulkScope"
+                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm">
+              <option value="all">Alle Gangs</option>
+              <option value="district">Nach Stadtteil…</option>
+              <option value="manual">Manuell auswählen…</option>
+            </select>
+          </div>
+          <div x-show="bulkScope === 'district'">
+            <label class="text-xs text-zinc-400 block mb-1">Stadtteil</label>
+            <select x-model="bulkDistrict"
+                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm">
+              <option value="">— Stadtteil wählen —</option>
+              <template x-for="d in DISTRICTS" :key="d">
+                <option :value="d" x-text="d"></option>
+              </template>
+            </select>
+          </div>
+        </div>
+
+        <div x-show="bulkScope === 'manual'" class="grid grid-cols-2 md:grid-cols-3 gap-2 p-2 bg-zinc-950 rounded border border-zinc-800">
+          <template x-for="c in crews" :key="c.id">
+            <label class="flex items-center gap-2 text-sm">
+              <input type="checkbox" :value="c.id" x-model="bulkSelectedCrews" />
+              <span x-text="c.name"></span>
+              <span x-show="c.district" class="text-xs text-zinc-500" x-text="`(${c.district})`"></span>
+            </label>
+          </template>
+        </div>
+
+        <p class="text-xs text-zinc-400">
+          Empfänger (<span x-text="bulkTargets.length"></span>):
+          <span x-text="bulkTargets.map(c => c.name).join(', ') || '—'"></span>
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-zinc-400 block mb-1">Modus</label>
+            <select x-model="bulkMode" @change="bulkResult=''"
+                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm">
+              <option value="manual">Klartext direkt (kein KI-Eingriff)</option>
+              <option value="ai_rewrite">KI: Roh-Input pro Gang umschreiben</option>
+              <option value="ai_generate">KI: pro Gang aus Story generieren</option>
+            </select>
+          </div>
+          <div x-show="bulkMode !== 'manual'">
+            <label class="text-xs text-zinc-400 block mb-1">KI-Provider</label>
+            <select x-model="bulkProvider"
+                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm">
+              <option value="anthropic">Claude (Anthropic)</option>
+              <option value="openai">OpenAI</option>
+            </select>
+          </div>
+        </div>
+
+        <textarea x-model="bulkContent" rows="4"
+                  :placeholder="bulkMode === 'manual' ? 'Auftragstext (1:1 an alle Empfänger)' : (bulkMode === 'ai_rewrite' ? 'Roh-Input — Klartext, was passieren soll. KI schreibt es pro Gang individuell um.' : 'Hinweise an die KI (optional, darf leer bleiben). KI generiert pro Gang aus Story+Beziehungen.')"
+                  class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm"></textarea>
+
+        <div class="grid grid-cols-3 gap-2">
+          <input type="number" min="0" x-model.number="bulkDeadlineValue"
+                 placeholder="⏳ Countdown (optional)"
+                 class="col-span-2 bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+          <select x-model="bulkDeadlineUnit"
+                  class="bg-zinc-950 border border-zinc-800 rounded px-2 py-2 text-sm">
+            <option value="min">Minuten</option>
+            <option value="hour">Stunden</option>
+            <option value="day">Tage</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button @click="sendBulk()"
+                  :disabled="bulkSending || bulkTargets.length === 0 || (bulkMode !== 'ai_generate' && !bulkContent.trim())"
+                  class="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 rounded font-medium">
+            <span x-show="!bulkSending && bulkMode === 'manual'">📤 An <span x-text="bulkTargets.length"></span> Gang<span x-show="bulkTargets.length !== 1">s</span> senden</span>
+            <span x-show="!bulkSending && bulkMode !== 'manual'">⚙ Vorschau für <span x-text="bulkTargets.length"></span> Gang<span x-show="bulkTargets.length !== 1">s</span> erstellen</span>
+            <span x-show="bulkSending" x-text="bulkBusyLabel || 'Bitte warten…'"></span>
+          </button>
+          <p x-show="bulkResult" x-text="bulkResult" class="text-xs whitespace-pre-line" :class="bulkResultIsError ? 'text-red-400' : 'text-green-400'"></p>
+        </div>
+      </div>
+
+      <!-- Phase 2: Vorschau (nur bei KI-Modi) -->
+      <div x-show="bulkPhase === 'preview'" class="space-y-3">
+        <div class="bg-blue-950/40 border border-blue-700 text-blue-200 text-sm rounded p-3">
+          <strong>Vorschau</strong> — geht an <span x-text="bulkTargets.length"></span> Gang<span x-show="bulkTargets.length !== 1">s</span>
+          (alle erhalten denselben Text). Du kannst noch editieren.
+          <div class="mt-1 text-xs text-blue-300/80" x-text="bulkTargets.map(c => c.name).join(', ')"></div>
+        </div>
+
+        <textarea x-model="bulkPreviewText" rows="8"
+                  class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm leading-relaxed"></textarea>
+
+        <div class="flex items-center gap-3 flex-wrap">
+          <button @click="bulkConfirmSend()"
+                  :disabled="bulkSending || !bulkPreviewText.trim()"
+                  class="px-4 py-2 bg-green-600 hover:bg-green-500 disabled:opacity-50 rounded font-medium">
+            <span x-show="!bulkSending">📤 An <span x-text="bulkTargets.length"></span> senden</span>
+            <span x-show="bulkSending" x-text="bulkBusyLabel || 'Bitte warten…'"></span>
+          </button>
+          <button @click="bulkDiscardPreview()" :disabled="bulkSending"
+                  class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded">
+            Verwerfen / zurück
+          </button>
+          <p x-show="bulkResult" x-text="bulkResult" class="text-xs whitespace-pre-line" :class="bulkResultIsError ? 'text-red-400' : 'text-green-400'"></p>
+        </div>
+      </div>
+
+      </div><!-- /showBulk -->
+    </section>
+
+    <section class="mb-4">
+      <h2 class="text-xl font-semibold">Gangs</h2>
     </section>
 
     <div x-show="showNew" x-transition class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mb-6">
@@ -36,6 +232,13 @@
                class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2" />
         <input x-model="draft.info_channel_id" placeholder="Zusatzinfo-Channel-ID (Boss-Feedback)"
                class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2" />
+        <select x-model="draft.district"
+                class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2">
+          <option value="">— Stadtteil wählen —</option>
+          <template x-for="d in DISTRICTS" :key="d">
+            <option :value="d" x-text="d"></option>
+          </template>
+        </select>
         <input x-model="draft.color_hex" type="color"
                class="bg-zinc-950 border border-zinc-800 rounded h-10 w-24" />
         <textarea x-model="draft.story_background" placeholder="Hintergrund-Story"
@@ -49,13 +252,16 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <template x-for="c in crews" :key="c.id">
-        <a :href="`/crew/${c.id}`"
+      <template x-for="c in filteredCrews" :key="c.id">
+        <a :href="`/crew/${c.id}`" @click="markCrewSeen(c)"
            class="block bg-zinc-900 border-2 rounded-lg p-5 transition hover:bg-zinc-800/60"
-           :class="cardBorder(c.last_mission_status)">
+           :class="[cardBorder(c.last_mission_status), hasUnread(c) ? 'animate-pulse ring-2 ring-amber-400' : '']">
           <div class="flex items-center gap-3 mb-3">
             <div class="w-3 h-3 rounded-full" :style="`background:${c.color_hex}`"></div>
             <h3 class="text-lg font-semibold" x-text="c.name"></h3>
+            <span x-show="c.district"
+                  class="ml-auto text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-300"
+                  x-text="c.district"></span>
           </div>
           <p class="text-sm text-zinc-400 line-clamp-3" x-text="c.story_background || 'Keine Story.'"></p>
           <div class="mt-3 flex items-center justify-between gap-2">
@@ -74,6 +280,9 @@
 
     <p x-show="crews.length === 0" class="text-zinc-500 mt-6">
       Noch keine Gangs angelegt. Klicke oben auf "Neue Gang".
+    </p>
+    <p x-show="crews.length > 0 && filteredCrews.length === 0" class="text-zinc-500 mt-6">
+      Keine Gang in <span x-text="districtFilter"></span>.
     </p>
   </div>
 

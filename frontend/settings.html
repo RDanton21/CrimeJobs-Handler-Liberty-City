@@ -9,12 +9,13 @@
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen">
-  <div x-data="settingsPage()" x-init="init()" class="max-w-3xl mx-auto p-6">
+  <div x-data="settingsPage()" x-init="init()" class="max-w-6xl mx-auto p-6">
     <header class="flex items-center justify-between mb-8">
       <h1 class="text-3xl font-bold">Settings</h1>
       <nav class="flex gap-3 text-sm">
         <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
-        <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
+        <a href="/archive" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Archiv</a>
+        <a href="/settings" class="px-3 py-1.5 rounded bg-red-700 text-white">Settings</a>
       </nav>
     </header>
 
@@ -50,6 +51,135 @@
       </div>
       <button @click="save()" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded">Speichern</button>
       <p x-show="msg" x-text="msg" class="text-sm text-green-400"></p>
+    </section>
+
+    <section class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+      <h2 class="text-lg font-semibold mb-1">🧠 KI System-Prompts</h2>
+      <p class="text-xs text-zinc-400 mb-3">
+        Mehrere Varianten möglich, exakt einer kann aktiv sein. Aktiver Prompt
+        steuert Stil + Regeln der KI. Kein Prompt aktiv → fest hinterlegter
+        Default greift.
+      </p>
+
+      <!-- Liste der gespeicherten Prompts -->
+      <ul class="space-y-2 mb-4">
+        <template x-for="sp in systemPrompts" :key="sp.id">
+          <li class="bg-zinc-950 border rounded p-3"
+              :class="sp.is_active ? 'border-green-600' : 'border-zinc-800'">
+            <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span x-show="sp.is_active" class="text-xs px-2 py-0.5 rounded bg-green-700 text-white">aktiv</span>
+                <span class="font-medium" x-text="sp.name"></span>
+              </div>
+              <div class="flex gap-1">
+                <button x-show="!sp.is_active" @click="activatePrompt(sp.id)"
+                        class="text-xs px-2 py-1 bg-green-700 hover:bg-green-600 rounded text-white">Aktivieren</button>
+                <button x-show="sp.is_active" @click="deactivatePrompts()"
+                        class="text-xs px-2 py-1 bg-zinc-700 hover:bg-zinc-600 rounded">Deaktivieren</button>
+                <button @click="editingPromptId = (editingPromptId === sp.id ? null : sp.id)"
+                        class="text-xs px-2 py-1 bg-zinc-700 hover:bg-zinc-600 rounded">
+                  <span x-show="editingPromptId !== sp.id">Bearbeiten</span>
+                  <span x-show="editingPromptId === sp.id">Schließen</span>
+                </button>
+                <button @click="deletePrompt(sp.id)"
+                        class="text-xs px-2 py-1 text-red-400 hover:text-red-300">×</button>
+              </div>
+            </div>
+            <div x-show="editingPromptId === sp.id" class="mt-2">
+              <input x-model="sp.name"
+                     class="w-full bg-zinc-900 border border-zinc-800 rounded px-2 py-1 text-sm mb-2" />
+              <textarea x-model="sp.text" rows="12"
+                        class="w-full bg-zinc-900 border border-zinc-800 rounded px-2 py-1 text-sm font-mono leading-relaxed"></textarea>
+              <button @click="updatePrompt(sp)"
+                      class="mt-2 px-3 py-1.5 bg-green-600 hover:bg-green-500 rounded text-sm">Speichern</button>
+            </div>
+          </li>
+        </template>
+      </ul>
+      <p x-show="systemPrompts.length === 0" class="text-zinc-500 text-sm mb-3">
+        Noch kein eigener Prompt — Default greift.
+      </p>
+
+      <!-- Neuer Prompt -->
+      <div class="bg-zinc-950 border border-zinc-800 rounded p-3">
+        <h3 class="text-sm font-semibold mb-2">+ Neuer Prompt</h3>
+        <input x-model="newPromptForm.name" placeholder="Name (z.B. 'Default kryptisch', 'Casual')"
+               class="w-full bg-zinc-900 border border-zinc-800 rounded px-2 py-1 text-sm mb-2" />
+        <textarea x-model="newPromptForm.text" rows="10"
+                  placeholder="Text des System-Prompts…"
+                  class="w-full bg-zinc-900 border border-zinc-800 rounded px-2 py-1 text-sm font-mono leading-relaxed"></textarea>
+        <div class="mt-2 flex gap-2 flex-wrap">
+          <button @click="createPrompt()"
+                  class="px-3 py-1.5 bg-green-600 hover:bg-green-500 rounded text-sm">Anlegen</button>
+          <button @click="prefillPromptWithDefault()"
+                  class="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 rounded text-sm">↺ Default-Vorlage einfügen</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+      <h2 class="text-lg font-semibold mb-1">💬 Reaktions-Antworten (nach 👍 / 👎 / ❌)</h2>
+      <p class="text-xs text-zinc-400 mb-3">
+        Wenn der Boss reagiert, postet der Bot zufällig einen dieser Sprüche
+        als Reply auf den Auftrag. Pool leer → Default
+        „Alles klar, wir melden uns.".
+      </p>
+
+      <div class="flex gap-2 mb-3">
+        <input x-model="newReactionMsg"
+               @keydown.enter="addReactionMsg()"
+               placeholder="Neue Antwort..."
+               class="flex-1 bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+        <button @click="addReactionMsg()"
+                class="px-3 py-2 bg-green-600 hover:bg-green-500 rounded text-sm">+ Hinzufügen</button>
+      </div>
+
+      <ul class="space-y-2">
+        <template x-for="rm in reactionMessages" :key="rm.id">
+          <li class="flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm">
+            <span x-text="rm.text" class="flex-1 mr-2 whitespace-pre-wrap break-words"></span>
+            <button @click="deleteReactionMsg(rm.id)"
+                    title="Antwort löschen"
+                    class="text-red-400 hover:text-red-300">×</button>
+          </li>
+        </template>
+      </ul>
+      <p x-show="reactionMessages.length === 0" class="text-zinc-500 text-sm">
+        Pool ist leer — Default „Alles klar, wir melden uns." wird verwendet.
+      </p>
+    </section>
+
+    <section class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+      <h2 class="text-lg font-semibold mb-1">⏳ Versager-Sprüche bei abgelaufener Deadline</h2>
+      <p class="text-xs text-zinc-400 mb-3">
+        Wenn ein Auftrag abläuft, ohne dass der Boss reagiert hat, postet der Bot
+        zufällig einen dieser Sprüche im Auftrags-Channel. Markdown wird gerendert
+        (z.B. <code class="text-zinc-300">**fett**</code>). Pool leer → Default
+        „Du hast versagt!".
+      </p>
+
+      <div class="flex gap-2 mb-3">
+        <input x-model="newExpiryMsg"
+               @keydown.enter="addExpiryMsg()"
+               placeholder="Neuer Spruch..."
+               class="flex-1 bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+        <button @click="addExpiryMsg()"
+                class="px-3 py-2 bg-green-600 hover:bg-green-500 rounded text-sm">+ Hinzufügen</button>
+      </div>
+
+      <ul class="space-y-2">
+        <template x-for="em in expiryMessages" :key="em.id">
+          <li class="flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm">
+            <span x-text="em.text" class="flex-1 mr-2 whitespace-pre-wrap break-words"></span>
+            <button @click="deleteExpiryMsg(em.id)"
+                    title="Spruch löschen"
+                    class="text-red-400 hover:text-red-300">×</button>
+          </li>
+        </template>
+      </ul>
+      <p x-show="expiryMessages.length === 0" class="text-zinc-500 text-sm">
+        Pool ist leer — Default „Du hast versagt!" wird verwendet.
+      </p>
     </section>
 
     <section class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg p-5 text-sm text-zinc-400 space-y-2">

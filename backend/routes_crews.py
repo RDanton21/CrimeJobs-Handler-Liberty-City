@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 
 import httpx
@@ -29,6 +30,49 @@ async def _attach_last_mission(session: AsyncSession, crew: Crew) -> Crew:
         crew.last_mission_status = None
         crew.last_mission_at = None
     return crew
+
+
+@router.get("/notifications")
+async def crew_notifications(session: AsyncSession = Depends(get_session)):
+    """Liefert pro Crew mit info_channel_id den Zeitstempel der jüngsten
+    Nicht-Bot-Message im Info-Channel — fürs Blink-Indicator auf dem Dashboard.
+    Bot-Calls laufen parallel, damit Polling auch bei vielen Crews schnell ist.
+
+    WICHTIG: Diese Route MUSS vor allen `/{crew_id}`-Routes stehen, sonst matcht
+    FastAPI 'notifications' als int crew_id und wirft 422."""
+    res = await session.execute(
+        select(Crew).where(Crew.info_channel_id != "").order_by(Crew.id)
+    )
+    crews_with_info = list(res.scalars().all())
+
+    if not crews_with_info:
+        return []
+
+    async def _fetch_latest(channel_id: str) -> str | None:
+        # Limit hoch genug, damit Bot-Messages oben nicht alles wegfiltern.
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as cli:
+                r = await cli.post(
+                    "http://127.0.0.1:8001/read_channel",
+                    json={"channel_id": channel_id, "limit": 10, "oldest_first": False},
+                )
+            if r.status_code >= 400:
+                return None
+            msgs = r.json()
+            if not msgs:
+                return None
+            return msgs[0].get("posted_at")
+        except Exception:
+            return None
+
+    timestamps = await asyncio.gather(
+        *[_fetch_latest(c.info_channel_id) for c in crews_with_info]
+    )
+
+    return [
+        {"crew_id": c.id, "latest_boss_message_at": ts}
+        for c, ts in zip(crews_with_info, timestamps)
+    ]
 
 
 @router.get("", response_model=list[CrewOut])

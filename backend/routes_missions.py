@@ -1,21 +1,46 @@
-from datetime import datetime
+import asyncio
+import json
+from datetime import datetime, timedelta, timezone
+from io import BytesIO
 from pathlib import Path
 from uuid import uuid4
 
+
+async def _resolve_active_system_prompt(session) -> str | None:
+    """Aktiver SystemPrompt aus DB > legacy settings.system_prompt > None (Default greift)."""
+    res = await session.execute(select(SystemPrompt).where(SystemPrompt.is_active.is_(True)))
+    sp = res.scalar_one_or_none()
+    if sp and sp.text.strip():
+        return sp.text
+    legacy = await settings_get(session, "system_prompt", "")
+    return legacy or None
+
+
+def _normalize_naive_utc(dt: datetime | None) -> datetime | None:
+    """Pydantic kann tz-aware datetimes liefern (z.B. ISO mit Z-Suffix).
+    SQLite DATETIME ist naive — wir konvertieren zu naive UTC."""
+    if dt is None:
+        return None
+    if dt.tzinfo is not None:
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt
+
 import aiofiles
 import httpx
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from sqlalchemy import desc, select
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
+from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .ai import get_provider
 from .auth import require_admin
 from .config import settings
 from .db import get_session
-from .models import Crew, CrewRelation, Mission, MissionStatus
+from .models import Crew, CrewRelation, Mission, MissionStatus, SystemPrompt
 from .prompts import MissionContext, build_rewrite_prompt, build_user_prompt
 from .schemas import (
+    BulkSendRequest,
     MissionGenerateRequest,
+    MissionManualRequest,
     MissionOut,
     MissionRewriteRequest,
     MissionUpdate,
@@ -100,11 +125,20 @@ async def generate_mission(
 
     ctx = await _load_context(session, crew, payload.extra_instructions)
     user_prompt = build_user_prompt(ctx)
+    system_prompt_val = await _resolve_active_system_prompt(session)
 
     try:
-        text = await provider.generate(user_prompt, model=payload.model)
+        text = await provider.generate(user_prompt, model=payload.model, system_prompt=system_prompt_val)
     except Exception as exc:
         raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+
+    deadline_at = None
+    if payload.deadline_minutes and payload.deadline_minutes > 0:
+        deadline_at = datetime.utcnow() + timedelta(minutes=payload.deadline_minutes)
+
+    final_text = text
+    if payload.append_text and payload.append_text.strip():
+        final_text = f"{text}\n\n---\n\n{payload.append_text.strip()}"
 
     mission = Mission(
         crew_id=crew.id,
@@ -112,9 +146,11 @@ async def generate_mission(
         ai_model=payload.model or "",
         prompt_used=user_prompt,
         content_generated=text,
-        content_final=text,
+        content_final=final_text,
         discord_channel_id=crew.discord_channel_id,
         status=MissionStatus.DRAFT,
+        deadline_at=deadline_at,
+        scheduled_send_at=_normalize_naive_utc(payload.scheduled_send_at),
     )
     session.add(mission)
     await session.commit()
@@ -149,11 +185,20 @@ async def rewrite_mission(
 
     ctx = await _load_context(session, crew, payload.extra_instructions)
     user_prompt = build_rewrite_prompt(ctx, payload.raw_input)
+    system_prompt_val = await _resolve_active_system_prompt(session)
 
     try:
-        text = await provider.generate(user_prompt, model=payload.model)
+        text = await provider.generate(user_prompt, model=payload.model, system_prompt=system_prompt_val)
     except Exception as exc:
         raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+
+    deadline_at = None
+    if payload.deadline_minutes and payload.deadline_minutes > 0:
+        deadline_at = datetime.utcnow() + timedelta(minutes=payload.deadline_minutes)
+
+    final_text = text
+    if payload.append_text and payload.append_text.strip():
+        final_text = f"{text}\n\n---\n\n{payload.append_text.strip()}"
 
     mission = Mission(
         crew_id=crew.id,
@@ -161,14 +206,143 @@ async def rewrite_mission(
         ai_model=payload.model or "",
         prompt_used=user_prompt,
         content_generated=text,
-        content_final=text,
+        content_final=final_text,
         discord_channel_id=crew.discord_channel_id,
         status=MissionStatus.DRAFT,
+        deadline_at=deadline_at,
+        scheduled_send_at=_normalize_naive_utc(payload.scheduled_send_at),
     )
     session.add(mission)
     await session.commit()
     await session.refresh(mission)
     return mission
+
+
+@router.post("/manual", response_model=MissionOut)
+async def create_manual_mission(
+    payload: MissionManualRequest, session: AsyncSession = Depends(get_session)
+):
+    """Erstellt eine Mission ohne KI-Generierung. Inhalt wird 1:1 als content_final
+    übernommen — gedacht für Klartext-Aufträge mit Adressen, GPS, etc."""
+    if not payload.content.strip():
+        raise HTTPException(400, "content darf nicht leer sein")
+
+    crew = await session.get(Crew, payload.crew_id)
+    if not crew:
+        raise HTTPException(404, "Crew nicht gefunden")
+
+    deadline_at = None
+    if payload.deadline_minutes and payload.deadline_minutes > 0:
+        deadline_at = datetime.utcnow() + timedelta(minutes=payload.deadline_minutes)
+
+    text = payload.content.strip()
+    mission = Mission(
+        crew_id=crew.id,
+        ai_provider="manual",
+        ai_model="",
+        prompt_used="",
+        content_generated=text,
+        content_final=text,
+        discord_channel_id=crew.discord_channel_id,
+        status=MissionStatus.DRAFT,
+        deadline_at=deadline_at,
+        scheduled_send_at=_normalize_naive_utc(payload.scheduled_send_at),
+    )
+    session.add(mission)
+    await session.commit()
+    await session.refresh(mission)
+    return mission
+
+
+@router.post("/bulk_send")
+async def bulk_send(
+    payload: BulkSendRequest, session: AsyncSession = Depends(get_session)
+):
+    """Bulk-Variante: erstellt für jede Crew eine manuelle Mission und sendet
+    sie parallel via Bot (5 gleichzeitig). Returns Liste mit Status pro Crew."""
+    text = payload.content.strip()
+    if not text:
+        raise HTTPException(400, "content darf nicht leer sein")
+    if not payload.crew_ids:
+        return []
+
+    deadline_at = None
+    if payload.deadline_minutes and payload.deadline_minutes > 0:
+        deadline_at = datetime.utcnow() + timedelta(minutes=payload.deadline_minutes)
+    schedule_at = _normalize_naive_utc(payload.scheduled_send_at)
+
+    # Phase 1: Missions sequentiell anlegen + Names sammeln
+    creations: list[dict] = []
+    for cid in payload.crew_ids:
+        crew = await session.get(Crew, cid)
+        if not crew:
+            creations.append({"crew_id": cid, "name": f"#{cid}", "mission": None,
+                              "error": "Crew nicht gefunden"})
+            continue
+        mission = Mission(
+            crew_id=crew.id,
+            ai_provider="manual",
+            ai_model="",
+            prompt_used="",
+            content_generated=text,
+            content_final=text,
+            discord_channel_id=crew.discord_channel_id,
+            status=MissionStatus.DRAFT,
+            deadline_at=deadline_at,
+            scheduled_send_at=schedule_at,
+        )
+        session.add(mission)
+        creations.append({"crew_id": cid, "name": crew.name, "mission": mission, "error": None})
+    await session.commit()
+    for entry in creations:
+        if entry["mission"]:
+            await session.refresh(entry["mission"])
+
+    # Wenn Schedule: nicht jetzt senden, Bot picks up
+    if schedule_at:
+        return [
+            {
+                "crew_id": e["crew_id"], "name": e["name"],
+                "ok": e["error"] is None,
+                "mission_id": e["mission"].id if e["mission"] else None,
+                "scheduled": True,
+                "error": e["error"],
+            }
+            for e in creations
+        ]
+
+    # Phase 2: parallele Bot-Sends, max 5 gleichzeitig
+    sem = asyncio.Semaphore(5)
+
+    async def _send_one(entry: dict) -> dict:
+        if entry["error"] is not None or entry["mission"] is None:
+            return {
+                "crew_id": entry["crew_id"], "name": entry["name"], "ok": False,
+                "mission_id": None, "error": entry["error"] or "create failed",
+            }
+        m = entry["mission"]
+        async with sem:
+            try:
+                async with httpx.AsyncClient(timeout=60.0) as cli:
+                    r = await cli.post(
+                        "http://127.0.0.1:8001/send", json={"mission_id": m.id}
+                    )
+                if r.status_code >= 400:
+                    return {
+                        "crew_id": entry["crew_id"], "name": entry["name"], "ok": False,
+                        "mission_id": m.id, "error": f"Bot {r.status_code}: {r.text[:200]}",
+                    }
+                return {
+                    "crew_id": entry["crew_id"], "name": entry["name"], "ok": True,
+                    "mission_id": m.id, "error": None,
+                }
+            except Exception as exc:
+                return {
+                    "crew_id": entry["crew_id"], "name": entry["name"], "ok": False,
+                    "mission_id": m.id, "error": str(exc),
+                }
+
+    return await asyncio.gather(*[_send_one(e) for e in creations])
 
 
 @router.get("", response_model=list[MissionOut])
@@ -189,6 +363,31 @@ async def list_missions(
     return result.scalars().all()
 
 
+@router.get("/stats")
+async def mission_stats(
+    crew_id: int | None = None,
+    district: str | None = None,
+    since: datetime | None = None,
+    session: AsyncSession = Depends(get_session),
+):
+    """Reaktions-Aggregat: Anzahl Missions je Status, optional gefiltert nach
+    Crew, Stadtteil und Zeitfenster (created_at >= since). Archivierte werden mitgezählt."""
+    q = select(Mission.status, func.count(Mission.id)).group_by(Mission.status)
+    if crew_id is not None:
+        q = q.where(Mission.crew_id == crew_id)
+    if district:
+        q = q.join(Crew, Crew.id == Mission.crew_id).where(Crew.district == district)
+    if since is not None:
+        q = q.where(Mission.created_at >= since)
+    res = await session.execute(q)
+    counts = {s.value: 0 for s in MissionStatus}
+    for status, count in res.all():
+        key = status.value if hasattr(status, "value") else str(status)
+        counts[key] = count
+    counts["total"] = sum(counts.values())
+    return counts
+
+
 @router.get("/{mission_id}", response_model=MissionOut)
 async def get_mission(mission_id: int, session: AsyncSession = Depends(get_session)):
     m = await session.get(Mission, mission_id)
@@ -206,8 +405,67 @@ async def update_mission(
         raise HTTPException(404, "Mission nicht gefunden")
     if m.status != MissionStatus.DRAFT:
         raise HTTPException(409, "Mission ist nicht mehr im Draft-Status")
-    for k, v in payload.model_dump(exclude_unset=True).items():
+    data = payload.model_dump(exclude_unset=True)
+    clear_schedule = data.pop("clear_scheduled_send_at", False)
+    if clear_schedule:
+        m.scheduled_send_at = None
+    if "scheduled_send_at" in data:
+        m.scheduled_send_at = _normalize_naive_utc(data.pop("scheduled_send_at"))
+    for k, v in data.items():
         setattr(m, k, v)
+    await session.commit()
+    await session.refresh(m)
+    return m
+
+
+@router.post("/{mission_id}/rewrite", response_model=MissionOut)
+async def rewrite_existing_mission(
+    mission_id: int, session: AsyncSession = Depends(get_session)
+):
+    """Schreibt den aktuellen Draft-Text durch einen neuen KI-Wurf. Nutzt
+    content_final als Roh-Input + Crew-Story als Kontext."""
+    m = await session.get(Mission, mission_id)
+    if not m:
+        raise HTTPException(404, "Mission nicht gefunden")
+    if m.status != MissionStatus.DRAFT:
+        raise HTTPException(409, "Nur DRAFT-Missions können umformuliert werden")
+
+    crew = await session.get(Crew, m.crew_id)
+    if not crew:
+        raise HTTPException(404, "Crew nicht gefunden")
+
+    current_text = (m.content_final or m.content_generated or "").strip()
+    if not current_text:
+        raise HTTPException(400, "Kein Text zum Umformulieren vorhanden")
+
+    keys = {
+        "anthropic": await settings_get(session, "anthropic_api_key", settings.anthropic_api_key),
+        "openai": await settings_get(session, "openai_api_key", settings.openai_api_key),
+    }
+    models = {
+        "claude": await settings_get(session, "default_claude_model", settings.default_claude_model),
+        "openai": await settings_get(session, "default_openai_model", settings.default_openai_model),
+    }
+    provider_name = m.ai_provider if m.ai_provider in ("anthropic", "openai") else (
+        await settings_get(session, "default_provider", settings.default_ai_provider)
+    )
+    provider = await get_provider(provider_name, keys=keys, models=models)
+
+    ctx = await _load_context(session, crew, "")
+    user_prompt = build_rewrite_prompt(ctx, current_text)
+    system_prompt_val = await _resolve_active_system_prompt(session)
+
+    try:
+        new_text = await provider.generate(
+            user_prompt, model=m.ai_model or None, system_prompt=system_prompt_val
+        )
+    except Exception as exc:
+        raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+
+    m.content_generated = new_text
+    m.content_final = new_text
+    m.prompt_used = user_prompt
+    m.ai_provider = provider.name
     await session.commit()
     await session.refresh(m)
     return m
@@ -273,7 +531,7 @@ async def send_to_discord(mission_id: int, session: AsyncSession = Depends(get_s
         else:
             raise HTTPException(400, "Crew hat keinen Discord-Channel hinterlegt")
 
-    async with httpx.AsyncClient(timeout=30.0) as cli:
+    async with httpx.AsyncClient(timeout=60.0) as cli:
         try:
             r = await cli.post("http://127.0.0.1:8001/send", json={"mission_id": mission_id})
         except Exception as exc:
@@ -307,6 +565,112 @@ async def override_status(
     return m
 
 
+@router.get("/{mission_id}/pdf")
+async def mission_pdf(mission_id: int, session: AsyncSession = Depends(get_session)):
+    """Erzeugt ein PDF mit Auftragstext, Bild und archiviertem Boss-Feedback."""
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import cm
+    from reportlab.lib import colors
+    from reportlab.platypus import (
+        SimpleDocTemplate, Paragraph, Spacer, Image as RLImage, HRFlowable,
+    )
+
+    m = await session.get(Mission, mission_id)
+    if not m:
+        raise HTTPException(404, "Mission nicht gefunden")
+    crew = await session.get(Crew, m.crew_id)
+    crew_name = crew.name if crew else "Unbekannt"
+
+    buf = BytesIO()
+    doc = SimpleDocTemplate(
+        buf, pagesize=A4,
+        leftMargin=2 * cm, rightMargin=2 * cm,
+        topMargin=2 * cm, bottomMargin=2 * cm,
+        title=f"Auftrag {mission_id} — {crew_name}",
+    )
+    styles = getSampleStyleSheet()
+    body_style = ParagraphStyle("body", parent=styles["Normal"], fontSize=11, leading=15)
+    boss_meta = ParagraphStyle(
+        "bossMeta", parent=styles["Normal"], fontSize=9,
+        textColor=colors.grey, leading=12,
+    )
+
+    story = []
+    story.append(Paragraph(f"<b>{crew_name}</b>", styles["Title"]))
+    status_label = {
+        "approved": "👍 Erledigt", "rejected": "👎 Fehlgeschlagen",
+        "cancelled": "❌ Nicht durchführbar", "pending": "⏳ Wartet",
+        "draft": "Entwurf",
+    }.get(m.status.value, m.status.value)
+    meta_parts = [f"<b>Status:</b> {status_label}"]
+    if m.created_at:
+        meta_parts.append(f"<b>Erstellt:</b> {m.created_at.strftime('%d.%m.%Y %H:%M')}")
+    if m.sent_at:
+        meta_parts.append(f"<b>Gesendet:</b> {m.sent_at.strftime('%d.%m.%Y %H:%M')}")
+    if m.deadline_at:
+        meta_parts.append(f"<b>Deadline:</b> {m.deadline_at.strftime('%d.%m.%Y %H:%M')}")
+    story.append(Paragraph(" &nbsp; · &nbsp; ".join(meta_parts), boss_meta))
+    story.append(Spacer(1, 14))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.lightgrey))
+    story.append(Spacer(1, 10))
+
+    content = (m.content_final or m.content_generated or "").strip()
+    if content:
+        for para in content.split("\n\n"):
+            story.append(Paragraph(para.replace("\n", "<br/>"), body_style))
+            story.append(Spacer(1, 8))
+
+    if m.image_path:
+        img_path = Path(m.image_path)
+        if img_path.exists():
+            try:
+                img = RLImage(str(img_path))
+                ratio = img.imageHeight / img.imageWidth if img.imageWidth else 0.6
+                target_w = 12 * cm
+                img.drawWidth = target_w
+                img.drawHeight = target_w * ratio
+                story.append(Spacer(1, 8))
+                story.append(img)
+                story.append(Spacer(1, 8))
+            except Exception:
+                pass
+
+    if m.archived_boss_info:
+        try:
+            boss_msgs = json.loads(m.archived_boss_info)
+        except (json.JSONDecodeError, TypeError):
+            boss_msgs = []
+        if boss_msgs:
+            story.append(Spacer(1, 12))
+            story.append(HRFlowable(width="100%", thickness=0.5, color=colors.lightgrey))
+            story.append(Spacer(1, 8))
+            story.append(Paragraph("<b>Boss-Feedback aus Zusatzinfo-Channel</b>", styles["Heading3"]))
+            story.append(Spacer(1, 6))
+            for bm in boss_msgs:
+                author = (bm.get("author") or "").replace("<", "&lt;").replace(">", "&gt;")
+                posted = bm.get("posted_at") or ""
+                try:
+                    posted_fmt = datetime.fromisoformat(posted).strftime("%d.%m.%Y %H:%M")
+                except (ValueError, TypeError):
+                    posted_fmt = posted
+                story.append(Paragraph(f"<b>{author}</b> &nbsp; <font size=9 color='#888'>{posted_fmt}</font>", body_style))
+                content_text = (bm.get("content") or "").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>")
+                story.append(Paragraph(content_text, body_style))
+                story.append(Spacer(1, 8))
+
+    doc.build(story)
+    buf.seek(0)
+
+    safe_crew = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in crew_name)
+    filename = f"auftrag_{mission_id}_{safe_crew}.pdf"
+    return Response(
+        content=buf.read(),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 @router.delete("/{mission_id}", response_model=MissionOut)
 async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_session)):
     """Soft-Delete: Mission ins Archiv verschieben + Discord-Message loeschen +
@@ -319,7 +683,11 @@ async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_s
 
     crew = await session.get(Crew, m.crew_id)
 
-    # Boss-Texte aus Zusatzinfo-Channel im Zeitfenster (sent_at .. next_mission.sent_at) loeschen
+    # Boss-Texte aus Zusatzinfo-Channel + Versager-Reply zusammen archivieren:
+    # erst snapshotten (in m.archived_boss_info), dann aus Discord löschen.
+    kept: list[dict] = []
+    before_iso: str | None = None
+
     if crew and crew.info_channel_id and m.sent_at:
         next_q = await session.execute(
             select(Mission)
@@ -337,6 +705,53 @@ async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_s
         before_iso = next_m.sent_at.isoformat() if next_m else None
 
         try:
+            async with httpx.AsyncClient(timeout=15.0) as cli:
+                r = await cli.post(
+                    "http://127.0.0.1:8001/read_channel",
+                    json={
+                        "channel_id": crew.info_channel_id,
+                        "after_iso": m.sent_at.isoformat(),
+                        "limit": 100,
+                    },
+                )
+            if r.status_code < 400:
+                all_msgs = r.json()
+                end_dt = datetime.fromisoformat(before_iso) if before_iso else None
+                for bm in all_msgs:
+                    try:
+                        ts = datetime.fromisoformat(bm["posted_at"])
+                    except (KeyError, ValueError):
+                        continue
+                    if end_dt and ts >= end_dt:
+                        continue
+                    kept.append(bm)
+        except Exception:
+            pass  # Bot offline -> nichts archiviert, weiter
+
+    # Versager-Reply mit ins Archiv aufnehmen (auch ohne info_channel_id)
+    if m.expiry_text:
+        kept.append({
+            "author": "⏳ Deadline",
+            "content": m.expiry_text,
+            "posted_at": (m.reacted_at or datetime.utcnow()).isoformat(),
+            "message_id": m.expiry_message_id or "",
+        })
+
+    # Reaktions-Antwort mit ins Archiv aufnehmen
+    if m.reaction_reply_text:
+        kept.append({
+            "author": "💬 Reaktions-Antwort",
+            "content": m.reaction_reply_text,
+            "posted_at": (m.reacted_at or datetime.utcnow()).isoformat(),
+            "message_id": m.reaction_reply_message_id or "",
+        })
+
+    if kept:
+        m.archived_boss_info = json.dumps(kept, ensure_ascii=False)
+
+    # Boss-Texte aus Info-Channel löschen
+    if crew and crew.info_channel_id and m.sent_at:
+        try:
             async with httpx.AsyncClient(timeout=30.0) as cli:
                 await cli.post(
                     "http://127.0.0.1:8001/delete_in_range",
@@ -347,21 +762,22 @@ async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_s
                     },
                 )
         except Exception:
-            pass  # Bot offline -> Auftrags-Delete + DB-Archiv weiterlaufen lassen
+            pass  # Bot offline -> weiter
 
-    # Discord-Message im Auftrags-Channel loeschen
-    if m.discord_message_id and m.discord_channel_id:
-        try:
-            async with httpx.AsyncClient(timeout=15.0) as cli:
-                await cli.post(
-                    "http://127.0.0.1:8001/delete_message",
-                    json={
-                        "channel_id": m.discord_channel_id,
-                        "message_id": m.discord_message_id,
-                    },
-                )
-        except Exception:
-            pass  # Bot offline -> nur DB-Archiv
+    # Original-Auftrags-Message + Versager-Reply + Reaktions-Antwort löschen
+    if m.discord_channel_id:
+        for msg_id in filter(None, [m.discord_message_id, m.expiry_message_id, m.reaction_reply_message_id]):
+            try:
+                async with httpx.AsyncClient(timeout=15.0) as cli:
+                    await cli.post(
+                        "http://127.0.0.1:8001/delete_message",
+                        json={
+                            "channel_id": m.discord_channel_id,
+                            "message_id": msg_id,
+                        },
+                    )
+            except Exception:
+                pass  # Bot offline -> nur DB-Archiv
 
     m.archived_at = datetime.utcnow()
     await session.commit()

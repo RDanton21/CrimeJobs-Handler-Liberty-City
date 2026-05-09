@@ -10,6 +10,7 @@ class CrewBase(BaseModel):
     story_background: str = ""
     discord_channel_id: str = ""
     info_channel_id: str = ""
+    district: str = ""
     color_hex: str = "#b91c1c"
 
 
@@ -22,6 +23,7 @@ class CrewUpdate(BaseModel):
     story_background: str | None = None
     discord_channel_id: str | None = None
     info_channel_id: str | None = None
+    district: str | None = None
     color_hex: str | None = None
 
 
@@ -50,6 +52,9 @@ class MissionGenerateRequest(BaseModel):
     provider: str | None = None
     model: str | None = None
     extra_instructions: str = ""
+    append_text: str = ""
+    deadline_minutes: int | None = None
+    scheduled_send_at: datetime | None = None
 
 
 class MissionRewriteRequest(BaseModel):
@@ -58,11 +63,30 @@ class MissionRewriteRequest(BaseModel):
     provider: str | None = None
     model: str | None = None
     extra_instructions: str = ""
+    append_text: str = ""
+    deadline_minutes: int | None = None
+    scheduled_send_at: datetime | None = None
+
+
+class MissionManualRequest(BaseModel):
+    crew_id: int
+    content: str
+    deadline_minutes: int | None = None
+    scheduled_send_at: datetime | None = None
+
+
+class BulkSendRequest(BaseModel):
+    crew_ids: list[int]
+    content: str
+    deadline_minutes: int | None = None
+    scheduled_send_at: datetime | None = None
 
 
 class MissionUpdate(BaseModel):
     content_final: str | None = None
     image_path: str | None = None
+    scheduled_send_at: datetime | None = None
+    clear_scheduled_send_at: bool = False
 
 
 class MissionOut(BaseModel):
@@ -81,10 +105,54 @@ class MissionOut(BaseModel):
     sent_at: datetime | None
     reacted_at: datetime | None
     archived_at: datetime | None
+    deadline_at: datetime | None
+    scheduled_send_at: datetime | None = None
+    archived_boss_info: str = ""
 
 
 class StatusOverrideRequest(BaseModel):
     status: MissionStatus
+
+
+class ExpiryMessageCreate(BaseModel):
+    text: str
+
+
+class ExpiryMessageOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    text: str
+    created_at: datetime
+
+
+class ReactionMessageCreate(BaseModel):
+    text: str
+
+
+class ReactionMessageOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    text: str
+    created_at: datetime
+
+
+class SystemPromptCreate(BaseModel):
+    name: str
+    text: str
+
+
+class SystemPromptUpdate(BaseModel):
+    name: str | None = None
+    text: str | None = None
+
+
+class SystemPromptOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    name: str
+    text: str
+    is_active: bool
+    created_at: datetime
 
 
 class SettingsUpdate(BaseModel):
@@ -93,3 +161,4 @@ class SettingsUpdate(BaseModel):
     default_provider: str | None = None
     default_claude_model: str | None = None
     default_openai_model: str | None = None
+    system_prompt: str | None = None

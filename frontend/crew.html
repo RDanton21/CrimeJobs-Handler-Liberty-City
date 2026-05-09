@@ -21,6 +21,7 @@
       </div>
       <nav class="flex gap-3 text-sm">
         <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
+        <a href="/archive" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Archiv</a>
         <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
       </nav>
     </header>
@@ -36,6 +37,14 @@
           <input x-model="crew.discord_channel_id" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3" />
           <label class="block text-xs text-zinc-400 mb-1">Zusatzinfo-Channel-ID (Boss-Feedback)</label>
           <input x-model="crew.info_channel_id" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3" />
+          <label class="block text-xs text-zinc-400 mb-1">Stadtteil</label>
+          <select x-model="crew.district"
+                  class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3">
+            <option value="">— kein Stadtteil —</option>
+            <template x-for="d in DISTRICTS" :key="d">
+              <option :value="d" x-text="d"></option>
+            </template>
+          </select>
           <label class="block text-xs text-zinc-400 mb-1">Farbe</label>
           <input x-model="crew.color_hex" type="color" class="bg-zinc-950 border border-zinc-800 rounded h-10 w-24 mb-3" />
           <label class="block text-xs text-zinc-400 mb-1">Hintergrund-Story</label>
@@ -117,8 +126,44 @@
                       class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm"></textarea>
           </div>
 
-          <textarea x-model="genReq.extra_instructions" rows="2" placeholder="Zusätzliche Hinweise (optional)"
+          <textarea x-model="genReq.extra_instructions" rows="2" placeholder="Zusätzliche Hinweise an die KI (optional)"
                     class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3 text-sm"></textarea>
+
+          <textarea x-model="genReq.append_text" rows="2"
+                    placeholder="📌 Zusatzinfos (NICHT KI-generiert, werden 1:1 angehängt — z.B. Adresse, GPS, Kontakt)"
+                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-1 text-sm"></textarea>
+          <div class="mb-3">
+            <button x-show="genReq.append_text.trim()"
+                    @click="sendManual()"
+                    :disabled="generating"
+                    class="text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 rounded font-medium">
+              <span x-show="!generating">📤 Diesen Text direkt an Discord senden (ohne KI)</span>
+              <span x-show="generating">Sende…</span>
+            </button>
+          </div>
+
+          <div class="mb-3 grid grid-cols-3 gap-2">
+            <input type="number" min="0" x-model.number="genReq.deadline_value"
+                   placeholder="⏳ Countdown (optional)"
+                   class="col-span-2 bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+            <select x-model="genReq.deadline_unit"
+                    class="bg-zinc-950 border border-zinc-800 rounded px-2 py-2 text-sm">
+              <option value="min">Minuten</option>
+              <option value="hour">Stunden</option>
+              <option value="day">Tage</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="block text-xs text-zinc-400 mb-1">📅 Senden um (optional, lokale Zeit)</label>
+            <input type="datetime-local" x-model="genReq.scheduled_send_at"
+                   class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+            <span x-show="genReq.scheduled_send_at" class="text-xs text-zinc-500 ml-2">
+              Bot sendet automatisch zum Zeitpunkt
+              <button type="button" @click="genReq.scheduled_send_at = ''"
+                      class="ml-1 underline hover:text-zinc-300">×</button>
+            </span>
+          </div>
 
           <div class="mb-3 flex items-center gap-3">
             <label class="text-xs px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded cursor-pointer">
@@ -158,10 +203,20 @@
             <article class="bg-zinc-900 border border-zinc-800 rounded-lg p-5"
                      :class="m.status === 'pending' ? 'border-amber-600' : (m.archived_at ? 'border-zinc-700 opacity-75' : '')">
               <header class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2 text-xs">
+                <div class="flex items-center gap-2 text-xs flex-wrap">
                   <span class="px-2 py-0.5 rounded" :class="statusClass(m.status)" x-text="statusLabel(m.status)"></span>
                   <span class="text-zinc-500" x-text="formatDate(m.created_at)"></span>
                   <span class="text-zinc-600" x-text="m.ai_provider"></span>
+                  <span x-show="m.deadline_at"
+                        class="px-2 py-0.5 rounded bg-zinc-800 text-amber-300"
+                        :title="m.deadline_at ? formatDate(m.deadline_at) : ''">
+                    ⏳ <span x-text="m.deadline_at ? relativeTime(m.deadline_at) : ''"></span>
+                  </span>
+                  <span x-show="m.scheduled_send_at && !m.sent_at"
+                        class="px-2 py-0.5 rounded bg-blue-900 text-blue-200"
+                        :title="m.scheduled_send_at ? formatDate(m.scheduled_send_at) : ''">
+                    📅 geplant <span x-text="m.scheduled_send_at ? relativeTime(m.scheduled_send_at) : ''"></span>
+                  </span>
                   <span x-show="m.archived_at" class="px-2 py-0.5 rounded bg-zinc-700 text-zinc-300">📦 archiviert</span>
                 </div>
                 <div class="flex gap-1">
@@ -174,7 +229,14 @@
                   <button x-show="!m.archived_at && m.status === 'pending'"
                           @click="override(m.id, 'cancelled')"
                           class="text-xs px-2 py-1 bg-zinc-700 hover:bg-zinc-600 rounded">❌</button>
-                  <button x-show="!m.archived_at"
+                  <a x-show="m.archived_at" :href="`/api/missions/${m.id}/pdf`" target="_blank"
+                     title="Als PDF exportieren"
+                     class="text-xs px-2 py-1 bg-blue-700 hover:bg-blue-600 rounded text-white">📄</a>
+                  <button x-show="!m.archived_at && m.status === 'draft'"
+                          @click="deleteDraft(m.id)"
+                          title="Entwurf endgültig löschen"
+                          class="text-xs px-2 py-1 text-red-400 hover:text-red-300">🗑</button>
+                  <button x-show="!m.archived_at && m.status !== 'draft'"
                           @click="archiveMission(m.id)"
                           title="Ins Archiv verschieben (Discord-Nachricht wird geloescht)"
                           class="text-xs px-2 py-1 text-amber-400 hover:text-amber-300">📦</button>
@@ -191,10 +253,11 @@
 
               <div x-show="m.status === 'draft'" class="space-y-2">
                 <textarea x-model="m.content_final" rows="5"
-                          @blur="updateContent(m)"
+                          @focus="editingMissionId = m.id"
+                          @blur="editingMissionId = null; updateContent(m)"
                           class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm"></textarea>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 flex-wrap">
                   <label class="text-xs px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded cursor-pointer">
                     Bild hinzufügen
                     <input type="file" class="hidden" accept="image/*" @change="uploadImage(m, $event)" />
@@ -203,28 +266,63 @@
                     Bild gesetzt
                     <button @click="deleteImage(m)" class="ml-2 text-red-400 hover:text-red-300">entfernen</button>
                   </span>
+                  <button @click="rewriteMission(m)"
+                          :disabled="rewritingMissionId === m.id"
+                          class="text-xs px-3 py-1.5 bg-purple-700 hover:bg-purple-600 disabled:opacity-50 rounded">
+                    <span x-show="rewritingMissionId !== m.id">🔁 Umformulieren</span>
+                    <span x-show="rewritingMissionId === m.id">Generiere…</span>
+                  </button>
+                </div>
+
+                <div x-show="m.scheduled_send_at"
+                     class="bg-blue-950/40 border border-blue-700 text-blue-200 text-sm rounded p-3 flex items-center justify-between gap-2 flex-wrap">
+                  <span>
+                    📅 Geplant für <strong x-text="m.scheduled_send_at ? formatDate(m.scheduled_send_at) : ''"></strong>
+                    <span class="text-blue-300/80" x-text="m.scheduled_send_at ? `(${relativeTime(m.scheduled_send_at)})` : ''"></span>
+                    — Bot sendet automatisch.
+                  </span>
+                  <button @click="cancelSchedule(m)"
+                          class="text-xs underline hover:text-blue-100">Schedule entfernen</button>
                 </div>
 
                 <button @click="sendMission(m)"
-                        class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded font-medium">
-                  An Discord senden
+                        class="px-4 py-2 rounded font-medium"
+                        :class="m.scheduled_send_at ? 'bg-zinc-700 hover:bg-zinc-600' : 'bg-red-600 hover:bg-red-500'">
+                  <span x-show="!m.scheduled_send_at">An Discord senden</span>
+                  <span x-show="m.scheduled_send_at">⚠ Trotzdem jetzt senden (Schedule überschreiben)</span>
                 </button>
               </div>
 
               <div x-show="m.status !== 'draft'" class="whitespace-pre-wrap text-zinc-200 leading-relaxed"
                    x-text="m.content_final || m.content_generated"></div>
 
-              <div x-show="bossInfoByMission[m.id] && bossInfoByMission[m.id].length"
+              <div x-show="bossInfoFor(m).length"
                    class="mt-4 pt-3 border-t border-zinc-800">
-                <h4 class="text-xs font-semibold text-zinc-400 mb-2">🗨 Boss-Feedback aus Zusatzinfo-Channel</h4>
+                <h4 class="text-xs font-semibold text-zinc-400 mb-2">
+                  <span x-show="!m.archived_at">🗨 Boss-Feedback aus Zusatzinfo-Channel</span>
+                  <span x-show="m.archived_at">🗨 Archiviertes Boss-Feedback</span>
+                </h4>
                 <ul class="space-y-2">
-                  <template x-for="bm in (bossInfoByMission[m.id] || [])" :key="bm.message_id">
+                  <template x-for="(bm, idx) in bossInfoFor(m)" :key="bm.message_id || idx">
                     <li class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm">
                       <div class="flex items-center justify-between text-xs text-zinc-500 mb-1">
                         <span x-text="bm.author" class="font-medium text-zinc-300"></span>
                         <span x-text="formatDate(bm.posted_at)"></span>
                       </div>
-                      <div class="whitespace-pre-wrap text-zinc-200" x-text="bm.content"></div>
+                      <div x-show="bm.content" class="whitespace-pre-wrap text-zinc-200" x-text="bm.content"></div>
+                      <div x-show="bm.attachments && bm.attachments.length"
+                           class="mt-2 flex flex-wrap gap-2">
+                        <template x-for="att in (bm.attachments || [])" :key="att.url">
+                          <a :href="att.url" target="_blank" class="block">
+                            <img x-show="att.content_type && att.content_type.startsWith('image/')"
+                                 :src="att.url" :alt="att.filename"
+                                 class="max-h-48 max-w-xs rounded border border-zinc-700" />
+                            <span x-show="!att.content_type || !att.content_type.startsWith('image/')"
+                                  class="text-blue-400 underline text-xs"
+                                  x-text="`📎 ${att.filename}`"></span>
+                          </a>
+                        </template>
+                      </div>
                     </li>
                   </template>
                 </ul>

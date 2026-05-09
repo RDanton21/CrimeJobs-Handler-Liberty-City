@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .auth import require_admin
 from .config import settings as env_settings
 from .db import get_session
+from .prompts import DEFAULT_SYSTEM_PROMPT
 from .schemas import SettingsUpdate
 from .settings_store import get_all, set_value
 
@@ -23,6 +24,8 @@ async def get_settings(session: AsyncSession = Depends(get_session)):
         "default_provider": merged("default_provider", env_settings.default_ai_provider),
         "default_claude_model": merged("default_claude_model", env_settings.default_claude_model),
         "default_openai_model": merged("default_openai_model", env_settings.default_openai_model),
+        "system_prompt": db_vals.get("system_prompt", ""),
+        "system_prompt_default": DEFAULT_SYSTEM_PROMPT,
     }
 
 
@@ -37,6 +40,7 @@ async def update_settings(
         "default_provider": "default_provider",
         "default_claude_model": "default_claude_model",
         "default_openai_model": "default_openai_model",
+        "system_prompt": "system_prompt",
     }
     for field, val in data.items():
         if val is None:

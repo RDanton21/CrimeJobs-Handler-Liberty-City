@@ -12,6 +12,7 @@ KEYS = {
     "default_provider",
     "default_claude_model",
     "default_openai_model",
+    "system_prompt",
 }
 
 

@@ -6,12 +6,14 @@ from anthropic import AsyncAnthropic
 from openai import AsyncOpenAI
 
 from .config import settings
-from .prompts import SYSTEM_PROMPT
+from .prompts import DEFAULT_SYSTEM_PROMPT
 
 
 class AIProvider(Protocol):
     name: str
-    async def generate(self, user_prompt: str, model: str | None = None) -> str: ...
+    async def generate(
+        self, user_prompt: str, model: str | None = None, system_prompt: str | None = None
+    ) -> str: ...
 
 
 class ClaudeProvider:
@@ -21,13 +23,15 @@ class ClaudeProvider:
         self._client = AsyncAnthropic(api_key=api_key) if api_key else None
         self._default_model = default_model
 
-    async def generate(self, user_prompt: str, model: str | None = None) -> str:
+    async def generate(
+        self, user_prompt: str, model: str | None = None, system_prompt: str | None = None
+    ) -> str:
         if not self._client:
             raise RuntimeError("Anthropic API-Key nicht gesetzt.")
         resp = await self._client.messages.create(
             model=model or self._default_model,
             max_tokens=600,
-            system=SYSTEM_PROMPT,
+            system=system_prompt or DEFAULT_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],
         )
         chunks: list[str] = []
@@ -44,13 +48,15 @@ class OpenAIProvider:
         self._client = AsyncOpenAI(api_key=api_key) if api_key else None
         self._default_model = default_model
 
-    async def generate(self, user_prompt: str, model: str | None = None) -> str:
+    async def generate(
+        self, user_prompt: str, model: str | None = None, system_prompt: str | None = None
+    ) -> str:
         if not self._client:
             raise RuntimeError("OpenAI API-Key nicht gesetzt.")
         resp = await self._client.chat.completions.create(
             model=model or self._default_model,
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt or DEFAULT_SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt},
             ],
             max_tokens=600,

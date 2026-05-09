@@ -40,6 +40,7 @@ class Crew(Base):
     story_background: Mapped[str] = mapped_column(Text, default="")
     discord_channel_id: Mapped[str] = mapped_column(String(40), default="")
     info_channel_id: Mapped[str] = mapped_column(String(40), default="")
+    district: Mapped[str] = mapped_column(String(40), default="")
     color_hex: Mapped[str] = mapped_column(String(7), default="#b91c1c")
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
@@ -99,6 +100,13 @@ class Mission(Base):
     sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     reacted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    deadline_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    archived_boss_info: Mapped[str] = mapped_column(Text, default="")
+    expiry_message_id: Mapped[str] = mapped_column(String(40), default="")
+    expiry_text: Mapped[str] = mapped_column(Text, default="")
+    scheduled_send_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    reaction_reply_message_id: Mapped[str] = mapped_column(String(40), default="")
+    reaction_reply_text: Mapped[str] = mapped_column(Text, default="")
 
     crew: Mapped["Crew"] = relationship(back_populates="missions")
 
@@ -109,3 +117,35 @@ class Settings(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     key: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
     value: Mapped[str] = mapped_column(Text, default="")
+
+
+class ExpiryMessage(Base):
+    """Pool von Sprüchen, die bei abgelaufener Mission-Deadline zufällig
+    im Auftrags-Channel gepostet werden."""
+    __tablename__ = "expiry_messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class ReactionMessage(Base):
+    """Pool von Sprüchen, die nach jeder Boss-Reaktion (👍/👎/❌) zufällig
+    als Reply im Auftrags-Channel gepostet werden."""
+    __tablename__ = "reaction_messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class SystemPrompt(Base):
+    """Benannte System-Prompt-Varianten. Genau einer kann aktiv sein
+    (is_active=True) — wird beim Generieren genutzt."""
+    __tablename__ = "system_prompts"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    is_active: Mapped[bool] = mapped_column(default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

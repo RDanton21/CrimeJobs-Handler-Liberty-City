@@ -56,24 +56,267 @@ function cardBorderClass(s) {
   })[s] || "border-zinc-800";
 }
 
+const DISTRICTS = ["Algonquin", "Bohan", "Broker", "Colony Island", "Dukes"];
+
+function _coerceUtc(iso) {
+  // Backend liefert UTC-Zeitstempel ohne tz-Suffix. JS würde das als lokal
+  // interpretieren → Anzeige 2h zu früh (CEST). Fix: Z anhängen wenn keine tz da.
+  if (!iso) return iso;
+  if (/[zZ]$/.test(iso)) return iso;
+  if (/[+-]\d\d:?\d\d$/.test(iso)) return iso;
+  return iso + "Z";
+}
+
 function formatDate(iso) {
   if (!iso) return "";
-  const d = new Date(iso);
+  const d = new Date(_coerceUtc(iso));
   return d.toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" });
+}
+
+function relativeTime(iso) {
+  if (!iso) return "";
+  const ms = new Date(_coerceUtc(iso)) - new Date();
+  if (ms <= 0) return "abgelaufen";
+  const min = Math.round(ms / 60000);
+  if (min < 60) return `noch ${min} Min`;
+  const hrs = Math.round(min / 60);
+  if (hrs < 24) return `noch ${hrs} Std`;
+  const days = Math.round(hrs / 24);
+  return `noch ${days} Tage`;
 }
 
 // ---- Dashboard ----
 function dashboard() {
   return {
     crews: [],
+    stats: {},
+    statsFilter: { crew_id: "", range: "all" },
+    districtFilter: "",
+    statusFilter: "",
+    DISTRICTS,
     showNew: false,
-    draft: { name: "", story_background: "", discord_channel_id: "", info_channel_id: "", color_hex: "#b91c1c" },
+    draft: { name: "", story_background: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
+    notifications: {},
+    seenAt: JSON.parse(localStorage.getItem("crewSeenAt") || "{}"),
+    archivingAll: false,
+    showBulk: false,
+    bulkScope: "all",
+    bulkDistrict: "",
+    bulkSelectedCrews: [],
+    bulkMode: "manual",
+    bulkProvider: "anthropic",
+    bulkContent: "",
+    bulkDeadlineValue: "",
+    bulkDeadlineUnit: "min",
+    bulkSending: false,
+    bulkBusyLabel: "",
+    bulkResult: "",
+    bulkResultIsError: false,
+    bulkPhase: "input",  // 'input' | 'preview'
+    bulkPreviewText: "",
+
+    get bulkTargets() {
+      if (this.bulkScope === "all") return this.crews;
+      if (this.bulkScope === "district") {
+        return this.bulkDistrict ? this.crews.filter(c => c.district === this.bulkDistrict) : [];
+      }
+      if (this.bulkScope === "manual") {
+        const ids = this.bulkSelectedCrews.map(s => parseInt(s, 10));
+        return this.crews.filter(c => ids.includes(c.id));
+      }
+      return [];
+    },
+    _bulkDeadlineMinutes() {
+      const n = parseInt(this.bulkDeadlineValue, 10);
+      if (!n || n <= 0) return null;
+      if (this.bulkDeadlineUnit === "hour") return n * 60;
+      if (this.bulkDeadlineUnit === "day") return n * 60 * 24;
+      return n;
+    },
+    async sendBulk() {
+      const text = (this.bulkContent || "").trim();
+      const targets = this.bulkTargets;
+      if (this.bulkMode === "manual" && !text) { alert("Bitte Auftragstext eingeben."); return; }
+      if (this.bulkMode === "ai_rewrite" && !text) { alert("Bitte Roh-Input eingeben."); return; }
+      if (targets.length === 0) { alert("Keine Empfänger ausgewählt."); return; }
+
+      this.bulkResult = "";
+      this.bulkResultIsError = false;
+
+      if (this.bulkMode === "manual") {
+        if (!confirm(`Auftrag an ${targets.length} Gang(s) senden?`)) return;
+        this.bulkPreviewText = text;
+        await this._bulkDispatch(targets);
+        return;
+      }
+
+      // AI-Modi: einmalig generieren mit erster Crew als Story-Kontext, dann Vorschau
+      this.bulkSending = true;
+      this.bulkBusyLabel = "Generiere…";
+      try {
+        const ctxCrew = targets[0];
+        let m;
+        if (this.bulkMode === "ai_rewrite") {
+          m = await api.post("/api/missions/rewrite", {
+            crew_id: ctxCrew.id,
+            raw_input: text,
+            provider: this.bulkProvider || null,
+          });
+        } else {
+          m = await api.post("/api/missions/generate", {
+            crew_id: ctxCrew.id,
+            extra_instructions: text,
+            provider: this.bulkProvider || null,
+          });
+        }
+        this.bulkPreviewText = m.content_final || m.content_generated || "";
+        // Draft purgen — beim Confirm wird via /manual frisch versendet
+        try { await api.del(`/api/missions/${m.id}/purge`); } catch (e) {}
+        this.bulkPhase = "preview";
+      } catch (e) {
+        alert(`KI-Fehler: ${e.message}`);
+      } finally {
+        this.bulkSending = false;
+        this.bulkBusyLabel = "";
+      }
+    },
+
+    async bulkConfirmSend() {
+      const targets = this.bulkTargets;
+      const text = (this.bulkPreviewText || "").trim();
+      if (!text || targets.length === 0) return;
+      await this._bulkDispatch(targets);
+    },
+
+    bulkDiscardPreview() {
+      this.bulkPreviewText = "";
+      this.bulkPhase = "input";
+    },
+
+    async _bulkDispatch(targets) {
+      const text = (this.bulkPreviewText || "").trim();
+      if (!text) return;
+      const fixedTargets = [...targets];
+      this.bulkSending = true;
+      this.bulkBusyLabel = `Sende ${fixedTargets.length} parallel…`;
+      const minutes = this._bulkDeadlineMinutes();
+      try {
+        const results = await api.post("/api/missions/bulk_send", {
+          crew_ids: fixedTargets.map(c => c.id),
+          content: text,
+          deadline_minutes: minutes,
+        });
+        const ok = results.filter(r => r.ok).length;
+        const failed = results.filter(r => !r.ok);
+        let resultText = `Gesendet: ${ok}/${fixedTargets.length}`;
+        if (failed.length) {
+          resultText += "\nFehler:\n" + failed.map(r => `${r.name}: ${r.error}`).join("\n");
+        }
+        this.bulkResult = resultText;
+        this.bulkResultIsError = failed.length > 0;
+        if (failed.length === 0) {
+          this.bulkContent = "";
+          this.bulkPreviewText = "";
+          this.bulkDeadlineValue = "";
+          this.bulkPhase = "input";
+        }
+      } catch (e) {
+        this.bulkResult = `Bulk-Send fehlgeschlagen: ${e.message}`;
+        this.bulkResultIsError = true;
+      } finally {
+        this.bulkSending = false;
+        this.bulkBusyLabel = "";
+      }
+    },
+
+    get filteredCrews() {
+      let list = this.crews;
+      if (this.districtFilter) list = list.filter(c => c.district === this.districtFilter);
+      if (this.statusFilter) list = list.filter(c => c.last_mission_status === this.statusFilter);
+      return list;
+    },
+    toggleStatusFilter(s) {
+      this.statusFilter = (this.statusFilter === s) ? "" : s;
+    },
     async init() {
       await this.loadCrews();
-      setInterval(() => { this.loadCrews().catch(() => {}); }, 5000);
+      await this.loadStats();
+      await this.loadNotifications();
+      setInterval(() => {
+        this.loadCrews().catch(() => {});
+        this.loadStats().catch(() => {});
+        this.loadNotifications().catch(() => {});
+      }, 5000);
     },
     async loadCrews() {
       this.crews = await api.get("/api/crews");
+    },
+    async archiveAllActive() {
+      let missions;
+      try { missions = await api.get("/api/missions?archived=false&limit=500"); }
+      catch (e) { alert("Konnte aktive Aufträge nicht laden: " + e.message); return; }
+      if (!missions || missions.length === 0) {
+        alert("Keine aktiven Aufträge zum Archivieren.");
+        return;
+      }
+      if (!confirm(`${missions.length} aktive(r) Auftrag(e) archivieren? Discord-Posts werden gelöscht, Boss-Feedback wird snapshottet.`)) return;
+      if (!confirm("Wirklich? Diese Aktion betrifft alle Crews gleichzeitig.")) return;
+
+      this.archivingAll = true;
+      let ok = 0, fail = 0;
+      try {
+        for (const m of missions) {
+          try { await api.del(`/api/missions/${m.id}`); ok++; }
+          catch (e) { fail++; }
+        }
+        alert(`Archiviert: ${ok}` + (fail > 0 ? `, Fehler: ${fail}` : ""));
+        await Promise.all([this.loadCrews(), this.loadStats(), this.loadNotifications()]);
+      } finally {
+        this.archivingAll = false;
+      }
+    },
+    async loadNotifications() {
+      try {
+        const data = await api.get("/api/crews/notifications");
+        const map = {};
+        for (const n of data) map[n.crew_id] = n.latest_boss_message_at;
+        this.notifications = map;
+      } catch (e) { /* Bot offline -> silent */ }
+    },
+    hasUnread(c) {
+      const latest = this.notifications[c.id];
+      if (!latest) return false;
+      const seen = this.seenAt[c.id];
+      if (!seen) return true;
+      return new Date(latest).getTime() > new Date(seen).getTime();
+    },
+    markCrewSeen(c) {
+      const latest = this.notifications[c.id];
+      if (!latest) return;
+      this.seenAt = { ...this.seenAt, [c.id]: latest };
+      localStorage.setItem("crewSeenAt", JSON.stringify(this.seenAt));
+    },
+    _rangeSince(range) {
+      const now = new Date();
+      if (range === "today") {
+        const d = new Date(now); d.setHours(0, 0, 0, 0); return d.toISOString();
+      }
+      if (range === "week") {
+        const d = new Date(now); d.setDate(d.getDate() - 7); return d.toISOString();
+      }
+      if (range === "month") {
+        const d = new Date(now); d.setDate(d.getDate() - 30); return d.toISOString();
+      }
+      return null;
+    },
+    async loadStats() {
+      const params = new URLSearchParams();
+      if (this.statsFilter.crew_id) params.set("crew_id", this.statsFilter.crew_id);
+      if (this.districtFilter) params.set("district", this.districtFilter);
+      const since = this._rangeSince(this.statsFilter.range);
+      if (since) params.set("since", since);
+      const qs = params.toString() ? "?" + params.toString() : "";
+      this.stats = await api.get(`/api/missions/stats${qs}`);
     },
     async createCrew() {
       if (!this.draft.name.trim()) { alert("Name fehlt"); return; }
@@ -81,7 +324,7 @@ function dashboard() {
         const c = await api.post("/api/crews", this.draft);
         this.crews.push(c);
         this.crews.sort((a, b) => a.name.localeCompare(b.name));
-        this.draft = { name: "", story_background: "", discord_channel_id: "", info_channel_id: "", color_hex: "#b91c1c" };
+        this.draft = { name: "", story_background: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" };
         this.showNew = false;
       } catch (e) { alert(e.message); }
     },
@@ -97,18 +340,21 @@ function crewPage() {
   const id = parseInt(location.pathname.split("/").pop(), 10);
   return {
     crewId: id,
-    crew: { name: "", story_background: "", discord_channel_id: "", info_channel_id: "", color_hex: "#b91c1c" },
+    crew: { name: "", story_background: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
+    DISTRICTS,
     allCrews: [],
     relations: [],
     missions: [],
     newRel: { crew_b_id: "", relation_type: "neutral", notes: "" },
     mode: "generate", // 'generate' | 'rewrite'
-    genReq: { provider: "anthropic", model: "", extra_instructions: "" },
+    genReq: { provider: "anthropic", model: "", extra_instructions: "", append_text: "", deadline_value: "", deadline_unit: "min", scheduled_send_at: "" },
     rewriteReq: { raw_input: "" },
     pendingImage: null,
     generating: false,
     showArchive: false,
     bossInfoByMission: {},
+    rewritingMissionId: null,
+    editingMissionId: null,
 
     get otherCrews() {
       return this.allCrews.filter(c => c.id !== this.crewId);
@@ -132,7 +378,19 @@ function crewPage() {
     async loadRelations() { this.relations = await api.get(`/api/crews/${this.crewId}/relations`); },
     async loadMissions() {
       const arch = this.showArchive ? "&archived=true" : "";
-      this.missions = await api.get(`/api/missions?crew_id=${this.crewId}&limit=50${arch}`);
+      const fresh = await api.get(`/api/missions?crew_id=${this.crewId}&limit=50${arch}`);
+      // Bei DRAFT-Missions: lokalen content_final behalten (User könnte gerade
+      // editieren). Andere Felder (status, sent_at, etc.) werden voll aktualisiert.
+      // Sobald Mission gesendet wird (Status != draft), kommt der DB-Wert durch.
+      this.missions = fresh.map(f => {
+        if (f.status === "draft") {
+          const oldM = (this.missions || []).find(mm => mm.id === f.id);
+          if (oldM && oldM.content_final !== undefined) {
+            return { ...f, content_final: oldM.content_final };
+          }
+        }
+        return f;
+      });
     },
     async loadBossInfo() {
       if (!this.crew || !this.crew.info_channel_id) return;
@@ -144,6 +402,15 @@ function crewPage() {
       } catch (e) {
         // Bot evtl. offline oder Permission-Issue — silent
       }
+    },
+    bossInfoFor(m) {
+      if (m.archived_at && m.archived_boss_info) {
+        try {
+          const arr = JSON.parse(m.archived_boss_info);
+          return Array.isArray(arr) ? arr : [];
+        } catch (e) { return []; }
+      }
+      return this.bossInfoByMission[m.id] || [];
     },
     async toggleArchive() {
       this.showArchive = !this.showArchive;
@@ -163,6 +430,7 @@ function crewPage() {
           story_background: this.crew.story_background,
           discord_channel_id: this.crew.discord_channel_id,
           info_channel_id: this.crew.info_channel_id,
+          district: this.crew.district || "",
           color_hex: this.crew.color_hex,
         });
       } catch (e) { alert(e.message); }
@@ -191,6 +459,21 @@ function crewPage() {
       catch (e) { alert(e.message); }
     },
 
+    _deadlineMinutes() {
+      const n = parseInt(this.genReq.deadline_value, 10);
+      if (!n || n <= 0) return null;
+      if (this.genReq.deadline_unit === "hour") return n * 60;
+      if (this.genReq.deadline_unit === "day") return n * 60 * 24;
+      return n;
+    },
+    _scheduledSendIso() {
+      // datetime-local liefert lokale Zeit ohne tz → in UTC ISO konvertieren
+      const v = (this.genReq.scheduled_send_at || "").trim();
+      if (!v) return null;
+      const d = new Date(v);
+      if (isNaN(d.getTime())) return null;
+      return d.toISOString();
+    },
     setPendingImage(evt) {
       this.pendingImage = evt.target.files[0] || null;
     },
@@ -212,9 +495,44 @@ function crewPage() {
           provider: this.genReq.provider || null,
           model: this.genReq.model || null,
           extra_instructions: this.genReq.extra_instructions || "",
+          append_text: this.genReq.append_text || "",
+          deadline_minutes: this._deadlineMinutes(),
+          scheduled_send_at: this._scheduledSendIso(),
         });
         await this._attachPendingImage(m && m.id);
         this.genReq.extra_instructions = "";
+        this.genReq.append_text = "";
+        this.genReq.deadline_value = "";
+        this.genReq.scheduled_send_at = "";
+        this.clearPendingImage();
+        await this.loadMissions();
+      } catch (e) { alert(e.message); }
+      finally { this.generating = false; }
+    },
+
+    async sendManual() {
+      const text = (this.genReq.append_text || "").trim();
+      if (!text) { alert("Bitte Text in den Zusatzinfos eingeben."); return; }
+      const scheduled = this._scheduledSendIso();
+      const confirmMsg = scheduled
+        ? `Diesen Text geplant senden (zum gewählten Zeitpunkt)?`
+        : "Diesen Text direkt (ohne KI) an Discord senden?";
+      if (!confirm(confirmMsg)) return;
+      this.generating = true;
+      try {
+        const m = await api.post("/api/missions/manual", {
+          crew_id: this.crewId,
+          content: text,
+          deadline_minutes: this._deadlineMinutes(),
+          scheduled_send_at: scheduled,
+        });
+        await this._attachPendingImage(m && m.id);
+        if (!scheduled) {
+          await api.post(`/api/missions/${m.id}/send`);
+        }
+        this.genReq.append_text = "";
+        this.genReq.deadline_value = "";
+        this.genReq.scheduled_send_at = "";
         this.clearPendingImage();
         await this.loadMissions();
       } catch (e) { alert(e.message); }
@@ -231,10 +549,16 @@ function crewPage() {
           provider: this.genReq.provider || null,
           model: this.genReq.model || null,
           extra_instructions: this.genReq.extra_instructions || "",
+          append_text: this.genReq.append_text || "",
+          deadline_minutes: this._deadlineMinutes(),
+          scheduled_send_at: this._scheduledSendIso(),
         });
         await this._attachPendingImage(m && m.id);
         this.rewriteReq.raw_input = "";
         this.genReq.extra_instructions = "";
+        this.genReq.append_text = "";
+        this.genReq.deadline_value = "";
+        this.genReq.scheduled_send_at = "";
         this.clearPendingImage();
         await this.loadMissions();
       } catch (e) { alert(e.message); }
@@ -260,9 +584,32 @@ function crewPage() {
       } catch (e) { alert(e.message); }
     },
     async sendMission(m) {
-      if (!confirm("An Discord senden?")) return;
-      try { await api.post(`/api/missions/${m.id}/send`); await this.loadMissions(); }
+      const msg = m.scheduled_send_at
+        ? "Schedule überschreiben und JETZT an Discord senden?"
+        : "An Discord senden?";
+      if (!confirm(msg)) return;
+      try {
+        // Aktuellen content_final synchron persistieren, damit Bot den User-Edit liest
+        await api.patch(`/api/missions/${m.id}`, { content_final: m.content_final });
+        await api.post(`/api/missions/${m.id}/send`);
+        await this.loadMissions();
+      }
       catch (e) { alert(e.message); }
+    },
+    async cancelSchedule(m) {
+      try {
+        const updated = await api.patch(`/api/missions/${m.id}`, { clear_scheduled_send_at: true });
+        Object.assign(m, updated);
+      } catch (e) { alert(e.message); }
+    },
+    async rewriteMission(m) {
+      if (!confirm("Aktuellen Text durch neue KI-Variante ersetzen?")) return;
+      this.rewritingMissionId = m.id;
+      try {
+        const updated = await api.post(`/api/missions/${m.id}/rewrite`);
+        Object.assign(m, updated);
+      } catch (e) { alert(e.message); }
+      finally { this.rewritingMissionId = null; }
     },
     async override(mid, status) {
       try { await api.post(`/api/missions/${mid}/override`, { status }); await this.loadMissions(); }
@@ -271,6 +618,11 @@ function crewPage() {
     async archiveMission(mid) {
       if (!confirm("Mission ins Archiv verschieben? Discord-Nachricht wird gelöscht.")) return;
       try { await api.del(`/api/missions/${mid}`); await this.loadMissions(); }
+      catch (e) { alert(e.message); }
+    },
+    async deleteDraft(mid) {
+      if (!confirm("Entwurf endgültig löschen? Nicht wiederherstellbar.")) return;
+      try { await api.del(`/api/missions/${mid}/purge`); await this.loadMissions(); }
       catch (e) { alert(e.message); }
     },
     async restoreMission(mid) {
@@ -286,26 +638,197 @@ function crewPage() {
     statusLabel: statusLabelMap,
     statusClass: statusClassMap,
     formatDate,
+    relativeTime,
+  };
+}
+
+// ---- Archive Page ----
+function archivePage() {
+  return {
+    missions: [],
+    crews: [],
+    crewFilter: "",
+    purging: false,
+
+    async init() {
+      await Promise.all([this.loadCrews(), this.loadMissions()]);
+    },
+    async loadCrews() {
+      this.crews = await api.get("/api/crews");
+    },
+    async loadMissions() {
+      this.missions = await api.get("/api/missions?archived=true&limit=500");
+    },
+    get filteredMissions() {
+      if (!this.crewFilter) return this.missions;
+      const id = parseInt(this.crewFilter, 10);
+      return this.missions.filter(m => m.crew_id === id);
+    },
+    crewName(id) {
+      const c = this.crews.find(c => c.id === id);
+      return c ? c.name : `#${id}`;
+    },
+    archivedBossInfo(m) {
+      if (!m.archived_boss_info) return [];
+      try {
+        const arr = JSON.parse(m.archived_boss_info);
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) { return []; }
+    },
+    async restoreMission(mid) {
+      try { await api.post(`/api/missions/${mid}/restore`); await this.loadMissions(); }
+      catch (e) { alert(e.message); }
+    },
+    async purgeMission(mid) {
+      if (!confirm("Endgültig löschen? Nicht wiederherstellbar.")) return;
+      try { await api.del(`/api/missions/${mid}/purge`); await this.loadMissions(); }
+      catch (e) { alert(e.message); }
+    },
+    async purgeAll() {
+      const targets = this.filteredMissions;
+      if (targets.length === 0) return;
+      const filterHint = this.crewFilter ? ` (Filter: ${this.crewName(parseInt(this.crewFilter, 10))})` : "";
+      if (!confirm(`${targets.length} archivierte Aufträge${filterHint} endgültig löschen? Nicht wiederherstellbar.`)) return;
+      if (!confirm("Wirklich? Diese Aktion ist endgültig.")) return;
+      this.purging = true;
+      let failed = 0;
+      try {
+        for (const m of targets) {
+          try { await api.del(`/api/missions/${m.id}/purge`); }
+          catch (e) { failed++; }
+        }
+        await this.loadMissions();
+        if (failed > 0) alert(`${failed} Auftrag/Aufträge konnten nicht gelöscht werden.`);
+      } finally { this.purging = false; }
+    },
+
+    statusLabel: statusLabelMap,
+    statusClass: statusClassMap,
+    formatDate,
   };
 }
 
 // ---- Settings Page ----
 function settingsPage() {
   return {
-    state: { anthropic_api_key_set: false, openai_api_key_set: false },
+    state: { anthropic_api_key_set: false, openai_api_key_set: false, system_prompt_default: "" },
     form: {
       anthropic_api_key: "",
       openai_api_key: "",
       default_provider: "anthropic",
       default_claude_model: "",
       default_openai_model: "",
+      system_prompt: "",
     },
     msg: "",
+    promptMsg: "",
+    expiryMessages: [],
+    newExpiryMsg: "",
+    reactionMessages: [],
+    newReactionMsg: "",
+    systemPrompts: [],
+    editingPromptId: null,
+    newPromptForm: { name: "", text: "" },
     async init() {
       this.state = await api.get("/api/settings");
       this.form.default_provider = this.state.default_provider;
       this.form.default_claude_model = this.state.default_claude_model;
       this.form.default_openai_model = this.state.default_openai_model;
+      this.form.system_prompt = this.state.system_prompt || "";
+      await this.loadExpiryMessages();
+      await this.loadReactionMessages();
+      await this.loadSystemPrompts();
+    },
+    async loadSystemPrompts() {
+      try { this.systemPrompts = await api.get("/api/system-prompts"); }
+      catch (e) { /* silent */ }
+    },
+    async createPrompt() {
+      const name = (this.newPromptForm.name || "").trim();
+      const text = (this.newPromptForm.text || "").trim();
+      if (!name || !text) { alert("Name und Text sind Pflicht."); return; }
+      try {
+        await api.post("/api/system-prompts", { name, text });
+        this.newPromptForm = { name: "", text: "" };
+        await this.loadSystemPrompts();
+      } catch (e) { alert(e.message); }
+    },
+    async updatePrompt(sp) {
+      try {
+        await api.patch(`/api/system-prompts/${sp.id}`, { name: sp.name, text: sp.text });
+        this.editingPromptId = null;
+        await this.loadSystemPrompts();
+      } catch (e) { alert(e.message); }
+    },
+    async activatePrompt(id) {
+      try { await api.post(`/api/system-prompts/${id}/activate`); await this.loadSystemPrompts(); }
+      catch (e) { alert(e.message); }
+    },
+    async deactivatePrompts() {
+      try { await api.post("/api/system-prompts/deactivate"); await this.loadSystemPrompts(); }
+      catch (e) { alert(e.message); }
+    },
+    async deletePrompt(id) {
+      if (!confirm("Diesen Prompt löschen?")) return;
+      try { await api.del(`/api/system-prompts/${id}`); await this.loadSystemPrompts(); }
+      catch (e) { alert(e.message); }
+    },
+    async prefillPromptWithDefault() {
+      try {
+        const r = await api.get("/api/system-prompts/default");
+        this.newPromptForm.text = r.text || "";
+        if (!this.newPromptForm.name) this.newPromptForm.name = "Default-Kopie";
+      } catch (e) { alert(e.message); }
+    },
+    async loadReactionMessages() {
+      try { this.reactionMessages = await api.get("/api/reaction-messages"); }
+      catch (e) { /* silent */ }
+    },
+    async addReactionMsg() {
+      const text = (this.newReactionMsg || "").trim();
+      if (!text) return;
+      try {
+        await api.post("/api/reaction-messages", { text });
+        this.newReactionMsg = "";
+        await this.loadReactionMessages();
+      } catch (e) { alert(e.message); }
+    },
+    async deleteReactionMsg(id) {
+      try { await api.del(`/api/reaction-messages/${id}`); await this.loadReactionMessages(); }
+      catch (e) { alert(e.message); }
+    },
+    async savePrompt() {
+      try {
+        await api.patch("/api/settings", { system_prompt: this.form.system_prompt || "" });
+        this.promptMsg = this.form.system_prompt.trim()
+          ? "Prompt gespeichert."
+          : "Prompt geleert — Default wird verwendet.";
+        this.state = await api.get("/api/settings");
+        setTimeout(() => { this.promptMsg = ""; }, 2500);
+      } catch (e) { alert(e.message); }
+    },
+    resetPromptToDefault() {
+      this.form.system_prompt = this.state.system_prompt_default || "";
+    },
+    clearPrompt() {
+      this.form.system_prompt = "";
+    },
+    async loadExpiryMessages() {
+      try { this.expiryMessages = await api.get("/api/expiry-messages"); }
+      catch (e) { /* silent */ }
+    },
+    async addExpiryMsg() {
+      const text = (this.newExpiryMsg || "").trim();
+      if (!text) return;
+      try {
+        await api.post("/api/expiry-messages", { text });
+        this.newExpiryMsg = "";
+        await this.loadExpiryMessages();
+      } catch (e) { alert(e.message); }
+    },
+    async deleteExpiryMsg(id) {
+      try { await api.del(`/api/expiry-messages/${id}`); await this.loadExpiryMessages(); }
+      catch (e) { alert(e.message); }
     },
     async save() {
       const payload = {};
