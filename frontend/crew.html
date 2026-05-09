@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crime Automation — Crew</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+  <div x-data="crewPage()" x-init="init()" class="max-w-6xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-6">
+      <div>
+        <a href="/" class="text-sm text-zinc-400 hover:text-zinc-100">← Dashboard</a>
+        <h1 class="text-3xl font-bold mt-1">
+          <span class="inline-block w-3 h-3 rounded-full mr-2 align-middle"
+                :style="`background:${crew.color_hex || '#b91c1c'}`"></span>
+          <span x-text="crew.name || '...'"></span>
+        </h1>
+      </div>
+      <nav class="flex gap-3 text-sm">
+        <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
+        <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
+      </nav>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Linke Spalte: Gang-Daten -->
+      <section class="lg:col-span-1 space-y-6">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+          <h2 class="text-lg font-semibold mb-3">Gang-Daten</h2>
+          <label class="block text-xs text-zinc-400 mb-1">Name</label>
+          <input x-model="crew.name" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3" />
+          <label class="block text-xs text-zinc-400 mb-1">Discord Channel-ID</label>
+          <input x-model="crew.discord_channel_id" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3" />
+          <label class="block text-xs text-zinc-400 mb-1">Farbe</label>
+          <input x-model="crew.color_hex" type="color" class="bg-zinc-950 border border-zinc-800 rounded h-10 w-24 mb-3" />
+          <label class="block text-xs text-zinc-400 mb-1">Hintergrund-Story</label>
+          <textarea x-model="crew.story_background" rows="8"
+                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2"></textarea>
+          <div class="mt-3 flex gap-2">
+            <button @click="saveCrew()" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded">Speichern</button>
+            <button @click="deleteCrew()" class="px-4 py-2 bg-red-700 hover:bg-red-600 rounded">Löschen</button>
+          </div>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+          <h2 class="text-lg font-semibold mb-3">Beziehungen</h2>
+          <ul class="space-y-2 mb-3">
+            <template x-for="r in relations" :key="r.id">
+              <li class="flex items-center justify-between bg-zinc-950 rounded px-3 py-2">
+                <span class="text-sm">
+                  <span x-text="otherCrewName(r)"></span>
+                  <span class="text-xs text-zinc-500 ml-2" x-text="r.relation_type"></span>
+                </span>
+                <button @click="deleteRelation(r.id)" class="text-xs text-red-400 hover:text-red-300">×</button>
+              </li>
+            </template>
+          </ul>
+          <div class="grid grid-cols-2 gap-2">
+            <select x-model="newRel.crew_b_id" class="bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-sm">
+              <option value="">— Gang —</option>
+              <template x-for="c in otherCrews" :key="c.id">
+                <option :value="c.id" x-text="c.name"></option>
+              </template>
+            </select>
+            <select x-model="newRel.relation_type" class="bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-sm">
+              <option value="allied">verbündet</option>
+              <option value="rival">rivalisierend</option>
+              <option value="hostile">feindlich</option>
+              <option value="business">geschäftlich</option>
+              <option value="neutral">neutral</option>
+            </select>
+          </div>
+          <input x-model="newRel.notes" placeholder="Notiz" class="w-full mt-2 bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-sm" />
+          <button @click="addRelation()" class="mt-2 px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 rounded text-sm">+ Beziehung</button>
+        </div>
+      </section>
+
+      <!-- Rechte Spalte: Missionen -->
+      <section class="lg:col-span-2 space-y-6">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold">Neuer Auftrag</h2>
+            <span class="text-xs text-zinc-500" x-text="`Heute: ${missionsToday}/3`"></span>
+          </div>
+
+          <div class="flex gap-2 mb-4 border-b border-zinc-800">
+            <button @click="mode = 'generate'"
+                    :class="mode === 'generate' ? 'border-red-500 text-red-400' : 'border-transparent text-zinc-400'"
+                    class="px-3 py-2 text-sm border-b-2 -mb-px">
+              KI generiert
+            </button>
+            <button @click="mode = 'rewrite'"
+                    :class="mode === 'rewrite' ? 'border-red-500 text-red-400' : 'border-transparent text-zinc-400'"
+                    class="px-3 py-2 text-sm border-b-2 -mb-px">
+              Eigenen Text umschreiben lassen
+            </button>
+          </div>
+
+          <div x-show="locked" class="bg-amber-900/40 border border-amber-700 text-amber-200 text-sm rounded p-3 mb-3">
+            Ein Auftrag wartet noch auf Reaktion. Erst nach 👍 / 👎 / ❌ kann ein neuer erstellt werden.
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+            <select x-model="genReq.provider" class="bg-zinc-950 border border-zinc-800 rounded px-2 py-2 text-sm">
+              <option value="anthropic">Claude (Anthropic)</option>
+              <option value="openai">OpenAI</option>
+            </select>
+            <input x-model="genReq.model" placeholder="Modell (optional)"
+                   class="bg-zinc-950 border border-zinc-800 rounded px-2 py-2 text-sm md:col-span-2" />
+          </div>
+
+          <div x-show="mode === 'rewrite'" class="mb-3">
+            <label class="block text-xs text-zinc-400 mb-1">Roh-Input (Klartext, was passieren soll)</label>
+            <textarea x-model="rewriteReq.raw_input" rows="4"
+                      placeholder="z.B.: Crew überfällt den Juwelier in der Innenstadt um 22 Uhr und übergibt die Beute an Mittelsmann am Hafen."
+                      class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm"></textarea>
+          </div>
+
+          <textarea x-model="genReq.extra_instructions" rows="2" placeholder="Zusätzliche Hinweise (optional)"
+                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3 text-sm"></textarea>
+
+          <button x-show="mode === 'generate'" @click="generate()" :disabled="locked || generating"
+                  class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded font-medium disabled:opacity-50">
+            <span x-show="!generating">⚙ Auftrag generieren</span>
+            <span x-show="generating">Generiere…</span>
+          </button>
+
+          <button x-show="mode === 'rewrite'" @click="rewrite()" :disabled="locked || generating"
+                  class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded font-medium disabled:opacity-50">
+            <span x-show="!generating">✎ Umschreiben lassen</span>
+            <span x-show="generating">Schreibe um…</span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-semibold text-zinc-400" x-text="showArchive ? 'Archiv' : 'Aktive Auftraege'"></h3>
+          <button @click="toggleArchive()"
+                  class="text-xs px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded">
+            <span x-show="!showArchive">📦 Archiv anzeigen</span>
+            <span x-show="showArchive">← Aktive anzeigen</span>
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <template x-for="m in missions" :key="m.id">
+            <article class="bg-zinc-900 border border-zinc-800 rounded-lg p-5"
+                     :class="m.status === 'pending' ? 'border-amber-600' : (m.archived_at ? 'border-zinc-700 opacity-75' : '')">
+              <header class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2 text-xs">
+                  <span class="px-2 py-0.5 rounded" :class="statusClass(m.status)" x-text="statusLabel(m.status)"></span>
+                  <span class="text-zinc-500" x-text="formatDate(m.created_at)"></span>
+                  <span class="text-zinc-600" x-text="m.ai_provider"></span>
+                  <span x-show="m.archived_at" class="px-2 py-0.5 rounded bg-zinc-700 text-zinc-300">📦 archiviert</span>
+                </div>
+                <div class="flex gap-1">
+                  <button x-show="!m.archived_at && m.status === 'pending'"
+                          @click="override(m.id, 'approved')"
+                          class="text-xs px-2 py-1 bg-green-700 hover:bg-green-600 rounded">👍</button>
+                  <button x-show="!m.archived_at && m.status === 'pending'"
+                          @click="override(m.id, 'rejected')"
+                          class="text-xs px-2 py-1 bg-red-700 hover:bg-red-600 rounded">👎</button>
+                  <button x-show="!m.archived_at && m.status === 'pending'"
+                          @click="override(m.id, 'cancelled')"
+                          class="text-xs px-2 py-1 bg-zinc-700 hover:bg-zinc-600 rounded">❌</button>
+                  <button x-show="!m.archived_at"
+                          @click="archiveMission(m.id)"
+                          title="Ins Archiv verschieben (Discord-Nachricht wird geloescht)"
+                          class="text-xs px-2 py-1 text-amber-400 hover:text-amber-300">📦</button>
+                  <button x-show="m.archived_at"
+                          @click="restoreMission(m.id)"
+                          title="Aus Archiv zurueckholen"
+                          class="text-xs px-2 py-1 text-green-400 hover:text-green-300">↺</button>
+                  <button x-show="m.archived_at"
+                          @click="purgeMission(m.id)"
+                          title="Endgueltig loeschen"
+                          class="text-xs px-2 py-1 text-red-400 hover:text-red-300">×</button>
+                </div>
+              </header>
+
+              <div x-show="m.status === 'draft'" class="space-y-2">
+                <textarea x-model="m.content_final" rows="5"
+                          @blur="updateContent(m)"
+                          class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm"></textarea>
+
+                <div class="flex items-center gap-3">
+                  <label class="text-xs px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded cursor-pointer">
+                    Bild hinzufügen
+                    <input type="file" class="hidden" accept="image/*" @change="uploadImage(m, $event)" />
+                  </label>
+                  <span x-show="m.image_path" class="text-xs text-zinc-400">
+                    Bild gesetzt
+                    <button @click="deleteImage(m)" class="ml-2 text-red-400 hover:text-red-300">entfernen</button>
+                  </span>
+                </div>
+
+                <button @click="sendMission(m)"
+                        class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded font-medium">
+                  An Discord senden
+                </button>
+              </div>
+
+              <div x-show="m.status !== 'draft'" class="whitespace-pre-wrap text-zinc-200 leading-relaxed"
+                   x-text="m.content_final || m.content_generated"></div>
+            </article>
+          </template>
+          <p x-show="missions.length === 0" class="text-zinc-500">Noch keine Missionen.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

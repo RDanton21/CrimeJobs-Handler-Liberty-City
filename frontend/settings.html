@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crime Automation — Settings</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+  <div x-data="settingsPage()" x-init="init()" class="max-w-3xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-8">
+      <h1 class="text-3xl font-bold">Settings</h1>
+      <nav class="flex gap-3 text-sm">
+        <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
+        <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
+      </nav>
+    </header>
+
+    <section class="bg-zinc-900 border border-zinc-800 rounded-lg p-5 space-y-4">
+      <div>
+        <label class="block text-sm text-zinc-400 mb-1">Anthropic API-Key</label>
+        <input x-model="form.anthropic_api_key" type="password"
+               :placeholder="state.anthropic_api_key_set ? '•••••••• (gesetzt)' : 'sk-ant-…'"
+               class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm text-zinc-400 mb-1">OpenAI API-Key</label>
+        <input x-model="form.openai_api_key" type="password"
+               :placeholder="state.openai_api_key_set ? '•••••••• (gesetzt)' : 'sk-…'"
+               class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2" />
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm text-zinc-400 mb-1">Default Provider</label>
+          <select x-model="form.default_provider" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2">
+            <option value="anthropic">anthropic</option>
+            <option value="openai">openai</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-400 mb-1">Claude-Modell</label>
+          <input x-model="form.default_claude_model" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm text-zinc-400 mb-1">OpenAI-Modell</label>
+          <input x-model="form.default_openai_model" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2" />
+        </div>
+      </div>
+      <button @click="save()" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded">Speichern</button>
+      <p x-show="msg" x-text="msg" class="text-sm text-green-400"></p>
+    </section>
+
+    <section class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg p-5 text-sm text-zinc-400 space-y-2">
+      <p><strong class="text-zinc-200">Discord-Bot-Token:</strong> in <code>.env</code> setzen (DISCORD_BOT_TOKEN). Neustart erforderlich.</p>
+      <p><strong class="text-zinc-200">Modell-Beispiele:</strong> Claude: <code>claude-sonnet-4-6</code>, <code>claude-opus-4-7</code>. OpenAI: <code>gpt-4o</code>, <code>gpt-4o-mini</code>.</p>
+    </section>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

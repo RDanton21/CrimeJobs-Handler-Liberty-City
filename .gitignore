@@ -1,0 +1,39 @@
+# Secrets
+.env
+*.env
+config.local.json
+
+# DB + uploads
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/images/*
+!data/images/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Logs
+*.log
+logs/
