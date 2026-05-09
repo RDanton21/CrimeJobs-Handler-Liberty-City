@@ -251,32 +251,37 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <template x-for="c in filteredCrews" :key="c.id">
-        <a :href="`/crew/${c.id}`" @click="markCrewSeen(c)"
-           class="block bg-zinc-900 border-2 rounded-lg p-5 transition hover:bg-zinc-800/60"
-           :class="[cardBorder(c.last_mission_status), hasUnread(c) ? 'animate-pulse ring-2 ring-amber-400' : '']">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-3 h-3 rounded-full" :style="`background:${c.color_hex}`"></div>
-            <h3 class="text-lg font-semibold" x-text="c.name"></h3>
-            <span x-show="c.district"
-                  class="ml-auto text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-300"
-                  x-text="c.district"></span>
-          </div>
-          <p class="text-sm text-zinc-400 line-clamp-3" x-text="c.story_background || 'Keine Story.'"></p>
-          <div class="mt-3 flex items-center justify-between gap-2">
-            <span class="text-xs text-zinc-500 truncate">
-              Channel: <span x-text="c.discord_channel_id || '—'"></span>
-            </span>
-            <span x-show="c.last_mission_status"
-                  :class="statusClass(c.last_mission_status)"
-                  class="text-xs px-2 py-0.5 rounded font-medium whitespace-nowrap"
-                  :title="c.last_mission_at ? formatDate(c.last_mission_at) : ''"
-                  x-text="statusLabel(c.last_mission_status)"></span>
-          </div>
-        </a>
-      </template>
-    </div>
+    <template x-for="group in groupedCrews" :key="group.district">
+      <div class="mb-6">
+        <h3 class="text-lg font-semibold text-zinc-300 mb-3 border-b border-zinc-800 pb-1 flex items-baseline gap-2">
+          <span x-text="group.district"></span>
+          <span class="text-xs text-zinc-500" x-text="`(${group.crews.length})`"></span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <template x-for="c in group.crews" :key="c.id">
+            <a :href="`/crew/${c.id}`" @click="markCrewSeen(c)"
+               class="block bg-zinc-900 border-2 rounded-lg p-5 transition hover:bg-zinc-800/60"
+               :class="[cardBorder(c.last_mission_status), hasUnread(c) ? 'animate-pulse ring-2 ring-amber-400' : '']">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-3 h-3 rounded-full" :style="`background:${c.color_hex}`"></div>
+                <h3 class="text-lg font-semibold" x-text="c.name"></h3>
+              </div>
+              <p class="text-sm text-zinc-400 line-clamp-3" x-text="c.story_background || 'Keine Story.'"></p>
+              <div class="mt-3 flex items-center justify-between gap-2">
+                <span class="text-xs text-zinc-500 truncate">
+                  Channel: <span x-text="c.discord_channel_id || '—'"></span>
+                </span>
+                <span x-show="c.last_mission_status"
+                      :class="statusClass(c.last_mission_status)"
+                      class="text-xs px-2 py-0.5 rounded font-medium whitespace-nowrap"
+                      :title="c.last_mission_at ? formatDate(c.last_mission_at) : ''"
+                      x-text="statusLabel(c.last_mission_status)"></span>
+              </div>
+            </a>
+          </template>
+        </div>
+      </div>
+    </template>
 
     <p x-show="crews.length === 0" class="text-zinc-500 mt-6">
       Noch keine Gangs angelegt. Klicke oben auf "Neue Gang".

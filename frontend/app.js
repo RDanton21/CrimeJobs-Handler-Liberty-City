@@ -235,6 +235,27 @@ function dashboard() {
       if (this.statusFilter) list = list.filter(c => c.last_mission_status === this.statusFilter);
       return list;
     },
+    get groupedCrews() {
+      // Gruppiert die filteredCrews nach Stadtteil (Algonquin/Bohan/...).
+      // Innerhalb jeder Gruppe alphabetisch nach Name. Crews ohne Stadtteil ans Ende.
+      const groups = {};
+      for (const c of this.filteredCrews) {
+        const key = c.district || "— ohne Stadtteil —";
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(c);
+      }
+      const sortedKeys = Object.keys(groups).sort((a, b) => {
+        if (a === "— ohne Stadtteil —") return 1;
+        if (b === "— ohne Stadtteil —") return -1;
+        return a.localeCompare(b, "de");
+      });
+      return sortedKeys.map(district => ({
+        district,
+        crews: groups[district].sort((a, b) =>
+          (a.name || "").localeCompare(b.name || "", "de")
+        ),
+      }));
+    },
     toggleStatusFilter(s) {
       this.statusFilter = (this.statusFilter === s) ? "" : s;
     },
