@@ -9,6 +9,7 @@ class CrewBase(BaseModel):
     name: str
     story_background: str = ""
     discord_channel_id: str = ""
+    info_channel_id: str = ""
     color_hex: str = "#b91c1c"
 
 
@@ -20,6 +21,7 @@ class CrewUpdate(BaseModel):
     name: str | None = None
     story_background: str | None = None
     discord_channel_id: str | None = None
+    info_channel_id: str | None = None
     color_hex: str | None = None
 
 
@@ -27,6 +29,8 @@ class CrewOut(CrewBase):
     model_config = ConfigDict(from_attributes=True)
     id: int
     created_at: datetime
+    last_mission_status: MissionStatus | None = None
+    last_mission_at: datetime | None = None
 
 
 class CrewRelationBase(BaseModel):

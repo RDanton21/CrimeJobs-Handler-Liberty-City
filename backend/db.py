@@ -18,6 +18,9 @@ async def init_db() -> None:
         await conn.run_sync(Base.metadata.create_all)
         # Inline-Migrationen (SQLite ALTER TABLE ADD COLUMN)
         await _migrate_add_column_if_missing(conn, "missions", "archived_at", "DATETIME")
+        await _migrate_add_column_if_missing(
+            conn, "crews", "info_channel_id", "VARCHAR(40) NOT NULL DEFAULT ''"
+        )
 
 
 async def _migrate_add_column_if_missing(conn, table: str, column: str, sql_type: str) -> None:

@@ -30,7 +30,7 @@ REACT_EMOJIS = [THUMB_UP, THUMB_DOWN, NOT_DOABLE]
 
 
 intents = discord.Intents.default()
-intents.message_content = False
+intents.message_content = True  # Privileged Intent! Im Discord Developer Portal aktivieren.
 intents.reactions = True
 intents.guilds = True
 
@@ -171,6 +171,120 @@ async def http_send_mission(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "message_id": str(msg.id)})
 
 
+async def http_read_channel(request: web.Request) -> web.Response:
+    """POST /read_channel  body: {channel_id: str, after_iso: str|null, limit: int}"""
+    data = await request.json()
+    try:
+        channel_id = int(data["channel_id"])
+    except (KeyError, ValueError, TypeError):
+        return web.json_response({"error": "channel_id ungültig"}, status=400)
+    after_iso = data.get("after_iso")
+    limit = int(data.get("limit", 100))
+
+    after_dt = None
+    if after_iso:
+        try:
+            after_dt = datetime.fromisoformat(after_iso)
+        except ValueError:
+            after_dt = None
+
+    try:
+        channel = client.get_channel(channel_id) or await client.fetch_channel(channel_id)
+    except discord.NotFound:
+        return web.json_response({"error": "channel not found"}, status=404)
+    except discord.Forbidden:
+        return web.json_response({"error": "forbidden - bot has no access to channel"}, status=403)
+    except Exception as exc:
+        return web.json_response({"error": f"channel: {exc}"}, status=500)
+
+    messages: list[dict] = []
+    try:
+        async for m in channel.history(limit=limit, after=after_dt, oldest_first=True):
+            if m.author.bot:
+                continue
+            messages.append({
+                "message_id": str(m.id),
+                "author": m.author.display_name or m.author.name,
+                "content": m.content or "",
+                "posted_at": m.created_at.replace(tzinfo=None).isoformat(),
+            })
+    except discord.Forbidden:
+        return web.json_response(
+            {"error": "forbidden - read message history permission?"}, status=403
+        )
+    except Exception as exc:
+        log.exception("read_channel failed")
+        return web.json_response({"error": str(exc)}, status=500)
+
+    return web.json_response(messages)
+
+
+async def http_delete_in_range(request: web.Request) -> web.Response:
+    """POST /delete_in_range  body: {channel_id: str, after_iso: str|null, before_iso: str|null}
+
+    Löscht alle Nicht-Bot-Nachrichten im Channel zwischen after und before (exclusive)."""
+    data = await request.json()
+    try:
+        channel_id = int(data["channel_id"])
+    except (KeyError, ValueError, TypeError):
+        return web.json_response({"error": "channel_id ungültig"}, status=400)
+
+    after_iso = data.get("after_iso")
+    before_iso = data.get("before_iso")
+    after_dt = None
+    before_dt = None
+    if after_iso:
+        try:
+            after_dt = datetime.fromisoformat(after_iso)
+        except ValueError:
+            after_dt = None
+    if before_iso:
+        try:
+            before_dt = datetime.fromisoformat(before_iso)
+        except ValueError:
+            before_dt = None
+
+    try:
+        channel = client.get_channel(channel_id) or await client.fetch_channel(channel_id)
+    except discord.NotFound:
+        return web.json_response({"ok": True, "deleted": 0, "note": "channel not found"})
+    except discord.Forbidden:
+        return web.json_response({"error": "forbidden - channel access?"}, status=403)
+    except Exception as exc:
+        return web.json_response({"error": f"channel: {exc}"}, status=500)
+
+    deleted = 0
+    failed = 0
+    try:
+        async for m in channel.history(limit=200, after=after_dt, oldest_first=True):
+            ts = m.created_at.replace(tzinfo=None)
+            if before_dt and ts >= before_dt:
+                break
+            if m.author.bot:
+                continue
+            try:
+                await m.delete()
+                deleted += 1
+            except discord.NotFound:
+                pass
+            except discord.Forbidden:
+                failed += 1
+            except Exception:
+                failed += 1
+    except discord.Forbidden:
+        return web.json_response(
+            {"error": "forbidden - manage messages permission?", "deleted": deleted},
+            status=403,
+        )
+    except Exception as exc:
+        log.exception("delete_in_range failed")
+        return web.json_response(
+            {"error": str(exc), "deleted": deleted, "failed": failed}, status=500
+        )
+
+    return web.json_response({"ok": True, "deleted": deleted, "failed": failed})
+
+
 async def http_health(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "ready": client.is_ready()})
 
@@ -198,6 +312,8 @@ def build_http_app() -> web.Application:
     app.add_routes([
         web.post("/send", http_send_mission),
         web.post("/delete_message", http_delete_message),
+        web.post("/delete_in_range", http_delete_in_range),
+        web.post("/read_channel", http_read_channel),
         web.get("/health", http_health),
     ])
     return app

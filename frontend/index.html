@@ -32,7 +32,9 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input x-model="draft.name" placeholder="Gang-Name"
                class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2" />
-        <input x-model="draft.discord_channel_id" placeholder="Discord Channel-ID"
+        <input x-model="draft.discord_channel_id" placeholder="Discord Channel-ID (Aufträge)"
+               class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2" />
+        <input x-model="draft.info_channel_id" placeholder="Zusatzinfo-Channel-ID (Boss-Feedback)"
                class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2" />
         <input x-model="draft.color_hex" type="color"
                class="bg-zinc-950 border border-zinc-800 rounded h-10 w-24" />
@@ -49,14 +51,22 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <template x-for="c in crews" :key="c.id">
         <a :href="`/crew/${c.id}`"
-           class="block bg-zinc-900 border border-zinc-800 rounded-lg p-5 hover:border-red-600 transition">
+           class="block bg-zinc-900 border-2 rounded-lg p-5 transition hover:bg-zinc-800/60"
+           :class="cardBorder(c.last_mission_status)">
           <div class="flex items-center gap-3 mb-3">
             <div class="w-3 h-3 rounded-full" :style="`background:${c.color_hex}`"></div>
             <h3 class="text-lg font-semibold" x-text="c.name"></h3>
           </div>
           <p class="text-sm text-zinc-400 line-clamp-3" x-text="c.story_background || 'Keine Story.'"></p>
-          <div class="mt-3 text-xs text-zinc-500">
-            Channel: <span x-text="c.discord_channel_id || '—'"></span>
+          <div class="mt-3 flex items-center justify-between gap-2">
+            <span class="text-xs text-zinc-500 truncate">
+              Channel: <span x-text="c.discord_channel_id || '—'"></span>
+            </span>
+            <span x-show="c.last_mission_status"
+                  :class="statusClass(c.last_mission_status)"
+                  class="text-xs px-2 py-0.5 rounded font-medium whitespace-nowrap"
+                  :title="c.last_mission_at ? formatDate(c.last_mission_at) : ''"
+                  x-text="statusLabel(c.last_mission_status)"></span>
           </div>
         </a>
       </template>

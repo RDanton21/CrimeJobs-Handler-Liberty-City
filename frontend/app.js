@@ -48,6 +48,14 @@ function statusClassMap(s) {
   })[s] || "bg-zinc-700";
 }
 
+function cardBorderClass(s) {
+  return ({
+    approved: "border-green-500",
+    rejected: "border-red-500",
+    cancelled: "border-yellow-500",
+  })[s] || "border-zinc-800";
+}
+
 function formatDate(iso) {
   if (!iso) return "";
   const d = new Date(iso);
@@ -59,8 +67,12 @@ function dashboard() {
   return {
     crews: [],
     showNew: false,
-    draft: { name: "", story_background: "", discord_channel_id: "", color_hex: "#b91c1c" },
+    draft: { name: "", story_background: "", discord_channel_id: "", info_channel_id: "", color_hex: "#b91c1c" },
     async init() {
+      await this.loadCrews();
+      setInterval(() => { this.loadCrews().catch(() => {}); }, 5000);
+    },
+    async loadCrews() {
       this.crews = await api.get("/api/crews");
     },
     async createCrew() {
@@ -69,10 +81,14 @@ function dashboard() {
         const c = await api.post("/api/crews", this.draft);
         this.crews.push(c);
         this.crews.sort((a, b) => a.name.localeCompare(b.name));
-        this.draft = { name: "", story_background: "", discord_channel_id: "", color_hex: "#b91c1c" };
+        this.draft = { name: "", story_background: "", discord_channel_id: "", info_channel_id: "", color_hex: "#b91c1c" };
         this.showNew = false;
       } catch (e) { alert(e.message); }
     },
+    statusLabel: statusLabelMap,
+    statusClass: statusClassMap,
+    cardBorder: cardBorderClass,
+    formatDate,
   };
 }
 
@@ -81,7 +97,7 @@ function crewPage() {
   const id = parseInt(location.pathname.split("/").pop(), 10);
   return {
     crewId: id,
-    crew: { name: "", story_background: "", discord_channel_id: "", color_hex: "#b91c1c" },
+    crew: { name: "", story_background: "", discord_channel_id: "", info_channel_id: "", color_hex: "#b91c1c" },
     allCrews: [],
     relations: [],
     missions: [],
@@ -89,14 +105,13 @@ function crewPage() {
     mode: "generate", // 'generate' | 'rewrite'
     genReq: { provider: "anthropic", model: "", extra_instructions: "" },
     rewriteReq: { raw_input: "" },
+    pendingImage: null,
     generating: false,
     showArchive: false,
+    bossInfoByMission: {},
 
     get otherCrews() {
       return this.allCrews.filter(c => c.id !== this.crewId);
-    },
-    get locked() {
-      return this.missions.some(m => m.status === "draft" || m.status === "pending");
     },
     get missionsToday() {
       const today = new Date().toDateString();
@@ -105,8 +120,12 @@ function crewPage() {
 
     async init() {
       await Promise.all([this.loadCrew(), this.loadAllCrews(), this.loadRelations(), this.loadMissions()]);
-      // Auto-Refresh Missionen alle 5 Sek (fuer Discord-Reaktions-Updates)
-      setInterval(() => { this.loadMissions().catch(() => {}); }, 5000);
+      await this.loadBossInfo();
+      // Auto-Refresh alle 5 Sek (fuer Discord-Reaktions-Updates + Boss-Texte)
+      setInterval(() => {
+        this.loadMissions().catch(() => {});
+        this.loadBossInfo().catch(() => {});
+      }, 5000);
     },
     async loadCrew() { this.crew = await api.get(`/api/crews/${this.crewId}`); },
     async loadAllCrews() { this.allCrews = await api.get("/api/crews"); },
@@ -114,6 +133,17 @@ function crewPage() {
     async loadMissions() {
       const arch = this.showArchive ? "&archived=true" : "";
       this.missions = await api.get(`/api/missions?crew_id=${this.crewId}&limit=50${arch}`);
+    },
+    async loadBossInfo() {
+      if (!this.crew || !this.crew.info_channel_id) return;
+      try {
+        const data = await api.get(`/api/crews/${this.crewId}/boss_info`);
+        const map = {};
+        for (const entry of data) map[entry.mission_id] = entry.messages || [];
+        this.bossInfoByMission = map;
+      } catch (e) {
+        // Bot evtl. offline oder Permission-Issue — silent
+      }
     },
     async toggleArchive() {
       this.showArchive = !this.showArchive;
@@ -132,6 +162,7 @@ function crewPage() {
           name: this.crew.name,
           story_background: this.crew.story_background,
           discord_channel_id: this.crew.discord_channel_id,
+          info_channel_id: this.crew.info_channel_id,
           color_hex: this.crew.color_hex,
         });
       } catch (e) { alert(e.message); }
@@ -160,36 +191,51 @@ function crewPage() {
       catch (e) { alert(e.message); }
     },
 
+    setPendingImage(evt) {
+      this.pendingImage = evt.target.files[0] || null;
+    },
+    clearPendingImage() {
+      this.pendingImage = null;
+      if (this.$refs.genImageInput) this.$refs.genImageInput.value = "";
+    },
+    async _attachPendingImage(missionId) {
+      if (!this.pendingImage || !missionId) return;
+      try { await api.upload(`/api/missions/${missionId}/image`, this.pendingImage); }
+      catch (e) { alert("Bild-Upload fehlgeschlagen: " + e.message); }
+    },
+
     async generate() {
-      if (this.locked) return;
       this.generating = true;
       try {
-        await api.post("/api/missions/generate", {
+        const m = await api.post("/api/missions/generate", {
           crew_id: this.crewId,
           provider: this.genReq.provider || null,
           model: this.genReq.model || null,
           extra_instructions: this.genReq.extra_instructions || "",
         });
+        await this._attachPendingImage(m && m.id);
         this.genReq.extra_instructions = "";
+        this.clearPendingImage();
         await this.loadMissions();
       } catch (e) { alert(e.message); }
       finally { this.generating = false; }
     },
 
     async rewrite() {
-      if (this.locked) return;
       if (!this.rewriteReq.raw_input.trim()) { alert("Bitte Roh-Input eingeben."); return; }
       this.generating = true;
       try {
-        await api.post("/api/missions/rewrite", {
+        const m = await api.post("/api/missions/rewrite", {
           crew_id: this.crewId,
           raw_input: this.rewriteReq.raw_input,
           provider: this.genReq.provider || null,
           model: this.genReq.model || null,
           extra_instructions: this.genReq.extra_instructions || "",
         });
+        await this._attachPendingImage(m && m.id);
         this.rewriteReq.raw_input = "";
         this.genReq.extra_instructions = "";
+        this.clearPendingImage();
         await this.loadMissions();
       } catch (e) { alert(e.message); }
       finally { this.generating = false; }

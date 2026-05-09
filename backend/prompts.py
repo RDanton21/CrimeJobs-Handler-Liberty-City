@@ -69,6 +69,12 @@ def build_user_prompt(ctx: MissionContext) -> str:
     parts.append(
         "\n## Aufgabe\nGeneriere jetzt den nächsten Auftrag im oben definierten Stil. "
         "Drei bis vier Sätze. Kryptisch. Kein Klartext für Außenstehende."
+        "\n\n**Story-Verankerung:** Greife sichtbar 1–2 konkrete Elemente aus der "
+        "Hintergrund-Story auf — typische Orte, Rollen, Geschäftsfelder, Reviere "
+        "oder die Mentalität der Gang. Der Auftrag soll sich anfühlen wie aus dem "
+        "inneren Kreis genau dieser Gang, nicht wie ein generisches Mafia-Briefing. "
+        "Erzwinge es nicht plump — die Anker sollen organisch im Text sitzen, "
+        "nicht aufgezählt wirken."
     )
 
     return "\n".join(parts)
@@ -113,9 +119,13 @@ def build_rewrite_prompt(ctx: MissionContext, raw_input: str) -> str:
         "\n## Aufgabe\n"
         "Schreibe den obigen Roh-Input in den definierten Stil um: kryptisch, atmosphärisch, hochwertig, "
         "3 bis 4 Sätze. Inhalt und Kernanweisung müssen erhalten bleiben — aber niemand außerhalb der Gang "
-        "soll auf den ersten Blick verstehen, was gefordert ist. Nutze Code-Wörter, Andeutungen, Metaphern. "
-        "Berücksichtige Gang-Hintergrund und Beziehungen. Gib nur den umgeschriebenen Auftragstext aus, "
-        "keine Erklärung."
+        "soll auf den ersten Blick verstehen, was gefordert ist. Nutze Code-Wörter, Andeutungen, Metaphern."
+        "\n\n**Story-Verankerung:** Lass die Hintergrund-Story spürbar werden — übersetze Locations, "
+        "Rollen oder Geschäftsfelder aus dem Roh-Input in die Welt der Gang (z.B. der Roh-Input nennt "
+        "'Juwelier in der Innenstadt' → die Gang-Story spricht vom 'Diamantenviertel' → nutze diesen "
+        "Begriff). Die Tonalität soll zur Mentalität der Gang passen. Beziehungen und Reviere "
+        "berücksichtigen, ohne sie aufzuzählen."
+        "\n\nGib nur den umgeschriebenen Auftragstext aus, keine Erklärung."
     )
 
     return "\n".join(parts)

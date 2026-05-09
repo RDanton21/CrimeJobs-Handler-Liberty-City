@@ -32,8 +32,10 @@
           <h2 class="text-lg font-semibold mb-3">Gang-Daten</h2>
           <label class="block text-xs text-zinc-400 mb-1">Name</label>
           <input x-model="crew.name" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3" />
-          <label class="block text-xs text-zinc-400 mb-1">Discord Channel-ID</label>
+          <label class="block text-xs text-zinc-400 mb-1">Discord Channel-ID (Aufträge)</label>
           <input x-model="crew.discord_channel_id" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3" />
+          <label class="block text-xs text-zinc-400 mb-1">Zusatzinfo-Channel-ID (Boss-Feedback)</label>
+          <input x-model="crew.info_channel_id" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3" />
           <label class="block text-xs text-zinc-400 mb-1">Farbe</label>
           <input x-model="crew.color_hex" type="color" class="bg-zinc-950 border border-zinc-800 rounded h-10 w-24 mb-3" />
           <label class="block text-xs text-zinc-400 mb-1">Hintergrund-Story</label>
@@ -83,7 +85,7 @@
         <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-5">
           <div class="flex items-center justify-between mb-3">
             <h2 class="text-lg font-semibold">Neuer Auftrag</h2>
-            <span class="text-xs text-zinc-500" x-text="`Heute: ${missionsToday}/3`"></span>
+            <span class="text-xs text-zinc-500" x-text="`Heute: ${missionsToday}/10`"></span>
           </div>
 
           <div class="flex gap-2 mb-4 border-b border-zinc-800">
@@ -97,10 +99,6 @@
                     class="px-3 py-2 text-sm border-b-2 -mb-px">
               Eigenen Text umschreiben lassen
             </button>
-          </div>
-
-          <div x-show="locked" class="bg-amber-900/40 border border-amber-700 text-amber-200 text-sm rounded p-3 mb-3">
-            Ein Auftrag wartet noch auf Reaktion. Erst nach 👍 / 👎 / ❌ kann ein neuer erstellt werden.
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
@@ -122,13 +120,24 @@
           <textarea x-model="genReq.extra_instructions" rows="2" placeholder="Zusätzliche Hinweise (optional)"
                     class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3 text-sm"></textarea>
 
-          <button x-show="mode === 'generate'" @click="generate()" :disabled="locked || generating"
+          <div class="mb-3 flex items-center gap-3">
+            <label class="text-xs px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded cursor-pointer">
+              <span x-show="!pendingImage">📎 Bild anhängen (optional)</span>
+              <span x-show="pendingImage" x-text="pendingImage ? `📎 ${pendingImage.name}` : ''"></span>
+              <input type="file" class="hidden" accept="image/*"
+                     x-ref="genImageInput" @change="setPendingImage($event)" />
+            </label>
+            <button x-show="pendingImage" type="button" @click="clearPendingImage()"
+                    class="text-xs text-red-400 hover:text-red-300">entfernen</button>
+          </div>
+
+          <button x-show="mode === 'generate'" @click="generate()" :disabled="generating"
                   class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded font-medium disabled:opacity-50">
             <span x-show="!generating">⚙ Auftrag generieren</span>
             <span x-show="generating">Generiere…</span>
           </button>
 
-          <button x-show="mode === 'rewrite'" @click="rewrite()" :disabled="locked || generating"
+          <button x-show="mode === 'rewrite'" @click="rewrite()" :disabled="generating"
                   class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded font-medium disabled:opacity-50">
             <span x-show="!generating">✎ Umschreiben lassen</span>
             <span x-show="generating">Schreibe um…</span>
@@ -204,6 +213,22 @@
 
               <div x-show="m.status !== 'draft'" class="whitespace-pre-wrap text-zinc-200 leading-relaxed"
                    x-text="m.content_final || m.content_generated"></div>
+
+              <div x-show="bossInfoByMission[m.id] && bossInfoByMission[m.id].length"
+                   class="mt-4 pt-3 border-t border-zinc-800">
+                <h4 class="text-xs font-semibold text-zinc-400 mb-2">🗨 Boss-Feedback aus Zusatzinfo-Channel</h4>
+                <ul class="space-y-2">
+                  <template x-for="bm in (bossInfoByMission[m.id] || [])" :key="bm.message_id">
+                    <li class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm">
+                      <div class="flex items-center justify-between text-xs text-zinc-500 mb-1">
+                        <span x-text="bm.author" class="font-medium text-zinc-300"></span>
+                        <span x-text="formatDate(bm.posted_at)"></span>
+                      </div>
+                      <div class="whitespace-pre-wrap text-zinc-200" x-text="bm.content"></div>
+                    </li>
+                  </template>
+                </ul>
+              </div>
             </article>
           </template>
           <p x-show="missions.length === 0" class="text-zinc-500">Noch keine Missionen.</p>

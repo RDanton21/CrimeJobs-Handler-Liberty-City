@@ -25,8 +25,6 @@ from .settings_store import get as settings_get
 
 router = APIRouter(prefix="/api/missions", tags=["missions"], dependencies=[Depends(require_admin)])
 
-BLOCKING_STATUSES = {MissionStatus.DRAFT, MissionStatus.PENDING}
-
 
 async def _load_context(session: AsyncSession, crew: Crew, extra: str) -> MissionContext:
     rel_q = await session.execute(
@@ -86,20 +84,6 @@ async def generate_mission(
     if not crew:
         raise HTTPException(404, "Crew nicht gefunden")
 
-    blocker = await session.execute(
-        select(Mission)
-        .where(
-            Mission.crew_id == crew.id,
-            Mission.status.in_(BLOCKING_STATUSES),
-            Mission.archived_at.is_(None),
-        )
-        .limit(1)
-    )
-    if blocker.scalar_one_or_none():
-        raise HTTPException(
-            409, "Es existiert bereits eine offene Mission (Draft oder Pending). Bitte erst abschließen."
-        )
-
     keys = {
         "anthropic": await settings_get(session, "anthropic_api_key", settings.anthropic_api_key),
         "openai": await settings_get(session, "openai_api_key", settings.openai_api_key),
@@ -148,20 +132,6 @@ async def rewrite_mission(
     crew = await session.get(Crew, payload.crew_id)
     if not crew:
         raise HTTPException(404, "Crew nicht gefunden")
-
-    blocker = await session.execute(
-        select(Mission)
-        .where(
-            Mission.crew_id == crew.id,
-            Mission.status.in_(BLOCKING_STATUSES),
-            Mission.archived_at.is_(None),
-        )
-        .limit(1)
-    )
-    if blocker.scalar_one_or_none():
-        raise HTTPException(
-            409, "Es existiert bereits eine offene Mission (Draft oder Pending). Bitte erst abschließen."
-        )
 
     keys = {
         "anthropic": await settings_get(session, "anthropic_api_key", settings.anthropic_api_key),
@@ -339,14 +309,47 @@ async def override_status(
 
 @router.delete("/{mission_id}", response_model=MissionOut)
 async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_session)):
-    """Soft-Delete: Mission ins Archiv verschieben + Discord-Message loeschen."""
+    """Soft-Delete: Mission ins Archiv verschieben + Discord-Message loeschen +
+    Boss-Texte aus Zusatzinfo-Channel im Mission-Zeitfenster loeschen."""
     m = await session.get(Mission, mission_id)
     if not m:
         raise HTTPException(404, "Mission nicht gefunden")
     if m.archived_at is not None:
         return m  # bereits archiviert
 
-    # Discord-Message loeschen wenn vorhanden
+    crew = await session.get(Crew, m.crew_id)
+
+    # Boss-Texte aus Zusatzinfo-Channel im Zeitfenster (sent_at .. next_mission.sent_at) loeschen
+    if crew and crew.info_channel_id and m.sent_at:
+        next_q = await session.execute(
+            select(Mission)
+            .where(
+                Mission.crew_id == crew.id,
+                Mission.id != m.id,
+                Mission.archived_at.is_(None),
+                Mission.sent_at.is_not(None),
+                Mission.sent_at > m.sent_at,
+            )
+            .order_by(Mission.sent_at)
+            .limit(1)
+        )
+        next_m = next_q.scalar_one_or_none()
+        before_iso = next_m.sent_at.isoformat() if next_m else None
+
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as cli:
+                await cli.post(
+                    "http://127.0.0.1:8001/delete_in_range",
+                    json={
+                        "channel_id": crew.info_channel_id,
+                        "after_iso": m.sent_at.isoformat(),
+                        "before_iso": before_iso,
+                    },
+                )
+        except Exception:
+            pass  # Bot offline -> Auftrags-Delete + DB-Archiv weiterlaufen lassen
+
+    # Discord-Message im Auftrags-Channel loeschen
     if m.discord_message_id and m.discord_channel_id:
         try:
             async with httpx.AsyncClient(timeout=15.0) as cli:
