@@ -52,7 +52,7 @@ Sie tragen Türkis und Schwarz, oft mit kaukasischen Mustern als Stickerei oder 
 
 Sie sind die Crew der Stadtgrenze: Brachen, Bahngleise, Industriehallen, Logistikzentren, Lagerflächen, Wege, die niemand sonst nimmt. Und über die Stadtgrenze hinaus: die Zufahrten zum **Francis Underwood International Airport**. Wer in Dukes einen Container vom Flughafen wegbringen will, ohne dass jemand nachfragt, fährt mit den Wolves — oder gar nicht.
 
-Mit der **Petrovsky Bratva** in Broker haben die Wolves einen kalten gegenseitigen Respekt. Die Wolves sind kein Bratva-Charter, sondern eine eigenständige Familie. Volkov und Pakhan Volkov (keine Verwandtschaft, eine Frage, die schon mal blutig endete) treffen sich nie persönlich — aber sie respektieren die Reviere des anderen, und beide wissen, dass sich eine osteuropäische Front in Liberty City keiner von ihnen leisten kann.
+Mit der **Asimov Bratva** in Broker haben die Wolves einen kalten gegenseitigen Respekt. Die Wolves sind kein Bratva-Charter, sondern eine eigenständige Familie. Volkov und Pakhan Volkov (keine Verwandtschaft, eine Frage, die schon mal blutig endete) treffen sich nie persönlich — aber sie respektieren die Reviere des anderen, und beide wissen, dass sich eine osteuropäische Front in Liberty City keiner von ihnen leisten kann.
 
 Ihre Alpha – Kira „Volka" Volkov, Mitte dreißig, Tochter eines kaukasischen Vaters und einer russischen Mutter, in Dukes geboren – führt die Crew aus einer Werkstatthalle an den Ostbahn-Gleisen. Sie spricht selten viel, lacht selten laut, und niemand testet sie zwei Mal.
 

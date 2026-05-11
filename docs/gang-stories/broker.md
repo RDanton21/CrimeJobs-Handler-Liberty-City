@@ -114,11 +114,11 @@ Sie haben keine Lust auf Krieg. Aber wer sie unterschätzt, lernt, dass eine Fam
 
 ---
 
-## Russian Mafia — Petrovsky Bratva
+## Russian Mafia — Asimov Bratva
 
 Wenn alle anderen Crews in Broker das Licht suchen, suchen die Russen den Schatten. Und im Schatten haben sie alles aufgebaut, was Broker heute ist.
 
-Die Petrovsky Bratva ist die größte Kraft in Broker — und in einem Stadtteil, der niemandem gehört, ist „die größte Kraft" mehr, als es in Algonquin oder Dukes je sein könnte. Vier von zehn Geschäften, die in Broker bewegt werden, bewegen sich mit dem Wissen der Bratva. Wer in den Hafen will, geht durch sie. Wer aus dem Hafen will, geht durch sie. Wer den Hafen umgehen will, lernt schnell, dass es keinen Weg gibt, der nicht doch durch sie führt.
+Die Asimov Bratva ist die größte Kraft in Broker — und in einem Stadtteil, der niemandem gehört, ist „die größte Kraft" mehr, als es in Algonquin oder Dukes je sein könnte. Vier von zehn Geschäften, die in Broker bewegt werden, bewegen sich mit dem Wissen der Bratva. Wer in den Hafen will, geht durch sie. Wer aus dem Hafen will, geht durch sie. Wer den Hafen umgehen will, lernt schnell, dass es keinen Weg gibt, der nicht doch durch sie führt.
 
 Die Bratva kam nach Liberty City, als die Mauer fiel und die alten Strukturen mit ihr. Sie haben sich nicht in Broker niedergelassen, weil es schön ist – sondern weil es funktioniert. Brokers Hafen, Brokers permanente Bewegung, Brokers Anonymität für jeden, der sich nicht erklären will. In zwei Jahrzehnten haben sie sich von einer Sauna in Nord-Broker bis in jeden Container, jeden Frachtbrief, jede Werft-Schicht eingeschrieben. Sie machen kein Aufsehen. Sie brauchen es nicht. Sie sind das Aufsehen.
 

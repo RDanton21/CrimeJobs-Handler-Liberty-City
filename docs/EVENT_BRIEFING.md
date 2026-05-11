@@ -87,7 +87,7 @@ Drei Querstraßen weiter, in *Mercer's Gym*, schlägt Andre Cross gerade auf ein
 
 Im Süden, in einem Plattenladen namens *Selecta Records*, läuft eine Schallplatte zu Ende. Don Gorgon Winston Brown legt sie um. Er schaut nicht, was als nächstes kommt. Er weiß es. Er weiß heute Abend mehr Dinge, als er möchte.
 
-Zwei Blocks vom Hafen entfernt, in einer Sauna namens *Tetka Marina*, sitzt Pyotr Volkov in einem weißen Bademantel, weißes Haar, kein Lächeln. Pakhan der Petrovsky Bratva. Vor ihm steht ein Glas Wasser. Er trinkt nicht. Sein Sovietnik flüstert. Volkov antwortet nicht.
+Zwei Blocks vom Hafen entfernt, in einer Sauna namens *Tetka Marina*, sitzt Pyotr Volkov in einem weißen Bademantel, weißes Haar, kein Lächeln. Pakhan der Asimov Bratva. Vor ihm steht ein Glas Wasser. Er trinkt nicht. Sein Sovietnik flüstert. Volkov antwortet nicht.
 
 Und in einem Lagerhallen-Komplex am Rand Brokers, der heute Nacht offiziell ein Rave wird, steht Lila Okafor — Phantom — auf einer Bühne, die sie selbst gebaut hat. Mother of the Swarm. Die Fireflys. Sie schaut über tausend Köpfe, die unter ihr leuchten, und sie weiß, dass sie heute die Lauteste in Broker ist.
 

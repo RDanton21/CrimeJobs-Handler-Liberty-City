@@ -120,7 +120,7 @@
 Mehrere Stadtteile haben Außenposten von Crews mit Stammsitz andernorts. Diese laufen operativ unter der Stamm-Crew, aber sie schaffen Stadtteil-Präsenz, die in Aufträgen relevant werden kann:
 
 - **Italienische Mafia** (Stammsitz Algonquin, ID 4) hat Außenposten in **Broker** (10 % Stadtteilmacht) und **Dukes** (20 %).
-- **Petrovsky Bratva** (Stammsitz Broker, ID 13) hat einen Außenposten auf **Colony Island** (10 %).
+- **Asimov Bratva** (Stammsitz Broker, ID 13) hat einen Außenposten auf **Colony Island** (10 %).
 - **Jamaikanische Yardis** (Stammsitz Broker, ID 11) haben in **Bohan** Verteilerzentren (Teil des 45-%-Latino-Blocks).
 - **Spanish Lords** (Stammsitz Dukes, ID 19) haben in **Bohan** Verstecke und Logistik-Punkte (Teil des 45-%-Latino-Blocks).
 - **Manschettis, Bratva, Yakuza, Avenue Lords, Wolves** haben alle in **Bohan** mindestens ein Versteck oder Operativ-Punkt — Bohan ist die unsichtbare Werkstatt der ganzen Stadt, ohne dass diese Crews Stadtteilmacht beanspruchen.

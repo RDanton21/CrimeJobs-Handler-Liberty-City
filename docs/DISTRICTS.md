@@ -34,7 +34,7 @@ Wer Broker verstehen will, muss verstehen, dass es hier keinen einzigen Tisch gi
 
 | Anteil | Block | Vertreten durch |
 |---:|---|---|
-| **40 %** | Osteuropäisch / Russisch | Russian Mafia (Petrovsky Bratva) |
+| **40 %** | Osteuropäisch / Russisch | Russian Mafia (Asimov Bratva) |
 | **20 %** | Karibisch / Afroamerikanisch | Jamaikanische Yardis (Trenchtown Outfit) |
 | **20 %** | Moderne & Digitale Gruppen | Avenue Lords · Crossline Kings · The Fireflys |
 | **10 %** | Italienische Mafia (alt) | Außenposten der Famiglia Manschetti (Stammsitz: Algonquin) |
@@ -152,7 +152,7 @@ Das ist Colony Island. Ein Ort, an dem die Stadt aufhört — und etwas anderes 
 | **35 %** | Independent Smugglers | Coalition of Free Trade (Captains' Council) |
 | **25 %** | Little Bay Pirates | „The Black Maeve" Crew |
 | **20 %** | Blackline Security | Director Magnus Thorsen |
-| **10 %** | Osteuropäer | Außenposten der Petrovsky Bratva (Stammsitz: Broker) |
+| **10 %** | Osteuropäer | Außenposten der Asimov Bratva (Stammsitz: Broker) |
 | **10 %** | Sonstige / Korruption | Obdachlose mit Wissen, freie Bootsleute, Wachleute, die nicht Blackline sind |
 
 Die **Independents** sind die mit Abstand größte Kraft auf der Insel — und gleichzeitig die unsichtbarste. Sieben Captains, jeder mit eigener Crew, gemeinsam eine Koalition, die kein Boss-System hat und damit nicht zerschlagen werden kann. Sie kontrollieren mehr als ein Drittel der Insel — und niemand weiß genau, welcher Captain für welche Lieferung verantwortlich ist.
