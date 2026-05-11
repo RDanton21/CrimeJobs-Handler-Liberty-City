@@ -138,3 +138,114 @@ Ungenutzte Verbindungen, die später nachgepflegt werden können, falls die Stor
 - Eastline Wolves ↔ Latin Kings (Stadtteil-Nachbarn ohne aktive Beziehung — aktivierbar bei Wolves/Mafia-Eskalation)
 
 Diese werden im Initial-Seed *bewusst* ausgelassen, damit sie als organischer Story-Hebel verfügbar bleiben.
+
+---
+
+## Firmen-Beziehungen (Zivile Akteure ↔ Crime-Crews)
+
+Die 13 Zivil-Firmen wurden mit ~35 zusätzlichen Beziehungen zu den Crime-Crews verknüpft. Diese werden vom Seed-Skript automatisch eingespielt, sobald die Firmen-Crews per Auto-Create angelegt sind. IDs vergibt die DB beim ersten Lauf — die folgende Doku referenziert die Firmen per Name.
+
+### LCPD — Liberty City Police Department
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| Italienische Mafia | `hostile` | Hauptziel offiziell, eingespielte Spielregeln in der Praxis. |
+| Asiatische Yakuza | `hostile` | Distanzierte Feindschaft, beide leben damit. |
+| Russian Mafia | `hostile` | Volkov auf jeder Watchlist seit 15 Jahren. Beweise: keine. |
+| Eastline Wolves | `hostile` | Streifen meiden Ost-Dukes nicht — aber kein Solo. |
+| Dukes Latin Kings | `hostile` | El Padre observiert, drei Versuche Beweise zu sammeln, alle gescheitert. |
+| LOST MC | `hostile` | Bohan Charter als Dauerreibung, Razzien Routine ohne Ergebnis. |
+| Blackline Security | `business` | Verstärkung in Colony Island gelegentlich angefordert. |
+| Blue Union | `hostile` | Konkurrenz um Polizei-Rolle in Bohan. |
+
+### DoJ — Department of Justice
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| Italienische Mafia | `hostile` | Drei Senior Prosecutors arbeiten daran, drei Anwälte verteidigen. |
+| Russian Mafia | `hostile` | Zwei Bratva-Lieutenants angeklagt, beide freigesprochen. Whitfield versucht es erneut. |
+| Eastline Wolves | `hostile` | Schwer fassbar — Strukturen, für die das Strafrecht nicht gemacht ist. |
+| Dukes Latin Kings | `hostile` | Lange Akte, wenige Verurteilungen — eigene juristische Verteidigungslinie. |
+
+### Diner — „The Brass Plate"
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| Italienische Mafia | `business` | Klassischer Treffpunkt seit zwei Generationen, fester Tisch. |
+| LCPD | `neutral` | Cops-Frühstück. Frankie kennt jeden, niemand redet mit jemand anderem. |
+
+### Triangle Club
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| Bohan Sequidors | `business` | La Loba hat festen Tisch im 2. Stock; Triangle bekommt „Schutz". |
+| Los Aztecas | `business` | Aztecas-Hip-Hop-Acts treten regelmäßig auf, Cruz Alvarez im Publikum. |
+| LOST MC | `neutral` | MC-Brüder kommen rein, wenn die Türsteher es erlauben. |
+
+### Pawn Shop — „Three Coins Pawn"
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| Jamaikanische Yardis | `business` | Sound-Equipment + Schmuck. Saul kennt Selecta seit 20 Jahren. |
+| The Fireflys | `business` | DJ-Equipment + Pop-Up-Fundsachen. Phantom verhandelt persönlich. |
+| Russian Mafia | `business` | Zwischenlager gegen Lagergebühr. |
+
+### Hayes Tuning
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| Eastline Wolves | `business` | Logistik-Fahrzeuge, Knuckles kennt Volka persönlich. |
+| Italienische Mafia | `business` | Wagen, die nicht in der Familien-Werkstatt landen sollen. |
+| Broker Avenue Lords | `business` | Royale schickt monatlich drei Wagen zur Aufwertung. |
+| Grotti Automobile | `business` | Familienverbindung — Hayes-Sohn ist Bruder von Grotti-Service-Director. |
+| ACLC Abschlepp Service | `business` | „Verloren gegangene" Fahrzeuge mit neuen Papieren. |
+
+### Grotti Automobile
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| Italienische Mafia | `business` | Manschettis haben mehrere Grottis. Carlo verhandelt persönlich mit dem Don. |
+| Russian Mafia | `business` | Volkov hat einen Grotti, der nicht zugelassen ist. Beide schweigen. |
+
+### Taxi — „Liberty Cab Co."
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| LCPD | `business` | Vertrag über „informelle Zusammenarbeit". Frank hält sich aus dem Inhalt raus. |
+| Italienische Mafia | `business` | Bestimmte Fahrer, bestimmte Kunden. Trinkgeld als Code. |
+
+### Wigwam Burger
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| Money over Bitches | `business` | Schnellste Verteilungsschiene, Joe Crow kassiert die Provision. |
+| The Harlem Vipers | `business` | „Vereinbarung" für eine bestimmte Lieferschiene. |
+| The Fireflys | `business` | Wigwam-Catering für Pop-Up-Raves, Phantom verhandelt selbst. |
+
+### Superstar Cafe
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| Italienische Mafia | `business` | Don Manschetti hat Stammplatz im hinteren Bereich. |
+
+### LCMD — Liberty City Medical Department
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| Italienische Mafia | `business` | Diskretions-Kultur: Schussverletzungen behandeln, Meldung wenn nötig. |
+| Russian Mafia | `business` | Bratva-Männer mit gefälschten Versicherungen. Niemand fragt zwei Mal. |
+| LOST MC | `business` | MC-Brüder mit Verletzungen, die nicht zur Geschichte passen — LCMD schweigt. |
+
+### ACLC Abschlepp Service
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| LCPD | `business` | Offizieller Vertragspartner für Beschlagnahmungen. |
+
+### LCFD — Fire Department Liberty City
+
+| Crew B | `relation_type` | `notes` (Kurzfassung) |
+|---|---|---|
+| Italienische Mafia | `neutral` | Neutraler Boden seit dem Mafia-Krieg der Achtziger. |
+| Russian Mafia | `neutral` | Wenn ein Bratva-Lager brennt, kommen die Feuerwehrleute. Berichte schaden niemandem. |
+

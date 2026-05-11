@@ -187,3 +187,41 @@ Wer in Bohan einen Auftrag platzieren will, der nicht von einer der vier Säulen
 Zehn Prozent Stadtteilmacht — die kleinste organisierte Schicht Bohans, aber die am schnellsten wachsende. **Digital-Akteure**, die Drogen-Bestellungen über verschlüsselte Kanäle abwickeln. **Online-Vermittler**, die in keinem Hinterhof, sondern in jedem Telegram-Kanal sitzen. **Pop-Up-Locations** der **Fireflys** (Stammsitz Broker, ID 10), die in alten Bohan-Lagerhallen für eine Nacht aufploppen und am nächsten Morgen wieder verschwunden sind.
 
 Sie haben keine festen Reviere, keine Hierarchien, keine sichtbaren Anführer. Sie sind das, was passiert, wenn die nächste Generation Bohans nicht mehr glaubt, dass eine Crew das richtige Vehikel für ihr Geschäft ist. Die etablierten Crews — Aztecas, Sequidors, LOST — wissen von ihnen, beobachten sie, und haben noch keine Antwort darauf, was mit ihnen zu tun ist.
+
+---
+
+# ⚖️ Firmen & Zivile Akteure
+
+> Bohan hat wenig Hochglanz. Was es hat, ist Nachtleben — aber anders als Broker. Lauter, dichter, gefährlicher. Eine Bühne, die auch im Verfall ihren Sound hat.
+
+---
+
+## Triangle Club
+
+Wenn der Avenue Lords-Klub in Broker das Restaurant ist, ist der Triangle Club die Schlägerei.
+
+Eröffnet vor neun Jahren in einer ehemaligen Industriehalle in Süd-Bohan, direkt unter einer der West-Bohan-Bridges. Der Triangle Club ist die größte Konzertlocation Bohans — und gleichzeitig die unkontrollierbarste. Drei Floors (deshalb der Name), zwei Bars, eine Backstage-Area, eine Privatlounge, und eine Tür im Keller, von der niemand offen redet. Hip-Hop, Reggaeton, Punk, Industrial — der Club spielt, was die Nacht braucht.
+
+Der Triangle ist neutraler Boden zwischen den Bohan-Crews. Aztecas, Sequidors, MOB-Gäste aus Dukes, sogar gelegentlich Yardies aus Süd-Broker — alle treffen sich hier, alle bleiben am Tisch sitzen, an den sie gekommen sind. Wer das durchbricht, fliegt raus, und „raus" heißt im Triangle ein Stockwerk tiefer und durch den Hinterausgang. Die Crews wissen das. Sie respektieren es.
+
+Der Inhaber — Dion „Triangle" Carver, Anfang vierzig, halb Trinidad, halb New York, immer in einem dunklen Hemd, das er nie ganz zumacht — hat den Club aufgebaut wie ein Diplomat. Er hat keine eigene Crew, will keine, wird auch keine. Er ist ein *Veranstalter*. Er kennt jeden Boss in Bohan beim Vornamen, hat aber mit niemandem ein Geschäft, das größer wäre als ein Tisch und drei Drinks.
+
+> *„In meinem Club gibt es nur eine Regel: ihr kommt nicht in dem Streit raus, mit dem ihr reingekommen seid."*
+
+### 🏛️ Struktur & Personal
+
+🔱 **Owner** (Dion „Triangle" Carver) — letzte Stimme, immer im Haus.
+🔸 **Floor Manager** — drei, je ein Stockwerk.
+🔹 **Head of Security** — eigene Türsteher-Mannschaft, ehemals Boxer und Veteranen.
+▫️ **Bartender, DJ-Crew, Lichttechnik** — Vollzeit-Personal.
+🔻 **Aushilfen** — Garderobe, Reinigung, Lager.
+
+### 🗺️ Standort & Einfluss
+
+📍 Süd-Bohan, ehemalige Industriehalle unter West-Bohan-Bridge
+📍 Drei Floors + Keller-Tür (geschlossen für Außenstehende)
+📍 Eigener Parkplatz mit drei Türstehern
+
+### 💰 Business während des Events
+
+❗ Diese Info muss IC herausgefunden werden.

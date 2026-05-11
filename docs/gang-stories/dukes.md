@@ -190,3 +190,41 @@ Sie kontrollieren Reviere, in denen die Kings nicht sind, und sie respektieren �
 ### 💰 Business während des Events
 
 ❗ Diese Info muss IC herausgefunden werden.
+
+---
+
+# ⚖️ Firmen & Zivile Akteure
+
+> Dukes ist die Werkstatt der Stadt. Wer hier arbeitet, baut, repariert, modifiziert. Wer in Dukes ein Auto hat, hat es entweder bei Hayes oder er sollte. Wer in Dukes ein Auto loswerden will — auch.
+
+---
+
+## Hayes Tuning
+
+In jeder Stadt gibt es eine Werkstatt, in die man sein Auto bringt, wenn man nicht möchte, dass jemand fragt, warum.
+
+Hayes Tuning ist die größte Auto-Werkstatt Liberty Citys, Hauptsitz in Dukes (zwei Hallen, ein eigener Hof, eine Lackiererei) und einer Filiale in Algonquin (für die Premium-Klientel direkt am Showroom-Distrikt). Offiziell: Wartung, Reparatur, Tuning, Lackierung, Reifen-Service. Auf einem Schild draußen steht „Family Owned Since 1978". Das ist wahr.
+
+Inoffiziell: Hayes ist der erste Anruf für Crews, die ein Fahrzeug *anpassen* lassen wollen — versteckte Fächer, falsche Bodenplatten, gefälschte VIN-Nummern, Lacke, die in keinem Service-Vertrag stehen. Hayes hat eine direkte Verbindung zu Grotti Automobile (familiär — Hayes-Sohn ist Grotti-Service-Chef-Bruder) und zu ACLC Abschlepp (geschäftlich — was über ACLC verschwindet, taucht manchmal bei Hayes wieder auf, mit neuen Papieren). Wolves nutzen Hayes regelmäßig für Logistik-Fahrzeuge. Mafia ebenso, aber leiser.
+
+Der Owner — Knox „Knuckles" Hayes, Mitte fünfzig, ehemaliger Drag-Race-Champion, immer in Werkstattoverall mit Logo am Rücken — hat die Werkstatt von seinem Vater geerbt und in zwanzig Jahren um das Vierfache erweitert. Er hat zwei Söhne, beide arbeiten mit. Er hat eine Frau, die das Büro führt. Und er hat einen Spitznamen, der von einer Geschichte aus seinen Drag-Race-Tagen kommt, über die er nie spricht.
+
+> *„Ein Auto ist Charakter. Manchmal muss man den Charakter austauschen."*
+
+### 🏛️ Struktur & Personal
+
+🔱 **Owner** (Knox „Knuckles" Hayes) — letzte Stimme, persönlich an heiklen Aufträgen.
+🔸 **Shop Manager** — Tagesgeschäft, Auftrags-Annahme.
+🔹 **Senior Mechaniker** — vier, je auf eigenes Fachgebiet spezialisiert (Motor, Karosserie, Elektronik, Lackierung).
+▫️ **Mechaniker** — Vollzeit-Team, ca. fünfzehn Mann.
+🔻 **Lehrlinge** — drei laufende Ausbildungsverhältnisse.
+
+### 🗺️ Standort & Einfluss
+
+📍 Hauptsitz: Dukes, an den Ostbahn-Gleisen — zwei Hallen, eigener Hof, Lackiererei
+📍 Filiale: Algonquin, in Showroom-Nähe (Premium-Service)
+📍 Verbindungsachse zu Grotti (familiär) und ACLC (geschäftlich)
+
+### 💰 Business während des Events
+
+❗ Diese Info muss IC herausgefunden werden.

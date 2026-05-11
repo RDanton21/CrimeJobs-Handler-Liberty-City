@@ -41,9 +41,12 @@ TARGET_CREW3_NAME = "Asiatische Yakuza"
 
 # Mapping: Crew-ID -> (Substring im "## "-Header der Story-Sektion, Stadtteil-Datei)
 # Reihenfolge entspricht den DB-IDs aus der initialen Erkundung.
+# Fuer Firmen wird die ID None gesetzt — sie werden bei Bedarf auto-angelegt
+# und ihre tatsaechliche ID wird zur Laufzeit ueber den Crew-Namen aufgeloest.
 # ----------------------------------------------------------------------------
-CREW_STORY_MAP: list[tuple[int, str, str]] = [
+CREW_STORY_MAP: list[tuple[int | None, str, str]] = [
     # (id, header_substring, district_file)
+    # --- 21 Crime-Crews mit fixen IDs ---
     (1,  "AOD MC",                     "algonquin"),
     (2,  "The Harlem Vipers",          "algonquin"),
     (3,  "Asiatische Yakuza",          "algonquin"),
@@ -65,6 +68,49 @@ CREW_STORY_MAP: list[tuple[int, str, str]] = [
     (19, "Spanish Lords",              "dukes"),
     (20, "Eastline Wolves",            "dukes"),
     (21, "Midtown 49ers",              "dukes"),
+    # --- 13 Zivile Firmen (ID per Auto-Increment beim Anlegen) ---
+    (None, "Diner",                    "algonquin"),
+    (None, "Superstar Cafe",           "algonquin"),
+    (None, "Wigwam Burger",            "algonquin"),
+    (None, "Grotti Automobile",        "algonquin"),
+    (None, "LCPD",                     "algonquin"),
+    (None, "LCFD",                     "algonquin"),
+    (None, "LCMD",                     "algonquin"),
+    (None, "ACLC Abschlepp Service",   "algonquin"),
+    (None, "DoJ",                      "algonquin"),
+    (None, "Taxi",                     "broker"),
+    (None, "Pawn Shop",                "broker"),
+    (None, "Triangle Club",            "bohan"),
+    (None, "Hayes Tuning",             "dukes"),
+]
+
+# Auto-Create-Liste fuer Firmen, die noch nicht in der DB existieren.
+# Beim Lauf wird gepueft, ob eine Crew mit diesem Namen existiert. Falls nicht,
+# wird sie angelegt mit dem hier definierten Stadtteil + Farbe (Stadtteil-Default).
+# Discord-Channel-IDs bleiben leer — User traegt sie via Dashboard nach.
+DISTRICT_COLOR_DEFAULT = {
+    "Algonquin":     "#b91c1c",
+    "Bohan":         "#ffffff",
+    "Broker":        "#ff00bb",
+    "Colony Island": "#001eff",
+    "Dukes":         "#00fffb",
+}
+
+FIRMS_TO_CREATE: list[tuple[str, str]] = [
+    # (crew_name, district)
+    ("Diner",                    "Algonquin"),
+    ("Superstar Cafe",           "Algonquin"),
+    ("Wigwam Burger",            "Algonquin"),
+    ("Grotti Automobile",        "Algonquin"),
+    ("LCPD",                     "Algonquin"),
+    ("LCFD",                     "Algonquin"),
+    ("LCMD",                     "Algonquin"),
+    ("ACLC Abschlepp Service",   "Algonquin"),
+    ("DoJ",                      "Algonquin"),
+    ("Taxi",                     "Broker"),
+    ("Pawn Shop",                "Broker"),
+    ("Triangle Club",            "Bohan"),
+    ("Hayes Tuning",             "Dukes"),
 ]
 
 # Beziehungen: (crew_a_id, crew_b_id, relation_type, notes)
@@ -210,6 +256,152 @@ RELATIONS: list[tuple[int, int, RelationType, str]] = [
 ]
 
 
+# Beziehungen, in denen mindestens eine Seite eine Firma ist (deren ID erst zur
+# Laufzeit feststeht). Tupel: (crew_a_NAME, crew_b_NAME, relation_type, notes).
+# Reihenfolge intern egal — die Logik sortiert per ID, sodass crew_a_id < crew_b_id.
+FIRM_RELATIONS: list[tuple[str, str, RelationType, str]] = [
+    # --- LCPD ---
+    ("LCPD", "Italienische Mafia", RelationType.HOSTILE,
+     "Auf dem Papier Hauptziel der LCPD-Ermittlungen. In der Praxis eine ueber Jahrzehnte "
+     "gewachsene Beziehung mit eigenen Spielregeln. Iron Bill weiss, dass er die Familie "
+     "nicht zerschlagen kann — er kann sie nur in Schach halten."),
+    ("LCPD", "Asiatische Yakuza", RelationType.HOSTILE,
+     "Distanzierte Feindschaft. Tanaka redet nicht mit Polizei, LCPD ermittelt nur, wenn "
+     "etwas oeffentlich passiert. Beide leben damit."),
+    ("LCPD", "Russian Mafia", RelationType.HOSTILE,
+     "Volkov ist auf jeder LCPD-Watchlist seit fuenfzehn Jahren. Beweise: keine."),
+    ("LCPD", "Eastline Wolves", RelationType.HOSTILE,
+     "Streifen meiden den Osten Dukes' nicht — aber sie wissen, wo sie nicht ohne "
+     "Backup hinfahren."),
+    ("LCPD", "Dukes Latin Kings", RelationType.HOSTILE,
+     "El Padre wird seit Jahren observiert. Drei Versuche, Beweise zu sammeln — alle "
+     "gescheitert."),
+    ("LCPD", "LOST MC", RelationType.HOSTILE,
+     "Bohan Charter: dauerhafter Reibungspunkt. Razzien an der West-Bohan-Bridge sind "
+     "Routine geworden, ohne Ergebnis."),
+    ("LCPD", "Blackline Security", RelationType.BUSINESS,
+     "Privatsicherheit mit Lizenz — LCPD nutzt Blackline-Operatives gelegentlich als "
+     "Verstaerkung in Colony Island."),
+    ("LCPD", "Blue Union", RelationType.HOSTILE,
+     "Konkurrenz um die Polizei-Rolle in Bohan. LCPD sieht Blue Union als das, was sie "
+     "selbst nicht sein duerfen — und genau deshalb sie als Bedrohung."),
+
+    # --- DoJ ---
+    ("DoJ", "Italienische Mafia", RelationType.HOSTILE,
+     "Drei Senior Prosecutors arbeiten an der Mafia. Don Manschetti hat drei Anwaelte, "
+     "die zur DoJ-Crew genauso lang im Verfahren sind."),
+    ("DoJ", "Russian Mafia", RelationType.HOSTILE,
+     "Whitfield hat in den letzten zwei Jahren zwei Bratva-Lieutenants angeklagt. Beide "
+     "wurden freigesprochen. Er versucht es erneut."),
+    ("DoJ", "Eastline Wolves", RelationType.HOSTILE,
+     "Schwer fassbar. Wolves bewegen sich in Strukturen, fuer die das US-amerikanische "
+     "Strafrecht nicht gemacht ist. Whitfield arbeitet daran."),
+    ("DoJ", "Dukes Latin Kings", RelationType.HOSTILE,
+     "Lange Akte, wenige Verurteilungen. Die Latin Kings haben ihre eigene juristische "
+     "Verteidigungslinie — und sie funktioniert."),
+
+    # --- Diner ---
+    ("Diner", "Italienische Mafia", RelationType.BUSINESS,
+     "Klassischer Treffpunkt. Die Manschettis haben hier seit zwei Generationen einen "
+     "Tisch, der nie ohne Reservierung besetzt wird."),
+    ("Diner", "LCPD", RelationType.NEUTRAL,
+     "Cops fruehstuecken hier vor Schicht. Frankie kennt jeden, niemand redet mit jemand "
+     "anderem ueber den anderen."),
+
+    # --- Triangle Club ---
+    ("Triangle Club", "Bohan Sequidors", RelationType.BUSINESS,
+     "Sequidors sind Stammgaeste, La Loba hat einen festen Tisch im zweiten Stock. "
+     "Triangle bekommt dafuer 'Schutz' fuer das Gelaende."),
+    ("Triangle Club", "Los Aztecas", RelationType.BUSINESS,
+     "Aztecas-Mitglieder treten regelmaessig auf — eigene Hip-Hop-Acts, gelegentlich "
+     "Reggaeton. Cruz Alvarez kommt zu jedem zweiten Auftritt."),
+    ("Triangle Club", "LOST MC", RelationType.NEUTRAL,
+     "MC-Brueder kommen rein wenn die Tuersteher es erlauben. Bisher hat es funktioniert."),
+
+    # --- Pawn Shop (Three Coins) ---
+    ("Pawn Shop", "Jamaikanische Yardis", RelationType.BUSINESS,
+     "Yardis bringen regelmaessig Sound-Equipment und Schmuck. Saul kennt Selecta seit "
+     "zwanzig Jahren."),
+    ("Pawn Shop", "The Fireflys", RelationType.BUSINESS,
+     "DJ-Equipment, Tontechnik, gelegentlich auch Fundsachen aus Pop-Up-Locations. "
+     "Phantom verhandelt persoenlich, wenn es um Markeninstrumente geht."),
+    ("Pawn Shop", "Russian Mafia", RelationType.BUSINESS,
+     "Bratva nutzt Three Coins gelegentlich als Zwischenlager fuer Dinge, die nicht "
+     "schnell verkauft werden sollen — gegen Lagergebuehr."),
+
+    # --- Hayes Tuning ---
+    ("Hayes Tuning", "Eastline Wolves", RelationType.BUSINESS,
+     "Wolves lassen ihre Logistik-Fahrzeuge bei Hayes warten und 'anpassen'. Knuckles "
+     "kennt Volka persoenlich — eine Art Geschaeftsfreundschaft."),
+    ("Hayes Tuning", "Italienische Mafia", RelationType.BUSINESS,
+     "Manschetti-Wagen, die nicht in der offiziellen Werkstatt der Familie betreut "
+     "werden, kommen zu Hayes. Diskretion ohne Worte."),
+    ("Hayes Tuning", "Broker Avenue Lords", RelationType.BUSINESS,
+     "Avenue-Lords-Fuhrpark wird bei Hayes optisch und technisch aufgewertet. Royale "
+     "schickt regelmaessig drei Wagen pro Monat."),
+    ("Hayes Tuning", "Grotti Automobile", RelationType.BUSINESS,
+     "Familienverbindung: Hayes-Sohn ist Service-Director-Bruder bei Grotti. "
+     "Premium-Modifikationen werden ueber diese Schiene abgewickelt."),
+    ("Hayes Tuning", "ACLC Abschlepp Service", RelationType.BUSINESS,
+     "ACLC liefert Fahrzeuge, die 'verloren gegangen' sind — Hayes baut sie um, "
+     "neue Papiere kommen aus dritter Hand."),
+
+    # --- Grotti Automobile ---
+    ("Grotti Automobile", "Italienische Mafia", RelationType.BUSINESS,
+     "Carbones — Manschettis — haben mehrere Grottis in der Garage. Carlo Bertolini "
+     "verhandelt jeden Verkauf persoenlich mit dem Don."),
+    ("Grotti Automobile", "Russian Mafia", RelationType.BUSINESS,
+     "Volkov hat einen Grotti, der nicht zugelassen ist. Carlo wusste es, als er ihn "
+     "verkaufte. Beide haben es nie ausgesprochen."),
+
+    # --- Taxi (Liberty Cab) ---
+    ("Taxi", "LCPD", RelationType.BUSINESS,
+     "Vertrag ueber 'informelle Zusammenarbeit'. Fahrer melden Auffaelligkeiten, wenn "
+     "sie wollen. Frank haelt sich aus dem Inhalt der Meldungen heraus."),
+    ("Taxi", "Italienische Mafia", RelationType.BUSINESS,
+     "Bestimmte Fahrer fahren bestimmte Kunden. Die Familie kennt die Spitznamen. "
+     "Trinkgeld ist Code."),
+
+    # --- Wigwam Burger ---
+    ("Wigwam Burger", "Money over Bitches", RelationType.BUSINESS,
+     "Wigwam-Lieferketten sind die schnellste Verteilung in Algonquin und Dukes. MOB "
+     "nutzt das. Joe Crow weiss es, kassiert die Provision, schweigt."),
+    ("Wigwam Burger", "The Harlem Vipers", RelationType.BUSINESS,
+     "Vipers haben eine 'Vereinbarung' mit Wigwam fuer eine bestimmte Lieferschiene. "
+     "Wer es genau weiss, sitzt nicht am Tisch."),
+    ("Wigwam Burger", "The Fireflys", RelationType.BUSINESS,
+     "Fireflys ordern Wigwam fuer ihre Pop-Up-Raves. Preise verhandelt Phantom selbst."),
+
+    # --- Superstar Cafe ---
+    ("Superstar Cafe", "Italienische Mafia", RelationType.BUSINESS,
+     "Don Manschetti hat einen Stammplatz im hinteren Bereich. Lorenz weiss, welche "
+     "Tische der Don nicht hoeren will."),
+
+    # --- LCMD ---
+    ("LCMD", "Italienische Mafia", RelationType.BUSINESS,
+     "Diskretions-Kultur: Schussverletzungen aus dem Mafia-Umfeld werden behandelt, "
+     "Meldung erfolgt, wenn es nicht anders geht. Doc Vance haelt die Linie."),
+    ("LCMD", "Russian Mafia", RelationType.BUSINESS,
+     "Bratva-Maenner kommen mit gefaelschten Versicherungen. Niemand fragt zwei Mal."),
+    ("LCMD", "LOST MC", RelationType.BUSINESS,
+     "MC-Brueder kommen oft mit Verletzungen, die nicht zur Geschichte passen. LCMD "
+     "behandelt — und schweigt."),
+
+    # --- ACLC ---
+    ("ACLC Abschlepp Service", "LCPD", RelationType.BUSINESS,
+     "Offizieller Vertragspartner fuer Beschlagnahmungen. Mike Crusher weiss, welche "
+     "Fahrzeuge nicht im offiziellen Inventar landen sollen."),
+
+    # --- LCFD ---
+    ("LCFD", "Italienische Mafia", RelationType.NEUTRAL,
+     "Neutraler Boden seit dem Mafia-Krieg der Achtziger. Big Sean haelt den Frieden "
+     "mit allen Crews — und alle Crews wissen es."),
+    ("LCFD", "Russian Mafia", RelationType.NEUTRAL,
+     "Wenn ein Bratva-Lager brennt, kommen die Feuerwehrleute. Nichts davon erscheint "
+     "in einem Bericht, der jemandem schadet."),
+]
+
+
 # ----------------------------------------------------------------------------
 # Story-Extraktion aus Markdown
 # ----------------------------------------------------------------------------
@@ -251,10 +443,39 @@ async def run_seed(dry_run: bool, force: bool, no_rename: bool) -> None:
         # 1. Crews laden
         result = await session.execute(select(Crew).order_by(Crew.id))
         crews_by_id: dict[int, Crew] = {c.id: c for c in result.scalars().all()}
+        crews_by_name: dict[str, Crew] = {c.name: c for c in crews_by_id.values()}
 
         print(f"\n=== {len(crews_by_id)} Crews in DB gefunden ===\n")
 
-        # 2. Crew-Umbenennung (Ziel: TARGET_CREW3_NAME)
+        # 2a. Auto-Create fuer Firmen, die noch nicht existieren
+        firms_created = 0
+        for firm_name, firm_district in FIRMS_TO_CREATE:
+            if firm_name in crews_by_name:
+                continue
+            color = DISTRICT_COLOR_DEFAULT.get(firm_district, "#b91c1c")
+            print(f"[firm-new] Lege Firma an: '{firm_name}' (Stadtteil: {firm_district}, Farbe: {color})")
+            if not dry_run:
+                new_crew = Crew(
+                    name=firm_name,
+                    district=firm_district,
+                    color_hex=color,
+                    discord_channel_id="",
+                    info_channel_id="",
+                    story_background="",
+                )
+                session.add(new_crew)
+                firms_created += 1
+
+        if firms_created > 0:
+            # Flush: damit die neu erstellten Crews IDs vom Auto-Increment bekommen
+            await session.flush()
+            # Crews-Maps aktualisieren
+            result2 = await session.execute(select(Crew).order_by(Crew.id))
+            crews_by_id = {c.id: c for c in result2.scalars().all()}
+            crews_by_name = {c.name: c for c in crews_by_id.values()}
+            print(f"\n  -> {firms_created} Firmen angelegt, neue Total: {len(crews_by_id)} Crews\n")
+
+        # 2b. Crew-Umbenennung (Ziel: TARGET_CREW3_NAME)
         if not no_rename:
             crew3 = crews_by_id.get(3)
             if crew3 is None:
@@ -271,10 +492,29 @@ async def run_seed(dry_run: bool, force: bool, no_rename: bool) -> None:
         story_updates = 0
         story_skipped = 0
         for crew_id, header_sub, district in CREW_STORY_MAP:
-            crew = crews_by_id.get(crew_id)
-            if crew is None:
-                print(f"  WARN: Crew ID {crew_id} ('{header_sub}') nicht in DB.")
-                continue
+            # Firmen haben crew_id=None -> per Name aufloesen (Header-Substring == Crew-Name)
+            if crew_id is None:
+                crew = crews_by_name.get(header_sub)
+                if crew is None:
+                    if not dry_run:
+                        print(f"  WARN: Firma '{header_sub}' nicht in DB nach Auto-Create — Skript-Fehler?")
+                    else:
+                        # Im dry-run: Auto-Create wurde nur simuliert, also Crew nicht in DB.
+                        # Story-Update wird trotzdem geplant (mit Pseudo-ID).
+                        story = extract_story(district, header_sub)
+                        if story:
+                            print(f"  [dry/insert] (neue Firma) '{header_sub}' "
+                                  f"<- {len(story)} Zeichen aus {district}.md")
+                            story_updates += 1
+                    continue
+                resolved_id = crew.id
+            else:
+                crew = crews_by_id.get(crew_id)
+                if crew is None:
+                    print(f"  WARN: Crew ID {crew_id} ('{header_sub}') nicht in DB.")
+                    continue
+                resolved_id = crew_id
+
             story = extract_story(district, header_sub)
             if story is None:
                 print(f"  WARN: Keine Story-Sektion fuer '{header_sub}' in {district}.md gefunden.")
@@ -284,13 +524,13 @@ async def run_seed(dry_run: bool, force: bool, no_rename: bool) -> None:
             has_existing = bool(existing.strip())
 
             if has_existing and not force:
-                print(f"  [skip] ID {crew_id} '{crew.name}' hat bereits Story "
+                print(f"  [skip] ID {resolved_id} '{crew.name}' hat bereits Story "
                       f"({len(existing)} Zeichen) — --force zum Ueberschreiben.")
                 story_skipped += 1
                 continue
 
             action = "UPDATE" if has_existing else "INSERT"
-            print(f"  [{action.lower()}] ID {crew_id} '{crew.name}' "
+            print(f"  [{action.lower()}] ID {resolved_id} '{crew.name}' "
                   f"<- {len(story)} Zeichen aus {district}.md")
             if not dry_run:
                 crew.story_background = story
@@ -304,10 +544,29 @@ async def run_seed(dry_run: bool, force: bool, no_rename: bool) -> None:
             (r.crew_a_id, r.crew_b_id): r for r in existing_rows.scalars().all()
         }
 
+        # FIRM_RELATIONS per Name aufloesen und an RELATIONS anhaengen.
+        # Sortiere immer so, dass crew_a_id < crew_b_id (UniqueConstraint-Konvention).
+        resolved_firm_relations: list[tuple[int, int, RelationType, str]] = []
+        for name_a, name_b, rtype, notes in FIRM_RELATIONS:
+            crew_a = crews_by_name.get(name_a)
+            crew_b = crews_by_name.get(name_b)
+            if crew_a is None or crew_b is None:
+                if dry_run:
+                    # Im dry-run: Firmen sind noch nicht in DB, das ist erwartet.
+                    print(f"  [dry/firm-rel] {name_a} <-> {name_b} ({rtype.value}) — "
+                          "uebersprungen, Firma noch nicht in DB")
+                else:
+                    print(f"  WARN: Firmen-Beziehung {name_a!r}<->{name_b!r}: Crew(s) nicht in DB.")
+                continue
+            a, b = (crew_a.id, crew_b.id) if crew_a.id < crew_b.id else (crew_b.id, crew_a.id)
+            resolved_firm_relations.append((a, b, rtype, notes))
+
+        all_relations = list(RELATIONS) + resolved_firm_relations
+
         rel_inserts = 0
         rel_updates = 0
         rel_skipped = 0
-        for a_id, b_id, rtype, notes in RELATIONS:
+        for a_id, b_id, rtype, notes in all_relations:
             if a_id >= b_id:
                 print(f"  WARN: Relation ({a_id}, {b_id}) hat a_id >= b_id — bitte sortieren.")
                 continue
