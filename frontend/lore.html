@@ -94,13 +94,30 @@
     <!-- Tab 2: Gang-Stories -->
     <div x-show="tab === 'crews' && !loading" class="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
       <!-- Crew-Liste links, gruppiert nach Stadtteil -->
-      <aside class="bg-zinc-900 border border-zinc-800 rounded-lg p-3 h-fit lg:sticky lg:top-4 max-h-[80vh] overflow-y-auto">
-        <h2 class="text-sm font-semibold mb-3 text-zinc-400 uppercase tracking-wider">Fraktionen</h2>
+      <aside class="bg-zinc-900 border border-zinc-800 rounded-lg p-3 h-fit lg:sticky lg:top-4 max-h-[85vh] overflow-y-auto">
+        <h2 class="text-sm font-semibold mb-2 text-zinc-400 uppercase tracking-wider">Fraktionen</h2>
+
+        <!-- Suchfeld -->
+        <div class="relative mb-3">
+          <input type="text" x-model="crewSearch"
+                 placeholder="🔍 Suchen..."
+                 class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-1.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-red-700" />
+          <button x-show="crewSearch" @click="crewSearch = ''"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs"
+                  title="Suche zurücksetzen">✕</button>
+        </div>
+
+        <!-- Anzeige bei leerem Filter-Ergebnis -->
+        <div x-show="crewSearch && filteredCrewsTotal() === 0"
+             class="text-zinc-500 text-xs px-3 py-2 italic">
+          Keine Fraktion gefunden für „<span x-text="crewSearch"></span>"
+        </div>
+
         <template x-for="d in DISTRICT_ORDER" :key="d">
-          <div class="mb-3">
+          <div x-show="crewsByDistrictFiltered(d).length > 0" class="mb-3">
             <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1 px-3" x-text="d"></h3>
             <ul class="space-y-0.5">
-              <template x-for="crew in crewsByDistrict(d)" :key="crew.id">
+              <template x-for="crew in crewsByDistrictFiltered(d)" :key="crew.id">
                 <li>
                   <button @click="selectedCrewId = crew.id"
                           :class="selectedCrewId === crew.id ? 'bg-red-700 text-white' : 'hover:bg-zinc-800 text-zinc-300'"
@@ -131,6 +148,33 @@
             </div>
             <div x-show="selectedCrew().story_background?.trim()"
                  x-html="renderMd(selectedCrew().story_background)"></div>
+
+            <!-- Discord-Format zum Kopieren -->
+            <section x-show="discordParts(selectedCrew()).length > 0" class="mt-8 pt-6 border-t border-zinc-800 not-prose-lore">
+              <div class="flex items-center gap-3 mb-2">
+                <h3 class="text-lg font-semibold text-zinc-200 m-0">📋 Discord-Format zum Kopieren</h3>
+                <span class="text-xs text-zinc-500"
+                      x-text="(() => { const n = discordParts(selectedCrew()).length; return n === 1 ? '(1 Discord-Message)' : `(${n} Discord-Messages)`; })()"></span>
+              </div>
+              <p class="text-xs text-zinc-500 mb-4">
+                Pro Block einen Discord-Post. Bei mehreren Parts: nacheinander in den Channel posten — Discord rendert die Markdown-Formatierung (Header, Listen, Quotes) nach dem Posten.
+              </p>
+              <template x-for="(part, idx) in discordParts(selectedCrew())" :key="`${selectedCrewId}-${idx}`">
+                <div class="mb-4 bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden">
+                  <div class="flex items-center justify-between px-4 py-2 bg-zinc-900 border-b border-zinc-800">
+                    <span class="text-xs text-zinc-500 uppercase tracking-wider">
+                      Part <span x-text="idx + 1"></span> / <span x-text="discordParts(selectedCrew()).length"></span>
+                      · <span x-text="part.length"></span> Zeichen
+                    </span>
+                    <button @click="copyToClipboard(part, $event)"
+                            class="text-xs px-3 py-1 bg-zinc-700 hover:bg-zinc-600 rounded font-medium">
+                      📋 Kopieren
+                    </button>
+                  </div>
+                  <pre class="p-4 text-sm text-zinc-300 whitespace-pre-wrap font-sans m-0 max-h-96 overflow-y-auto" x-text="part"></pre>
+                </div>
+              </template>
+            </section>
           </article>
         </template>
         <div x-show="!selectedCrew()" class="text-zinc-500 text-sm py-12 text-center">

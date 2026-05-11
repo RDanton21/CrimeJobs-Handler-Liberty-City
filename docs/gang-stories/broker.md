@@ -2,7 +2,7 @@
 
 > Stadtteil-Atmosphäre: Backstein und Hafen, Werften und Hinterhöfe, billige Wohnungen und Ghettos. Broker ist Liberty Citys raueste und bodenständigste Adresse — hierher kommen die Einwanderer, die Straßenhändler, die Gangs. Politik geschieht über Broker hinweg, nicht in Broker. Hier regiert die Straße, nicht das Rathaus. Farbcode der Gangs: Magenta-Pink — eine Trotzfarbe, kein Glamour. Vollständige Stadtteil-Lore: [DISTRICTS.md](../DISTRICTS.md).
 >
-> **Machtverhältnisse 2026:** Russisch/Osteuropäisch (Bratva) **40 %** · Karibisch/Afroamerikanisch (Yardis) **20 %** · Moderne & Digitale (Lords/Kings/Fireflys) **20 %** · Alte italienische Mafia (Carbone-Außenposten) **10 %** · Sonstige/Korruption **10 %**.
+> **Machtverhältnisse 2026:** Russisch/Osteuropäisch (Bratva) **40 %** · Karibisch/Afroamerikanisch (Yardis) **20 %** · Moderne & Digitale (Lords/Kings/Fireflys) **20 %** · Alte italienische Mafia (Manschetti-Außenposten) **10 %** · Sonstige/Korruption **10 %**.
 
 ---
 
@@ -114,11 +114,11 @@ Sie haben keine Lust auf Krieg. Aber wer sie unterschätzt, lernt, dass eine Fam
 
 ---
 
-## Russian Mafia — Petrovsky Bratva
+## Russian Mafia — Asimov Bratva
 
 Wenn alle anderen Crews in Broker das Licht suchen, suchen die Russen den Schatten. Und im Schatten haben sie alles aufgebaut, was Broker heute ist.
 
-Die Petrovsky Bratva ist die größte Kraft in Broker — und in einem Stadtteil, der niemandem gehört, ist „die größte Kraft" mehr, als es in Algonquin oder Dukes je sein könnte. Vier von zehn Geschäften, die in Broker bewegt werden, bewegen sich mit dem Wissen der Bratva. Wer in den Hafen will, geht durch sie. Wer aus dem Hafen will, geht durch sie. Wer den Hafen umgehen will, lernt schnell, dass es keinen Weg gibt, der nicht doch durch sie führt.
+Die Asimov Bratva ist die größte Kraft in Broker — und in einem Stadtteil, der niemandem gehört, ist „die größte Kraft" mehr, als es in Algonquin oder Dukes je sein könnte. Vier von zehn Geschäften, die in Broker bewegt werden, bewegen sich mit dem Wissen der Bratva. Wer in den Hafen will, geht durch sie. Wer aus dem Hafen will, geht durch sie. Wer den Hafen umgehen will, lernt schnell, dass es keinen Weg gibt, der nicht doch durch sie führt.
 
 Die Bratva kam nach Liberty City, als die Mauer fiel und die alten Strukturen mit ihr. Sie haben sich nicht in Broker niedergelassen, weil es schön ist – sondern weil es funktioniert. Brokers Hafen, Brokers permanente Bewegung, Brokers Anonymität für jeden, der sich nicht erklären will. In zwei Jahrzehnten haben sie sich von einer Sauna in Nord-Broker bis in jeden Container, jeden Frachtbrief, jede Werft-Schicht eingeschrieben. Sie machen kein Aufsehen. Sie brauchen es nicht. Sie sind das Aufsehen.
 
@@ -181,6 +181,76 @@ Ihre Mother of the Swarm – Lila „Phantom" Okafor, Anfang dreißig, ehemalige
 📍 Café in der Nähe der Hive, das tagsüber existiert
 
 Sie kontrollieren nichts dauerhaft. Aber sie kontrollieren, wo Broker am nächsten Wochenende sein wird.
+
+### 💰 Business während des Events
+
+❗ Diese Info muss IC herausgefunden werden.
+
+---
+
+# ⚖️ Firmen & Zivile Akteure
+
+> Broker ist nicht nur Hafen und Untergrund. Broker ist auch Arbeit. Wer hier wohnt, fährt Taxi oder repariert es. Wer hier kauft, geht zum Pfandhaus. Die Firmen Brokers sind das, was die Stadt am Laufen hält — und gleichzeitig das, worüber alle Schmuggler-Geschichten laufen.
+
+---
+
+## Taxi — „Liberty Cab Co."
+
+Liberty Cab ist die größte Taxiflotte der Stadt. Sitz in Broker, Routen über alle fünf Stadtteile.
+
+Gegründet vor dreißig Jahren von einem polnischen Einwanderer, der mit einem einzigen Wagen anfing und über die Jahre eine Flotte von zweihundertfünfzig gelben Wagen aufbaute. Liberty Cab ist nicht romantisch — sie ist effizient. Vierundzwanzig Stunden Funk, drei Schichten, Dispatcher, die jeden Fahrer bei Spitznamen kennen. Wer in Liberty City ein Taxi ruft, bekommt mit hoher Wahrscheinlichkeit ein Liberty-Cab.
+
+Die andere Schicht: ein Taxi sieht alles. Es fährt die Mafia zu Beerdigungen, die Bratva zur Sauna, Studenten zu illegalen Raves der Fireflys, Touristen zu Pawn-Shops, in denen sie nicht hätten sein sollen. Liberty Cab hat einen Vertrag mit dem LCPD über „informelle Zusammenarbeit" — Fahrer melden Auffälligkeiten, wenn sie wollen. Manche wollen, manche nie. Es gibt eine ungeschriebene Regel: was im Wagen passiert, bleibt im Wagen, außer es betrifft Kinder. Dann ruft der Fahrer.
+
+Der Dispatcher und Owner — Frank „Dispatch" Kowalski, Anfang sechzig, immer mit Telefon am Ohr, immer mit einem Kaffee in der Hand — führt die Firma vom Hauptdepot in Broker aus. Er kennt jeden Stammfahrgast in der Stadt. Manche kennt er besser als ihre Ehefrauen.
+
+> *„Ein Taxi fährt nicht nur dahin, wo der Gast hin will. Es fährt durch alles, was der Gast nicht sehen will."*
+
+### 🏛️ Struktur & Personal
+
+🔱 **Owner & Chief Dispatcher** (Frank „Dispatch" Kowalski) — letzte Stimme.
+🔸 **Shift Dispatchers** — drei, je eine Schicht.
+🔹 **Senior Drivers** — die alten Hasen, dürfen die heiklen Touren.
+▫️ **Drivers** — über zweihundert, fest oder Schicht.
+🔻 **Mechaniker** — eigenes Werkstatt-Team in Broker.
+
+### 🗺️ Standort & Einfluss
+
+📍 Hauptdepot in Süd-Broker — Werkstatt + Dispatcher-Zentrale
+📍 Drei Übergabe-Stationen über die Stadt verteilt (Algonquin, Bohan, Dukes)
+📍 Taxiplätze stadtweit
+
+### 💰 Business während des Events
+
+❗ Diese Info muss IC herausgefunden werden.
+
+---
+
+## Pawn Shop — „Three Coins Pawn"
+
+In Broker gibt es zwölf Pfandhäuser. Three Coins ist das, an das man geht, wenn die anderen elf nein sagen.
+
+Eröffnet vor fünfzig Jahren von einer jüdischen Familie aus Osteuropa, übernommen vor zwanzig Jahren vom Sohn des Sohns, der das Geschäft erweitert hat — nicht nur Schmuck, Uhren, Werkzeug, sondern alles, was sich verkaufen lässt: Waffen (mit Lizenz), Elektronik, gelegentlich Kunst, manchmal etwas, was niemand fragt, woher es kommt. Der Laden ist nicht groß. Aber er hat einen Tresor im Keller, der größer ist als die Verkaufsfläche.
+
+Three Coins ist die größte Hehlerei-Adresse Brokers — offiziell ein lizenzierter Pfandbetrieb, inoffiziell die erste Anlaufstelle für Crews, die etwas loswerden müssen. Yardies bringen Sound-Equipment, Fireflys bringen DJ-Pulte, Bratva-Männer bringen Dinge, über die niemand spricht. Saul nimmt vieles. Was er nicht nimmt, erklärt er nicht.
+
+Der Owner — Saul „Three" Mendelson, Anfang sechzig, runde Brille, dünner Bart, immer am Schreibtisch hinter der Theke — ist der Mann, der im Viertel als „der mit den drei Münzen" bekannt ist. Drei Münzen, weil man drei Mal hingehen muss, bis er einem ein faires Angebot macht. Beim ersten Mal sagt er „nein". Beim zweiten Mal sagt er einen niedrigen Preis. Beim dritten Mal sagt er den fairen.
+
+> *„Alles hat einen Preis. Aber nicht jeder Preis ist der erste."*
+
+### 🏛️ Struktur & Personal
+
+🔱 **Owner** (Saul „Three" Mendelson) — letzte Stimme, alle Geschäfte über ihn.
+🔸 **Backroom Specialist** — hinten im Laden, schätzt Spezialware.
+🔹 **Counter Clerks** — zwei, kennen die Stammkunden.
+▫️ **Security** — ein bewaffneter Türsteher tagsüber, zwei nachts.
+🔻 **Apprentice** — Saul's Neffe, lernt das Geschäft.
+
+### 🗺️ Standort & Einfluss
+
+📍 Laden in Süd-Broker, drei Blocks vom Hafen
+📍 Tresor im Keller, eigener Aufzug
+📍 Hinterer Eingang über einen Innenhof — Lieferungen ohne Schaufenster
 
 ### 💰 Business während des Events
 

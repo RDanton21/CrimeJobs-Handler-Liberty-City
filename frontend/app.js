@@ -889,6 +889,7 @@ function lorePage() {
     // Crews-Tab
     crews: [],
     selectedCrewId: null,
+    crewSearch: "",
 
     async init() {
       // marked-Optionen sicher setzen (Lib via CDN in lore.html geladen)
@@ -919,6 +920,19 @@ function lorePage() {
       return this.crews.filter(c => (c.district || "") === districtName);
     },
 
+    crewsByDistrictFiltered(districtName) {
+      const search = (this.crewSearch || "").trim().toLowerCase();
+      const list = this.crewsByDistrict(districtName);
+      if (!search) return list;
+      return list.filter(c => (c.name || "").toLowerCase().includes(search));
+    },
+
+    filteredCrewsTotal() {
+      const search = (this.crewSearch || "").trim().toLowerCase();
+      if (!search) return this.crews.length;
+      return this.crews.filter(c => (c.name || "").toLowerCase().includes(search)).length;
+    },
+
     selectedCrew() {
       return this.crews.find(c => c.id === this.selectedCrewId) || null;
     },
@@ -932,6 +946,114 @@ function lorePage() {
       const div = document.createElement("div");
       div.innerText = md;
       return "<pre>" + div.innerHTML + "</pre>";
+    },
+
+    // Convert crew.story_background -> Array von Discord-tauglichen Text-Bloecken,
+    // jeder <= ~1900 Zeichen (Discord-Limit ist 2000, kleine Reserve).
+    // Splittet bevorzugt an Sektionsgrenzen (---), dann an Sub-Header (### / ##),
+    // dann an Absaetzen, im Notfall an Wortgrenzen.
+    discordParts(crew) {
+      const md = crew && crew.story_background ? crew.story_background : "";
+      if (!md.trim()) return [];
+      const cleaned = this._discordClean(md);
+      return this._splitForDiscord(cleaned, 1900);
+    },
+
+    _discordClean(md) {
+      // Discord-Markdown ist sehr aehnlich zu Standard-MD, aber:
+      // - Tabellen werden NICHT gerendert (haben wir keine in den Stories)
+      // - Horizontale Trennlinien (---) rendert Discord NICHT — wir machen
+      //   eine optische Pause draus.
+      // - Mehrere Leerzeilen reduzieren wir auf max. eine.
+      let s = md.replace(/\r\n/g, "\n");
+      s = s.replace(/^\s*---\s*$/gm, "─────────────────────");
+      s = s.replace(/\n{3,}/g, "\n\n");
+      return s.trim();
+    },
+
+    _splitForDiscord(text, maxLen) {
+      if (text.length <= maxLen) return [text];
+      const parts = [];
+      const sepLine = "─────────────────────";
+      let blocks = text.split("\n" + sepLine + "\n");
+      blocks = blocks.map(b => b.trim()).filter(Boolean);
+      for (const block of blocks) {
+        if (block.length <= maxLen) {
+          parts.push(block);
+          continue;
+        }
+        // Sub-Header oder Header-Splits
+        const headerSplit = block.split(/\n(?=#{1,3} )/);
+        let buf = "";
+        for (const seg of headerSplit) {
+          const candidate = buf ? buf + "\n\n" + seg : seg;
+          if (candidate.length <= maxLen) {
+            buf = candidate;
+          } else {
+            if (buf) parts.push(buf);
+            if (seg.length <= maxLen) {
+              buf = seg;
+            } else {
+              const paraParts = this._splitByParagraphs(seg, maxLen);
+              for (let i = 0; i < paraParts.length - 1; i++) parts.push(paraParts[i]);
+              buf = paraParts[paraParts.length - 1];
+            }
+          }
+        }
+        if (buf) parts.push(buf);
+      }
+      return parts.map(p => p.trim()).filter(Boolean);
+    },
+
+    _splitByParagraphs(text, maxLen) {
+      const paras = text.split(/\n\n+/);
+      const out = [];
+      let buf = "";
+      for (const p of paras) {
+        const candidate = buf ? buf + "\n\n" + p : p;
+        if (candidate.length <= maxLen) {
+          buf = candidate;
+        } else {
+          if (buf) out.push(buf);
+          if (p.length <= maxLen) {
+            buf = p;
+          } else {
+            const words = p.split(/\s+/);
+            buf = "";
+            for (const w of words) {
+              const cand2 = buf ? buf + " " + w : w;
+              if (cand2.length <= maxLen) {
+                buf = cand2;
+              } else {
+                if (buf) out.push(buf);
+                buf = w;
+              }
+            }
+          }
+        }
+      }
+      if (buf) out.push(buf);
+      return out;
+    },
+
+    async copyToClipboard(text, evt) {
+      try {
+        await navigator.clipboard.writeText(text);
+        const btn = evt && evt.target;
+        if (btn) {
+          const orig = btn.textContent;
+          btn.textContent = "✓ Kopiert!";
+          btn.classList.add("bg-green-700");
+          btn.classList.remove("bg-zinc-700", "hover:bg-zinc-600");
+          setTimeout(() => {
+            btn.textContent = orig;
+            btn.classList.remove("bg-green-700");
+            btn.classList.add("bg-zinc-700", "hover:bg-zinc-600");
+          }, 1500);
+        }
+      } catch (e) {
+        alert("Kopieren fehlgeschlagen: " + e.message);
+      }
     },
   };
 }

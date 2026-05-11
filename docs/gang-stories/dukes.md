@@ -2,7 +2,7 @@
 
 > Stadtteil-Atmosphäre: Vorstadt, Garage, Flughafen-Hum. Östlichster Bezirk Liberty Citys — ruhige Wohnviertel, Industrieflächen, große Transportachsen, und über allem der **Francis Underwood International Airport**. Tagsüber arbeitende Mittelschicht. Nachts Transit-Unterwelt der ganzen Stadt: Schmuggel, Korruption, Drogenrouten, Verbindungen nach Algonquin, die kürzer sind als die Karte vermuten lässt. Wer das Vorstadt-Bild glaubt, hat nicht hingesehen. Farbcode der Gangs: Cyan und Türkis. Vollständige Stadtteil-Lore: [DISTRICTS.md](../DISTRICTS.md).
 >
-> **Machtverhältnisse 2026:** Osteuropäisch/Kaukasisch (Eastline Wolves) **35 %** · Street Crews/Gangs (Latin Kings · Spanish Lords · MOB) **20 %** · Italienische Mafia (Carbone-Außenposten) **20 %** · Spezialisierte Organisationen (49ers) **15 %** · Sonstige/Korruption (Flughafenbeamte, Spediteure) **10 %**.
+> **Machtverhältnisse 2026:** Osteuropäisch/Kaukasisch (Eastline Wolves) **35 %** · Street Crews/Gangs (Latin Kings · Spanish Lords · MOB) **20 %** · Italienische Mafia (Manschetti-Außenposten) **20 %** · Spezialisierte Organisationen (49ers) **15 %** · Sonstige/Korruption (Flughafenbeamte, Spediteure) **10 %**.
 
 ---
 
@@ -52,7 +52,7 @@ Sie tragen Türkis und Schwarz, oft mit kaukasischen Mustern als Stickerei oder 
 
 Sie sind die Crew der Stadtgrenze: Brachen, Bahngleise, Industriehallen, Logistikzentren, Lagerflächen, Wege, die niemand sonst nimmt. Und über die Stadtgrenze hinaus: die Zufahrten zum **Francis Underwood International Airport**. Wer in Dukes einen Container vom Flughafen wegbringen will, ohne dass jemand nachfragt, fährt mit den Wolves — oder gar nicht.
 
-Mit der **Petrovsky Bratva** in Broker haben die Wolves einen kalten gegenseitigen Respekt. Die Wolves sind kein Bratva-Charter, sondern eine eigenständige Familie. Volkov und Pakhan Volkov (keine Verwandtschaft, eine Frage, die schon mal blutig endete) treffen sich nie persönlich — aber sie respektieren die Reviere des anderen, und beide wissen, dass sich eine osteuropäische Front in Liberty City keiner von ihnen leisten kann.
+Mit der **Asimov Bratva** in Broker haben die Wolves einen kalten gegenseitigen Respekt. Die Wolves sind kein Bratva-Charter, sondern eine eigenständige Familie. Volkov und Pakhan Volkov (keine Verwandtschaft, eine Frage, die schon mal blutig endete) treffen sich nie persönlich — aber sie respektieren die Reviere des anderen, und beide wissen, dass sich eine osteuropäische Front in Liberty City keiner von ihnen leisten kann.
 
 Ihre Alpha – Kira „Volka" Volkov, Mitte dreißig, Tochter eines kaukasischen Vaters und einer russischen Mutter, in Dukes geboren – führt die Crew aus einer Werkstatthalle an den Ostbahn-Gleisen. Sie spricht selten viel, lacht selten laut, und niemand testet sie zwei Mal.
 
@@ -186,6 +186,44 @@ Ihr Supreme – Rafael „Don Rafa" Mendoza, Mitte fünfzig, leiser als der Inca
 📍 Sportplatz an der Schule — Rekrutierung und Präsenz
 
 Sie kontrollieren Reviere, in denen die Kings nicht sind, und sie respektieren – meistens – die Reviere, in denen die Kings sind. Was zwischen beiden Crews liegt, ist seit Jahren in der Schwebe und kann jederzeit umkippen.
+
+### 💰 Business während des Events
+
+❗ Diese Info muss IC herausgefunden werden.
+
+---
+
+# ⚖️ Firmen & Zivile Akteure
+
+> Dukes ist die Werkstatt der Stadt. Wer hier arbeitet, baut, repariert, modifiziert. Wer in Dukes ein Auto hat, hat es entweder bei Hayes oder er sollte. Wer in Dukes ein Auto loswerden will — auch.
+
+---
+
+## Hayes Tuning
+
+In jeder Stadt gibt es eine Werkstatt, in die man sein Auto bringt, wenn man nicht möchte, dass jemand fragt, warum.
+
+Hayes Tuning ist die größte Auto-Werkstatt Liberty Citys, Hauptsitz in Dukes (zwei Hallen, ein eigener Hof, eine Lackiererei) und einer Filiale in Algonquin (für die Premium-Klientel direkt am Showroom-Distrikt). Offiziell: Wartung, Reparatur, Tuning, Lackierung, Reifen-Service. Auf einem Schild draußen steht „Family Owned Since 1978". Das ist wahr.
+
+Inoffiziell: Hayes ist der erste Anruf für Crews, die ein Fahrzeug *anpassen* lassen wollen — versteckte Fächer, falsche Bodenplatten, gefälschte VIN-Nummern, Lacke, die in keinem Service-Vertrag stehen. Hayes hat eine direkte Verbindung zu Grotti Automobile (familiär — Hayes-Sohn ist Grotti-Service-Chef-Bruder) und zu ACLC Abschlepp (geschäftlich — was über ACLC verschwindet, taucht manchmal bei Hayes wieder auf, mit neuen Papieren). Wolves nutzen Hayes regelmäßig für Logistik-Fahrzeuge. Mafia ebenso, aber leiser.
+
+Der Owner — Knox „Knuckles" Hayes, Mitte fünfzig, ehemaliger Drag-Race-Champion, immer in Werkstattoverall mit Logo am Rücken — hat die Werkstatt von seinem Vater geerbt und in zwanzig Jahren um das Vierfache erweitert. Er hat zwei Söhne, beide arbeiten mit. Er hat eine Frau, die das Büro führt. Und er hat einen Spitznamen, der von einer Geschichte aus seinen Drag-Race-Tagen kommt, über die er nie spricht.
+
+> *„Ein Auto ist Charakter. Manchmal muss man den Charakter austauschen."*
+
+### 🏛️ Struktur & Personal
+
+🔱 **Owner** (Knox „Knuckles" Hayes) — letzte Stimme, persönlich an heiklen Aufträgen.
+🔸 **Shop Manager** — Tagesgeschäft, Auftrags-Annahme.
+🔹 **Senior Mechaniker** — vier, je auf eigenes Fachgebiet spezialisiert (Motor, Karosserie, Elektronik, Lackierung).
+▫️ **Mechaniker** — Vollzeit-Team, ca. fünfzehn Mann.
+🔻 **Lehrlinge** — drei laufende Ausbildungsverhältnisse.
+
+### 🗺️ Standort & Einfluss
+
+📍 Hauptsitz: Dukes, an den Ostbahn-Gleisen — zwei Hallen, eigener Hof, Lackiererei
+📍 Filiale: Algonquin, in Showroom-Nähe (Premium-Service)
+📍 Verbindungsachse zu Grotti (familiär) und ACLC (geschäftlich)
 
 ### 💰 Business während des Events
 

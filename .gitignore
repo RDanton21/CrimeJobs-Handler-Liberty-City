@@ -37,3 +37,6 @@ desktop.ini
 # Logs
 *.log
 logs/
+
+# Claude Code Worktrees + Plans (lokale Arbeitskopien, gehoeren nicht ins Repo)
+.claude/

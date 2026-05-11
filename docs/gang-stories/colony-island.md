@@ -118,7 +118,7 @@ Sie kontrollieren nicht das Wasser. Sie kontrollieren das Gefühl, dass man auf 
 
 ## Bratva-Außenposten *(kein eigener Crew-Eintrag — operativ unter Russian Mafia / Broker geführt)*
 
-Auf Colony Island hat die **Petrovsky Bratva** (Stammsitz: Broker, ID 13) einen ständigen Außenposten. Kein Charter, kein Pakhan vor Ort — eine kleine Operativ-Zelle, die unter direkter Aufsicht aus der *Tetka Marina* in Nord-Broker steht. Sie kontrollieren etwa zehn Prozent der Insel, und ihre Aufgabe ist denkbar einfach: alles, was die Bratva durch den Hafen bewegt und über Colony Island verschwinden lassen will, wird hier durchgereicht.
+Auf Colony Island hat die **Asimov Bratva** (Stammsitz: Broker, ID 13) einen ständigen Außenposten. Kein Charter, kein Pakhan vor Ort — eine kleine Operativ-Zelle, die unter direkter Aufsicht aus der *Tetka Marina* in Nord-Broker steht. Sie kontrollieren etwa zehn Prozent der Insel, und ihre Aufgabe ist denkbar einfach: alles, was die Bratva durch den Hafen bewegt und über Colony Island verschwinden lassen will, wird hier durchgereicht.
 
 Sie arbeiten Hand in Hand mit den Independents (geschäftliche Übereinkunft) und in offener Distanz zu den Pirates (die mehrfach Bratva-Lieferungen geentert haben — ein Konflikt, der noch auf seine Eskalation wartet).
 
