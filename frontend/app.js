@@ -889,6 +889,7 @@ function lorePage() {
     // Crews-Tab
     crews: [],
     selectedCrewId: null,
+    crewSearch: "",
 
     async init() {
       // marked-Optionen sicher setzen (Lib via CDN in lore.html geladen)
@@ -917,6 +918,19 @@ function lorePage() {
 
     crewsByDistrict(districtName) {
       return this.crews.filter(c => (c.district || "") === districtName);
+    },
+
+    crewsByDistrictFiltered(districtName) {
+      const search = (this.crewSearch || "").trim().toLowerCase();
+      const list = this.crewsByDistrict(districtName);
+      if (!search) return list;
+      return list.filter(c => (c.name || "").toLowerCase().includes(search));
+    },
+
+    filteredCrewsTotal() {
+      const search = (this.crewSearch || "").trim().toLowerCase();
+      if (!search) return this.crews.length;
+      return this.crews.filter(c => (c.name || "").toLowerCase().includes(search)).length;
     },
 
     selectedCrew() {
