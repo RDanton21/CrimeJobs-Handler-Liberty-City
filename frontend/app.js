@@ -873,3 +873,65 @@ function settingsPage() {
     },
   };
 }
+
+// ---------------------------------------------------------------------------
+// Lore-Seite (Stadtteile + Gang-Stories)
+// ---------------------------------------------------------------------------
+function lorePage() {
+  return {
+    DISTRICT_ORDER: ["Algonquin", "Bohan", "Broker", "Colony Island", "Dukes"],
+    tab: "districts",
+    loading: true,
+    error: "",
+    // Districts-Tab
+    districts: [],
+    selectedDistrict: "algonquin",
+    // Crews-Tab
+    crews: [],
+    selectedCrewId: null,
+
+    async init() {
+      // marked-Optionen sicher setzen (Lib via CDN in lore.html geladen)
+      if (window.marked) {
+        window.marked.setOptions({ breaks: false, gfm: true });
+      }
+      try {
+        const [districtsResp, crewsResp] = await Promise.all([
+          api.get("/api/lore/districts"),
+          api.get("/api/crews"),
+        ]);
+        this.districts = districtsResp.districts || [];
+        this.crews = (crewsResp || []).slice().sort((a, b) => a.name.localeCompare(b.name));
+        if (this.districts.length && !this.districts.find(d => d.slug === this.selectedDistrict)) {
+          this.selectedDistrict = this.districts[0].slug;
+        }
+        if (!this.selectedCrewId && this.crews.length) {
+          this.selectedCrewId = this.crews[0].id;
+        }
+      } catch (e) {
+        this.error = "Lore konnte nicht geladen werden: " + (e.message || e);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    crewsByDistrict(districtName) {
+      return this.crews.filter(c => (c.district || "") === districtName);
+    },
+
+    selectedCrew() {
+      return this.crews.find(c => c.id === this.selectedCrewId) || null;
+    },
+
+    renderMd(md) {
+      if (!md) return "";
+      if (window.marked && typeof window.marked.parse === "function") {
+        return window.marked.parse(md);
+      }
+      // Fallback: nur HTML-escapen, falls marked nicht geladen
+      const div = document.createElement("div");
+      div.innerText = md;
+      return "<pre>" + div.innerHTML + "</pre>";
+    },
+  };
+}

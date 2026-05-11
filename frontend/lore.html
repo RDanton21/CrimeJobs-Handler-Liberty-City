@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crime Automation — Lore</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    .prose-lore h2 { font-size: 1.5rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #fafafa; }
+    .prose-lore h3 { font-size: 1.15rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #f4f4f5; }
+    .prose-lore p { margin-bottom: 0.85rem; line-height: 1.65; color: #d4d4d8; }
+    .prose-lore blockquote { border-left: 3px solid #b91c1c; padding-left: 1rem; margin: 1rem 0; color: #a1a1aa; font-style: italic; }
+    .prose-lore ul { margin-left: 1.5rem; margin-bottom: 0.85rem; list-style: disc; color: #d4d4d8; }
+    .prose-lore ol { margin-left: 1.5rem; margin-bottom: 0.85rem; list-style: decimal; color: #d4d4d8; }
+    .prose-lore li { margin-bottom: 0.3rem; line-height: 1.55; }
+    .prose-lore strong { color: #fafafa; font-weight: 600; }
+    .prose-lore em { color: #e4e4e7; font-style: italic; }
+    .prose-lore a { color: #f87171; text-decoration: underline; }
+    .prose-lore code { background: #18181b; padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-size: 0.85em; color: #fca5a5; }
+    .prose-lore hr { border-color: #3f3f46; margin: 1.5rem 0; }
+    .prose-lore table { border-collapse: collapse; margin: 1rem 0; width: 100%; font-size: 0.9rem; }
+    .prose-lore th, .prose-lore td { border: 1px solid #3f3f46; padding: 0.4rem 0.7rem; text-align: left; }
+    .prose-lore th { background: #18181b; color: #fafafa; font-weight: 600; }
+    .prose-lore tr:nth-child(even) td { background: #0c0c0e; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+  <div x-data="lorePage()" x-init="init()" class="max-w-6xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <h1>
+        <img src="/static/logo.png" alt="SEKT6R" class="h-12 w-auto" />
+      </h1>
+      <nav class="flex gap-2 text-sm flex-wrap items-center">
+        <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
+        <a href="/archive" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Archiv</a>
+        <a href="/lore" class="px-3 py-1.5 rounded bg-red-700 text-white">Lore</a>
+        <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
+      </nav>
+    </header>
+
+    <!-- Tab-Auswahl -->
+    <div class="flex gap-2 mb-6 border-b border-zinc-800 pb-1">
+      <button @click="tab = 'districts'"
+              :class="tab === 'districts' ? 'bg-red-700 text-white' : 'bg-zinc-800 hover:bg-zinc-700'"
+              class="px-4 py-2 rounded-t font-medium text-sm">
+        🗺️ Stadtteile
+      </button>
+      <button @click="tab = 'crews'"
+              :class="tab === 'crews' ? 'bg-red-700 text-white' : 'bg-zinc-800 hover:bg-zinc-700'"
+              class="px-4 py-2 rounded-t font-medium text-sm">
+        🎭 Gang-Stories
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div x-show="loading" class="text-zinc-500 text-sm py-12 text-center">
+      Lade Lore-Daten…
+    </div>
+
+    <!-- Error -->
+    <div x-show="error" class="bg-red-900/30 border border-red-800 rounded p-4 text-red-200 text-sm mb-4" x-text="error"></div>
+
+    <!-- Tab 1: Stadtteile -->
+    <div x-show="tab === 'districts' && !loading" class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6">
+      <!-- Stadtteil-Liste links -->
+      <aside class="bg-zinc-900 border border-zinc-800 rounded-lg p-3 h-fit lg:sticky lg:top-4">
+        <h2 class="text-sm font-semibold mb-3 text-zinc-400 uppercase tracking-wider">Stadtteile</h2>
+        <ul class="space-y-1">
+          <template x-for="d in districts" :key="d.slug">
+            <li>
+              <button @click="selectedDistrict = d.slug"
+                      :class="selectedDistrict === d.slug ? 'bg-red-700 text-white' : 'hover:bg-zinc-800 text-zinc-300'"
+                      class="w-full text-left px-3 py-2 rounded text-sm font-medium">
+                <span x-text="d.name"></span>
+              </button>
+            </li>
+          </template>
+        </ul>
+      </aside>
+
+      <!-- Stadtteil-Inhalt rechts -->
+      <main class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+        <template x-for="d in districts" :key="d.slug">
+          <article x-show="selectedDistrict === d.slug" class="prose-lore">
+            <div x-html="renderMd(d.content_md)"></div>
+          </article>
+        </template>
+      </main>
+    </div>
+
+    <!-- Tab 2: Gang-Stories -->
+    <div x-show="tab === 'crews' && !loading" class="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
+      <!-- Crew-Liste links, gruppiert nach Stadtteil -->
+      <aside class="bg-zinc-900 border border-zinc-800 rounded-lg p-3 h-fit lg:sticky lg:top-4 max-h-[80vh] overflow-y-auto">
+        <h2 class="text-sm font-semibold mb-3 text-zinc-400 uppercase tracking-wider">Fraktionen</h2>
+        <template x-for="d in DISTRICT_ORDER" :key="d">
+          <div class="mb-3">
+            <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1 px-3" x-text="d"></h3>
+            <ul class="space-y-0.5">
+              <template x-for="crew in crewsByDistrict(d)" :key="crew.id">
+                <li>
+                  <button @click="selectedCrewId = crew.id"
+                          :class="selectedCrewId === crew.id ? 'bg-red-700 text-white' : 'hover:bg-zinc-800 text-zinc-300'"
+                          class="w-full text-left px-3 py-1.5 rounded text-sm flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          :style="`background-color: ${crew.color_hex || '#71717a'}`"></span>
+                    <span x-text="crew.name"></span>
+                  </button>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </template>
+      </aside>
+
+      <!-- Crew-Story rechts -->
+      <main class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+        <template x-if="selectedCrew()">
+          <article class="prose-lore">
+            <header class="mb-4 pb-4 border-b border-zinc-800 flex items-center gap-3">
+              <span class="w-4 h-4 rounded-full"
+                    :style="`background-color: ${selectedCrew().color_hex || '#71717a'}`"></span>
+              <h2 class="text-2xl font-bold m-0" x-text="selectedCrew().name"></h2>
+              <span class="text-xs text-zinc-500 ml-auto" x-text="selectedCrew().district || '—'"></span>
+            </header>
+            <div x-show="!selectedCrew().story_background?.trim()" class="text-zinc-500 italic text-sm">
+              Diese Crew hat noch keine Story-Background hinterlegt.
+            </div>
+            <div x-show="selectedCrew().story_background?.trim()"
+                 x-html="renderMd(selectedCrew().story_background)"></div>
+          </article>
+        </template>
+        <div x-show="!selectedCrew()" class="text-zinc-500 text-sm py-12 text-center">
+          Wähle links eine Fraktion aus.
+        </div>
+      </main>
+    </div>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
