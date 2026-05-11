@@ -10,6 +10,7 @@ from .config import settings
 from .db import init_db
 from .routes_crews import router as crews_router
 from .routes_expiry import router as expiry_router
+from .routes_lore import router as lore_router
 from .routes_missions import router as missions_router
 from .routes_reaction import router as reaction_router
 from .routes_settings import router as settings_router
@@ -34,6 +35,7 @@ app.include_router(settings_router)
 app.include_router(expiry_router)
 app.include_router(reaction_router)
 app.include_router(system_prompts_router)
+app.include_router(lore_router)
 
 
 @app.get("/api/health")
@@ -64,6 +66,11 @@ async def settings_page(_user: str = Depends(require_admin)):
 @app.get("/archive")
 async def archive_page(_user: str = Depends(require_admin)):
     return FileResponse(str(FRONTEND_DIR / "archive.html"))
+
+
+@app.get("/lore")
+async def lore_page(_user: str = Depends(require_admin)):
+    return FileResponse(str(FRONTEND_DIR / "lore.html"))
 
 
 @app.get("/favicon.ico")
