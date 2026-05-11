@@ -220,8 +220,16 @@
       </div><!-- /showBulk -->
     </section>
 
-    <section class="mb-4">
+    <section class="mb-4 flex items-center justify-between flex-wrap gap-3">
       <h2 class="text-xl font-semibold">Gangs</h2>
+      <div class="flex items-center gap-2">
+        <input type="text" x-model="searchQuery"
+               placeholder="🔍 Gang-Name suchen…"
+               class="bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-sm w-full md:w-72 focus:border-red-600 focus:outline-none" />
+        <button x-show="searchQuery" @click="searchQuery = ''"
+                title="Suche zurücksetzen"
+                class="text-zinc-400 hover:text-zinc-200 text-sm">×</button>
+      </div>
     </section>
 
     <div x-show="showNew" x-transition class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mb-6">

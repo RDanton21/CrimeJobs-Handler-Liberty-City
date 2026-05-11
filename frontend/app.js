@@ -99,6 +99,7 @@ function dashboard() {
     notifications: {},
     seenAt: JSON.parse(localStorage.getItem("crewSeenAt") || "{}"),
     archivingAll: false,
+    searchQuery: "",
     showBulk: false,
     bulkScope: "all",
     bulkDistrict: "",
@@ -233,6 +234,10 @@ function dashboard() {
       let list = this.crews;
       if (this.districtFilter) list = list.filter(c => c.district === this.districtFilter);
       if (this.statusFilter) list = list.filter(c => c.last_mission_status === this.statusFilter);
+      if (this.searchQuery && this.searchQuery.trim()) {
+        const q = this.searchQuery.trim().toLowerCase();
+        list = list.filter(c => (c.name || "").toLowerCase().includes(q));
+      }
       return list;
     },
     get groupedCrews() {
