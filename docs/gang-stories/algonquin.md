@@ -86,21 +86,21 @@ Die Nishiki-kai macht keine Ansprüche auf Stadtteile. Sie macht Ansprüche auf 
 
 ---
 
-## Italienische Mafia — Famiglia Carbone
+## Italienische Mafia — Famiglia Manschetti
 
 Sie sind das Original. Alles andere in Algonquin verhandelt mit ihnen.
 
-Die Famiglia Carbone hat Liberty City älter erlebt als die Wolkenkratzer, die heute über ihren Restaurants stehen. Der Großvater des heutigen Don kam aus Palermo mit einem Koffer und drei Briefen. Aus den drei Briefen wurde ein Stadtviertel.
+Die Famiglia Manschetti hat Liberty City älter erlebt als die Wolkenkratzer, die heute über ihren Restaurants stehen. Der Großvater des heutigen Don kam aus Palermo mit einem Koffer und drei Briefen. Aus den drei Briefen wurde ein Stadtviertel.
 
 Heute ist die Familie ein Mosaik aus Beerdigungsinstituten, Bauunternehmen, einem Hotel im Theater District, drei Restaurants, einer Eisdiele, einer Müllabfuhr-Firma, Anteilen an mehreren Banken und – immer noch – jenem Klub im Untergeschoss eines unscheinbaren Wohnhauses, in dem die echten Entscheidungen fallen. Ein Viertel der Stadtteilmacht — gleichauf mit Yakuza und MC, und älter als beide.
 
-Don Vincenzo „Vince" Carbone ist Mitte fünfzig, immer in Anzug, immer ruhig. Er hat zwei Söhne, die er nicht ins Geschäft lässt, und drei Capos, die wie Söhne sind. Die Carbones haben in den letzten zehn Jahren weniger Tote produziert als jede andere Familie der Stadt – weil sie weniger müssen. Ein Anruf reicht.
+Don Vincenzo „Vince" Manschetti ist Mitte fünfzig, immer in Anzug, immer ruhig. Er hat zwei Söhne, die er nicht ins Geschäft lässt, und drei Capos, die wie Söhne sind. Die Manschettis haben in den letzten zehn Jahren weniger Tote produziert als jede andere Familie der Stadt – weil sie weniger müssen. Ein Anruf reicht.
 
 > *„Ein Mann, der reden muss, hat seine Macht schon verloren."*
 
 ### 🏛️ Struktur & Hierarchie
 
-🔱 **Don** (Vincenzo „Vince" Carbone) — Oberhaupt der Famiglia.
+🔱 **Don** (Vincenzo „Vince" Manschetti) — Oberhaupt der Famiglia.
 🔸 **Consigliere** — Berater, oft die zweite Stimme im Raum.
 🔹 **Capodecina** (Capos) — Führen jeweils eine eigene Crew (Decina).
 ▫️ **Soldati** — Vollwertige Mitglieder, Made Men.

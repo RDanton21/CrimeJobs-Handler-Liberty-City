@@ -2,7 +2,7 @@
 
 > Stadtteil-Atmosphäre: Vorstadt, Garage, Flughafen-Hum. Östlichster Bezirk Liberty Citys — ruhige Wohnviertel, Industrieflächen, große Transportachsen, und über allem der **Francis Underwood International Airport**. Tagsüber arbeitende Mittelschicht. Nachts Transit-Unterwelt der ganzen Stadt: Schmuggel, Korruption, Drogenrouten, Verbindungen nach Algonquin, die kürzer sind als die Karte vermuten lässt. Wer das Vorstadt-Bild glaubt, hat nicht hingesehen. Farbcode der Gangs: Cyan und Türkis. Vollständige Stadtteil-Lore: [DISTRICTS.md](../DISTRICTS.md).
 >
-> **Machtverhältnisse 2026:** Osteuropäisch/Kaukasisch (Eastline Wolves) **35 %** · Street Crews/Gangs (Latin Kings · Spanish Lords · MOB) **20 %** · Italienische Mafia (Carbone-Außenposten) **20 %** · Spezialisierte Organisationen (49ers) **15 %** · Sonstige/Korruption (Flughafenbeamte, Spediteure) **10 %**.
+> **Machtverhältnisse 2026:** Osteuropäisch/Kaukasisch (Eastline Wolves) **35 %** · Street Crews/Gangs (Latin Kings · Spanish Lords · MOB) **20 %** · Italienische Mafia (Manschetti-Außenposten) **20 %** · Spezialisierte Organisationen (49ers) **15 %** · Sonstige/Korruption (Flughafenbeamte, Spediteure) **10 %**.
 
 ---
 

@@ -29,7 +29,7 @@ Nur dieser eine Stuhl ist leer. Und niemand schaut hin.
 
 Beginnen wir, wo die Stadt begonnen hat.
 
-In der Theaterstraße, dort, wo die alten Gebäude aussehen, als hätten sie alles gesehen — und dort, wo das stimmt. Hinter einer Marmor-Fassade öffnet sich der Souterrain-Gang zum *Club Roma*, dem Mitgliederklub, in dem die Familie Carbone über Liberty City entscheidet, ohne je darüber zu sprechen. Don Vincenzo Carbone trägt heute Abend einen grauen Anzug. Er hat einen Espresso vor sich. Er hat noch nicht getrunken.
+In der Theaterstraße, dort, wo die alten Gebäude aussehen, als hätten sie alles gesehen — und dort, wo das stimmt. Hinter einer Marmor-Fassade öffnet sich der Souterrain-Gang zum *Club Roma*, dem Mitgliederklub, in dem die Familie Manschetti über Liberty City entscheidet, ohne je darüber zu sprechen. Don Vincenzo Manschetti trägt heute Abend einen grauen Anzug. Er hat einen Espresso vor sich. Er hat noch nicht getrunken.
 
 Drei Querstraßen weiter, in einem kleinen Restaurant namens *Akagi*, sitzt Oyabun Kenji Tanaka mit zwei Männern, die seine Stille teilen. Niemand spricht. Zwischen ihnen liegt ein Brief, geöffnet, in einer Schrift, die niemand außer ihnen lesen kann. Tanaka klappt ihn zu. Er nickt. Es bedeutet etwas.
 
@@ -153,9 +153,9 @@ Es passiert um kurz nach zehn.
 
 Eine Inhaberin in Algonquin hat ein Telefon in die Hand genommen, weil ein Stuhl leer war.
 
-Sie hat den Ersten angerufen, dessen Nummer sie auswendig konnte. Eine Familie Carbone, weil sie wusste, dass die Familie Carbone wusste, wer hier sitzt.
+Sie hat den Ersten angerufen, dessen Nummer sie auswendig konnte. Eine Familie Manschetti, weil sie wusste, dass die Familie Manschetti wusste, wer hier sitzt.
 
-Don Vincenzo Carbone hat den Hörer abgenommen. Er hat zugehört. Er hat nichts gesagt.
+Don Vincenzo Manschetti hat den Hörer abgenommen. Er hat zugehört. Er hat nichts gesagt.
 
 Dann hat er aufgelegt, drei Sekunden gewartet, und hat den Consigliere gerufen.
 
@@ -163,7 +163,7 @@ Dreißig Minuten später wussten es vier weitere Crews in Algonquin. Eine Stunde
 
 Don Eligio war nicht da.
 
-Don Eligio. Achtzig Jahre alt. Kein Mafioso, kein Boss, kein Mitglied einer Crew. Ein alter Mann, der seit dreißig Jahren in einem Café in Algonquin saß und zuhörte. Der für Don Carbones Vater Pate gewesen war. Der dem Iron der AOD MC nach der Beerdigung seiner Frau die Hand gehalten hatte. Der den Inca der Latin Kings das Studieren bezahlt hatte. Der für die Aztecas in Bohan Konflikte beigelegt hatte, ohne je in Bohan gewesen zu sein. Der einer Familie der Nishiki-kai das Leben gerettet hatte, ohne je das Wort *Yakuza* in den Mund zu nehmen.
+Don Eligio. Achtzig Jahre alt. Kein Mafioso, kein Boss, kein Mitglied einer Crew. Ein alter Mann, der seit dreißig Jahren in einem Café in Algonquin saß und zuhörte. Der für Don Manschettis Vater Pate gewesen war. Der dem Iron der AOD MC nach der Beerdigung seiner Frau die Hand gehalten hatte. Der den Inca der Latin Kings das Studieren bezahlt hatte. Der für die Aztecas in Bohan Konflikte beigelegt hatte, ohne je in Bohan gewesen zu sein. Der einer Familie der Nishiki-kai das Leben gerettet hatte, ohne je das Wort *Yakuza* in den Mund zu nehmen.
 
 Don Eligio. Der Mann, mit dem jeder reden konnte, weil er zu nichts gehörte. Der Mann, dessen Stille eine Brücke war zwischen Crews, die sich seit Jahrzehnten nicht ansahen.
 
@@ -183,7 +183,7 @@ Und dass diese Klammer fehlt.
 
 In den ersten Stunden glaubt jede Crew, sie wisse, wer dahintersteckt.
 
-Die Carbones glauben, es war die Bratva. Die Bratva glaubt, es war die Yakuza. Die Nishiki-kai glaubt nichts laut, aber Tanaka hat den Brief auf seinem Tisch noch einmal aufgeklappt. Die Latin Kings glauben, es war eine Botschaft an *sie*. Die Spanish Lords glauben, es war eine Botschaft *durch* die Latin Kings. Die Aztecas glauben, jemand wollte Bohan Stille nehmen. Die Vipers glauben, dass die alten Häuser zerfallen — und dass das eine Chance ist. Die MOB streamt es, ohne zu verstehen, was sie streamt. Die Fireflys posten ein Bild von einem leeren Stuhl, das innerhalb einer Stunde dreihunderttausend Mal geteilt wird.
+Die Manschettis glauben, es war die Bratva. Die Bratva glaubt, es war die Yakuza. Die Nishiki-kai glaubt nichts laut, aber Tanaka hat den Brief auf seinem Tisch noch einmal aufgeklappt. Die Latin Kings glauben, es war eine Botschaft an *sie*. Die Spanish Lords glauben, es war eine Botschaft *durch* die Latin Kings. Die Aztecas glauben, jemand wollte Bohan Stille nehmen. Die Vipers glauben, dass die alten Häuser zerfallen — und dass das eine Chance ist. Die MOB streamt es, ohne zu verstehen, was sie streamt. Die Fireflys posten ein Bild von einem leeren Stuhl, das innerhalb einer Stunde dreihunderttausend Mal geteilt wird.
 
 Niemand weiß, wo Don Eligio ist.
 

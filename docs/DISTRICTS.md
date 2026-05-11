@@ -37,7 +37,7 @@ Wer Broker verstehen will, muss verstehen, dass es hier keinen einzigen Tisch gi
 | **40 %** | Osteuropäisch / Russisch | Russian Mafia (Petrovsky Bratva) |
 | **20 %** | Karibisch / Afroamerikanisch | Jamaikanische Yardis (Trenchtown Outfit) |
 | **20 %** | Moderne & Digitale Gruppen | Avenue Lords · Crossline Kings · The Fireflys |
-| **10 %** | Italienische Mafia (alt) | Außenposten der Famiglia Carbone (Stammsitz: Algonquin) |
+| **10 %** | Italienische Mafia (alt) | Außenposten der Famiglia Manschetti (Stammsitz: Algonquin) |
 | **10 %** | Sonstige / Korruption | Freie Akteure, korrupte Hafenbeamte, Einzeltäter |
 
 Die Bratva ist die größte Kraft in Broker – nicht weil sie die meisten Mitglieder hat, sondern weil sie kontrolliert, was durch den Hafen geht. Wer in Broker etwas bewegen will, das größer ist als ein Karton, bewegt es mit dem Wissen der Bratva oder gar nicht.
@@ -46,7 +46,7 @@ Die karibischen und afroamerikanischen Crews – allen voran die Yardis – kont
 
 Die modernen Crews – Avenue Lords, Crossline Kings, Fireflys – teilen sich die zwanzig Prozent, die das Nachtleben und die Subkultur ausmachen. Klein in Hafenwährung, groß in Sichtbarkeit.
 
-Die Italiener haben in Broker noch Reste alter Strukturen – Außenposten der Famiglia Carbone, die seit den Stadtkriegen geduldet werden, aber nicht mehr expandieren. Zehn Prozent, die alle kennen und niemand vergisst.
+Die Italiener haben in Broker noch Reste alter Strukturen – Außenposten der Famiglia Manschetti, die seit den Stadtkriegen geduldet werden, aber nicht mehr expandieren. Zehn Prozent, die alle kennen und niemand vergisst.
 
 Der Rest – die zehn Prozent „Sonstige" – sind das, was Broker am gefährlichsten macht: korrupte Hafenbeamte, Einzeltäter, Bootsleute mit eigenen Geschäften, Polizisten, die zur falschen Zeit wegschauen. Die unsichtbare Schicht, die alle anderen funktionieren lässt.
 
@@ -89,7 +89,7 @@ Es ist ein Stadtteil, in dem nichts ohne Kosten passiert und in dem die Kosten s
 
 | Anteil | Block | Vertreten durch |
 |---:|---|---|
-| **25 %** | Italienisch-Amerikanische Mafia | Famiglia Carbone |
+| **25 %** | Italienisch-Amerikanische Mafia | Famiglia Manschetti |
 | **25 %** | Asiatische Organisationen (Yakuza) | Nishiki-kai |
 | **25 %** | Motorradclubs (MC's) | AOD MC, Algonquin Charter |
 | **15 %** | Streetgangs & Urbane Gruppierungen | The Harlem Vipers (führend) + kleinere Block-Crews |
@@ -204,7 +204,7 @@ Dukes wird unterschätzt — von den Mafia-Familien in Algonquin, die Dukes als 
 |---:|---|---|
 | **35 %** | Osteuropäisch / Kaukasisch | Eastline Wolves |
 | **20 %** | Street Crews / Gangs | Dukes Latin Kings · Spanish Lords · Money over Bitches |
-| **20 %** | Italienische Mafia | Außenposten der Famiglia Carbone (Stammsitz: Algonquin) |
+| **20 %** | Italienische Mafia | Außenposten der Famiglia Manschetti (Stammsitz: Algonquin) |
 | **15 %** | Spezialisierte Organisationen | Midtown 49ers |
 | **10 %** | Sonstige / Korruption | Korrupte Flughafenbeamte, Spediteure, freie Akteure |
 
@@ -212,7 +212,7 @@ Die **Eastline Wolves** sind die größte Kraft Dukes' — und der am häufigste
 
 Die **Street Crews** — Latin Kings, Spanish Lords, MOB — teilen sich gemeinsam zwanzig Prozent: die Latino-Kontingente, die jüngeren Crews, das Tagesgeschäft an den Blocks. Drei Crews, eine gemeinsame Schicht der Stadtteilmacht. Was nicht heißt, dass sie miteinander kooperieren — sondern dass sie zusammen den Block ausmachen, den die Wolves *nicht* sind.
 
-Die **Italienische Mafia** hat in Dukes Außenposten der Famiglia Carbone — die alte Verbindung zwischen El Padre und Don Carbone hat über die Jahre eine ganze Logistik-Schicht aufgebaut. Zwanzig Prozent, die niemand offen anspricht und die jeder kennt.
+Die **Italienische Mafia** hat in Dukes Außenposten der Famiglia Manschetti — die alte Verbindung zwischen El Padre und Don Manschetti hat über die Jahre eine ganze Logistik-Schicht aufgebaut. Zwanzig Prozent, die niemand offen anspricht und die jeder kennt.
 
 Die **49ers** sind die spezialisierte Organisation Dukes': KPIs, Direktoren, Quartalsziele. Eine Crew, die wie ein Start-Up funktioniert — und genau deshalb fünfzehn Prozent kontrolliert, ohne ein Revier zu besitzen. Sie liefern, was andere nicht beschaffen können.
 
@@ -225,7 +225,7 @@ Die **„Sonstigen"** — korrupte Flughafenbeamte, Spediteure mit doppelter Buc
 - **Latin Kings und 49ers** sind business-verbunden — die 49ers vermitteln, die Kings schützen.
 - **MOB** ist mit allem in Konflikt, mit dem sich Konflikt monetarisieren lässt.
 - **Italienische Mafia** hat über die Latin-Kings-Verbindung das Tor in Dukes — und über den Flughafen den Weg, den sie sonst nirgendwo hat.
-- **Korrupte Flughafenbeamte** arbeiten für jeden, der zahlt — und vor allem für die Wolves und die Carbones.
+- **Korrupte Flughafenbeamte** arbeiten für jeden, der zahlt — und vor allem für die Wolves und die Manschettis.
 
 ---
 
@@ -283,7 +283,7 @@ Die **Blue Union** — Ex-Cops, „nehmen Steuern für Schutz" — kontrolliert 
 - **LOST MC** ist mit allen in Bohan in Spannung — `rival` zu Aztecas und Sequidors, `hostile` zur Blue Union.
 - **Yardies-Außenposten** in Bohan arbeiten still und vermeiden offene Konflikte.
 - **Blue Union und Sequidors** haben einen kalten Modus vivendi (`business`).
-- **Bohan ist Werkstatt für die ganze Stadt** — Carbones, Bratva, Yakuza, Lords, Wolves: alle haben hier mindestens ein Versteck oder einen Operativ-Punkt, ohne dass sie Stadtteilmacht beanspruchen.
+- **Bohan ist Werkstatt für die ganze Stadt** — Manschettis, Bratva, Yakuza, Lords, Wolves: alle haben hier mindestens ein Versteck oder einen Operativ-Punkt, ohne dass sie Stadtteilmacht beanspruchen.
 
 ---
 

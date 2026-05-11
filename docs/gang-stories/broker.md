@@ -2,7 +2,7 @@
 
 > Stadtteil-Atmosphäre: Backstein und Hafen, Werften und Hinterhöfe, billige Wohnungen und Ghettos. Broker ist Liberty Citys raueste und bodenständigste Adresse — hierher kommen die Einwanderer, die Straßenhändler, die Gangs. Politik geschieht über Broker hinweg, nicht in Broker. Hier regiert die Straße, nicht das Rathaus. Farbcode der Gangs: Magenta-Pink — eine Trotzfarbe, kein Glamour. Vollständige Stadtteil-Lore: [DISTRICTS.md](../DISTRICTS.md).
 >
-> **Machtverhältnisse 2026:** Russisch/Osteuropäisch (Bratva) **40 %** · Karibisch/Afroamerikanisch (Yardis) **20 %** · Moderne & Digitale (Lords/Kings/Fireflys) **20 %** · Alte italienische Mafia (Carbone-Außenposten) **10 %** · Sonstige/Korruption **10 %**.
+> **Machtverhältnisse 2026:** Russisch/Osteuropäisch (Bratva) **40 %** · Karibisch/Afroamerikanisch (Yardis) **20 %** · Moderne & Digitale (Lords/Kings/Fireflys) **20 %** · Alte italienische Mafia (Manschetti-Außenposten) **10 %** · Sonstige/Korruption **10 %**.
 
 ---
 

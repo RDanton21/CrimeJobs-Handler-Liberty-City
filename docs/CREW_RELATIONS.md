@@ -38,7 +38,7 @@
 
 | `a_id` | Crew A | `b_id` | Crew B | `relation_type` | `notes` |
 |---:|---|---:|---|---|---|
-| 3 | Asiatische Yakuza | 4 | Italienische Mafia | `business` | Geteilte Theaterstraße, Übereinkunft seit zwei Generationen — gegenseitiger Respekt zwischen Don Carbone und Oyabun Tanaka, aber keine Wärme. Die Linie zwischen ihren Geschäften wird in keinem Vertrag erwähnt und in keinem Vertrag verletzt. |
+| 3 | Asiatische Yakuza | 4 | Italienische Mafia | `business` | Geteilte Theaterstraße, Übereinkunft seit zwei Generationen — gegenseitiger Respekt zwischen Don Manschetti und Oyabun Tanaka, aber keine Wärme. Die Linie zwischen ihren Geschäften wird in keinem Vertrag erwähnt und in keinem Vertrag verletzt. |
 | 1 | AOD MC | 4 | Italienische Mafia | `rival` | Drei Säulen, eine Stadt — beide kontrollieren je 25 % Algonquins. Die Mafia toleriert den Charter, der Charter trotzt der Mafia. Ungeschriebene Linien, an die sich beide halten — bis es einer nicht mehr tut. |
 | 2 | The Harlem Vipers | 4 | Italienische Mafia | `hostile` | Die Vipers brechen alte Hierarchien, die Mafia sieht das als persönlichen Affront. 15 % gegen 25 % — bisher kein Krieg, aber jeder Vorfall wird gezählt. |
 | 2 | The Harlem Vipers | 3 | Asiatische Yakuza | `neutral` | Distanziert. Beide Crews vermeiden den Konflikt, weil keiner ihn braucht — die Yakuza hat ihre eigene parallele Welt, die Vipers haben ihre Blocks. Wenn sich die Welten kreuzen, ist es noch nicht entschieden, wie. |
@@ -89,11 +89,11 @@
 
 | `a_id` | Crew A | `b_id` | Crew B | `relation_type` | `notes` |
 |---:|---|---:|---|---|---|
-| 4 | Italienische Mafia | 13 | Russian Mafia | `rival` | Alter Streit um Hafen-Anteile in Broker, kalt seit dem letzten Winter. Don Carbone und Pakhan Volkov haben sich seit Jahren nicht persönlich gesehen — sie kommunizieren über Mittler, die zählen. |
-| 4 | Italienische Mafia | 18 | Dukes Latin Kings | `business` | Alte Übereinkunft zwischen El Padre und Don Carbone aus den Stadtkriegen: Konzessionen gegen Stille. Funktioniert seit acht Jahren. |
+| 4 | Italienische Mafia | 13 | Russian Mafia | `rival` | Alter Streit um Hafen-Anteile in Broker, kalt seit dem letzten Winter. Don Manschetti und Pakhan Volkov haben sich seit Jahren nicht persönlich gesehen — sie kommunizieren über Mittler, die zählen. |
+| 4 | Italienische Mafia | 18 | Dukes Latin Kings | `business` | Alte Übereinkunft zwischen El Padre und Don Manschetti aus den Stadtkriegen: Konzessionen gegen Stille. Funktioniert seit acht Jahren. |
 | 1 | AOD MC | 5 | LOST MC | `hostile` | Bruder-Clubs, die nie mehr Brüder waren. Eine ungelöste Fehde, die so alt ist, dass die meisten Mitglieder den Auslöser nicht mehr kennen — aber den Hass weitergeben. |
 | 13 | Russian Mafia | 15 | Independent Smugglers | `business` | Die Bratva ist einer der größten Kunden der Independents. Welcher Captain für sie arbeitet, ändert sich von Lieferung zu Lieferung — Absicht. |
-| 4 | Italienische Mafia | 16 | Blackline Security | `business` | Verträge auf Briefpapier, die nicht aussehen wie das, was sie sind. Magnus Thorsen war einmal bei einer Beerdigung der Carbones — als „Sicherheitsberater". |
+| 4 | Italienische Mafia | 16 | Blackline Security | `business` | Verträge auf Briefpapier, die nicht aussehen wie das, was sie sind. Magnus Thorsen war einmal bei einer Beerdigung der Manschettis — als „Sicherheitsberater". |
 | 7 | Los Aztecas | 19 | Spanish Lords | `allied` | Kulturelle Brücke. Don Rafa und Cruz Alvarez kennen sich seit der Schule — die einzige offene Allianz der beiden Bohan- und Dukes-Latinos. Über diese Allianz haben die Spanish Lords Verstecke und Logistik-Punkte in Bohan. |
 | 6 | Bohan Sequidors | 19 | Spanish Lords | `business` | Geografische Notwendigkeit: die Spanish Lords betreiben Verstecke in Sequidor-Reviere. Carmen Rivera duldet das gegen einen Anteil — kein Bündnis, eine kalte Übereinkunft mit klaren Linien. |
 | 6 | Bohan Sequidors | 11 | Jamaikanische Yardis | `business` | Die Yardies haben in Süd-Bohan Verteilerzentren auf Sequidor-Territorium. Selecta und La Loba haben sich vor zwei Jahren persönlich verständigt: Yardies bleiben still, Sequidors lassen sie arbeiten, beide profitieren. |
@@ -102,8 +102,8 @@
 | 10 | The Fireflys | 17 | Money over Bitches | `allied` | Beide jung, beide laut, beide Internet-orientiert. Die einzige offene Allianz quer durch die Halbinseln. Phantom postet Forty's Tracks. |
 | 5 | LOST MC | 14 | Little Bay Pirates | `business` | Die Pirates liefern via Wasser, der LOST verteilt via Land. Eine Logistik-Kette, die Wreck und Hook auf einer Bierdose besiegelt haben. |
 | 13 | Russian Mafia | 20 | Eastline Wolves | `neutral` | Zwei osteuropäische Mächte, eine Stadt — die Bratva (Broker, 40 % dort) und die Wolves (Dukes, 35 % dort) treffen sich nie persönlich. Genau das ist die Übereinkunft. Beide wissen, dass eine osteuropäische Front in Liberty City keiner von ihnen leisten könnte. (Keine Verwandtschaft zwischen den beiden Volkov — eine Frage, die schon mal blutig endete.) |
-| 4 | Italienische Mafia | 20 | Eastline Wolves | `rival` | Carbones haben über die Latin-Kings-Brücke einen Außenposten in Dukes (20 % Stadtteilmacht). Die Wolves (35 %) sehen das als geduldete Anwesenheit, nicht als Recht. Die Linie hält — unter Spannung. |
-| 4 | Italienische Mafia | 21 | Midtown 49ers | `business` | Die 49ers sind die einzige Crew der Stadt, die für jede der drei Algonquin-Säulen (Mafia, Yakuza, AOD) gleichzeitig arbeiten kann, ohne Interessenkonflikte zu erzeugen. Carbone nutzt das. |
+| 4 | Italienische Mafia | 20 | Eastline Wolves | `rival` | Manschettis haben über die Latin-Kings-Brücke einen Außenposten in Dukes (20 % Stadtteilmacht). Die Wolves (35 %) sehen das als geduldete Anwesenheit, nicht als Recht. Die Linie hält — unter Spannung. |
+| 4 | Italienische Mafia | 21 | Midtown 49ers | `business` | Die 49ers sind die einzige Crew der Stadt, die für jede der drei Algonquin-Säulen (Mafia, Yakuza, AOD) gleichzeitig arbeiten kann, ohne Interessenkonflikte zu erzeugen. Manschetti nutzt das. |
 
 ---
 
@@ -123,7 +123,7 @@ Mehrere Stadtteile haben Außenposten von Crews mit Stammsitz andernorts. Diese 
 - **Petrovsky Bratva** (Stammsitz Broker, ID 13) hat einen Außenposten auf **Colony Island** (10 %).
 - **Jamaikanische Yardis** (Stammsitz Broker, ID 11) haben in **Bohan** Verteilerzentren (Teil des 45-%-Latino-Blocks).
 - **Spanish Lords** (Stammsitz Dukes, ID 19) haben in **Bohan** Verstecke und Logistik-Punkte (Teil des 45-%-Latino-Blocks).
-- **Carbones, Bratva, Yakuza, Avenue Lords, Wolves** haben alle in **Bohan** mindestens ein Versteck oder Operativ-Punkt — Bohan ist die unsichtbare Werkstatt der ganzen Stadt, ohne dass diese Crews Stadtteilmacht beanspruchen.
+- **Manschettis, Bratva, Yakuza, Avenue Lords, Wolves** haben alle in **Bohan** mindestens ein Versteck oder Operativ-Punkt — Bohan ist die unsichtbare Werkstatt der ganzen Stadt, ohne dass diese Crews Stadtteilmacht beanspruchen.
 
 In KI-Aufträgen für die Stamm-Crew kann diese Außenposten-Präsenz organisch erwähnt werden, ohne dass eine separate Crew nötig wäre.
 

@@ -73,7 +73,7 @@ RELATIONS: list[tuple[int, int, RelationType, str]] = [
     # --- Algonquin intra ---
     (3, 4, RelationType.BUSINESS,
      "Geteilte Theaterstrasse, Uebereinkunft seit zwei Generationen — gegenseitiger "
-     "Respekt zwischen Don Carbone und Oyabun Tanaka, aber keine Waerme."),
+     "Respekt zwischen Don Manschetti und Oyabun Tanaka, aber keine Waerme."),
     (1, 4, RelationType.RIVAL,
      "Drei Saeulen, eine Stadt — beide kontrollieren je 25 % Algonquins. Mafia toleriert "
      "den Charter, Charter trotzt der Mafia. Ungeschriebene Linien."),
@@ -160,10 +160,10 @@ RELATIONS: list[tuple[int, int, RelationType, str]] = [
 
     # --- Inter-District ---
     (4, 13, RelationType.RIVAL,
-     "Alter Streit um Hafen-Anteile in Broker, kalt seit dem letzten Winter. Carbone und "
+     "Alter Streit um Hafen-Anteile in Broker, kalt seit dem letzten Winter. Manschetti und "
      "Volkov haben sich seit Jahren nicht persoenlich gesehen — sie kommunizieren ueber Mittler."),
     (4, 18, RelationType.BUSINESS,
-     "Alte Uebereinkunft zwischen El Padre und Don Carbone aus den Stadtkriegen: "
+     "Alte Uebereinkunft zwischen El Padre und Don Manschetti aus den Stadtkriegen: "
      "Konzessionen gegen Stille. Funktioniert seit acht Jahren."),
     (1, 5, RelationType.HOSTILE,
      "Bruder-Clubs, die nie mehr Brueder waren. Ungeloeste Fehde, so alt, dass die meisten "
@@ -173,7 +173,7 @@ RELATIONS: list[tuple[int, int, RelationType, str]] = [
      "arbeitet, aendert sich von Lieferung zu Lieferung — Absicht."),
     (4, 16, RelationType.BUSINESS,
      "Vertraege auf Briefpapier, die nicht aussehen wie das, was sie sind. Magnus Thorsen "
-     "war einmal bei einer Beerdigung der Carbones — als 'Sicherheitsberater'."),
+     "war einmal bei einer Beerdigung der Manschettis — als 'Sicherheitsberater'."),
     (7, 19, RelationType.ALLIED,
      "Kulturelle Bruecke. Don Rafa und Cruz Alvarez kennen sich seit der Schule — die "
      "einzige offene Allianz der beiden Bohan- und Dukes-Latinos. Ueber diese Allianz "
@@ -192,12 +192,12 @@ RELATIONS: list[tuple[int, int, RelationType, str]] = [
      "35 %) treffen sich nie persoenlich. Genau das ist die Uebereinkunft. Beide wissen, "
      "dass eine osteuropaeische Front in Liberty City keiner sich leisten koennte."),
     (4, 20, RelationType.RIVAL,
-     "Carbones haben ueber die Latin-Kings-Bruecke einen Aussenposten in Dukes (20 % "
+     "Manschettis haben ueber die Latin-Kings-Bruecke einen Aussenposten in Dukes (20 % "
      "Stadtteilmacht). Wolves (35 %) sehen das als geduldete Anwesenheit, nicht als Recht. "
      "Linie haelt — unter Spannung."),
     (4, 21, RelationType.BUSINESS,
      "49ers sind die einzige Crew der Stadt, die fuer jede der drei Algonquin-Saeulen "
-     "(Mafia, Yakuza, AOD) gleichzeitig arbeiten kann. Carbone nutzt das."),
+     "(Mafia, Yakuza, AOD) gleichzeitig arbeiten kann. Manschetti nutzt das."),
     (6, 19, RelationType.BUSINESS,
      "Geografische Notwendigkeit: Spanish Lords betreiben Verstecke in Sequidor-Reviere. "
      "Carmen Rivera duldet das gegen einen Anteil — kein Buendnis, kalte Uebereinkunft."),
