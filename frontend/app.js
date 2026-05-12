@@ -117,15 +117,34 @@ function dashboard() {
     bulkPreviewText: "",
 
     get bulkTargets() {
-      if (this.bulkScope === "all") return this.crews;
-      if (this.bulkScope === "district") {
-        return this.bulkDistrict ? this.crews.filter(c => c.district === this.bulkDistrict) : [];
+      let list = [];
+      if (this.bulkScope === "all") list = this.crews;
+      else if (this.bulkScope === "district") {
+        list = this.bulkDistrict ? this.crews.filter(c => c.district === this.bulkDistrict) : [];
       }
-      if (this.bulkScope === "manual") {
+      else if (this.bulkScope === "manual") {
         const ids = this.bulkSelectedCrews.map(s => parseInt(s, 10));
-        return this.crews.filter(c => ids.includes(c.id));
+        list = this.crews.filter(c => ids.includes(c.id));
       }
-      return [];
+      // Nur Crews mit Discord-Channel — Firmen ohne Channel werden uebersprungen
+      return list.filter(c => (c.discord_channel_id || "").trim());
+    },
+
+    // Crews mit gesetzter Channel-ID — fuer manual-Auswahl-Liste
+    get sendableCrews() {
+      return this.crews.filter(c => (c.discord_channel_id || "").trim());
+    },
+
+    // Anzahl Crews, die wegen fehlender Channel-ID aus dem aktuellen Scope
+    // ausgeschlossen wurden (nur fuer Anzeige in Phase 1)
+    get bulkExcludedCount() {
+      let list = [];
+      if (this.bulkScope === "all") list = this.crews;
+      else if (this.bulkScope === "district") {
+        list = this.bulkDistrict ? this.crews.filter(c => c.district === this.bulkDistrict) : [];
+      }
+      else return 0;
+      return list.filter(c => !(c.discord_channel_id || "").trim()).length;
     },
     _bulkDeadlineMinutes() {
       const n = parseInt(this.bulkDeadlineValue, 10);
