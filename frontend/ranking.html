@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crime Automation — Ranking</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    .medal-gold   { box-shadow: inset 4px 0 0 0 #facc15; }
+    .medal-silver { box-shadow: inset 4px 0 0 0 #d4d4d8; }
+    .medal-bronze { box-shadow: inset 4px 0 0 0 #c2410c; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+  <div x-data="rankingPage()" x-init="init()" class="max-w-screen-2xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <h1>
+        <img src="/static/logo.png" alt="SEKT6R" class="h-12 w-auto" />
+      </h1>
+      <nav class="flex gap-2 text-sm flex-wrap items-center">
+        <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
+        <a href="/archive" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Archiv</a>
+        <a href="/lore" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Lore</a>
+        <a href="/ranking" class="px-3 py-1.5 rounded bg-red-700 text-white">Ranking</a>
+        <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
+      </nav>
+    </header>
+
+    <!-- Filter-Bar -->
+    <section class="mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+      <div class="flex items-end gap-3 flex-wrap">
+        <div>
+          <label class="text-xs text-zinc-400 block mb-1">Zeitraum</label>
+          <select x-model="rangeSince" @change="load()"
+                  class="bg-zinc-950 border border-zinc-800 rounded px-3 py-1.5 text-sm">
+            <option value="today">Heute</option>
+            <option value="7d">Letzte 7 Tage</option>
+            <option value="30d">Letzte 30 Tage</option>
+            <option value="all">Gesamt</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-zinc-400 flex items-center gap-1">
+            <input type="checkbox" x-model="crimeOnly" @change="load()" />
+            Nur Crime-Crews (Zivil-Firmen ausblenden)
+          </label>
+        </div>
+        <button @click="load()"
+                :disabled="loading"
+                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 rounded text-sm">
+          <span x-show="!loading">↻ Aktualisieren</span>
+          <span x-show="loading">Lade…</span>
+        </button>
+        <p class="text-xs text-zinc-500 ml-auto">
+          Punkte: 👍 +2 · 👎 −1 · ❌ 0 · ⏳ 0
+        </p>
+      </div>
+    </section>
+
+    <p x-show="error" x-text="error"
+       class="text-red-400 text-sm mb-4 bg-red-900/30 border border-red-800 rounded p-3"></p>
+
+    <!-- Crew-Ranking -->
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold mb-3">🏆 Crew-Ranking</h2>
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-zinc-950 text-zinc-400 text-xs uppercase tracking-wider">
+            <tr>
+              <th class="px-4 py-3 text-left w-14">Rang</th>
+              <th class="px-4 py-3 text-left">Crew</th>
+              <th class="px-4 py-3 text-left hidden md:table-cell">Stadtteil</th>
+              <th class="px-4 py-3 text-right">👍</th>
+              <th class="px-4 py-3 text-right">👎</th>
+              <th class="px-4 py-3 text-right hidden md:table-cell">❌</th>
+              <th class="px-4 py-3 text-right hidden md:table-cell">⏳</th>
+              <th class="px-4 py-3 text-right font-bold">Punkte</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="(c, idx) in data.crews" :key="c.crew_id">
+              <tr :class="medalClass(idx)" class="border-t border-zinc-800 hover:bg-zinc-800/50">
+                <td class="px-4 py-2.5 font-mono text-zinc-500" x-text="`#${idx + 1}`"></td>
+                <td class="px-4 py-2.5">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          :style="`background-color: ${c.color_hex || '#71717a'}`"></span>
+                    <span class="font-medium" x-text="c.name"></span>
+                  </div>
+                </td>
+                <td class="px-4 py-2.5 text-zinc-400 hidden md:table-cell" x-text="c.district || '—'"></td>
+                <td class="px-4 py-2.5 text-right text-green-400" x-text="c.approved"></td>
+                <td class="px-4 py-2.5 text-right text-red-400" x-text="c.rejected"></td>
+                <td class="px-4 py-2.5 text-right text-zinc-500 hidden md:table-cell" x-text="c.cancelled"></td>
+                <td class="px-4 py-2.5 text-right text-amber-300 hidden md:table-cell" x-text="c.pending"></td>
+                <td class="px-4 py-2.5 text-right font-bold"
+                    :class="c.points > 0 ? 'text-green-400' : (c.points < 0 ? 'text-red-400' : 'text-zinc-400')"
+                    x-text="c.points"></td>
+              </tr>
+            </template>
+            <tr x-show="!loading && data.crews.length === 0">
+              <td colspan="8" class="px-4 py-8 text-center text-zinc-500 text-sm">
+                Noch keine Crew-Daten für diesen Zeitraum.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Stadtteil-Ranking -->
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold mb-3">🗺️ Stadtteil-Ranking</h2>
+      <div class="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-zinc-950 text-zinc-400 text-xs uppercase tracking-wider">
+            <tr>
+              <th class="px-4 py-3 text-left w-14">Rang</th>
+              <th class="px-4 py-3 text-left">Stadtteil</th>
+              <th class="px-4 py-3 text-right">Crews</th>
+              <th class="px-4 py-3 text-right">👍 gesamt</th>
+              <th class="px-4 py-3 text-right">👎 gesamt</th>
+              <th class="px-4 py-3 text-right font-bold">Punkte</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="(d, idx) in data.districts" :key="d.name">
+              <tr :class="medalClass(idx)" class="border-t border-zinc-800 hover:bg-zinc-800/50">
+                <td class="px-4 py-2.5 font-mono text-zinc-500" x-text="`#${idx + 1}`"></td>
+                <td class="px-4 py-2.5 font-medium" x-text="d.name"></td>
+                <td class="px-4 py-2.5 text-right text-zinc-400" x-text="d.crew_count"></td>
+                <td class="px-4 py-2.5 text-right text-green-400" x-text="d.approved"></td>
+                <td class="px-4 py-2.5 text-right text-red-400" x-text="d.rejected"></td>
+                <td class="px-4 py-2.5 text-right font-bold"
+                    :class="d.points > 0 ? 'text-green-400' : (d.points < 0 ? 'text-red-400' : 'text-zinc-400')"
+                    x-text="d.points"></td>
+              </tr>
+            </template>
+            <tr x-show="!loading && data.districts.length === 0">
+              <td colspan="6" class="px-4 py-8 text-center text-zinc-500 text-sm">
+                Noch keine Stadtteil-Daten.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="text-xs text-zinc-500 text-center">
+      Auto-Refresh alle 15 Sekunden ·
+      <span x-show="data.since" x-text="`Zeitraum seit ${data.since}`"></span>
+      <span x-show="!data.since">Zeitraum: Gesamt</span>
+    </p>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

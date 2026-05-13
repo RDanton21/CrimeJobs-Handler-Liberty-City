@@ -1155,3 +1155,70 @@ function lorePage() {
     },
   };
 }
+
+
+// ---------------------------------------------------------------------------
+// Ranking-Seite (Crew + Stadtteil-Performance)
+// ---------------------------------------------------------------------------
+function rankingPage() {
+  return {
+    loading: true,
+    error: "",
+    rangeSince: "all",     // 'today' | '7d' | '30d' | 'all'
+    crimeOnly: true,
+    data: { crews: [], districts: [], since: null, crime_only: true },
+    _refreshTimer: null,
+
+    async init() {
+      await this.load();
+      this._refreshTimer = setInterval(() => this.load().catch(() => {}), 15000);
+    },
+
+    async load() {
+      this.loading = true;
+      this.error = "";
+      try {
+        const params = new URLSearchParams();
+        const since = this._sinceIso();
+        if (since) params.set("since", since);
+        params.set("crime_only", this.crimeOnly ? "true" : "false");
+        const url = `/api/missions/ranking?${params.toString()}`;
+        this.data = await api.get(url);
+      } catch (e) {
+        this.error = "Konnte Ranking nicht laden: " + (e.message || e);
+        this.data = { crews: [], districts: [], since: null, crime_only: this.crimeOnly };
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    _sinceIso() {
+      const now = new Date();
+      const utc = (d) => new Date(Date.UTC(
+        d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(),
+        d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()
+      ));
+      if (this.rangeSince === "today") {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        return utc(d).toISOString().replace(/\.\d{3}Z$/, "");
+      }
+      if (this.rangeSince === "7d") {
+        const d = new Date(now.getTime() - 7 * 24 * 3600 * 1000);
+        return utc(d).toISOString().replace(/\.\d{3}Z$/, "");
+      }
+      if (this.rangeSince === "30d") {
+        const d = new Date(now.getTime() - 30 * 24 * 3600 * 1000);
+        return utc(d).toISOString().replace(/\.\d{3}Z$/, "");
+      }
+      return null; // 'all' -> kein since
+    },
+
+    medalClass(idx) {
+      if (idx === 0) return "medal-gold";
+      if (idx === 1) return "medal-silver";
+      if (idx === 2) return "medal-bronze";
+      return "";
+    },
+  };
+}

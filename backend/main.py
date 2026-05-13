@@ -73,6 +73,11 @@ async def lore_page(_user: str = Depends(require_admin)):
     return FileResponse(str(FRONTEND_DIR / "lore.html"))
 
 
+@app.get("/ranking")
+async def ranking_page(_user: str = Depends(require_admin)):
+    return FileResponse(str(FRONTEND_DIR / "ranking.html"))
+
+
 @app.get("/favicon.ico")
 async def favicon():
     return RedirectResponse("/static/favicon.svg")
