@@ -93,6 +93,8 @@ function dashboard() {
     statsFilter: { crew_id: "", range: "all" },
     districtFilter: "",
     statusFilter: "",
+    topCrews: [],
+    topDistricts: [],
     DISTRICTS,
     showNew: false,
     draft: { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
@@ -287,14 +289,27 @@ function dashboard() {
       await this.loadCrews();
       await this.loadStats();
       await this.loadNotifications();
+      await this.loadRankingPreview();
       setInterval(() => {
         this.loadCrews().catch(() => {});
         this.loadStats().catch(() => {});
         this.loadNotifications().catch(() => {});
       }, 5000);
+      // Ranking aendert sich langsamer -> seltener pollen
+      setInterval(() => { this.loadRankingPreview().catch(() => {}); }, 20000);
     },
     async loadCrews() {
       this.crews = await api.get("/api/crews");
+    },
+    async loadRankingPreview() {
+      try {
+        const data = await api.get("/api/missions/ranking?crime_only=true");
+        this.topCrews = (data.crews || []).slice(0, 3);
+        this.topDistricts = (data.districts || []).slice(0, 3);
+      } catch (e) {
+        // Stilles Schweigen — wenn Backend noch nicht restartet ist (404), bleibt
+        // die Liste leer und das Widget zeigt "Noch keine Daten".
+      }
     },
     async archiveAllActive() {
       let missions;

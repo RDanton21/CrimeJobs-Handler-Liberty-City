@@ -98,6 +98,68 @@
       </p>
     </section>
 
+    <!-- Top-3-Ranking-Block -->
+    <section class="mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <h2 class="text-lg font-semibold">🏆 Top 3 — Performance-Ranking</h2>
+        <a href="/ranking" class="text-xs text-blue-400 hover:text-blue-300">
+          Vollständiges Ranking →
+        </a>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Top 3 Crews -->
+        <div>
+          <h3 class="text-xs text-zinc-400 mb-2 uppercase tracking-wider">Crews</h3>
+          <ol class="space-y-1">
+            <template x-for="(c, idx) in topCrews" :key="c.crew_id">
+              <li class="flex items-center gap-2 px-3 py-2 rounded text-sm"
+                  :class="[
+                    idx === 0 ? 'bg-yellow-900/30 border border-yellow-700' :
+                    idx === 1 ? 'bg-zinc-700/30 border border-zinc-600' :
+                                'bg-orange-900/30 border border-orange-800'
+                  ]">
+                <span class="font-mono text-zinc-500 w-6" x-text="`#${idx + 1}`"></span>
+                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                      :style="`background-color: ${c.color_hex || '#71717a'}`"></span>
+                <span class="font-medium flex-1 truncate" x-text="c.name"></span>
+                <span class="text-xs text-zinc-400" x-text="c.district"></span>
+                <span class="font-bold tabular-nums"
+                      :class="c.points > 0 ? 'text-green-400' : c.points < 0 ? 'text-red-400' : 'text-zinc-400'"
+                      x-text="`${c.points}P`"></span>
+              </li>
+            </template>
+            <li x-show="topCrews.length === 0" class="text-zinc-500 text-sm px-3 py-2">
+              Noch keine Crew-Daten.
+            </li>
+          </ol>
+        </div>
+        <!-- Top 3 Stadtteile -->
+        <div>
+          <h3 class="text-xs text-zinc-400 mb-2 uppercase tracking-wider">Stadtteile</h3>
+          <ol class="space-y-1">
+            <template x-for="(d, idx) in topDistricts" :key="d.name">
+              <li class="flex items-center gap-2 px-3 py-2 rounded text-sm"
+                  :class="[
+                    idx === 0 ? 'bg-yellow-900/30 border border-yellow-700' :
+                    idx === 1 ? 'bg-zinc-700/30 border border-zinc-600' :
+                                'bg-orange-900/30 border border-orange-800'
+                  ]">
+                <span class="font-mono text-zinc-500 w-6" x-text="`#${idx + 1}`"></span>
+                <span class="font-medium flex-1" x-text="d.name"></span>
+                <span class="text-xs text-zinc-500" x-text="`${d.crew_count} Crews`"></span>
+                <span class="font-bold tabular-nums"
+                      :class="d.points > 0 ? 'text-green-400' : d.points < 0 ? 'text-red-400' : 'text-zinc-400'"
+                      x-text="`${d.points}P`"></span>
+              </li>
+            </template>
+            <li x-show="topDistricts.length === 0" class="text-zinc-500 text-sm px-3 py-2">
+              Noch keine Stadtteil-Daten.
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
     <section class="mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
       <button @click="showBulk = !showBulk" class="text-left w-full flex items-center justify-between">
         <h2 class="text-lg font-semibold">📢 Massen-Auftrag senden</h2>
