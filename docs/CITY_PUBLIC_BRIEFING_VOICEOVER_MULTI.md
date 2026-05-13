@@ -11,7 +11,7 @@
 | Sprecher | Rolle | ElevenLabs-Stimme | Voice ID | Settings | Anteil |
 |---|---|---|---|---|---|
 | **ERZÄHLER** | trägt die Story | **Bill** (strong, narrator, gravity-heavy) | `pqHfZKP75CvOlQylNhV4` | Stability 50 %, Style 35 %, Speaker Boost ON | ~90 % |
-| **BOTSCHAFT** | die anonyme Stadt-Botschaft (1 Zeile) | **Sarah** (young, professional, female) | `EXAVITQu4vr4xnSDxMaL` | Stability 100 %, Style 0 %, Speaker Boost OFF — dann **Audacity-Distortion + Pitch-Shift −3** | 1 Mal |
+| **BOTSCHAFT** | die anonyme Stadt-Botschaft (1 Zeile) | **Sarah** (young, professional, female) | `jmuki9rdPecaWw4g7Exe` | Stability 100 %, Style 0 %, Speaker Boost OFF — dann **Audacity-Distortion + Pitch-Shift −3** | 1 Mal |
 | **MR. CAMINO** | spricht 2 Zitate | User-Voice (custom) | `xVObCw3gG96REsnh3t2I` | Stability 70 %, Style 15 %, langsame Rate | 2 Mal |
 | **FRANKIE MALONEY** | Diner-Wirt, spricht 2 Zitate | **Brian** (deep, friendly, conversational) | `nPczCjzI2devNBz1zQrb` | Stability 45 %, Style 35 % (mehr Variation, herzlich-resigniert) | 2 Mal |
 
@@ -373,7 +373,7 @@ Ab jetzt.
 
 ---
 
-## 📺 Block 2 — BOTSCHAFT (Stimme: **Sarah** `EXAVITQu4vr4xnSDxMaL` · Stability 100 % · Style 0 % · Speaker Boost OFF)
+## 📺 Block 2 — BOTSCHAFT (Stimme: **Sarah** `jmuki9rdPecaWw4g7Exe` · Stability 100 % · Style 0 % · Speaker Boost OFF)
 
 > Generieren, dann **in Audacity nachbearbeiten**: Pitch-Shift −3 Halbtöne + Distortion (Schwellenwert 50, Lautstärke −12 dB). Optional: Bit-Crusher-Plugin für „digital glitch"-Effekt. Ziel: klingt wie aus einem Lautsprecher, nicht aus einem Mund.
 
@@ -502,7 +502,7 @@ Wenn du eine **Cinematic-Version** willst, lege einen zusätzlichen Track unter:
 | Charakter | Wo? | Voice ID | Tag |
 |---|---|---|---|
 | Erzähler (Bill) | diese Datei | `pqHfZKP75CvOlQylNhV4` | Tag 0 |
-| Botschaft (Sarah) | diese Datei | `EXAVITQu4vr4xnSDxMaL` | Tag 0 |
+| Botschaft (Sarah) | diese Datei | `jmuki9rdPecaWw4g7Exe` | Tag 0 |
 | Mr. Camino (User-Custom) | diese Datei + EVENT_FINALE.md | `xVObCw3gG96REsnh3t2I` | Tag 0 + Tag 16 |
 | Frankie Maloney (Brian) | diese Datei | `nPczCjzI2devNBz1zQrb` | Tag 0 |
 | **Francis J. Underwood** (User-Custom) | EVENT_FINALE.md | `5V1aDRVValmofPm493AW` | **Tag 16 (Reveal)** |
