@@ -97,38 +97,64 @@ def build_user_prompt(ctx: MissionContext) -> str:
 def build_crime_business_briefing_prompt(
     crew_name: str, crew_story: str, crime_business: str
 ) -> tuple[str, str]:
-    """Eigenstaendiger Prompt: KI formuliert das interne Crime-Business
-    der Crew in einen atmosphaerischen Briefing-Text um, der direkt in einen
-    privaten Discord-Channel der Crew gepostet wird.
+    """Eigenstaendiger Prompt: KI formuliert das interne Crime-Business der Crew
+    in einen Briefing-Text um, der direkt in einen privaten Discord-Channel der
+    Crew gepostet wird.
+
+    Der Text wird so geschrieben, als waere er eine Anweisung 'von ganz oben' —
+    der Big Boss spricht durch seinen Mittelsmann zur Crew. Kalt, klar,
+    kompromisslos. Macht deutlich:
+      - Dies ist EUER zugewiesener Bereich.
+      - Ihr habt euch darum zu kuemmern.
+      - Machtverhaeltnisse koennen wechseln, je nach Performance.
 
     Returns (system_prompt, user_prompt). Kein Mission-Kontext, keine Historie.
-    Output soll <= 1900 Zeichen sein (Discord-Limit), 3-6 Absaetze."""
+    Output soll <= 1800 Zeichen sein (Discord-Limit 2000, Reserve), 4-6 Absaetze.
+    """
     sys = (
-        "Du bist Briefing-Autor fuer eine GTA-V-Liberty-City-Roleplay-Krimiserie. "
-        "Du formulierst das interne Geschaeftsprofil einer Crime-Crew als atmosphaerischen "
-        "Einfuehrungstext um, der von einem Mittelsmann oder Crew-Insider an die Crew "
-        "selbst gerichtet ist — also kein verschluesseltes Auftrags-Briefing, sondern eine "
-        "Beschreibung des Geschaeftsfeldes der Crew im Noir-Ton.\n\n"
-        "Ton: literarisch, atmosphaerisch, ein Hauch Noir. Kein Slang. Kein platter Klartext "
-        "('wir handeln mit Drogen'), sondern Andeutungen, Code-Woerter, Milieu-Sprache. "
-        "Die Crew weiss schon, was sie tut — der Text soll Stimmung und Identitaet liefern, "
-        "nicht Information.\n\n"
-        "Struktur: 3 bis 6 kurze Absaetze, Gesamtlaenge <= 1800 Zeichen. Keine Ueberschrift, "
-        "keine Anrede an die Crew, keine Aufzaehlungen mit Bullets. Sprache: Deutsch."
+        "Du bist Sprecher eines unsichtbaren, unantastbaren 'Big Boss', der Liberty City "
+        "im Hintergrund steuert. Du verfasst ein internes Briefing an eine Crime-Crew — "
+        "kein verschluesselter Auftrag, sondern eine Klarstellung von ganz oben: 'Das ist "
+        "euer zugewiesener Bereich. Kuemmert euch darum.'\n\n"
+        "Tonalitaet: kalt, prazise, kompromisslos, mit gewaehlten Worten — jedes Wort hat "
+        "Gewicht. Kein Slang, keine Witze, keine Anbiederung. Drohung als Einordnung, nicht "
+        "als Eskalation. Beispiele aus dem Stilrepertoire des Big Boss:\n"
+        "  - 'Liberty City verzeiht nichts.'\n"
+        "  - 'Eure Geschaefte laufen, solange sie funktionieren.'\n"
+        "  - 'Stille ist kein Stillstand, sondern Vorbereitung.'\n"
+        "  - 'Irrelevanz ist nur ein anderer Begriff fuer Austauschbarkeit.'\n"
+        "  - 'Es gibt Ebenen, die ihr nicht seht.'\n\n"
+        "Verbindlich enthalten:\n"
+        "  1. **Klarer Eroeffnungs-Satz**, der unmissverstaendlich macht, dass dies das "
+        "ZUGEWIESENE Crime-Business der Crew ist — 'Das hier ist eures', 'Ihr habt euer Feld', "
+        "'Eure Reviere stehen' o. ae. Sehr direkt, ohne Floskeln.\n"
+        "  2. **Aufgabe in eigenen Worten**: was die Crew ab sofort zu tun hat (das Geschaeft "
+        "fuehren, Reviere halten, Gewinne erzeugen). Nutze Andeutungen statt Klartext — keine "
+        "Woerter wie 'Drogen', 'Schutzgeld', 'Kokain' direkt; uebersetze in Code-Sprache, "
+        "Schauplaetze und Rollen passend zur Hintergrund-Story der Gang.\n"
+        "  3. **Performance-Klausel**: Hinweis, dass Machtverhaeltnisse in Liberty City "
+        "wechseln koennen — wer liefert, wird groesser; wer scheitert, wird ersetzt oder verliert "
+        "Reviere. Nicht aufgezaehlt, sondern als beilaeufige Tatsache eingewoben.\n"
+        "  4. **Abschluss-Saetze** im Big-Boss-Stil, kurz und schwer.\n\n"
+        "Struktur: 4 bis 6 Absaetze, Gesamtlaenge <= 1800 Zeichen. Keine Ueberschrift, keine "
+        "Anrede ('Liebe Crew' verboten — der Big Boss schreibt nicht freundlich), keine "
+        "Aufzaehlungen mit Bullets, kein Emoji. Sprache: Deutsch."
     )
     parts = [f"## Gang\n{crew_name}"]
     if crew_story:
-        parts.append(f"\n## Hintergrund-Story der Gang\n{crew_story}")
+        parts.append(f"\n## Hintergrund-Story der Gang (zur Sprach-/Symbolik-Verankerung)\n{crew_story}")
     parts.append(
-        f"\n## Internes Crime-Business (Klartext, ungeschliffen)\n{crime_business.strip()}"
+        f"\n## Zugewiesenes Crime-Business (Klartext, ungeschliffen)\n{crime_business.strip()}"
     )
     parts.append(
         "\n## Aufgabe\n"
-        "Formuliere das oben genannte Crime-Business in einen atmosphaerischen Briefing-Text "
-        "im Stil der Hintergrund-Story. Der Text wird in den privaten Discord-Channel der Crew "
-        "gepostet — die Crew soll spueren, wer sie ist und was ihr Geschaeftsfeld ist, ohne dass "
-        "konkrete Klartext-Begriffe ('Kokain', 'Schutzgeld') verwendet werden. Stattdessen: "
-        "Code-Woerter, Schauplaetze, Rollen, Mentalitaet der Gang."
+        "Schreibe das Briefing der Crew. Es kommt von ganz oben — durch einen Mittelsmann an "
+        "die Crew gerichtet. Mache klar: dies ist ihr zugewiesenes Geschaeftsfeld, sie haben "
+        "sich darum zu kuemmern, und die Machtverhaeltnisse in Liberty City koennen wechseln, "
+        "je nachdem wie sie performen.\n\n"
+        "Verankere das Briefing in der Hintergrund-Story (Schauplaetze, Rollen, Mentalitaet der "
+        "Gang). Uebersetze das Crime-Business in Code-Worte und Andeutungen — nie Klartext-"
+        "Begriffe. Gib nur den Briefing-Text aus, keine Erklaerung, keine Anmerkung."
     )
     return sys, "\n".join(parts)
 
