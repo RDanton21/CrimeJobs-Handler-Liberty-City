@@ -400,8 +400,11 @@ function crewPage() {
     bossInfoByMission: {},
     rewritingMissionId: null,
     editingMissionId: null,
-    // Crime-Business-Send
-    cbSending: false,
+    // Crime-Business-Workflow: idle -> preview -> (post | discard)
+    cbPhase: "idle",     // 'idle' | 'preview'
+    cbBusy: false,        // generiert/sendet gerade?
+    cbPreviewText: "",    // editierbarer Vorschau-Text
+    cbProvider: "",       // welcher AI-Provider hat generiert (Info-Anzeige)
     cbMessage: "",
     cbIsError: false,
 
@@ -492,25 +495,71 @@ function crewPage() {
       catch (e) { alert(e.message); }
     },
 
-    async sendCrimeBusiness() {
+    // Schritt 1 — KI-Vorschau generieren. Wenn regenerate=true, ueberschreibt
+    // den aktuellen Preview-Text mit einer neuen KI-Generierung.
+    async previewCrimeBusiness(regenerate = false) {
       this.cbMessage = "";
       this.cbIsError = false;
       const cb = (this.crew.crime_business || "").trim();
       const ch = (this.crew.crime_business_channel_id || "").trim();
       if (!cb) { this.cbMessage = "Bitte erst Crime-Business eintragen und speichern."; this.cbIsError = true; return; }
       if (!ch) { this.cbMessage = "Bitte erst Crime-Business-Channel-ID eintragen und speichern."; this.cbIsError = true; return; }
-      this.cbSending = true;
+      this.cbBusy = true;
       try {
-        const res = await api.post(`/api/crews/${this.crewId}/send-crime-business`, {});
-        const preview = (res.preview || "").slice(0, 140);
-        this.cbMessage = `✓ Gesendet (${res.char_count} Zeichen, ${res.ai_provider}). Vorschau: ${preview}…`;
+        const res = await api.post(`/api/crews/${this.crewId}/crime-business/preview`, {});
+        this.cbPreviewText = res.text || "";
+        this.cbProvider = res.ai_provider || "";
+        this.cbPhase = "preview";
+        this.cbMessage = regenerate
+          ? `✓ Neu generiert (${res.char_count} Zeichen).`
+          : `✓ Vorschau bereit (${res.char_count} Zeichen). Du kannst editieren, bevor du sendest.`;
         this.cbIsError = false;
       } catch (e) {
-        this.cbMessage = "Fehler: " + (e.message || e);
+        this.cbMessage = "Fehler bei Generierung: " + (e.message || e);
         this.cbIsError = true;
       } finally {
-        this.cbSending = false;
+        this.cbBusy = false;
       }
+    },
+
+    // Schritt 2 — den (ggf. editierten) Preview-Text an Discord posten.
+    async postCrimeBusiness() {
+      this.cbMessage = "";
+      this.cbIsError = false;
+      const content = (this.cbPreviewText || "").trim();
+      if (!content) {
+        this.cbMessage = "Vorschau-Text ist leer.";
+        this.cbIsError = true;
+        return;
+      }
+      if (content.length > 1990) {
+        this.cbMessage = `Text zu lang (${content.length}/1990 Zeichen). Bitte kürzen.`;
+        this.cbIsError = true;
+        return;
+      }
+      this.cbBusy = true;
+      try {
+        const res = await api.post(`/api/crews/${this.crewId}/crime-business/post`, { content });
+        this.cbMessage = `✓ Gesendet (${res.char_count} Zeichen, Message-ID ${res.discord_message_id}).`;
+        this.cbIsError = false;
+        // Zuruecksetzen
+        this.cbPhase = "idle";
+        this.cbPreviewText = "";
+        this.cbProvider = "";
+      } catch (e) {
+        this.cbMessage = "Fehler beim Senden: " + (e.message || e);
+        this.cbIsError = true;
+      } finally {
+        this.cbBusy = false;
+      }
+    },
+
+    discardCrimeBusinessPreview() {
+      this.cbPhase = "idle";
+      this.cbPreviewText = "";
+      this.cbProvider = "";
+      this.cbMessage = "Vorschau verworfen.";
+      this.cbIsError = false;
     },
 
     async addRelation() {

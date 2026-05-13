@@ -19,6 +19,7 @@ from .schemas import (
     CrewRelationBase,
     CrewRelationOut,
     CrewUpdate,
+    CrimeBusinessPostRequest,
     CrimeBusinessSendRequest,
 )
 from .settings_store import get as settings_get_value
@@ -244,25 +245,23 @@ async def get_crew_boss_info(crew_id: int, session: AsyncSession = Depends(get_s
     return out
 
 
-# ---- Crime-Business: KI-Umformulierung + Sendung an separaten Channel ----
+# ---- Crime-Business: KI-Vorschau + Senden an separaten Channel ----
 
-@router.post("/{crew_id}/send-crime-business")
-async def send_crime_business(
+@router.post("/{crew_id}/crime-business/preview")
+async def preview_crime_business(
     crew_id: int,
     payload: CrimeBusinessSendRequest,
     session: AsyncSession = Depends(get_session),
 ):
-    """Liest crime_business der Crew, formuliert es per KI im Noir-Stil um
-    (passend zur Hintergrund-Story) und postet das Ergebnis in den
-    crime_business_channel_id der Crew. Speichert KEINE Mission ab —
-    eigenstaendiger Briefing-Post."""
+    """Generiert den Crime-Business-Briefing-Text per KI im Big-Boss-Stil,
+    OHNE ihn an Discord zu senden. Liefert den Text zur Anzeige + Bearbeitung
+    im Frontend zurueck. Der eigentliche Send-Schritt erfolgt anschliessend
+    ueber /crime-business/post."""
     crew = await session.get(Crew, crew_id)
     if not crew:
         raise HTTPException(404, "Crew nicht gefunden")
     if not (crew.crime_business or "").strip():
         raise HTTPException(400, "Keine Crime-Business-Beschreibung hinterlegt")
-    if not (crew.crime_business_channel_id or "").strip():
-        raise HTTPException(400, "Kein Crime-Business-Channel hinterlegt")
 
     # AI-Provider aufbauen (gleiche Konfiguration wie Mission-Generator)
     keys = {
@@ -289,17 +288,46 @@ async def send_crime_business(
     except Exception as exc:
         raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
 
-    # Sicherheits-Limit fuer Discord (2000 Zeichen max)
+    # Sicherheits-Trim fuer Discord (2000 Zeichen max — kleines Polster)
     text = (text or "").strip()
     if len(text) > 1990:
         text = text[:1985] + "…"
 
-    # Bot-Call zum Posten in den Channel
+    return {
+        "ok": True,
+        "ai_provider": provider.name,
+        "ai_model": payload.model or "",
+        "char_count": len(text),
+        "text": text,
+    }
+
+
+@router.post("/{crew_id}/crime-business/post")
+async def post_crime_business(
+    crew_id: int,
+    payload: CrimeBusinessPostRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Postet einen (ggf. vom User editierten) Briefing-Text an den
+    crime_business_channel_id der Crew. Keine KI-Generierung — der Text
+    kommt vom Frontend nach Preview/Edit."""
+    crew = await session.get(Crew, crew_id)
+    if not crew:
+        raise HTTPException(404, "Crew nicht gefunden")
+    if not (crew.crime_business_channel_id or "").strip():
+        raise HTTPException(400, "Kein Crime-Business-Channel hinterlegt")
+
+    content = (payload.content or "").strip()
+    if not content:
+        raise HTTPException(400, "Content darf nicht leer sein")
+    if len(content) > 1990:
+        raise HTTPException(400, f"Content zu lang ({len(content)} > 1990 Zeichen)")
+
     try:
         async with httpx.AsyncClient(timeout=15.0) as cli:
             r = await cli.post(
                 "http://127.0.0.1:8001/post_text",
-                json={"channel_id": crew.crime_business_channel_id, "content": text},
+                json={"channel_id": crew.crime_business_channel_id, "content": content},
             )
         if r.status_code >= 400:
             try:
@@ -313,9 +341,6 @@ async def send_crime_business(
 
     return {
         "ok": True,
-        "ai_provider": provider.name,
-        "ai_model": payload.model or "",
-        "char_count": len(text),
-        "preview": text[:200],
+        "char_count": len(content),
         "discord_message_id": bot_result.get("message_id"),
     }
