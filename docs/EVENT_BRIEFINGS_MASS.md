@@ -172,6 +172,7 @@ Liefer-Workflow: Spielleiter postet Skript als Voice-Over (oder Text) in den Cre
 - ALLE Crews bekommen am Tag 16 etwas Spektakuläres — die Stadt brennt
 - Bewertung am Tag 16 Abend: jede Crew 0/1/2 oder erweiterte Skala (Spielleiter-Wahl), ×3 ins Ranking
 - Krönung erfolgt am gleichen Abend (siehe EVENT_FINALE.md)
+- 🔒 **Reveal-Schutz:** Die Big-Boss-Stimme in diesem Voice-Over MUSS verfremdet / verzerrt sein (Voice-Modulator, tiefe digitale Stimme, oder anonymer Text-Post ohne Audio). Underwoods natürliche Stimme darf hier noch nicht erkennbar sein — der eigentliche Reveal kommt erst nach der Krönung in Phase 3b (siehe `EVENT_FINALE.md`).
 
 ---
 

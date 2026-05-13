@@ -3,6 +3,10 @@
 **Datum:** 19.09.2026, Freitag
 **Spielleiter-Briefing für die finale Phase des Events**
 
+> 🔒 **DER GROSSE REVEAL — Spielleiter-intern, niemals vorab spoilern:**
+> Der „Big Boss" ist **Bürgermeister Francis J. Underwood**. Der amtierende Head of Liberty City hat das gesamte Probespiel inszeniert. Er hat Mr. Camino zur Seite gestellt, weil dessen Neutralität ihm im Weg stand — Underwood will keine vermittelnde Macht über sich, sondern eine **eigene** Crime-Crew als rechte Hand. Die Mittler-Stimmen, die „Botschaft auf den Bildschirmen", die Aufträge — alles kam aus dem Rathaus, über einen Apparat, den nicht einmal die Mittler selbst voll durchschauen.
+> Der Reveal kommt in **zwei Stufen**: zuerst die verschleierte Stimme (Voice-Over), dann das Gesicht (Underwood persönlich). Details in Phase 3 + 3b.
+
 ---
 
 ## Was passiert an Tag 16
@@ -72,47 +76,83 @@ Die Phasen:
 - **Voice-Over aufnehmen** (oder Discord-Voice-Stream vorbereiten)
 - **Mr.-Camino-Spieler vorbereiten:** Comeback-Auftritt geplant?
 
-### Phase 3 — Die Krönung (abends, fixer Zeitpunkt)
+### Phase 3 — Die Krönung Teil 1: Die Stimme (abends, fixer Zeitpunkt)
 
-- **Voice-Over wird in allen Crew-Channels gepostet** (gleichzeitig) — entweder als Audio-Datei oder als Text mit anschließendem Voice-Stream im Hauptchannel
-- **Erlaubt 5–10 Minuten Reaktionszeit** — Spieler sollen auf die Krönung reagieren
-- **Sieger-Crew bekommt eine besondere Markierung** — neuer Discord-Rolle (z. B. „👑 Die Krone"), evtl. eigener neuer privater Channel mit dem Big Boss als direktes Sprachrohr
+- **Voice-Over wird in allen Crew-Channels gepostet** (gleichzeitig) — entweder als Audio-Datei (verfremdete, tiefe Stimme — bewusst anonym gehalten) oder als Text mit anschließendem Voice-Stream im Hauptchannel
+- **Erlaubt 5–10 Minuten Reaktionszeit** — Spieler sollen auf die Krönung reagieren, rätseln, jubeln, fluchen
+- **Sieger-Crew bekommt eine besondere Markierung** — neue Discord-Rolle (z. B. „👑 Die Krone"), evtl. eigener neuer privater Channel
+- **Spannung halten:** Die Stadt fragt sich noch: *„Wer ist das?"* Der Big Boss bleibt im Schatten — vorerst.
 
-### Phase 4 — Mr. Caminos Rückkehr (kurz nach Krönung)
+### Phase 3b — Der Reveal: Underwood tritt auf (ca. 30 Minuten nach Voice-Over)
 
-- **Don-Camino-Spieler** (User selbst oder einer aus dem Team) erscheint in-game am vereinbarten Ort
-- **Erste RP-Begegnung** mit Sieger-Crew: Mr. Camino sucht den Boss der Sieger-Crew auf, gibt sich „dem Big Boss verpflichtet" zu erkennen
-- **Atmosphäre:** Mr. Camino ist nicht gebrochen. Er ist nicht entführt worden. Er ist gewählt. Etwas in ihm hat sich verändert — er ist jetzt Big-Boss-Stimme, kein Friedenswahrer mehr.
+**Der eigentliche Schock-Moment der gesamten Story.**
+
+Bürgermeister Francis J. Underwood erscheint live — entweder im Stadtrat-Hauptchannel oder per kurzfristig einberufener Pressekonferenz (in-game am Rathaus, ggf. simuliert via Voice-Channel). Er trägt denselben dunkelgrauen Anzug wie an Tag 1. Diesmal lächelt er.
+
+**Underwood-Skript (~1100 Zeichen, Voice-Over-tauglich, House-of-Cards-Ton):**
+
+> *Guten Abend, Liberty City.*
+>
+> *Ich weiß, ihr habt heute viel gehört. Sirenen. Schlagzeilen. Eine Stimme im Radio, die euch erklärt hat, dass die Stadt sich sortiert hat. Manche von euch haben sich gefragt, wer hinter dieser Stimme steht.*
+>
+> *Ich stehe hinter ihr.*
+>
+> *Sechzehn Tage habe ich an einer einzigen Frage gearbeitet: Wer in dieser Stadt verdient meine Hand? Wer kann liefern, ohne zu fragen? Wer kann schweigen, wenn die Welt schreit? Wer kann brennen, ohne sich zu verraten? Heute habe ich die Antwort.*
+>
+> *Manche werden mich verurteilen. Manche werden mich aus dem Amt fordern. Sie können es versuchen. Sie haben gegen einen Mann gekämpft, den sie nicht sehen konnten. Jetzt kämpfen sie gegen einen Mann, der das Rathaus besitzt. Wir werden sehen, wer sich darunter sortiert.*
+>
+> *Liberty City hat eine neue Ordnung. Und sie beginnt morgen — mit mir an der Spitze und [SIEGER-CREW-NAME] an meiner Seite.*
+>
+> *Macht euch bereit.*
+
+**Diese Stufe ist optional**, wenn der User keine Underwood-Reveal-Live-Szene möchte. Alternativ kann der Reveal subtiler laufen — Mr. Camino sagt der Sieger-Crew bei seinem Comeback ein einziges Zitat: *„Der Mann im Rathaus hat mich gerufen."* Damit ist die Bombe gezündet, ohne dass Underwood selbst auftreten muss.
+
+### Phase 4 — Mr. Caminos Rückkehr (kurz nach Phase 3b)
+
+- **Mr.-Camino-Spieler** (User selbst oder einer aus dem Team) erscheint in-game am vereinbarten Ort — empfohlen: ein Café im Heimatstadtteil der Sieger-Crew
+- **Erste RP-Begegnung** mit Sieger-Crew: Mr. Camino sucht den Boss der Sieger-Crew auf. Wenn der Underwood-Reveal in Phase 3b lief: Camino bestätigt — *„Underwood. Er hat mich überzeugt. Ich habe lange genug Vermittler gespielt. Jetzt höre ich für ihn."* Wenn nicht: Camino lüftet den Reveal hier selbst.
+- **Atmosphäre:** Mr. Camino ist nicht gebrochen. Er ist nicht entführt worden. Er ist gewählt. Etwas in ihm hat sich verändert — er ist jetzt Underwoods Stimme an der Sieger-Crew, kein Friedenswahrer mehr. Er hat sich entschieden, weil er erkannt hat: die alte Balance ist tot, die neue Macht ist im Rathaus.
 
 ### Phase 5 — Konsequenzen (Rest des Abends)
 
-- **Andere Crews** finden die Veränderung über Mittler heraus:
+- **Andere Crews** finden die Veränderung über Mittler + Medien heraus:
   - Maklerin lädt zu einem letzten Gespräch („Wir reden über eure Position morgen")
   - Pater bietet manchen Crews Trost und Aussicht („Eure Crew ist nicht raus, sie hat nur ihren Platz gefunden")
-  - Skrupellose stellt klar: keine Rache-Versuche gegen die Sieger-Crew geduldet
+  - Skrupellose stellt klar: keine Rache-Versuche gegen die Sieger-Crew geduldet — Underwoods Wort
+- **Medien explodieren:** Talkshows live, Eilmeldungen, Twitter-/Verschwörungs-Threads. Manche Reporter rufen zur Abwahl Underwoods auf, manche jubeln ihm zu.
+- **Crime-Crews verstehen jetzt:** der „Big Boss" war nie unsichtbar. Er saß die ganze Zeit im 47. Stock des LC Civic Tower. Sie haben für den amtierenden Bürgermeister gearbeitet, ohne es zu wissen.
 - **Keine neuen Aufträge.** Das Event endet hier.
 
 ---
 
-## Don-Camino-Variante A im Detail
+## Don-Camino-Variante A im Detail (mit Underwood-Reveal)
 
 **Was am Tag 1 unausgesprochen war:**
-Mr. Caminos Stuhl im Café war leer. Niemand wusste warum. Die Stadt hat es als „Verschwinden" gelesen. Manche dachten an die Bratva. Andere an die Mafia. Andere an die LCPD. Niemand dachte an den Big Boss — weil niemand wusste, dass es ihn überhaupt gibt.
+Mr. Caminos Stuhl im Café war leer. Niemand wusste warum. Die Stadt hat es als „Verschwinden" gelesen. Manche dachten an die Bratva. Andere an die Mafia. Andere an die LCPD. Niemand dachte an Bürgermeister Underwood — weil niemand wusste, dass er etwas damit zu tun hatte.
 
 **Was wirklich passiert ist:**
-Mr. Camino wurde vom Big Boss kontaktiert. Persönliches Gespräch. Ort: unbekannt. Big Boss hat ihm ein Angebot gemacht: *„Du bist müde geworden. Drei Jahrzehnte hast du zwischen den Häusern gestanden. Es ist Zeit, dass du wieder zuhörst — aber für mich."*
+Mr. Camino wurde von **Underwood persönlich** kontaktiert — kein Mittler, kein Anruf, kein Brief. Underwood ist abends in den Brass-Plate-Diner gegangen, hat sich Camino gegenüber gesetzt und gesagt:
 
-Mr. Camino hat es angenommen. Vielleicht weil er erkannt hat, dass die Stadt sich ändern muss. Vielleicht weil er müde war, neutral zu sein. Vielleicht weil er gemerkt hat, dass der Big Boss eine Macht hat, der man nicht „nein" sagen sollte.
+> *„Du bist müde geworden, alter Mann. Drei Jahrzehnte hast du zwischen den Häusern vermittelt. Du hast das Beste aus dir gemacht. Aber ich brauche keine Vermittlung mehr. Ich brauche eine rechte Hand. Und ich brauche dich an der Seite dieser Hand, nicht in der Mitte zwischen allen. Du hast die Wahl: du hörst weiter zu — aber für mich. Oder du verschwindest aus diesem Café, aus dieser Stadt, aus dieser Geschichte."*
+
+Mr. Camino hat es angenommen. Vielleicht weil er erkannt hat, dass die Stadt sich ändern muss. Vielleicht weil er müde war, neutral zu sein. Vielleicht weil er gemerkt hat, dass Underwood — der Mann, der ihm 2024 nicht die Hand schütteln durfte — jetzt genug Macht hat, dass „Nein sagen" kein Optionsweg mehr ist. Vielleicht weil ein Teil von ihm das stille Spiel im Schatten attraktiver findet als die offene Vermittlung im Sonnenlicht.
 
 **Was an Tag 16 passiert:**
-Mr. Camino kehrt zurück. Älter, langsamer, aber nicht gebrochen. Er sitzt jetzt in einem Café im Heimatstadtteil der Sieger-Crew. Sein alter Stuhl bleibt leer — der Ort hat ausgedient. Sein neuer Stuhl steht für die Sieger-Crew bereit.
+Mr. Camino kehrt zurück. Älter, langsamer, aber nicht gebrochen. Er sitzt jetzt in einem Café im Heimatstadtteil der Sieger-Crew. Sein alter Stuhl im Brass Plate bleibt leer — der Ort hat ausgedient. Sein neuer Stuhl steht für die Sieger-Crew bereit.
 
-Seine Rolle: Mittler für die Sieger-Crew, Direktdraht zum Big Boss, Vermittler bei zukünftigen Spannungen — aber jetzt mit klarer Loyalität.
+Wenn die Crew ihn fragt, wer hinter allem steht, sagt er einen einzigen Satz:
+
+> *„Der Mann im Rathaus hat mich gerufen."*
+
+Damit ist die Bombe für die Crew gezündet, falls Underwood nicht in Phase 3b live aufgetreten ist.
+
+Seine neue Rolle: Mittler für die Sieger-Crew, Direktdraht zu Underwood (alias Big Boss), Vermittler bei zukünftigen Spannungen — aber jetzt mit klarer Loyalität ans Rathaus.
 
 **RP-Hooks für nach dem Event:**
 - Mr. Camino kann in zukünftigen RP-Sessions als Quest-Geber für die Sieger-Crew auftreten
-- Andere Crews können versuchen, ihn zurück zu „bekehren" (gefährlich — er gehört dem Big Boss)
+- Andere Crews können versuchen, ihn zurück zu „bekehren" (gefährlich — er gehört Underwood)
 - Sein Comeback bringt eine neue Dynamik: jeder weiß jetzt, wer in Liberty City wirklich entscheidet
+- **Politische RP-Achse:** Reporter, Opposition, FBI können versuchen, Underwood-Camino-Connection zu belegen — eine offene Spielwiese für künftige Events
 
 ---
 
