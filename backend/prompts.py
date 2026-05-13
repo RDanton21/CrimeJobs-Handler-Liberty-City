@@ -29,6 +29,7 @@ class MissionContext:
     related_crews: list[dict]  # [{name, story, relation_type, notes}]
     history: list[dict]        # [{content, status, created_at}]
     extra_instructions: str = ""
+    crime_business: str = ""
 
 
 def build_user_prompt(ctx: MissionContext) -> str:
@@ -36,6 +37,16 @@ def build_user_prompt(ctx: MissionContext) -> str:
     parts.append(f"## Gang\n{ctx.crew_name}")
     if ctx.crew_story:
         parts.append(f"\n## Hintergrund-Story\n{ctx.crew_story}")
+
+    if ctx.crime_business and ctx.crime_business.strip():
+        parts.append(
+            f"\n## Crime-Business (intern, fuer Auftrags-Ausrichtung)\n"
+            f"{ctx.crime_business.strip()}\n\n"
+            f"Diese Information ist NICHT oeffentlich. Die KI nutzt sie als Kompass, "
+            f"in welche Richtung Auftraege gehen sollen (Drogenhandel, Waffenhandel, "
+            f"Schutzgeld, Hehlerei, Geldwaesche etc.), ohne sie im Auftragstext direkt "
+            f"zu nennen."
+        )
 
     if ctx.related_crews:
         rel_lines = ["\n## Beziehungen zu anderen Gangs"]
@@ -89,6 +100,15 @@ def build_rewrite_prompt(ctx: MissionContext, raw_input: str) -> str:
     parts.append(f"## Gang\n{ctx.crew_name}")
     if ctx.crew_story:
         parts.append(f"\n## Hintergrund-Story\n{ctx.crew_story}")
+
+    if ctx.crime_business and ctx.crime_business.strip():
+        parts.append(
+            f"\n## Crime-Business (intern, fuer Auftrags-Ausrichtung)\n"
+            f"{ctx.crime_business.strip()}\n\n"
+            f"Beim Umschreiben des Roh-Inputs darf dieses Business-Profil als Kompass "
+            f"dienen — passe Code-Woerter und Andeutungen an das Geschaeftsfeld der "
+            f"Gang an, ohne es im Auftragstext direkt zu nennen."
+        )
 
     if ctx.related_crews:
         rel_lines = ["\n## Beziehungen zu anderen Gangs"]

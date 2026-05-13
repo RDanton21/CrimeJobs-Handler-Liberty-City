@@ -95,7 +95,7 @@ function dashboard() {
     statusFilter: "",
     DISTRICTS,
     showNew: false,
-    draft: { name: "", story_background: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
+    draft: { name: "", story_background: "", crime_business: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
     notifications: {},
     seenAt: JSON.parse(localStorage.getItem("crewSeenAt") || "{}"),
     archivingAll: false,
@@ -369,7 +369,7 @@ function dashboard() {
         const c = await api.post("/api/crews", this.draft);
         this.crews.push(c);
         this.crews.sort((a, b) => a.name.localeCompare(b.name));
-        this.draft = { name: "", story_background: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" };
+        this.draft = { name: "", story_background: "", crime_business: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" };
         this.showNew = false;
       } catch (e) { alert(e.message); }
     },
@@ -385,7 +385,7 @@ function crewPage() {
   const id = parseInt(location.pathname.split("/").pop(), 10);
   return {
     crewId: id,
-    crew: { name: "", story_background: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
+    crew: { name: "", story_background: "", crime_business: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
     DISTRICTS,
     allCrews: [],
     relations: [],
@@ -473,6 +473,7 @@ function crewPage() {
         this.crew = await api.patch(`/api/crews/${this.crewId}`, {
           name: this.crew.name,
           story_background: this.crew.story_background,
+          crime_business: this.crew.crime_business || "",
           discord_channel_id: this.crew.discord_channel_id,
           info_channel_id: this.crew.info_channel_id,
           district: this.crew.district || "",

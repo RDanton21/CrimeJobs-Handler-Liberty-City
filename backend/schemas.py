@@ -8,6 +8,7 @@ from .models import MissionStatus, RelationType
 class CrewBase(BaseModel):
     name: str
     story_background: str = ""
+    crime_business: str = ""
     discord_channel_id: str = ""
     info_channel_id: str = ""
     district: str = ""
@@ -21,6 +22,7 @@ class CrewCreate(CrewBase):
 class CrewUpdate(BaseModel):
     name: str | None = None
     story_background: str | None = None
+    crime_business: str | None = None
     discord_channel_id: str | None = None
     info_channel_id: str | None = None
     district: str | None = None

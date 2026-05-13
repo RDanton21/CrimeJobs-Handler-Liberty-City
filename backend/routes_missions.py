@@ -98,6 +98,7 @@ async def _load_context(session: AsyncSession, crew: Crew, extra: str) -> Missio
         related_crews=relations,
         history=history,
         extra_instructions=extra,
+        crime_business=getattr(crew, "crime_business", "") or "",
     )
 
 
