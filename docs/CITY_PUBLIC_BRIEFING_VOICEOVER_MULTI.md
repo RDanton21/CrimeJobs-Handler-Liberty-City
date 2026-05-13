@@ -15,7 +15,17 @@
 | **MR. CAMINO** | spricht 2 Zitate | User-Voice (custom) | `xVObCw3gG96REsnh3t2I` | Stability 70 %, Style 15 %, langsame Rate | 2 Mal |
 | **FRANKIE MALONEY** | Diner-Wirt, spricht 2 Zitate | **Brian** (deep, friendly, conversational) | `nPczCjzI2devNBz1zQrb` | Stability 45 %, Style 35 % (mehr Variation, herzlich-resigniert) | 2 Mal |
 
-**Wichtig:** Wähle „Eleven Multilingual v2" als Model — alle 4 Stimmen sprechen dann sauberes Deutsch, auch wenn ihre Default-Profile englisch sind.
+**Wichtig:** Wähle **„Eleven v3"** (Alpha / Enhanced) als Model — unterstützt Audio-Tags inline (z. B. `[serious]`, `[softly]`, `[pauses]`), für emotionale Variation. Falls v3 nicht verfügbar → Fallback auf „Eleven Multilingual v2" (Tags werden dort ignoriert, aber Text läuft trotzdem).
+
+**Audio-Tag-Konvention für diese Story:**
+- `[serious]` / `[dramatic]` — Gravitas, gewichtige Aussagen
+- `[thoughtful]` / `[calm]` — Reflexion, ruhige Beschreibung
+- `[softly]` / `[whispers]` — leise, geheimnisvoll
+- `[pauses]` — explizite Pause (länger als Punkt)
+- `[melancholic]` / `[sad]` — Trauer-Ton (Frankie-Zitate, „leerer Stuhl")
+- `[stern]` / `[intense]` — Camino-Vito-Szene
+- `[reverent]` — feierlich (Camino-Stadt-Zitat)
+- Vermeide: zu viele Tags hintereinander. Pro Satz max 1 Tag.
 
 **Klang-Differenzierung:**
 - Bill (Erzähler) — amerikanisch, deep, Trailer-Pathos
