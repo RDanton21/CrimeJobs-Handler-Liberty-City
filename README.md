@@ -46,6 +46,29 @@ sequenzielle Storyline mit Berücksichtigung der Beziehungen zwischen den Gangs.
 - **Border-Farbe** der Karte zeigt letzten Reaktions-Status (grün/rot/gelb/neutral)
 - **Auto-Refresh** alle 5 Sekunden (Stats, Notifications, Crew-Liste)
 
+### Performance-Ranking
+- **Eigene Seite `/ranking`** mit zwei Tabellen: Crew-Ranking + Stadtteil-Aggregat
+- **Top-3-Widget** auch im Dashboard (Link „Vollständiges Ranking →")
+- **Top 3 visuell hervorgehoben** mit Gold/Silber/Bronze-Border
+- **Filter**: Zeitraum (Heute / 7 Tage / 30 Tage / Gesamt) + optional „Nur Crime-Crews"
+- **Auto-Refresh** alle 15–20 Sekunden
+
+**Punkteverteilung pro Mission:**
+
+| Status | Symbol | Punkte | Bedeutung |
+|---|:---:|:---:|---|
+| `approved` | 👍 Erledigt | **+2** | Crew hat den Auftrag erfolgreich erledigt |
+| `rejected` | 👎 Fehlgeschlagen | **−1** | Crew hat es versucht und ist gescheitert |
+| `cancelled` | ❌ Nicht durchführbar | **0** | Crew hat abgelehnt — neutral |
+| `pending` | ⏳ Wartet | **0** | Auftrag läuft noch, noch keine Reaktion |
+| `draft` | — | **0** | Auftrag noch nicht gesendet |
+
+**Formel:** `crew_points = (approved × 2) + (rejected × −1)`
+
+**Stadtteil-Punkte:** Summe aller Crew-Punkte im jeweiligen Stadtteil.
+
+Konstanten in [`backend/routes_missions.py`](backend/routes_missions.py) → `RANKING_POINTS` dict (5-Sekunden-Anpassung möglich).
+
 ### Archiv
 - **Globale Archive-Page** über alle Crews mit Crew-Filter
 - **Snapshot beim Archivieren** — Boss-Texte aus Info-Channel + Versager-Reply + Reaktions-Antwort werden als JSON gespeichert, bevor sie aus Discord gelöscht werden
