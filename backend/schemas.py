@@ -9,6 +9,7 @@ class CrewBase(BaseModel):
     name: str
     story_background: str = ""
     crime_business: str = ""
+    crime_business_channel_id: str = ""
     discord_channel_id: str = ""
     info_channel_id: str = ""
     district: str = ""
@@ -23,10 +24,16 @@ class CrewUpdate(BaseModel):
     name: str | None = None
     story_background: str | None = None
     crime_business: str | None = None
+    crime_business_channel_id: str | None = None
     discord_channel_id: str | None = None
     info_channel_id: str | None = None
     district: str | None = None
     color_hex: str | None = None
+
+
+class CrimeBusinessSendRequest(BaseModel):
+    provider: str | None = None
+    model: str | None = None
 
 
 class CrewOut(CrewBase):

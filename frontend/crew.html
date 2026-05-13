@@ -106,8 +106,28 @@
           </p>
           <textarea x-model="crew.crime_business" rows="6"
                     placeholder="Konkretes Geschäftsfeld der Crew — z.B. 'Drogenhandel: hauptsächlich Kokain über Hafen. Schutzgeld: Restaurants in Algonquin. Hehlerei: Luxus-Uhren über Pawn Shop.'"
-                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm"></textarea>
-          <button @click="saveCrew()" class="mt-2 px-4 py-2 bg-green-600 hover:bg-green-500 rounded text-sm">Speichern</button>
+                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm mb-3"></textarea>
+
+          <label class="block text-xs text-zinc-400 mb-1">📤 Crime-Business Discord-Channel-ID</label>
+          <input x-model="crew.crime_business_channel_id"
+                 placeholder="Channel-ID, in den der umformulierte Text gepostet wird"
+                 class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm mb-3" />
+
+          <div class="flex gap-2 flex-wrap">
+            <button @click="saveCrew()"
+                    class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded text-sm">
+              Speichern
+            </button>
+            <button @click="sendCrimeBusiness()"
+                    :disabled="cbSending || !(crew.crime_business || '').trim() || !(crew.crime_business_channel_id || '').trim()"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed rounded text-sm font-medium">
+              <span x-show="!cbSending">📤 KI-umformuliert senden</span>
+              <span x-show="cbSending">Sende…</span>
+            </button>
+          </div>
+          <p x-show="cbMessage" x-text="cbMessage"
+             :class="cbIsError ? 'text-red-400' : 'text-green-400'"
+             class="text-xs mt-2 whitespace-pre-line"></p>
         </div>
       </section>
 

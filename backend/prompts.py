@@ -94,6 +94,45 @@ def build_user_prompt(ctx: MissionContext) -> str:
     return "\n".join(parts)
 
 
+def build_crime_business_briefing_prompt(
+    crew_name: str, crew_story: str, crime_business: str
+) -> tuple[str, str]:
+    """Eigenstaendiger Prompt: KI formuliert das interne Crime-Business
+    der Crew in einen atmosphaerischen Briefing-Text um, der direkt in einen
+    privaten Discord-Channel der Crew gepostet wird.
+
+    Returns (system_prompt, user_prompt). Kein Mission-Kontext, keine Historie.
+    Output soll <= 1900 Zeichen sein (Discord-Limit), 3-6 Absaetze."""
+    sys = (
+        "Du bist Briefing-Autor fuer eine GTA-V-Liberty-City-Roleplay-Krimiserie. "
+        "Du formulierst das interne Geschaeftsprofil einer Crime-Crew als atmosphaerischen "
+        "Einfuehrungstext um, der von einem Mittelsmann oder Crew-Insider an die Crew "
+        "selbst gerichtet ist — also kein verschluesseltes Auftrags-Briefing, sondern eine "
+        "Beschreibung des Geschaeftsfeldes der Crew im Noir-Ton.\n\n"
+        "Ton: literarisch, atmosphaerisch, ein Hauch Noir. Kein Slang. Kein platter Klartext "
+        "('wir handeln mit Drogen'), sondern Andeutungen, Code-Woerter, Milieu-Sprache. "
+        "Die Crew weiss schon, was sie tut — der Text soll Stimmung und Identitaet liefern, "
+        "nicht Information.\n\n"
+        "Struktur: 3 bis 6 kurze Absaetze, Gesamtlaenge <= 1800 Zeichen. Keine Ueberschrift, "
+        "keine Anrede an die Crew, keine Aufzaehlungen mit Bullets. Sprache: Deutsch."
+    )
+    parts = [f"## Gang\n{crew_name}"]
+    if crew_story:
+        parts.append(f"\n## Hintergrund-Story der Gang\n{crew_story}")
+    parts.append(
+        f"\n## Internes Crime-Business (Klartext, ungeschliffen)\n{crime_business.strip()}"
+    )
+    parts.append(
+        "\n## Aufgabe\n"
+        "Formuliere das oben genannte Crime-Business in einen atmosphaerischen Briefing-Text "
+        "im Stil der Hintergrund-Story. Der Text wird in den privaten Discord-Channel der Crew "
+        "gepostet — die Crew soll spueren, wer sie ist und was ihr Geschaeftsfeld ist, ohne dass "
+        "konkrete Klartext-Begriffe ('Kokain', 'Schutzgeld') verwendet werden. Stattdessen: "
+        "Code-Woerter, Schauplaetze, Rollen, Mentalitaet der Gang."
+    )
+    return sys, "\n".join(parts)
+
+
 def build_rewrite_prompt(ctx: MissionContext, raw_input: str) -> str:
     """Roher Admin-Text → KI schreibt im kryptisch-hochwertigen Stil um."""
     parts: list[str] = []
