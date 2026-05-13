@@ -94,7 +94,6 @@ function dashboard() {
     districtFilter: "",
     statusFilter: "",
     topCrews: [],
-    topDistricts: [],
     DISTRICTS,
     showNew: false,
     draft: { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
@@ -305,7 +304,6 @@ function dashboard() {
       try {
         const data = await api.get("/api/missions/ranking?crime_only=false");
         this.topCrews = (data.crews || []).slice(0, 3);
-        this.topDistricts = (data.districts || []).slice(0, 3);
       } catch (e) {
         // Stilles Schweigen — wenn Backend noch nicht restartet ist (404), bleibt
         // die Liste leer und das Widget zeigt "Noch keine Daten".
