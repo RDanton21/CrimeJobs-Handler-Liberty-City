@@ -12,14 +12,14 @@
 |---|---|---|---|---|---|
 | **ERZÄHLER** | trägt die Story | **Bill** (strong, narrator, gravity-heavy) | `pqHfZKP75CvOlQylNhV4` | Stability 50 %, Style 35 %, Speaker Boost ON | ~90 % |
 | **BOTSCHAFT** | die anonyme Stadt-Botschaft (1 Zeile) | **Sarah** (young, professional, female) | `EXAVITQu4vr4xnSDxMaL` | Stability 100 %, Style 0 %, Speaker Boost OFF — dann **Audacity-Distortion + Pitch-Shift −3** | 1 Mal |
-| **MR. CAMINO** | spricht 2 Zitate | **George** (warm, middle-aged British) | `JBFqnCBsd6RMkjVDRZzb` | Stability 70 %, Style 15 %, langsame Rate | 2 Mal |
+| **MR. CAMINO** | spricht 2 Zitate | User-Voice (custom) | `xVObCw3gG96REsnh3t2I` | Stability 70 %, Style 15 %, langsame Rate | 2 Mal |
 | **FRANKIE MALONEY** | Diner-Wirt, spricht 2 Zitate | **Brian** (deep, friendly, conversational) | `nPczCjzI2devNBz1zQrb` | Stability 45 %, Style 35 % (mehr Variation, herzlich-resigniert) | 2 Mal |
 
 **Wichtig:** Wähle „Eleven Multilingual v2" als Model — alle 4 Stimmen sprechen dann sauberes Deutsch, auch wenn ihre Default-Profile englisch sind.
 
 **Klang-Differenzierung:**
 - Bill (Erzähler) — amerikanisch, deep, Trailer-Pathos
-- George (Camino) — britisch, warm, älter, ruhiger → klingt deutlich anders als Bill
+- Camino (User-Voice `xVObCw3gG96REsnh3t2I`) — user-gewählte Stimme, soll deutlich anders klingen als Bill (ruhiger, älter, schwerer)
 - Brian (Frankie) — amerikanisch, freundlicher, weniger Pathos als Bill → klare Abgrenzung
 - Sarah (Botschaft) — weiblich + Distortion → maximaler Kontrast zu allen drei männlichen Stimmen
 
@@ -381,7 +381,7 @@ Liberty City. Sechzehn Tage. Dann seht ihr, wer hier wirklich entscheidet.
 
 ---
 
-## 🧓 Block 3 — MR. CAMINO Zitat 1 (Stimme: **George** `JBFqnCBsd6RMkjVDRZzb` · Stability 70 % · Style 15 %)
+## 🧓 Block 3 — MR. CAMINO Zitat 1 (Stimme: **User-Voice** `xVObCw3gG96REsnh3t2I` · Stability 70 % · Style 15 %)
 
 > Generieren mit langsamer, schwerer Aussprache. Optional Reverb 12 % in Audacity drüberlegen für „Erinnerung"-Effekt.
 
@@ -389,7 +389,7 @@ Setz dich, Vito. Wenn du heute Nacht schießt… schießt deine Mutter dich näc
 
 ---
 
-## 🧓 Block 4 — MR. CAMINO Zitat 2 (Stimme: **George** `JBFqnCBsd6RMkjVDRZzb` · Stability 70 % · Style 15 %)
+## 🧓 Block 4 — MR. CAMINO Zitat 2 (Stimme: **User-Voice** `xVObCw3gG96REsnh3t2I` · Stability 70 % · Style 15 %)
 
 > Wie Block 3. Diesen Satz besonders langsam und schwer aussprechen lassen — er ist das Stadt-Zitat.
 
