@@ -36,13 +36,19 @@ from .auth import require_admin
 from .config import settings
 from .db import get_session
 from .models import Crew, CrewRelation, Mission, MissionStatus, SystemPrompt
-from .prompts import MissionContext, build_rewrite_prompt, build_user_prompt
+from .prompts import (
+    MissionContext,
+    build_mission_suggestions_prompt,
+    build_rewrite_prompt,
+    build_user_prompt,
+)
 from .schemas import (
     BulkSendRequest,
     MissionGenerateRequest,
     MissionManualRequest,
     MissionOut,
     MissionRewriteRequest,
+    MissionSuggestionsRequest,
     MissionUpdate,
     StatusOverrideRequest,
 )
@@ -217,6 +223,90 @@ async def rewrite_mission(
     await session.commit()
     await session.refresh(mission)
     return mission
+
+
+@router.post("/suggestions/{crew_id}")
+async def mission_suggestions(
+    crew_id: int,
+    payload: MissionSuggestionsRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Liefert 3 KI-Vorschlaege fuer den naechsten Auftrag der Crew. Basis ist
+    die letzte Reaktion: '👍 erledigt' -> Eskalation, '👎 fehlgeschlagen' ->
+    Tonwechsel, '❌ nicht ausfuehrbar' -> realistischere Alternativen, kein
+    vorheriger Auftrag -> frischer Einstieg.
+
+    Speichert KEINE Mission — der User waehlt einen Vorschlag im Frontend
+    und sendet ihn dann manuell via /manual oder /rewrite weiter.
+    """
+    crew = await session.get(Crew, crew_id)
+    if not crew:
+        raise HTTPException(404, "Crew nicht gefunden")
+
+    provider_override = payload.provider
+    model_override = payload.model
+
+    keys = {
+        "anthropic": await settings_get(session, "anthropic_api_key", settings.anthropic_api_key),
+        "openai": await settings_get(session, "openai_api_key", settings.openai_api_key),
+    }
+    models = {
+        "claude": await settings_get(session, "default_claude_model", settings.default_claude_model),
+        "openai": await settings_get(session, "default_openai_model", settings.default_openai_model),
+    }
+    provider_name = provider_override or await settings_get(
+        session, "default_provider", settings.default_ai_provider
+    )
+    provider = await get_provider(provider_name, keys=keys, models=models)
+
+    ctx = await _load_context(session, crew, "")
+    system_prompt, user_prompt = build_mission_suggestions_prompt(ctx)
+
+    try:
+        text = await provider.generate(user_prompt, model=model_override, system_prompt=system_prompt)
+    except Exception as exc:
+        raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+
+    # KI-Antwort als JSON parsen. Wenn die KI Markdown-Fences oder Erklaerungen
+    # mitschickt, versuchen wir die JSON-Liste innerhalb des Strings zu finden.
+    raw = (text or "").strip()
+    suggestions: list[dict] = []
+    try:
+        suggestions = json.loads(raw)
+    except json.JSONDecodeError:
+        # Fallback: suche das erste '[' ... ']' Substring
+        start = raw.find("[")
+        end = raw.rfind("]")
+        if start != -1 and end != -1 and end > start:
+            snippet = raw[start : end + 1]
+            try:
+                suggestions = json.loads(snippet)
+            except json.JSONDecodeError:
+                suggestions = []
+
+    # Validieren + auf 3 Eintraege normalisieren
+    cleaned: list[dict] = []
+    if isinstance(suggestions, list):
+        for s in suggestions[:3]:
+            if not isinstance(s, dict):
+                continue
+            title = str(s.get("title", "")).strip()
+            content = str(s.get("content", "")).strip()
+            if title or content:
+                cleaned.append({"title": title or "Vorschlag", "content": content})
+
+    last_status = ""
+    if ctx.history:
+        last_status = ctx.history[0].get("status", "")
+
+    return {
+        "ok": True,
+        "ai_provider": provider.name,
+        "ai_model": model_override or "",
+        "last_status": last_status,
+        "suggestions": cleaned,
+        "raw": raw if not cleaned else "",  # Debug-Hilfe falls Parsing fehlschlaegt
+    }
 
 
 @router.post("/manual", response_model=MissionOut)

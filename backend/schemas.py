@@ -91,6 +91,11 @@ class MissionManualRequest(BaseModel):
     scheduled_send_at: datetime | None = None
 
 
+class MissionSuggestionsRequest(BaseModel):
+    provider: str | None = None
+    model: str | None = None
+
+
 class BulkSendRequest(BaseModel):
     crew_ids: list[int]
     content: str

@@ -161,11 +161,11 @@ Dann hat er aufgelegt, drei Sekunden gewartet, und hat den Consigliere gerufen.
 
 Dreißig Minuten später wussten es vier weitere Crews in Algonquin. Eine Stunde später wusste es Bohan. Zwei Stunden später wusste es Broker, Colony Island, Dukes.
 
-Don Eligio war nicht da.
+Mr. Camino war nicht da.
 
-Don Eligio. Achtzig Jahre alt. Kein Mafioso, kein Boss, kein Mitglied einer Crew. Ein alter Mann, der seit dreißig Jahren in einem Café in Algonquin saß und zuhörte. Der für Don Manschettis Vater Pate gewesen war. Der dem Iron der AOD MC nach der Beerdigung seiner Frau die Hand gehalten hatte. Der den Inca der Latin Kings das Studieren bezahlt hatte. Der für die Aztecas in Bohan Konflikte beigelegt hatte, ohne je in Bohan gewesen zu sein. Der einer Familie der Nishiki-kai das Leben gerettet hatte, ohne je das Wort *Yakuza* in den Mund zu nehmen.
+Mr. Camino. Achtzig Jahre alt. Kein Mafioso, kein Boss, kein Mitglied einer Crew. Ein alter Mann, der seit dreißig Jahren in einem Café in Algonquin saß und zuhörte. Der für Don Manschettis Vater Pate gewesen war. Der dem Iron der AOD MC nach der Beerdigung seiner Frau die Hand gehalten hatte. Der den Inca der Latin Kings das Studieren bezahlt hatte. Der für die Aztecas in Bohan Konflikte beigelegt hatte, ohne je in Bohan gewesen zu sein. Der einer Familie der Nishiki-kai das Leben gerettet hatte, ohne je das Wort *Yakuza* in den Mund zu nehmen.
 
-Don Eligio. Der Mann, mit dem jeder reden konnte, weil er zu nichts gehörte. Der Mann, dessen Stille eine Brücke war zwischen Crews, die sich seit Jahrzehnten nicht ansahen.
+Mr. Camino. Der Mann, mit dem jeder reden konnte, weil er zu nichts gehörte. Der Mann, dessen Stille eine Brücke war zwischen Crews, die sich seit Jahrzehnten nicht ansahen.
 
 Sein Tee dampft noch. Sein Buch ist aufgeschlagen. Seine Brille liegt daneben.
 
@@ -185,7 +185,7 @@ In den ersten Stunden glaubt jede Crew, sie wisse, wer dahintersteckt.
 
 Die Manschettis glauben, es war die Bratva. Die Bratva glaubt, es war die Yakuza. Die Nishiki-kai glaubt nichts laut, aber Tanaka hat den Brief auf seinem Tisch noch einmal aufgeklappt. Die Latin Kings glauben, es war eine Botschaft an *sie*. Die Spanish Lords glauben, es war eine Botschaft *durch* die Latin Kings. Die Aztecas glauben, jemand wollte Bohan Stille nehmen. Die Vipers glauben, dass die alten Häuser zerfallen — und dass das eine Chance ist. Die MOB streamt es, ohne zu verstehen, was sie streamt. Die Fireflys posten ein Bild von einem leeren Stuhl, das innerhalb einer Stunde dreihunderttausend Mal geteilt wird.
 
-Niemand weiß, wo Don Eligio ist.
+Niemand weiß, wo Mr. Camino ist.
 
 Niemand weiß, ob er noch lebt.
 
@@ -211,7 +211,7 @@ Und die Stadt, die nie schläft, lernt zum ersten Mal seit dreißig Jahren, was 
 | **Colony Island** | Blackline Security · Independent Smugglers · Little Bay Pirates | Blau |
 | **Dukes** | Latin Kings · Eastline Wolves · Midtown 49ers · Money over Bitches · Spanish Lords | Cyan-Türkis |
 
-**Don Eligio** — 80 Jahre, Algonquin, kein Mitglied einer Crew. Vermittler seit drei Jahrzehnten. Verschwunden in der Nacht, in der dieses Briefing endet.
+**Mr. Camino** — 80 Jahre, Algonquin, kein Mitglied einer Crew. Vermittler seit drei Jahrzehnten. Verschwunden in der Nacht, in der dieses Briefing endet.
 
 ---
 
@@ -219,13 +219,13 @@ Und die Stadt, die nie schläft, lernt zum ersten Mal seit dreißig Jahren, was 
 
 ## Der Master-Plot — „Das Probespiel" (Spielleiter-Hinweis)
 
-Was die Spieler aus diesem Eröffnungs-Briefing wissen sollen: Don Eligio ist weg, die Stadt brodelt, der Big Boss bewegt sich im Hintergrund.
+Was die Spieler aus diesem Eröffnungs-Briefing wissen sollen: Mr. Camino ist weg, die Stadt brodelt, der Big Boss bewegt sich im Hintergrund.
 
-Was sie **nicht** wissen sollen (Reveal erst Tag 15–16): Das ganze Event ist ein **Probespiel**. Don Eligios Verschwinden ist kein Zufall — der Big Boss hat ihn entfernt, um die alte Hierarchie zu sprengen und einen neuen Top-Lieutenant aus den Crews auszuwählen. Alle 16 Tage werden als Test geführt:
+Was sie **nicht** wissen sollen (Reveal erst Tag 15–16): Das ganze Event ist ein **Probespiel**. Mr. Caminos Verschwinden ist kein Zufall — der Big Boss hat ihn entfernt, um die alte Hierarchie zu sprengen und einen neuen Top-Lieutenant aus den Crews auszuwählen. Alle 16 Tage werden als Test geführt:
 
 - Tag 3, 6, 9, 12, 15: Massen-Aufträge prüfen Akkumulation, Stille, öffentliche Wirkung, Loyalität und Finale-Können
 - Tag 1–2: Findungsphase
-- Tag 16: Krönung der Sieger-Crew + Don Eligios Rückkehr unter Big-Boss-Kontrolle
+- Tag 16: Krönung der Sieger-Crew + Mr. Caminos Rückkehr unter Big-Boss-Kontrolle
 
 Vollständige Spielleiter-Doku: [`EVENT_TIMELINE.md`](EVENT_TIMELINE.md), [`EVENT_BRIEFINGS_MASS.md`](EVENT_BRIEFINGS_MASS.md), [`QUEST_GIVERS.md`](QUEST_GIVERS.md), [`EVENT_FINALE.md`](EVENT_FINALE.md).
 
@@ -233,7 +233,7 @@ Vollständige Spielleiter-Doku: [`EVENT_TIMELINE.md`](EVENT_TIMELINE.md), [`EVEN
 
 ## Alternative Inciting Incidents (zur Wahl)
 
-Falls *„Don Eligio verschwindet"* nicht passt, sind hier zwei Alternativen — sie nutzen dieselbe Stadtteil-Tour und denselben Erzählbogen, nur mit anderem Auslöser im Schluss-Kapitel:
+Falls *„Mr. Camino verschwindet"* nicht passt, sind hier zwei Alternativen — sie nutzen dieselbe Stadtteil-Tour und denselben Erzählbogen, nur mit anderem Auslöser im Schluss-Kapitel:
 
 1. **Der Container, der nicht ankam.** In dieser Nacht verschwindet ein einzelner Container im Hafen Brokers. Inhalt: unbekannt — aber Italienische Mafia, Russian Mafia, Yakuza, Independents und Blackline behaupten alle, er war für sie. Niemand sagt was er enthielt. Das Event ist die Suche nach Container *und* Wahrheit.
 

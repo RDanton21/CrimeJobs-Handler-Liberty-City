@@ -49,14 +49,40 @@ def build_user_prompt(ctx: MissionContext) -> str:
         )
 
     if ctx.related_crews:
-        rel_lines = ["\n## Beziehungen zu anderen Gangs"]
-        for r in ctx.related_crews:
-            rel_lines.append(
-                f"- **{r['name']}** ({r['relation_type']}): {r.get('notes', '').strip() or 'keine Notiz'}"
-            )
-            if r.get("story"):
-                rel_lines.append(f"  Story-Notiz: {r['story'][:240]}")
-        parts.append("\n".join(rel_lines))
+        # Sortiere Beziehungen nach Dramaturgie-Relevanz:
+        # Rivals/Hostile sind die staerksten Story-Treiber; Allies/Business
+        # liefern Kontext fuer Kooperation oder Druckmittel.
+        rivals = [r for r in ctx.related_crews if r.get("relation_type") in ("rival", "hostile")]
+        partners = [r for r in ctx.related_crews if r.get("relation_type") in ("allied", "business")]
+        neutrals = [r for r in ctx.related_crews if r.get("relation_type") == "neutral"]
+
+        if rivals:
+            rel_lines = ["\n## Rivalitäten & Feinde (Story-Treiber — aktiv nutzen)"]
+            for r in rivals:
+                rel_lines.append(
+                    f"- **{r['name']}** ({r['relation_type']}): {r.get('notes', '').strip() or 'keine Notiz'}"
+                )
+                if r.get("story"):
+                    rel_lines.append(f"  Story-Notiz: {r['story'][:240]}")
+            parts.append("\n".join(rel_lines))
+
+        if partners:
+            rel_lines = ["\n## Verbündete & Geschäftspartner"]
+            for r in partners:
+                rel_lines.append(
+                    f"- **{r['name']}** ({r['relation_type']}): {r.get('notes', '').strip() or 'keine Notiz'}"
+                )
+                if r.get("story"):
+                    rel_lines.append(f"  Story-Notiz: {r['story'][:200]}")
+            parts.append("\n".join(rel_lines))
+
+        if neutrals:
+            rel_lines = ["\n## Neutrale Beziehungen"]
+            for r in neutrals:
+                rel_lines.append(
+                    f"- **{r['name']}** ({r['relation_type']}): {r.get('notes', '').strip() or 'keine Notiz'}"
+                )
+            parts.append("\n".join(rel_lines))
 
     if ctx.history:
         hist = ["\n## Bisherige Aufträge (jüngste zuerst)"]
@@ -89,6 +115,21 @@ def build_user_prompt(ctx: MissionContext) -> str:
         "inneren Kreis genau dieser Gang, nicht wie ein generisches Mafia-Briefing. "
         "Erzwinge es nicht plump — die Anker sollen organisch im Text sitzen, "
         "nicht aufgezählt wirken."
+        "\n\n**Rivalitäten als Plot-Motor:** Wenn die Gang Rivalen oder Feinde hat "
+        "(siehe Sektion 'Rivalitäten & Feinde'), nutze sie aktiv als Story-Treiber, "
+        "wenn der Auftragsinhalt das hergibt — als Zielpersonen, als Reviere die "
+        "angegriffen werden, als Gegner an einem Übergabe-Ort, als zu sabotierende "
+        "Geschäftspartner. Nicht jeder Auftrag muss eine Rivalität bedienen, aber "
+        "wo sie organisch passt, soll sie sichtbar im Text mitschwingen — verschlüsselt "
+        "über Code-Wörter (Revier-Namen, Rollen-Bezeichnungen) statt durch direkte "
+        "Nennung. Verbündete & Geschäftspartner können als verdeckte Helfer oder "
+        "Druckmittel auftauchen."
+        "\n\n**Firmen & Gewerbe einbeziehen:** Wenn in der Hintergrund-Story oder den "
+        "Beziehungen Firmen / Lokale / zivile Akteure vorkommen (Diner, Werkstatt, "
+        "Pawn Shop, Taxi-Unternehmen, Polizei-/Justiz-Behörden, Abschleppdienst usw.), "
+        "binde sie aktiv ein: als Schauplatz, als Zielort, als Mittelsmann, als Cover, "
+        "als Erpressungsobjekt oder als Informant. Das macht den Auftrag konkreter und "
+        "verzahnt die Crew-Story mit der zivilen Welt von Liberty City."
     )
 
     return "\n".join(parts)
@@ -189,6 +230,117 @@ def build_crime_business_briefing_prompt(
     return sys, "\n".join(parts)
 
 
+def build_mission_suggestions_prompt(ctx: MissionContext) -> tuple[str, str]:
+    """Drei KI-Vorschlaege fuer den naechsten Auftrag, basierend auf der letzten
+    Reaktion. Ausgabe-Format: JSON-Liste mit 3 Eintraegen, jeder ein knapper
+    Titel + ein fertiger Auftragstext im definierten Stil.
+
+    Returns (system_prompt, user_prompt).
+    """
+    last_status = ""
+    last_content = ""
+    if ctx.history:
+        last_status = ctx.history[0].get("status", "")
+        last_content = ctx.history[0].get("content", "")
+
+    status_hint_map = {
+        "approved": (
+            "Der letzte Auftrag wurde '👍 erfolgreich erledigt'. Die drei Vorschlaege "
+            "sollen die Story konsequent FORTFUEHREN — Eskalation, naechste Stufe, "
+            "groesseres Ziel, hoeheres Risiko. Drei verschiedene Richtungen, in denen "
+            "die Crew an Boden gewinnt."
+        ),
+        "rejected": (
+            "Der letzte Auftrag '👎 schlug fehl'. Die drei Vorschlaege sollen einen "
+            "klaren TONWECHSEL bringen — anderer Ansatz, anderes Geschaeftsfeld, "
+            "andere Mittel. Mindestens einer der drei sollte eine REPARATUR-Geste "
+            "sein (Schaden begrenzen, Verraeter finden, Gesicht wahren), die anderen "
+            "neue Wege oeffnen."
+        ),
+        "cancelled": (
+            "Der letzte Auftrag wurde '❌ als nicht ausfuehrbar' markiert. Die drei "
+            "Vorschlaege sollen REALISTISCHERE Alternativen sein — kleiner skaliert, "
+            "anderer Zugang, andere Mittel. Aber dennoch im gleichen Spannungs-Niveau."
+        ),
+        "pending": (
+            "Der letzte Auftrag laeuft noch '⏳ offen'. Die drei Vorschlaege sollen "
+            "PARALLELE Operationen sein, die sich nicht mit dem laufenden Auftrag "
+            "beissen."
+        ),
+        "": (
+            "Es gibt keinen vorherigen Auftrag. Die drei Vorschlaege sollen FRISCHE "
+            "Einstiege sein — drei verschiedene atmosphaerische Aufhaenger, die zur "
+            "Gang-Story passen."
+        ),
+    }
+    status_hint = status_hint_map.get(last_status, status_hint_map[""])
+
+    sys = (
+        DEFAULT_SYSTEM_PROMPT
+        + "\n\n## Spezial-Modus: Drei Vorschlaege"
+        + "\nDu generierst nicht EINEN Auftrag, sondern DREI verschiedene Vorschlaege "
+        + "fuer den naechsten Auftrag — als Auswahl fuer den Spielleiter."
+        + "\n\nAusgabe-Format: AUSSCHLIESSLICH ein JSON-Array mit genau 3 Objekten, "
+        + "jedes Objekt mit den Feldern 'title' (kurz, 3-6 Worte, Klartext fuer den "
+        + "Spielleiter) und 'content' (der fertige Auftragstext im definierten "
+        + "kryptisch-atmosphaerischen Stil, 3-4 Saetze). Beispiel:"
+        + "\n[{\"title\": \"Hafen-Tribut bei Nacht\", \"content\": \"Die Container schweigen, ...\"}, "
+        + "{\"title\": \"Brand im Diamantenviertel\", \"content\": \"...\"}, "
+        + "{\"title\": \"Maklerin abklopfen\", \"content\": \"...\"}]"
+        + "\nKEIN Markdown, KEIN Codeblock, KEIN erklaerender Text vor oder nach dem JSON. "
+        + "Nur das reine JSON-Array."
+    )
+
+    parts: list[str] = []
+    parts.append(f"## Gang\n{ctx.crew_name}")
+    if ctx.crew_story:
+        parts.append(f"\n## Hintergrund-Story\n{ctx.crew_story}")
+
+    if ctx.crime_business and ctx.crime_business.strip():
+        parts.append(
+            f"\n## Crime-Business (intern, fuer Auftrags-Ausrichtung)\n{ctx.crime_business.strip()}"
+        )
+
+    if ctx.related_crews:
+        rivals = [r for r in ctx.related_crews if r.get("relation_type") in ("rival", "hostile")]
+        partners = [r for r in ctx.related_crews if r.get("relation_type") in ("allied", "business")]
+
+        if rivals:
+            rel_lines = ["\n## Rivalitäten & Feinde (Story-Treiber)"]
+            for r in rivals:
+                rel_lines.append(
+                    f"- **{r['name']}** ({r['relation_type']}): {r.get('notes', '').strip() or 'keine Notiz'}"
+                )
+            parts.append("\n".join(rel_lines))
+
+        if partners:
+            rel_lines = ["\n## Verbündete & Geschäftspartner"]
+            for r in partners:
+                rel_lines.append(
+                    f"- **{r['name']}** ({r['relation_type']}): {r.get('notes', '').strip() or 'keine Notiz'}"
+                )
+            parts.append("\n".join(rel_lines))
+
+    if last_content:
+        parts.append(
+            f"\n## Letzter Auftrag (Status: {last_status})\n{last_content[:500]}"
+        )
+
+    parts.append(f"\n## Steuerung auf Basis der letzten Reaktion\n{status_hint}")
+
+    parts.append(
+        "\n## Aufgabe\n"
+        "Generiere jetzt DREI verschiedene Auftrags-Vorschlaege als JSON-Array (Format "
+        "siehe System-Prompt). Die drei Vorschlaege sollen sich DEUTLICH unterscheiden — "
+        "verschiedene Geschaeftsfelder, verschiedene Schauplaetze, verschiedene "
+        "Tonalitaeten. Mindestens einer sollte eine Rivalitaet oder einen zivilen "
+        "Akteur (Firma) ins Spiel bringen, wenn vorhanden. Jeder Vorschlag muss "
+        "fuer sich allein stehen koennen — der Spielleiter waehlt EINEN aus."
+    )
+
+    return sys, "\n".join(parts)
+
+
 def build_rewrite_prompt(ctx: MissionContext, raw_input: str) -> str:
     """Roher Admin-Text → KI schreibt im kryptisch-hochwertigen Stil um."""
     parts: list[str] = []
@@ -206,12 +358,33 @@ def build_rewrite_prompt(ctx: MissionContext, raw_input: str) -> str:
         )
 
     if ctx.related_crews:
-        rel_lines = ["\n## Beziehungen zu anderen Gangs"]
-        for r in ctx.related_crews:
-            rel_lines.append(
-                f"- **{r['name']}** ({r['relation_type']}): {r.get('notes', '').strip() or 'keine Notiz'}"
-            )
-        parts.append("\n".join(rel_lines))
+        rivals = [r for r in ctx.related_crews if r.get("relation_type") in ("rival", "hostile")]
+        partners = [r for r in ctx.related_crews if r.get("relation_type") in ("allied", "business")]
+        neutrals = [r for r in ctx.related_crews if r.get("relation_type") == "neutral"]
+
+        if rivals:
+            rel_lines = ["\n## Rivalitäten & Feinde (aktiv einweben, wenn Roh-Input passt)"]
+            for r in rivals:
+                rel_lines.append(
+                    f"- **{r['name']}** ({r['relation_type']}): {r.get('notes', '').strip() or 'keine Notiz'}"
+                )
+            parts.append("\n".join(rel_lines))
+
+        if partners:
+            rel_lines = ["\n## Verbündete & Geschäftspartner"]
+            for r in partners:
+                rel_lines.append(
+                    f"- **{r['name']}** ({r['relation_type']}): {r.get('notes', '').strip() or 'keine Notiz'}"
+                )
+            parts.append("\n".join(rel_lines))
+
+        if neutrals:
+            rel_lines = ["\n## Neutrale Beziehungen"]
+            for r in neutrals:
+                rel_lines.append(
+                    f"- **{r['name']}** ({r['relation_type']}): {r.get('notes', '').strip() or 'keine Notiz'}"
+                )
+            parts.append("\n".join(rel_lines))
 
     if ctx.history:
         hist = ["\n## Bisherige Aufträge (jüngste zuerst)"]
@@ -241,8 +414,16 @@ def build_rewrite_prompt(ctx: MissionContext, raw_input: str) -> str:
         "\n\n**Story-Verankerung:** Lass die Hintergrund-Story spürbar werden — übersetze Locations, "
         "Rollen oder Geschäftsfelder aus dem Roh-Input in die Welt der Gang (z.B. der Roh-Input nennt "
         "'Juwelier in der Innenstadt' → die Gang-Story spricht vom 'Diamantenviertel' → nutze diesen "
-        "Begriff). Die Tonalität soll zur Mentalität der Gang passen. Beziehungen und Reviere "
-        "berücksichtigen, ohne sie aufzuzählen."
+        "Begriff). Die Tonalität soll zur Mentalität der Gang passen."
+        "\n\n**Rivalitäten als Plot-Motor:** Wenn der Roh-Input einen Gegner / Zielperson / Reviere "
+        "erwähnt und die Gang hat passende Rivalen oder Feinde, übersetze die Zielreferenz in eine "
+        "Anspielung auf den konkreten Rivalen (über Revier-Namen, Rollen-Bezeichnungen, nicht direkt "
+        "den Crew-Namen). Verbündete & Geschäftspartner können als verdeckte Helfer oder Druckmittel "
+        "im Subtext mitschwingen."
+        "\n\n**Firmen & Gewerbe einbeziehen:** Wenn der Roh-Input einen zivilen Akteur nennt (Lokal, "
+        "Werkstatt, Pawn Shop, Taxi, Polizei, Justiz, Abschleppdienst) und die Gang-Story oder die "
+        "Beziehungen verweisen auf eine passende Firma, nutze sie aktiv als Schauplatz, Cover, "
+        "Mittelsmann oder Erpressungsobjekt."
         "\n\nGib nur den umgeschriebenen Auftragstext aus, keine Erklärung."
     )
 
