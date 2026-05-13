@@ -288,8 +288,25 @@ async def preview_crime_business(
     except Exception as exc:
         raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
 
-    # Sicherheits-Trim fuer Discord (2000 Zeichen max — kleines Polster)
     text = (text or "").strip()
+
+    # Pflicht-Eroeffnung garantieren — auch wenn die KI sie weglaesst oder leicht
+    # umformuliert. Wir pruefen auf den exakten Wortlaut; falls die KI eine eigene
+    # Eroeffnung gewaehlt hat, wird sie durch die feste ersetzt/vorangestellt.
+    FIXED_OPENING = (
+        "Ihr wollt wissen, mit welchem Business ich euch betreuen werde: Dann passt gut auf..."
+    )
+    if not text.startswith(FIXED_OPENING):
+        # Wenn ein aehnlicher Satz am Anfang steht (KI hat es umformuliert), erste
+        # Zeile entfernen und durch FIXED ersetzen. Heuristik: erste Zeile enthaelt
+        # 'Business' oder 'betreuen' -> ersetzen.
+        first_line, _, rest = text.partition("\n")
+        if "business" in first_line.lower() or "betreuen" in first_line.lower():
+            text = f"{FIXED_OPENING}\n\n{rest.lstrip()}"
+        else:
+            text = f"{FIXED_OPENING}\n\n{text}"
+
+    # Sicherheits-Trim fuer Discord (2000 Zeichen max — kleines Polster)
     if len(text) > 1990:
         text = text[:1985] + "…"
 
