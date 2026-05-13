@@ -4,7 +4,7 @@
 **Spielleiter-Briefing für die finale Phase des Events**
 
 > 🔒 **DER GROSSE REVEAL — Spielleiter-intern, niemals vorab spoilern:**
-> Der „Big Boss" ist **Bürgermeister Francis J. Underwood**. Der amtierende Head of Liberty City hat das gesamte Probespiel inszeniert. Er hat Mr. Camino zur Seite gestellt, weil dessen Neutralität ihm im Weg stand — Underwood will keine vermittelnde Macht über sich, sondern eine **eigene** Crime-Crew als rechte Hand. Die Mittler-Stimmen, die „Botschaft auf den Bildschirmen", die Aufträge — alles kam aus dem Rathaus, über einen Apparat, den nicht einmal die Mittler selbst voll durchschauen.
+> Der „Big Boss" ist **Francis J. Underwood, der amtierende Head of Liberty City**. Er hat das gesamte Probespiel inszeniert. Er hat Mr. Camino zur Seite gestellt, weil dessen Neutralität ihm im Weg stand — Underwood will keine vermittelnde Macht über sich, sondern eine **eigene** Crime-Crew als rechte Hand. Die Mittler-Stimmen, die „Botschaft auf den Bildschirmen", die Aufträge — alles kam aus dem Rathaus, über einen Apparat, den nicht einmal die Mittler selbst voll durchschauen.
 > Der Reveal kommt in **zwei Stufen**: zuerst die verschleierte Stimme (Voice-Over), dann das Gesicht (Underwood persönlich). Details in Phase 3 + 3b.
 
 ---
@@ -87,7 +87,7 @@ Die Phasen:
 
 **Der eigentliche Schock-Moment der gesamten Story.**
 
-Bürgermeister Francis J. Underwood erscheint live — entweder im Stadtrat-Hauptchannel oder per kurzfristig einberufener Pressekonferenz (in-game am Rathaus, ggf. simuliert via Voice-Channel). Er trägt denselben dunkelgrauen Anzug wie an Tag 1. Diesmal lächelt er.
+Francis J. Underwood, der Head of Liberty City, erscheint live — entweder im Stadtrat-Hauptchannel oder per kurzfristig einberufener Pressekonferenz (in-game am City Hall, ggf. simuliert via Voice-Channel). Er trägt denselben dunkelgrauen Anzug wie an Tag 1. Diesmal lächelt er.
 
 **Underwood-Skript (~1100 Zeichen, Voice-Over-tauglich, House-of-Cards-Ton):**
 
@@ -120,7 +120,7 @@ Bürgermeister Francis J. Underwood erscheint live — entweder im Stadtrat-Haup
   - Pater bietet manchen Crews Trost und Aussicht („Eure Crew ist nicht raus, sie hat nur ihren Platz gefunden")
   - Skrupellose stellt klar: keine Rache-Versuche gegen die Sieger-Crew geduldet — Underwoods Wort
 - **Medien explodieren:** Talkshows live, Eilmeldungen, Twitter-/Verschwörungs-Threads. Manche Reporter rufen zur Abwahl Underwoods auf, manche jubeln ihm zu.
-- **Crime-Crews verstehen jetzt:** der „Big Boss" war nie unsichtbar. Er saß die ganze Zeit im 47. Stock des LC Civic Tower. Sie haben für den amtierenden Bürgermeister gearbeitet, ohne es zu wissen.
+- **Crime-Crews verstehen jetzt:** der „Big Boss" war nie unsichtbar. Er saß die ganze Zeit im 47. Stock des LC Civic Tower. Sie haben für den amtierenden Head of Liberty City gearbeitet, ohne es zu wissen.
 - **Keine neuen Aufträge.** Das Event endet hier.
 
 ---
@@ -128,7 +128,7 @@ Bürgermeister Francis J. Underwood erscheint live — entweder im Stadtrat-Haup
 ## Don-Camino-Variante A im Detail (mit Underwood-Reveal)
 
 **Was am Tag 1 unausgesprochen war:**
-Mr. Caminos Stuhl im Café war leer. Niemand wusste warum. Die Stadt hat es als „Verschwinden" gelesen. Manche dachten an die Bratva. Andere an die Mafia. Andere an die LCPD. Niemand dachte an Bürgermeister Underwood — weil niemand wusste, dass er etwas damit zu tun hatte.
+Mr. Caminos Stuhl im Café war leer. Niemand wusste warum. Die Stadt hat es als „Verschwinden" gelesen. Manche dachten an die Bratva. Andere an die Mafia. Andere an die LCPD. Niemand dachte an den Head of Liberty City — weil niemand wusste, dass Underwood etwas damit zu tun hatte.
 
 **Was wirklich passiert ist:**
 Mr. Camino wurde von **Underwood persönlich** kontaktiert — kein Mittler, kein Anruf, kein Brief. Underwood ist abends in den Brass-Plate-Diner gegangen, hat sich Camino gegenüber gesetzt und gesagt:
