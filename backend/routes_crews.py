@@ -7,10 +7,21 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from .ai import get_provider
 from .auth import require_admin
+from .config import settings
 from .db import get_session
 from .models import Crew, CrewRelation, Mission
-from .schemas import CrewCreate, CrewOut, CrewRelationBase, CrewRelationOut, CrewUpdate
+from .prompts import build_crime_business_briefing_prompt
+from .schemas import (
+    CrewCreate,
+    CrewOut,
+    CrewRelationBase,
+    CrewRelationOut,
+    CrewUpdate,
+    CrimeBusinessSendRequest,
+)
+from .settings_store import get as settings_get_value
 
 router = APIRouter(prefix="/api/crews", tags=["crews"], dependencies=[Depends(require_admin)])
 
@@ -231,3 +242,80 @@ async def get_crew_boss_info(crew_id: int, session: AsyncSession = Depends(get_s
         out.append({"mission_id": m.id, "messages": bucket})
 
     return out
+
+
+# ---- Crime-Business: KI-Umformulierung + Sendung an separaten Channel ----
+
+@router.post("/{crew_id}/send-crime-business")
+async def send_crime_business(
+    crew_id: int,
+    payload: CrimeBusinessSendRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Liest crime_business der Crew, formuliert es per KI im Noir-Stil um
+    (passend zur Hintergrund-Story) und postet das Ergebnis in den
+    crime_business_channel_id der Crew. Speichert KEINE Mission ab —
+    eigenstaendiger Briefing-Post."""
+    crew = await session.get(Crew, crew_id)
+    if not crew:
+        raise HTTPException(404, "Crew nicht gefunden")
+    if not (crew.crime_business or "").strip():
+        raise HTTPException(400, "Keine Crime-Business-Beschreibung hinterlegt")
+    if not (crew.crime_business_channel_id or "").strip():
+        raise HTTPException(400, "Kein Crime-Business-Channel hinterlegt")
+
+    # AI-Provider aufbauen (gleiche Konfiguration wie Mission-Generator)
+    keys = {
+        "anthropic": await settings_get_value(session, "anthropic_api_key", settings.anthropic_api_key),
+        "openai": await settings_get_value(session, "openai_api_key", settings.openai_api_key),
+    }
+    models = {
+        "claude": await settings_get_value(session, "default_claude_model", settings.default_claude_model),
+        "openai": await settings_get_value(session, "default_openai_model", settings.default_openai_model),
+    }
+    provider_name = payload.provider or await settings_get_value(
+        session, "default_provider", settings.default_ai_provider
+    )
+    provider = await get_provider(provider_name, keys=keys, models=models)
+
+    system_prompt, user_prompt = build_crime_business_briefing_prompt(
+        crew_name=crew.name,
+        crew_story=crew.story_background or "",
+        crime_business=crew.crime_business,
+    )
+
+    try:
+        text = await provider.generate(user_prompt, model=payload.model, system_prompt=system_prompt)
+    except Exception as exc:
+        raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+
+    # Sicherheits-Limit fuer Discord (2000 Zeichen max)
+    text = (text or "").strip()
+    if len(text) > 1990:
+        text = text[:1985] + "…"
+
+    # Bot-Call zum Posten in den Channel
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as cli:
+            r = await cli.post(
+                "http://127.0.0.1:8001/post_text",
+                json={"channel_id": crew.crime_business_channel_id, "content": text},
+            )
+        if r.status_code >= 400:
+            try:
+                detail = r.json().get("error", r.text)
+            except Exception:
+                detail = r.text
+            raise HTTPException(r.status_code, f"Bot-Fehler: {detail}")
+        bot_result = r.json()
+    except httpx.RequestError as exc:
+        raise HTTPException(503, f"Bot nicht erreichbar: {exc}") from exc
+
+    return {
+        "ok": True,
+        "ai_provider": provider.name,
+        "ai_model": payload.model or "",
+        "char_count": len(text),
+        "preview": text[:200],
+        "discord_message_id": bot_result.get("message_id"),
+    }

@@ -95,7 +95,7 @@ function dashboard() {
     statusFilter: "",
     DISTRICTS,
     showNew: false,
-    draft: { name: "", story_background: "", crime_business: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
+    draft: { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
     notifications: {},
     seenAt: JSON.parse(localStorage.getItem("crewSeenAt") || "{}"),
     archivingAll: false,
@@ -369,7 +369,7 @@ function dashboard() {
         const c = await api.post("/api/crews", this.draft);
         this.crews.push(c);
         this.crews.sort((a, b) => a.name.localeCompare(b.name));
-        this.draft = { name: "", story_background: "", crime_business: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" };
+        this.draft = { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" };
         this.showNew = false;
       } catch (e) { alert(e.message); }
     },
@@ -385,7 +385,7 @@ function crewPage() {
   const id = parseInt(location.pathname.split("/").pop(), 10);
   return {
     crewId: id,
-    crew: { name: "", story_background: "", crime_business: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
+    crew: { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
     DISTRICTS,
     allCrews: [],
     relations: [],
@@ -400,6 +400,10 @@ function crewPage() {
     bossInfoByMission: {},
     rewritingMissionId: null,
     editingMissionId: null,
+    // Crime-Business-Send
+    cbSending: false,
+    cbMessage: "",
+    cbIsError: false,
 
     get otherCrews() {
       return this.allCrews.filter(c => c.id !== this.crewId);
@@ -474,6 +478,7 @@ function crewPage() {
           name: this.crew.name,
           story_background: this.crew.story_background,
           crime_business: this.crew.crime_business || "",
+          crime_business_channel_id: this.crew.crime_business_channel_id || "",
           discord_channel_id: this.crew.discord_channel_id,
           info_channel_id: this.crew.info_channel_id,
           district: this.crew.district || "",
@@ -485,6 +490,27 @@ function crewPage() {
       if (!confirm("Gang wirklich löschen?")) return;
       try { await api.del(`/api/crews/${this.crewId}`); location.href = "/"; }
       catch (e) { alert(e.message); }
+    },
+
+    async sendCrimeBusiness() {
+      this.cbMessage = "";
+      this.cbIsError = false;
+      const cb = (this.crew.crime_business || "").trim();
+      const ch = (this.crew.crime_business_channel_id || "").trim();
+      if (!cb) { this.cbMessage = "Bitte erst Crime-Business eintragen und speichern."; this.cbIsError = true; return; }
+      if (!ch) { this.cbMessage = "Bitte erst Crime-Business-Channel-ID eintragen und speichern."; this.cbIsError = true; return; }
+      this.cbSending = true;
+      try {
+        const res = await api.post(`/api/crews/${this.crewId}/send-crime-business`, {});
+        const preview = (res.preview || "").slice(0, 140);
+        this.cbMessage = `✓ Gesendet (${res.char_count} Zeichen, ${res.ai_provider}). Vorschau: ${preview}…`;
+        this.cbIsError = false;
+      } catch (e) {
+        this.cbMessage = "Fehler: " + (e.message || e);
+        this.cbIsError = true;
+      } finally {
+        this.cbSending = false;
+      }
     },
 
     async addRelation() {

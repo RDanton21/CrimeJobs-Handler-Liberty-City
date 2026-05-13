@@ -39,6 +39,7 @@ class Crew(Base):
     name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     story_background: Mapped[str] = mapped_column(Text, default="")
     crime_business: Mapped[str] = mapped_column(Text, default="")
+    crime_business_channel_id: Mapped[str] = mapped_column(String(40), default="")
     discord_channel_id: Mapped[str] = mapped_column(String(40), default="")
     info_channel_id: Mapped[str] = mapped_column(String(40), default="")
     district: Mapped[str] = mapped_column(String(40), default="")
