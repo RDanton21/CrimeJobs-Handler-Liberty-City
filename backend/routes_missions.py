@@ -364,6 +364,114 @@ async def list_missions(
     return result.scalars().all()
 
 
+RANKING_POINTS = {
+    MissionStatus.APPROVED: 2,
+    MissionStatus.REJECTED: -1,
+    MissionStatus.CANCELLED: 0,
+    MissionStatus.PENDING: 0,
+    MissionStatus.DRAFT: 0,
+}
+
+
+@router.get("/ranking")
+async def mission_ranking(
+    since: datetime | None = None,
+    crime_only: bool = True,
+    session: AsyncSession = Depends(get_session),
+):
+    """Performance-Ranking pro Crew + Stadtteil-Aggregat.
+
+    Punkte: approved=+2, rejected=-1, cancelled/pending/draft=0.
+    Bei crime_only=true werden Crews aus FIRMS_TO_CREATE ausgeschlossen
+    (13 Zivil-Firmen werden nicht gerankt)."""
+    # Lokaler Import um circular-import zu vermeiden (FIRMS_TO_CREATE liegt im
+    # seed-Skript). Sicher, da seed_event_lore.py keine Bot/Backend-Routen importiert.
+    from .seed_event_lore import FIRMS_TO_CREATE
+    firm_names = {name for name, _district in FIRMS_TO_CREATE}
+
+    # Alle Crews laden (fuer Metadata wie name/district/color_hex)
+    crews_result = await session.execute(select(Crew).order_by(Crew.id))
+    crews: list[Crew] = list(crews_result.scalars().all())
+
+    if crime_only:
+        crews = [c for c in crews if c.name not in firm_names]
+
+    crew_ids = [c.id for c in crews]
+    if not crew_ids:
+        return {
+            "crews": [],
+            "districts": [],
+            "since": since.isoformat() if since else None,
+            "crime_only": crime_only,
+        }
+
+    # Counts pro (crew_id, status) aggregieren
+    q = (
+        select(Mission.crew_id, Mission.status, func.count(Mission.id))
+        .where(Mission.crew_id.in_(crew_ids))
+        .group_by(Mission.crew_id, Mission.status)
+    )
+    if since is not None:
+        q = q.where(Mission.created_at >= since)
+    rows = (await session.execute(q)).all()
+
+    # In dict[crew_id] = {status: count, ...}
+    by_crew: dict[int, dict[str, int]] = {
+        cid: {s.value: 0 for s in MissionStatus} for cid in crew_ids
+    }
+    for crew_id, status, count in rows:
+        key = status.value if hasattr(status, "value") else str(status)
+        by_crew[crew_id][key] = count
+
+    crew_entries: list[dict] = []
+    for c in crews:
+        counts = by_crew[c.id]
+        approved = counts.get(MissionStatus.APPROVED.value, 0)
+        rejected = counts.get(MissionStatus.REJECTED.value, 0)
+        cancelled = counts.get(MissionStatus.CANCELLED.value, 0)
+        pending = counts.get(MissionStatus.PENDING.value, 0)
+        draft = counts.get(MissionStatus.DRAFT.value, 0)
+        points = approved * 2 + rejected * -1
+        total = approved + rejected + cancelled + pending + draft
+        crew_entries.append({
+            "crew_id": c.id,
+            "name": c.name,
+            "district": c.district or "",
+            "color_hex": c.color_hex,
+            "approved": approved,
+            "rejected": rejected,
+            "cancelled": cancelled,
+            "pending": pending,
+            "total": total,
+            "points": points,
+        })
+    crew_entries.sort(key=lambda e: (-e["points"], -e["approved"], e["name"]))
+
+    # Stadtteil-Aggregat
+    district_acc: dict[str, dict[str, int]] = {}
+    for e in crew_entries:
+        d = e["district"] or "(ohne)"
+        bucket = district_acc.setdefault(d, {
+            "name": d, "points": 0, "approved": 0, "rejected": 0,
+            "cancelled": 0, "pending": 0, "crew_count": 0,
+        })
+        bucket["points"] += e["points"]
+        bucket["approved"] += e["approved"]
+        bucket["rejected"] += e["rejected"]
+        bucket["cancelled"] += e["cancelled"]
+        bucket["pending"] += e["pending"]
+        bucket["crew_count"] += 1
+    district_entries = list(district_acc.values())
+    district_entries.sort(key=lambda e: (-e["points"], -e["approved"], e["name"]))
+
+    return {
+        "crews": crew_entries,
+        "districts": district_entries,
+        "since": since.isoformat() if since else None,
+        "crime_only": crime_only,
+    }
+
+
 @router.get("/stats")
 async def mission_stats(
     crew_id: int | None = None,
