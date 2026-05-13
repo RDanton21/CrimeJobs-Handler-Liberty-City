@@ -111,6 +111,7 @@ def build_crime_business_briefing_prompt(
     Returns (system_prompt, user_prompt). Kein Mission-Kontext, keine Historie.
     Output soll <= 1800 Zeichen sein (Discord-Limit 2000, Reserve), 4-6 Absaetze.
     """
+    FIXED_OPENING = "Ihr wollt wissen, mit welchem Business ich euch betreuen werde: Dann passt gut auf..."
     sys = (
         "Du bist Sprecher eines unsichtbaren, unantastbaren 'Big Boss', der Liberty City "
         "im Hintergrund steuert. Du verfasst ein internes Briefing an eine Crime-Crew — "
@@ -125,9 +126,10 @@ def build_crime_business_briefing_prompt(
         "  - 'Irrelevanz ist nur ein anderer Begriff fuer Austauschbarkeit.'\n"
         "  - 'Es gibt Ebenen, die ihr nicht seht.'\n\n"
         "Verbindlich enthalten:\n"
-        "  1. **Klarer Eroeffnungs-Satz**, der unmissverstaendlich macht, dass dies das "
-        "ZUGEWIESENE Crime-Business der Crew ist — 'Das hier ist eures', 'Ihr habt euer Feld', "
-        "'Eure Reviere stehen' o. ae. Sehr direkt, ohne Floskeln.\n"
+        f"  1. **PFLICHT-EROEFFNUNG (woertlich, exakt so):**\n"
+        f"     {FIXED_OPENING}\n"
+        f"     Der Text beginnt MIT genau dieser Zeile (eigene Zeile, dann Leerzeile, "
+        f"dann der Rest). Keine andere Anrede an die Crew vorher oder nachher.\n"
         "  2. **Konkrete Benennung des Geschaeftsfeldes**: Die Crew MUSS nach dem Lesen "
         "wissen, um welches Business es geht. Wenn das zugewiesene Crime-Business "
         "'Drogenhandel: Kokain ueber Hafen' lautet, muss der Text die Begriffe klar erkennen "
