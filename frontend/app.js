@@ -420,6 +420,13 @@ function crewPage() {
     cbProvider: "",       // welcher AI-Provider hat generiert (Info-Anzeige)
     cbMessage: "",
     cbIsError: false,
+    // KI-Folgeauftrags-Vorschläge (3 Stueck, basieren auf letzter Reaktion)
+    suggestions: [],
+    suggestionsBusy: false,
+    suggestionsLoaded: false,
+    suggestionsLastStatus: "",  // 'approved' | 'rejected' | 'cancelled' | 'pending' | ''
+    suggestionsMessage: "",
+    suggestionsIsError: false,
 
     get otherCrews() {
       return this.allCrews.filter(c => c.id !== this.crewId);
@@ -573,6 +580,70 @@ function crewPage() {
       this.cbProvider = "";
       this.cbMessage = "Vorschau verworfen.";
       this.cbIsError = false;
+    },
+
+    // ---- KI-Folgeauftrags-Vorschläge ----
+    suggestionsStatusLabel() {
+      const map = {
+        approved: "👍 erledigt → Vorschläge eskalieren / nächste Stufe",
+        rejected: "👎 fehlgeschlagen → Vorschläge wechseln den Ton / Ansatz",
+        cancelled: "❌ nicht ausführbar → Vorschläge sind realistischer skaliert",
+        pending: "⏳ offen → Vorschläge sind parallele Operationen",
+      };
+      return map[this.suggestionsLastStatus] || "kein Verlauf → frische Einstiege";
+    },
+
+    async loadSuggestions(force = false) {
+      this.suggestionsMessage = "";
+      this.suggestionsIsError = false;
+      this.suggestionsBusy = true;
+      try {
+        const provider = (this.genReq && this.genReq.provider) || "anthropic";
+        const model = (this.genReq && this.genReq.model) || "";
+        const res = await api.post(`/api/missions/suggestions/${this.crewId}`, {
+          crew_id: this.crewId,
+          provider,
+          model,
+          extra_instructions: "",
+        });
+        this.suggestions = Array.isArray(res.suggestions) ? res.suggestions : [];
+        this.suggestionsLastStatus = res.last_status || "";
+        this.suggestionsLoaded = true;
+        if (this.suggestions.length === 0) {
+          this.suggestionsMessage = "Keine Vorschläge geparst. Roh-Antwort der KI:\n" + (res.raw || "");
+          this.suggestionsIsError = true;
+        } else if (force) {
+          this.suggestionsMessage = `✓ Neu generiert (${this.suggestions.length} Vorschläge).`;
+        }
+      } catch (e) {
+        this.suggestionsMessage = "Fehler beim Generieren: " + (e.message || e);
+        this.suggestionsIsError = true;
+      } finally {
+        this.suggestionsBusy = false;
+      }
+    },
+
+    async adoptSuggestion(s) {
+      const text = (s && s.content ? String(s.content) : "").trim();
+      if (!text) { alert("Vorschlag ist leer."); return; }
+      if (!confirm(`Diesen Vorschlag als Entwurf übernehmen?\n\nTitel: ${s.title || "(ohne)"}\n\nDer Auftrag wird als DRAFT angelegt — du kannst danach editieren und senden.`)) return;
+      this.suggestionsBusy = true;
+      try {
+        await api.post("/api/missions/manual", {
+          crew_id: this.crewId,
+          content: text,
+          deadline_minutes: 0,
+          scheduled_send_at: null,
+        });
+        this.suggestionsMessage = `✓ „${s.title || "Vorschlag"}" als Entwurf gespeichert.`;
+        this.suggestionsIsError = false;
+        await this.loadMissions();
+      } catch (e) {
+        this.suggestionsMessage = "Fehler beim Übernehmen: " + (e.message || e);
+        this.suggestionsIsError = true;
+      } finally {
+        this.suggestionsBusy = false;
+      }
     },
 
     async addRelation() {

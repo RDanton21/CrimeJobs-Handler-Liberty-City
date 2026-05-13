@@ -3,7 +3,7 @@
 **Zeitraum:** 04.09.2026 (Tag 1) – 20.09.2026 (Tag 16)
 **Master-Plot:** „Das Probespiel" — Big Boss sucht neuen Top-Lieutenant, alle Crews konkurrieren um die Krone.
 
-> ⚠ **Was die Spieler nicht wissen** (Reveal in Tag 15–16): Das ganze Event ist eine Casting-Show. Don Eligio wurde nicht entführt — er wurde vom Big Boss zur Seite gestellt, um die alte Hierarchie zu sprengen. Am Ende übernimmt nur **eine Crew** die rechte Hand des Big Boss.
+> ⚠ **Was die Spieler nicht wissen** (Reveal in Tag 15–16): Das ganze Event ist eine Casting-Show. Mr. Camino wurde nicht entführt — er wurde vom Big Boss zur Seite gestellt, um die alte Hierarchie zu sprengen. Am Ende übernimmt nur **eine Crew** die rechte Hand des Big Boss.
 
 ---
 
@@ -23,7 +23,7 @@
 **Quest-Geber:** beginnen subtil aufzutauchen — Café-Begegnungen, Garage-Besuche, „zufällige" Treffen
 **Aufträge:** ggf. erste kleine RP-Aufgaben einzelner Quest-Geber (nicht systemkritisch)
 **Was passiert:** Crews bauen Allianzen, treffen Mittler zum ersten Mal — ohne zu wissen, dass es Mittler sind. „Wer ist der Kerl im Diner, der mich gestern nach meinem Boss gefragt hat?"
-**Atmosphäre:** Spannung steigt. Die Stadt hört Gerüchte. Don Eligios Stuhl ist immer noch leer.
+**Atmosphäre:** Spannung steigt. Die Stadt hört Gerüchte. Mr. Caminos Stuhl ist immer noch leer.
 
 ---
 
@@ -125,31 +125,36 @@
 
 ## Akt 4 — Finale (Tag 15–16)
 
-### Tag 15 · 18.09.2026 · Donnerstag · 🔴 FÜNFTER MASSEN-AUFTRAG · FINALE-TEST
-**Phase:** **Die Krone** — Finale-Test (Punkte ×3)
-**Big Boss:** zweites großes Voice-Over — meldet sich direkt, nicht über Mittler
+### Tag 15 · 18.09.2026 · Donnerstag · 🔴 FÜNFTER MASSEN-AUFTRAG · RIVALEN-TEST
+**Phase:** **Die Probe** — Rivalitäts-Test (alle Crews)
+**Big Boss:** über Mittler (z. B. Der Skrupellose) — geliefert in allen Crew-Channels
+**Auftrag:** *„Jede Crew hat eine offene Rechnung. Heute Nacht begleicht ihr sie. Ich will sehen, wer den Mut hat, die Hand zu heben — und wer den Verstand hat, sie wieder fallen zu lassen, bevor er sie verliert."*
+
+**Mechanik:** Jede Crew bekommt einen **konkreten Rival-Auftrag** gegen eine ihrer hinterlegten rivalisierenden Crews (aus dem Crew-Profil) — Lagerschlag, Revierübernahme, Sabotage einer Lieferung, Auslieferung eines Spitzels. KI-generiert pro Crew, **Rivalitäten aus dem Crew-Profil** werden zwingend einbezogen.
+
+**Was passiert:** Die Stadt brennt parallel an 21 Stellen. Allianzen aus Tag 11–12 werden zur Probe gestellt — manche halten, manche zerbrechen unter der Last. Wer in Tag 12 die Top-3 verraten hat, bekommt jetzt die Rechnung präsentiert.
+**Atmosphäre:** Höchste Reibung. Letzter Test vor der Krone — Mut + Berechnung gleichermaßen.
+
+### Tag 16 · 19.09.2026 · Freitag · 🔴 SECHSTER MASSEN-AUFTRAG · 🏆 FINALE + KRÖNUNG
+**Phase:** **Das Finale: Die Krone** — Punkte ×3 + Showdown
+**Big Boss:** meldet sich **direkt** (ohne Mittler) — finales Voice-Over-Video, live in allen Channels
 **Auftrag:** *„Eine letzte Aufgabe. Eine, die nur die wert ist, die die Krone tragen will. Wer sie besteht, bekommt sie. Der Rest sortiert sich darunter."*
 
-**Mechanik:** Ein einziger spektakulärer Coup — Bank-Überfall / Polit-Mord / Großentführung / Geldwäsche-Schlag. Konkrete Mechanik: User-Wahl, sollte zum RP-Server passen.
+**Mechanik:** Ein einziger spektakulärer Coup — Bank-Überfall / Polit-Mord / Großentführung / Geldwäsche-Schlag. Konkrete Mechanik: User-Wahl, sollte zum RP-Server passen. Alle 21 Crews konkurrieren parallel.
 
-**Punkte-Multiplikator:** Tag-15-Punkte werden ×3 ins Ranking eingerechnet — der Finale-Test entscheidet die Krone.
+**Punkte-Multiplikator:** Tag-16-Punkte werden **×3** ins Ranking eingerechnet — der Finale-Test entscheidet die Krone.
 
-**Was passiert:** Alle Crews konkurrieren parallel. Größtes Adrenalin des Events. Sirenen, Schießereien, alles geht.
-**Atmosphäre:** Der Höhepunkt. Alle Crews sind beteiligt, alle wollen gewinnen.
-
-### Tag 16 · 19.09.2026 · Freitag · 🏆 SHOWDOWN & KRÖNUNG
-**Phase:** Auflösung
-**Big Boss:** meldet sich live — finales Voice-Over-Video oder Live-Discord-Voice-Stream
+**Nach dem Coup (gleicher Tag, später Abend):** Big Boss meldet sich erneut zur **Krönung & Auflösung**:
 - **Bestätigt das Probespiel:** „Ihr habt euch sortiert. Wie ich es wollte."
-- **Krönt die Sieger-Crew** (Ranking-#1)
-- **Klärt Don Eligios Schicksal** (Variante A empfohlen — siehe EVENT_FINALE.md)
+- **Krönt die Sieger-Crew** (Ranking-#1 nach allen 16 Tagen)
+- **Klärt Mr. Caminos Schicksal** (Variante A empfohlen — siehe EVENT_FINALE.md)
 
-**Was passiert:** Krönung. Sieger-Crew bekommt RP-Status / Privileg. Andere Crews bekommen Plätze in der neuen Hierarchie zugewiesen. Don Eligio kehrt zurück (unter Big-Boss-Kontrolle) und nimmt seine Rolle als Mittler für die Sieger-Crew auf.
+**Was passiert:** Größter Adrenalin-Moment des Events am Tag selbst, gefolgt von Katharsis am Abend. Sieger-Crew bekommt RP-Status / Privileg. Andere Crews bekommen Plätze in der neuen Hierarchie zugewiesen. Mr. Camino kehrt zurück (unter Big-Boss-Kontrolle) und nimmt seine Rolle als Mittler für die Sieger-Crew auf.
 
-**Atmosphäre:** Abschluss. Katharsis. Bühne frei für das, was nach dem Event kommt.
+**Atmosphäre:** Der Höhepunkt — gefolgt vom Abschluss. Sirenen, Schießereien, alles geht. Dann Stille. Dann die Stimme von oben.
 
 ### Tag 17+ · ab 20.09.2026
-**Post-Event:** Reflexion in den Channels, RP-Abschluss-Begegnungen. Don Eligio nimmt offiziell seine neue Rolle auf, ist für nächste Events verfügbar.
+**Post-Event:** Reflexion in den Channels, RP-Abschluss-Begegnungen. Mr. Camino nimmt offiziell seine neue Rolle auf, ist für nächste Events verfügbar.
 
 ---
 
@@ -158,9 +163,11 @@
 ```
 Adrenalin
    ▲
-   │                                                  ●
-   │                                                ╱ Tag 15 (Krone)
-   │                                              ╱
+   │                                                      ●
+   │                                                    ╱ Tag 16 (Krone ×3)
+   │                                                  ╱
+   │                                                ●
+   │                                              ╱ Tag 15 (Probe)
    │                          ●         ●        ╱
    │                        ╱ Tag 9   ╱ Tag 12  ╱
    │              ●        ╱        ╱         ╱
@@ -171,14 +178,14 @@ Adrenalin
    │ ╱  Findung
    │╱
    └──────────────────────────────────────────────► Zeit
-   T1   T3      T6      T9      T12     T15   T16
+   T1   T3      T6      T9      T12   T15  T16
 ```
 
 ## Spielleiter-Checkliste
 
-**Vor jedem Massen-Auftrag (Tag 3, 6, 9, 12, 15):**
+**Vor jedem Massen-Auftrag (Tag 3, 6, 9, 12, 15, 16):**
 - Voice-Over-Skript aus `EVENT_BRIEFINGS_MASS.md` vorbereiten
-- Welcher Mittler liefert das Briefing? (Stil-Variation für Wiederwert)
+- Welcher Mittler liefert das Briefing? (Stil-Variation für Wiederwert; Tag 16 = Big Boss direkt)
 - Über Crime-Automation-Tool → Massen-Auftrag senden (an alle 21 Crime-Crews)
 - Punkte-Tracking im Ranking-Dashboard mitverfolgen
 
@@ -186,27 +193,31 @@ Adrenalin
 - Quest-Geber-Team koordinieren: wer macht heute was?
 - Mindestens 1 Auftrag pro Crew pro Tag — sonst flaut Engagement ab
 - Reaktionen (👍/👎/❌) zeitnah pflegen, damit Ranking aktuell ist
+- KI-Folgeauftrags-Vorschläge auf der Crew-Detail-Seite nutzen (basieren auf letzter Reaktion)
 
 **Vor Tag 12 (Verrats-Wendepunkt):**
 - Aktuelle Top-3 aus Ranking checken
 - Privates Briefing an die jeweiligen Mittler-Spieler vorbereiten
 - Plan B: wenn Top-3 ablehnen, kaskadiert auf Rank 4–6 etc.
 
-**Vor Tag 15:**
+**Vor Tag 15 (Rivalen-Probe):**
+- Pro Crew die hinterlegten Rivalitäten im Crew-Profil prüfen
+- Ggf. KI-generierten Rival-Auftrag pro Crew vorbereiten
+- Konflikt-Schauplätze (Reviere, Lager, Treffpunkte) festlegen
+
+**Tag 16 (Finale + Krönung):**
 - Finale-Coup-Mechanik mit RP-Server-Admin abstimmen
 - Sieger-Belohnung in-game vorbereitet (was bekommt #1?)
-
-**Tag 16:**
-- Finale-Voice-Over aufgenommen und ready
-- Don-Eligio-Spieler (oder Voice-Over) ready für Comeback
-- Krönungs-Zeremonie in-game choreografiert
+- Finale-Voice-Over aufgenommen und ready (Big Boss direkt, ohne Mittler)
+- Mr.-Camino-Spieler (oder Voice-Over) ready für Comeback
+- Krönungs-Zeremonie in-game choreografiert (nach dem Coup, später Abend)
 
 ---
 
 ## Verwandte Dokumente
 
 - [`EVENT_BRIEFING.md`](EVENT_BRIEFING.md) — Eröffnungs-Story (Tag 1)
-- [`EVENT_BRIEFINGS_MASS.md`](EVENT_BRIEFINGS_MASS.md) — 5 Massen-Auftrags-Skripte
+- [`EVENT_BRIEFINGS_MASS.md`](EVENT_BRIEFINGS_MASS.md) — 6 Massen-Auftrags-Skripte (Tag 3/6/9/12/15/16)
 - [`QUEST_GIVERS.md`](QUEST_GIVERS.md) — 6 Mittler-Profile
 - [`EVENT_FINALE.md`](EVENT_FINALE.md) — Tag-16-Auflösungs-Skript
 - [`CREW_RELATIONS.md`](CREW_RELATIONS.md) — Crew-Beziehungen
