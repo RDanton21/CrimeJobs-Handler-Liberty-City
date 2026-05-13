@@ -493,3 +493,16 @@ Wenn du eine **Cinematic-Version** willst, lege einen zusätzlichen Track unter:
 - [`CITY_PUBLIC_BRIEFING_DISCORD.md`](CITY_PUBLIC_BRIEFING_DISCORD.md) — 5-Block-Kurzversion für Discord
 - [`CITY_PUBLIC_BRIEFING_VOICEOVER.md`](CITY_PUBLIC_BRIEFING_VOICEOVER.md) — Single-Voice-Version (Option A)
 - **diese Datei** — Multi-Voice-Version (Option B, empfohlen)
+- [`EVENT_FINALE.md`](EVENT_FINALE.md) — Tag-16-Reveal mit Underwood-Voice-Over-Skript (Underwood-Stimme: `5V1aDRVValmofPm493AW`)
+
+---
+
+# 🎤 Übersicht aller Voice-IDs des Events
+
+| Charakter | Wo? | Voice ID | Tag |
+|---|---|---|---|
+| Erzähler (Bill) | diese Datei | `pqHfZKP75CvOlQylNhV4` | Tag 0 |
+| Botschaft (Sarah) | diese Datei | `EXAVITQu4vr4xnSDxMaL` | Tag 0 |
+| Mr. Camino (User-Custom) | diese Datei + EVENT_FINALE.md | `xVObCw3gG96REsnh3t2I` | Tag 0 + Tag 16 |
+| Frankie Maloney (Brian) | diese Datei | `nPczCjzI2devNBz1zQrb` | Tag 0 |
+| **Francis J. Underwood** (User-Custom) | EVENT_FINALE.md | `5V1aDRVValmofPm493AW` | **Tag 16 (Reveal)** |

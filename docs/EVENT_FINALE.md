@@ -91,6 +91,8 @@ Francis J. Underwood, der Head of Liberty City, erscheint live — entweder im S
 
 **Underwood-Skript (~1100 Zeichen, Voice-Over-tauglich, House-of-Cards-Ton):**
 
+> **ElevenLabs-Einstellungen:** Voice ID `5V1aDRVValmofPm493AW` (user-custom) · Model: Eleven Multilingual v2 · Stability **65 %** (kontrolliert, aber nicht steif) · Style Exaggeration **30 %** (süffisanter Untertöne) · Speaker Boost **ON** · Langsame Aussprache durch Pausen-Punkte sicherstellen.
+
 > *Guten Abend, Liberty City.*
 >
 > *Ich weiß, ihr habt heute viel gehört. Sirenen. Schlagzeilen. Eine Stimme im Radio, die euch erklärt hat, dass die Stadt sich sortiert hat. Manche von euch haben sich gefragt, wer hinter dieser Stimme steht.*
@@ -216,9 +218,42 @@ Das Event ist offiziell zu Ende. Aber Liberty City lebt weiter:
 
 ---
 
+## 🎙 Underwood-Voice-Over-Block (für direkten Copy-Paste in ElevenLabs)
+
+**Stimme:** User-Custom `5V1aDRVValmofPm493AW` · Model: Eleven Multilingual v2
+**Settings:** Stability **65 %** · Style Exaggeration **30 %** · Speaker Boost **ON**
+**Wichtig:** Vor dem Generieren `[SIEGER-CREW-NAME]` durch den realen Crew-Namen ersetzen.
+
+---
+
+Guten Abend, Liberty City.
+
+Ich weiß, ihr habt heute viel gehört. Sirenen. Schlagzeilen. Eine Stimme im Radio, die euch erklärt hat, dass die Stadt sich sortiert hat. Manche von euch haben sich gefragt, wer hinter dieser Stimme steht.
+
+Ich stehe hinter ihr.
+
+Sechzehn Tage habe ich an einer einzigen Frage gearbeitet: Wer in dieser Stadt verdient meine Hand? Wer kann liefern, ohne zu fragen? Wer kann schweigen, wenn die Welt schreit? Wer kann brennen, ohne sich zu verraten? Heute habe ich die Antwort.
+
+Manche werden mich verurteilen. Manche werden mich aus dem Amt fordern. Sie können es versuchen. Sie haben gegen einen Mann gekämpft, den sie nicht sehen konnten. Jetzt kämpfen sie gegen einen Mann, der das Rathaus besitzt. Wir werden sehen, wer sich darunter sortiert.
+
+Liberty City hat eine neue Ordnung. Und sie beginnt morgen — mit mir an der Spitze und [SIEGER-CREW-NAME] an meiner Seite.
+
+Macht euch bereit.
+
+---
+
+**Post-Production-Empfehlung für Underwood:**
+- **Audacity Compressor**: Ratio 3:1, Threshold −18 dB — gibt Stimme noch mehr Präsenz
+- **EQ**: leichte Höhen-Anhebung (3–5 kHz +2 dB), tiefe Bässe sauber (60 Hz +1 dB)
+- **Optional: dezenter Hall** (Reverb 8 %) — gibt Eindruck einer Pressekonferenz im Plenarsaal
+- **Sehr lange Pause** vor *„Ich stehe hinter ihr."* — der Schlüssel-Satz der gesamten 16 Tage
+
+---
+
 ## Verwandte Dokumente
 
 - [`EVENT_TIMELINE.md`](EVENT_TIMELINE.md) — 16-Tage-Übersicht
 - [`EVENT_BRIEFINGS_MASS.md`](EVENT_BRIEFINGS_MASS.md) — die 6 Massen-Briefings (Tag 3, 6, 9, 12, 15, 16)
 - [`QUEST_GIVERS.md`](QUEST_GIVERS.md) — Mittler-Profile
 - [`EVENT_BRIEFING.md`](EVENT_BRIEFING.md) — Eröffnungs-Story (Tag 1)
+- [`CITY_PUBLIC_BRIEFING_VOICEOVER_MULTI.md`](CITY_PUBLIC_BRIEFING_VOICEOVER_MULTI.md) — Multi-Voice-Skript Tag 0 (Bill/Sarah/Camino/Brian)
