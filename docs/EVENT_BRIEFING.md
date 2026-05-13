@@ -215,6 +215,22 @@ Und die Stadt, die nie schläft, lernt zum ersten Mal seit dreißig Jahren, was 
 
 ---
 
+---
+
+## Der Master-Plot — „Das Probespiel" (Spielleiter-Hinweis)
+
+Was die Spieler aus diesem Eröffnungs-Briefing wissen sollen: Don Eligio ist weg, die Stadt brodelt, der Big Boss bewegt sich im Hintergrund.
+
+Was sie **nicht** wissen sollen (Reveal erst Tag 15–16): Das ganze Event ist ein **Probespiel**. Don Eligios Verschwinden ist kein Zufall — der Big Boss hat ihn entfernt, um die alte Hierarchie zu sprengen und einen neuen Top-Lieutenant aus den Crews auszuwählen. Alle 16 Tage werden als Test geführt:
+
+- Tag 3, 6, 9, 12, 15: Massen-Aufträge prüfen Akkumulation, Stille, öffentliche Wirkung, Loyalität und Finale-Können
+- Tag 1–2: Findungsphase
+- Tag 16: Krönung der Sieger-Crew + Don Eligios Rückkehr unter Big-Boss-Kontrolle
+
+Vollständige Spielleiter-Doku: [`EVENT_TIMELINE.md`](EVENT_TIMELINE.md), [`EVENT_BRIEFINGS_MASS.md`](EVENT_BRIEFINGS_MASS.md), [`QUEST_GIVERS.md`](QUEST_GIVERS.md), [`EVENT_FINALE.md`](EVENT_FINALE.md).
+
+---
+
 ## Alternative Inciting Incidents (zur Wahl)
 
 Falls *„Don Eligio verschwindet"* nicht passt, sind hier zwei Alternativen — sie nutzen dieselbe Stadtteil-Tour und denselben Erzählbogen, nur mit anderem Auslöser im Schluss-Kapitel:
