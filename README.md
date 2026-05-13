@@ -47,7 +47,7 @@ sequenzielle Storyline mit Berücksichtigung der Beziehungen zwischen den Gangs.
 - **Auto-Refresh** alle 5 Sekunden (Stats, Notifications, Crew-Liste)
 
 ### Performance-Ranking
-- **Eigene Seite `/ranking`** mit zwei Tabellen: Crew-Ranking + Stadtteil-Aggregat
+- **Eigene Seite `/ranking`** mit Crew-Ranking (Top-Liste, sortiert nach Punkten)
 - **Top-3-Widget** auch im Dashboard (Link „Vollständiges Ranking →")
 - **Top 3 visuell hervorgehoben** mit Gold/Silber/Bronze-Border
 - **Filter**: Zeitraum (Heute / 7 Tage / 30 Tage / Gesamt) + optional „Nur Crime-Crews"
@@ -64,8 +64,6 @@ sequenzielle Storyline mit Berücksichtigung der Beziehungen zwischen den Gangs.
 | `draft` | — | **0** | Auftrag noch nicht gesendet |
 
 **Formel:** `crew_points = (approved × 2) + (rejected × −1)`
-
-**Stadtteil-Punkte:** Summe aller Crew-Punkte im jeweiligen Stadtteil.
 
 Konstanten in [`backend/routes_missions.py`](backend/routes_missions.py) → `RANKING_POINTS` dict (5-Sekunden-Anpassung möglich).
 

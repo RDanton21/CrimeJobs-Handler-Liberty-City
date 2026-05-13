@@ -110,44 +110,6 @@
       </div>
     </section>
 
-    <!-- Stadtteil-Ranking -->
-    <section class="mb-8">
-      <h2 class="text-xl font-semibold mb-3">🗺️ Stadtteil-Ranking</h2>
-      <div class="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-        <table class="w-full text-sm">
-          <thead class="bg-zinc-950 text-zinc-400 text-xs uppercase tracking-wider">
-            <tr>
-              <th class="px-4 py-3 text-left w-14">Rang</th>
-              <th class="px-4 py-3 text-left">Stadtteil</th>
-              <th class="px-4 py-3 text-right">Crews</th>
-              <th class="px-4 py-3 text-right">👍 gesamt</th>
-              <th class="px-4 py-3 text-right">👎 gesamt</th>
-              <th class="px-4 py-3 text-right font-bold">Punkte</th>
-            </tr>
-          </thead>
-          <tbody>
-            <template x-for="(d, idx) in data.districts" :key="d.name">
-              <tr :class="medalClass(idx)" class="border-t border-zinc-800 hover:bg-zinc-800/50">
-                <td class="px-4 py-2.5 font-mono text-zinc-500" x-text="`#${idx + 1}`"></td>
-                <td class="px-4 py-2.5 font-medium" x-text="d.name"></td>
-                <td class="px-4 py-2.5 text-right text-zinc-400" x-text="d.crew_count"></td>
-                <td class="px-4 py-2.5 text-right text-green-400" x-text="d.approved"></td>
-                <td class="px-4 py-2.5 text-right text-red-400" x-text="d.rejected"></td>
-                <td class="px-4 py-2.5 text-right font-bold"
-                    :class="d.points > 0 ? 'text-green-400' : (d.points < 0 ? 'text-red-400' : 'text-zinc-400')"
-                    x-text="d.points"></td>
-              </tr>
-            </template>
-            <tr x-show="!loading && data.districts.length === 0">
-              <td colspan="6" class="px-4 py-8 text-center text-zinc-500 text-sm">
-                Noch keine Stadtteil-Daten.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
     <p class="text-xs text-zinc-500 text-center">
       Auto-Refresh alle 15 Sekunden ·
       <span x-show="data.since" x-text="`Zeitraum seit ${data.since}`"></span>
