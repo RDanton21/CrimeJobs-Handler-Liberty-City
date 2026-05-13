@@ -36,6 +36,13 @@ class CrimeBusinessSendRequest(BaseModel):
     model: str | None = None
 
 
+class CrimeBusinessPostRequest(BaseModel):
+    """Postet einen (ggf. editierten) Briefing-Text an den
+    crime_business_channel_id der Crew. Kein KI-Aufruf — der Text wurde
+    vorher per /preview generiert und vom User ggf. angepasst."""
+    content: str
+
+
 class CrewOut(CrewBase):
     model_config = ConfigDict(from_attributes=True)
     id: int
