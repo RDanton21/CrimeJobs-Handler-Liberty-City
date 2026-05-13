@@ -86,7 +86,15 @@
             </select>
           </div>
           <input x-model="newRel.notes" placeholder="Notiz" class="w-full mt-2 bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-sm" />
-          <button @click="addRelation()" class="mt-2 px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 rounded text-sm">+ Beziehung</button>
+          <button @click="addRelation()"
+                  :disabled="!newRel.crew_b_id"
+                  :title="!newRel.crew_b_id ? 'Erst eine Gang aus dem Dropdown wählen' : ''"
+                  class="mt-2 px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-zinc-700 rounded text-sm">
+            + Beziehung
+          </button>
+          <p x-show="!newRel.crew_b_id" class="text-xs text-zinc-500 mt-1">
+            ⚠ Erst eine Gang aus dem Dropdown wählen.
+          </p>
         </div>
 
         <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-5">

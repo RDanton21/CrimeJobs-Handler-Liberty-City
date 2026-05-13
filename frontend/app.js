@@ -488,7 +488,10 @@ function crewPage() {
     },
 
     async addRelation() {
-      if (!this.newRel.crew_b_id) return;
+      if (!this.newRel.crew_b_id) {
+        alert("Bitte erst eine Gang aus dem Dropdown auswählen.");
+        return;
+      }
       try {
         await api.post(`/api/crews/${this.crewId}/relations`, {
           crew_a_id: this.crewId,
