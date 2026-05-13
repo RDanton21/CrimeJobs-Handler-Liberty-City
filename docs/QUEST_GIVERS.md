@@ -1,0 +1,199 @@
+# Die Mittler — Big-Boss-Quest-Geber-Team
+
+Sechs Persönlichkeiten, alle dem Big Boss loyal, aber jede mit eigenem Stil und Schwerpunkt. Gespielt vom User + Team (5–6 Personen). Crews kennen am Anfang keine von ihnen — sie tauchen über die Tage in RP-Begegnungen auf und übergeben Aufträge.
+
+> Wichtig für die Spielleitung: alle Mittler dienen dem **gleichen Boss**. Loyalität ist zu 100 % geklärt. Was variiert, ist der **Ton**, der **Schwerpunkt** und die **Beziehung zu den Crews**. So bekommt jede RP-Begegnung eine andere Farbe.
+
+---
+
+## 1. Miguel — „die Stimme"
+
+**Bekannt aus:** Big-Boss-Briefing-Video (Onboarding-Tag, vor Event-Start)
+**Rolle:** Persönlicher Bote des Big Boss, ältester Mittler, etabliert
+**Stil:** Kalt, präzise, unbeweglich. Spricht selten, jedes Wort sitzt.
+**Sprechweise:** Hochdeutsch, formell, keine Umgangssprache. Pausiert oft mit kurzen Nick-Bewegungen statt Worten.
+**Erscheinung:** Mitte fünfzig, immer Anzug, immer ruhig.
+
+**Schwerpunkt:** Klassische Briefings, formelle Auftragsübergaben, „offizielle" Big-Boss-Stimme. Crews wissen: wenn Miguel kommt, ist es ernst.
+
+**Beziehung zu Crews:** Distanziert. Bekommt selten persönlich Kontakt — er ist die Stimme, nicht der Mensch. Tritt bei den großen Massen-Aufträgen Tag 3, 9, 14 auf.
+
+**Typische Aufträge:**
+- Formelle Massen-Briefings (Tag 3, Tag 14)
+- „Du hast geliefert. Du wirst beobachtet." — kurze Bestätigungen ohne Aufwand
+- Konsequenz-Übergabe (wenn eine Crew etwas getan hat, das der Big Boss nicht akzeptiert)
+
+**Catchphrase / Stilanker:**
+> *„Mein Auftrag ist einfach. Macht keinen Fehler."*
+
+---
+
+## 2. Die Maklerin — „die Glatte"
+
+**Rolle:** Verhandlerin, Vermittlerin zwischen Crews und externen Akteuren
+**Stil:** Charmant, verbindlich, scheinbar zuvorkommend. Darunter: gefährlich präzise. Jedes Lächeln hat eine Funktion.
+**Sprechweise:** Höflich, perfekt artikuliert, gelegentlich italienische oder französische Einsprengsel. Nutzt Komplimente als Werkzeug.
+**Erscheinung:** Ende dreißig, immer gut gekleidet, immer mit Goldschmuck. Trinkt Champagner auch zum Frühstück.
+
+**Schwerpunkt:** Übergaben, Mittler-zu-Mittler-Geschäfte, Verhandlungen mit Firmen (Grotti, Superstar Cafe, Triangle Club). Crews, die Eleganz schätzen, mögen sie. Crews, die nicht hinhören, unterschätzen sie.
+
+**Beziehung zu Crews:** Pflegt Beziehungen zu den Bossen mit Charme. Hat einen Tisch im Superstar Cafe. Trinkt mit Don Manschetti. Verhandelt mit Lila „Phantom" Okafor von den Fireflys auf Augenhöhe.
+
+**Typische Aufträge:**
+- Verhandlungen (Crew X soll bei Firma Y eine Übergabe machen, bei der niemand verletzt wird)
+- Diplomatische Aufträge zwischen rivalisierenden Crews
+- „Bring mir ein Geschenk für [andere Crew]. Du weißt, was sie wollen."
+
+**Catchphrase / Stilanker:**
+> *„Wir sind erwachsene Leute. Wir wissen, wie das hier funktioniert."*
+
+---
+
+## 3. Der Pater — „die Beichte"
+
+**Rolle:** Vertraulicher Berater, Loyalitäts-Test-Spezialist
+**Stil:** Bedacht, leise, paternal. Hört mehr, als er spricht. Klingt verständnisvoll, urteilt aber innerlich hart.
+**Sprechweise:** Langsam, mit Pausen, oft Fragen statt Aussagen. Gelegentlich religiöse Anspielungen, die nie kitschig wirken.
+**Erscheinung:** Anfang sechzig, schwarzer Mantel, dunkle Brille. Sieht aus wie ein pensionierter Lehrer, ist aber ein Mann mit einem langen Schatten.
+
+**Schwerpunkt:** Loyalitäts-Tests, Geheimnisse, „Beichten". Crews vertrauen ihm Dinge an, die sie niemandem sonst sagen würden — und er erinnert sich an alles.
+
+**Beziehung zu Crews:** Erscheint in stillen Momenten — nach einer Beerdigung, nach einem schwarzen Tag, in einem leeren Restaurant. Trifft sich gerne im „Brass Plate"-Diner und am Hafen.
+
+**Typische Aufträge:**
+- Loyalitäts-Tests („Erzähl mir, was du letzte Woche getan hast")
+- Geheime Konsequenzen für Verrat (still, ohne öffentlichen Lärm)
+- Vermittlung zwischen verfeindeten Crew-Mitgliedern
+
+**Catchphrase / Stilanker:**
+> *„Manchmal ist es nicht das, was du tust, sondern was du verschweigst."*
+
+---
+
+## 4. Der Fixer — „der Pragmatiker"
+
+**Rolle:** Logistik, Werkzeuge, schnelle Lösungen
+**Stil:** Pragmatisch, schnoddrig, geradeheraus. Kein Drama, kein Pathos. Ruft an, liefert, hängt auf.
+**Sprechweise:** Knapp, manchmal Fluchen, viel Brooklyn-amerikanischer Slang. Cuts to the chase.
+**Erscheinung:** Anfang vierzig, immer in Jeans und Lederjacke, immer mit einem Telefon am Ohr. Fährt einen alten Cadillac.
+
+**Schwerpunkt:** Werkzeuge (Waffen, Fahrzeuge), Logistik, Geld-Bewegungen. Wenn eine Crew was Konkretes braucht, klingelt Der Fixer.
+
+**Beziehung zu Crews:** Beste Kontakte zu MC-Crews (AOD MC, LOST MC) und Bratva — Männer, die wie er reden. Hat eine Garage in Dukes, von der niemand weiß, dass er sie besitzt.
+
+**Typische Aufträge:**
+- Schnelle Werkzeug-Lieferungen („Holt euch die Kiste an der Garage")
+- Logistik-Operationen (Tag 6 „Die Stille" wäre sein Briefing)
+- Stealth-Coordinations-Aufträge
+
+**Catchphrase / Stilanker:**
+> *„Du brauchst nur einen Anruf. Den machst du jetzt."*
+
+---
+
+## 5. Die Witwe — „die Erinnerung"
+
+**Rolle:** Hintergrund-Informationen, Warnungen, alte Geschichten
+**Stil:** Bitter, alt, hat zu viel gesehen. Hat keine Angst mehr vor irgendetwas. Sagt unangenehme Wahrheiten.
+**Sprechweise:** Trocken, scharf, gelegentlich sarkastisch. Liebt es, Crews mit Geschichten aus „den alten Tagen" zu erinnern, wer sie wirklich sind.
+**Erscheinung:** Ende sechzig, schwarze Witwentracht, immer eine Zigarette. Sitzt immer am gleichen Fenstertisch im Brass Plate.
+
+**Schwerpunkt:** Information, Hintergründe, „du solltest wissen, mit wem du es zu tun hast". Aufträge mit historischer Tiefe — sie kennt die Geschichte jeder Crew, jedes Stadtteils, jedes Don.
+
+**Beziehung zu Crews:** Respektiert von alten Crews (Mafia, Yakuza, LOST MC), unterschätzt von jungen (MOB, Vipers). Spricht in Bildern, die die Älteren verstehen und die Jüngeren erst entschlüsseln müssen.
+
+**Typische Aufträge:**
+- „Findet heraus, warum [Crew X] sich vor [Crew Y] fürchtet — die Antwort liegt drei Generationen zurück"
+- Warnungen vor Fehlern, die andere Crews schon gemacht haben
+- Hintergrund-Recherche für später wichtige Aufträge
+
+**Catchphrase / Stilanker:**
+> *„Ich habe Männer wie dich kommen und gehen sehen. Meistens gehen sie schneller, als sie gekommen sind."*
+
+---
+
+## 6. Der Skrupellose — „die Faust"
+
+**Rolle:** Druckmittel, Sonderaufträge, Vergeltung
+**Stil:** Brutal-direkt, körperlich präsent. Sieht aus wie eine Drohung, redet wie eine Drohung, ist eine Drohung.
+**Sprechweise:** Tief, langsam, mit Pausen, die wie Schläge sitzen. Verwendet Vokabular aus dem Boxsport und dem Militär.
+**Erscheinung:** Anfang fünfzig, kräftig, Narbe an der Wange, immer mit Mantel auch im Sommer. Trägt Lederhandschuhe, die er nie auszieht.
+
+**Schwerpunkt:** Wenn der Big Boss eine harte Hand braucht, ruft er Den Skrupellosen. Sonderaufträge mit Eskalations-Element, Drohgesten gegen unfolgsame Crews, Tag-12-Verrats-Übergabe.
+
+**Beziehung zu Crews:** Wird gefürchtet, nicht gemocht. Crews wechseln die Straßenseite, wenn sie ihn kommen sehen. Hat eine direkte Linie zum Big Boss.
+
+**Typische Aufträge:**
+- Tag-12-Verrats-Übergabe (der härteste Mittler für den härtesten Auftrag)
+- „Mach klar, was passiert, wenn die nicht liefern"
+- Direkte Vergeltungs-Aufträge nach Versagen
+
+**Catchphrase / Stilanker:**
+> *„Eine Warnung ist eine Warnung. Du bekommst sie einmal."*
+
+---
+
+## Tag-für-Tag-Zuordnung — Wer liefert wann?
+
+Empfehlung, kann nach Spielleiter-Team-Verfügbarkeit angepasst werden:
+
+| Tag | Auftrag-Typ | Empfohlener Mittler |
+|---:|---|---|
+| 3 | Massen-Briefing „Der Tribut" | **Miguel** (formell, ernst) |
+| 4–5 | Individuell | Maklerin / Pater / Fixer (rotation) |
+| 6 | Massen-Briefing „Die Stille" | **Der Fixer** (passend zum Stealth-Thema) |
+| 7–8 | Individuell | Witwe / Maklerin / Pater |
+| 9 | Massen-Briefing „Die Botschaft" | **Der Skrupellose** (passend zur lauten Aktion) |
+| 10 | Zwischen-Briefing | **Miguel** (offizielle Bewertung) |
+| 11 | Individuell | Pater (Loyalitäts-Tests) |
+| 12 | Verrats-Auftrag (privat an Top-3) | **Der Skrupellose** (passend zum harten Auftrag) |
+| 13 | Individuell (Konsequenzen) | Witwe / Pater (Trostspender / Beichten) |
+| 14 | Vor-Finale-Kurzansage | **Miguel** |
+| 15 | Finale „Die Krone" | **Big Boss DIREKT** (kein Mittler) |
+| 16 | Showdown & Krönung | **Big Boss DIREKT** |
+
+## RP-Hinweise für die Spielleiter
+
+### Wenn ein Crew einen Mittler trifft
+
+- **Authentizität:** Bleib im Stil deines Mittlers, auch wenn die Crew provoziert
+- **Loyalität nie aussprechen:** Mittler sagen nicht „ich diene dem Big Boss" — sie deuten an, übermitteln, sind „eine Stimme"
+- **Geheimnis-Stufen:** Manche Infos sind Big-Boss-Geheimnisse (nur Miguel/Skrupellose). Andere Mittler wissen weniger — das macht Verwirrung beim Spieler glaubhaft
+- **Notizen führen:** jede Crew bekommt unterschiedliche Eindrücke. Was du ihnen sagst, sollte konsistent bleiben
+
+### Wenn zwei Mittler aufeinandertreffen
+
+- Mittler tun so, als ob sie sich nicht (gut) kennen
+- Sie geben unterschiedliche Versionen einer Geschichte — Crews müssen rätseln
+- Aber: sie widersprechen sich nicht in der Sache. Stil unterscheidet sich, Substanz nicht
+
+### Wenn eine Crew anfängt zu mauern oder zu drohen
+
+- **Die Maklerin** lächelt und geht
+- **Der Pater** wartet ab, ohne zu reagieren
+- **Der Fixer** rollt mit den Augen und geht zum nächsten Auftrag
+- **Die Witwe** lacht trocken
+- **Der Skrupellose** wird ruhig — und genau dann sollte die Crew Angst bekommen
+- **Miguel** dreht sich um und geht, ohne ein Wort
+
+### Wann der Big Boss persönlich auftritt
+
+Nur an folgenden Punkten — Big Boss DIREKT, nicht als Mittler:
+1. Onboarding (vor Event-Start, das bestehende Video)
+2. Tag 10 Zwischenstand (Miguel ODER direkt, je nach Dramatik-Wunsch)
+3. Tag 15 Finale-Briefing
+4. Tag 16 Showdown & Krönung
+
+Sonst bleibt der Big Boss unsichtbar. Das verstärkt seine Macht.
+
+---
+
+## User-Action: Mittler an dein Team verteilen
+
+Deine 5–6 Teammitglieder bekommen jeweils einen Mittler. Wer welchen, hängt von Spieler-Stärken ab:
+- Wer hat eine ruhige, dunkle Stimme? → **Miguel**, **Der Skrupellose**, **Der Pater**
+- Wer hat Charme und Wortwitz? → **Die Maklerin**
+- Wer ist pragmatisch und schnell? → **Der Fixer**
+- Wer kann eine bittere alte Frau spielen? → **Die Witwe**
+
+Du selbst spielst den **Big Boss** — die Stimme, die nur 2–3 Mal direkt auftritt, sonst nur über Mittler.
