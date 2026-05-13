@@ -6,16 +6,22 @@
 
 ---
 
-## 🎭 Die 4 Sprecher
+## 🎭 Die 4 Sprecher — finale Stimm-Wahl
 
-| Sprecher | Rolle | Empfohlene ElevenLabs-Stimme | Settings | Anteil |
-|---|---|---|---|---|
-| **ERZÄHLER** | trägt die Story, beschreibt Liberty City | **Adam** (deep, warm) oder **Antoni** (well-rounded) | Stability 55 %, Style 25 %, Speaker Boost ON | ~90 % |
-| **BOTSCHAFT** | die anonyme Stadt-Botschaft (1 Zeile) | **Charlie** (neutral) oder eine weibliche Stimme z. B. **Rachel** | Stability 85 % (maximal monoton), Style 0 %, dann **Audacity-Distortion + Pitch-Shift −3** | 1 Mal |
-| **MR. CAMINO** | spricht 2 Zitate aus seiner Vergangenheit | **George** (old British, calm) oder **Bill** (narrator, gewichtig) | Stability 70 %, Style 15 %, langsame Rate | 2 Mal |
-| **FRANKIE MALONEY** | Diner-Wirt, spricht 2 Zitate | **Brian** (friendly, deep) oder **Drew** (well-rounded) | Stability 45 %, Style 35 % (mehr Variation, herzlich-resigniert) | 2 Mal |
+| Sprecher | Rolle | ElevenLabs-Stimme | Voice ID | Settings | Anteil |
+|---|---|---|---|---|---|
+| **ERZÄHLER** | trägt die Story | **Bill** (strong, narrator, gravity-heavy) | `pqHfZKP75CvOlQylNhV4` | Stability 50 %, Style 35 %, Speaker Boost ON | ~90 % |
+| **BOTSCHAFT** | die anonyme Stadt-Botschaft (1 Zeile) | **Sarah** (young, professional, female) | `EXAVITQu4vr4xnSDxMaL` | Stability 100 %, Style 0 %, Speaker Boost OFF — dann **Audacity-Distortion + Pitch-Shift −3** | 1 Mal |
+| **MR. CAMINO** | spricht 2 Zitate | **George** (warm, middle-aged British) | `JBFqnCBsd6RMkjVDRZzb` | Stability 70 %, Style 15 %, langsame Rate | 2 Mal |
+| **FRANKIE MALONEY** | Diner-Wirt, spricht 2 Zitate | **Brian** (deep, friendly, conversational) | `nPczCjzI2devNBz1zQrb` | Stability 45 %, Style 35 % (mehr Variation, herzlich-resigniert) | 2 Mal |
 
 **Wichtig:** Wähle „Eleven Multilingual v2" als Model — alle 4 Stimmen sprechen dann sauberes Deutsch, auch wenn ihre Default-Profile englisch sind.
+
+**Klang-Differenzierung:**
+- Bill (Erzähler) — amerikanisch, deep, Trailer-Pathos
+- George (Camino) — britisch, warm, älter, ruhiger → klingt deutlich anders als Bill
+- Brian (Frankie) — amerikanisch, freundlicher, weniger Pathos als Bill → klare Abgrenzung
+- Sarah (Botschaft) — weiblich + Distortion → maximaler Kontrast zu allen drei männlichen Stimmen
 
 ---
 
@@ -209,7 +215,7 @@ Generiere pro Sprecher einen Audio-Track. Jeder Block ist ein zusammenhängender
 
 ---
 
-## 🎙 Block 1 — ERZÄHLER (Stimme: Adam · Stability 55 % · Style 25 %)
+## 🎙 Block 1 — ERZÄHLER (Stimme: **Bill** `pqHfZKP75CvOlQylNhV4` · Stability 50 % · Style 35 % · Speaker Boost ON)
 
 Liberty City. Drei Wörter… und mit ihnen vier Millionen Menschen, fünf Stadtteile, ein Hafen, ein Flughafen, eine Wall-Street-Schwester und eine Insel im Nebel.
 
@@ -367,7 +373,7 @@ Ab jetzt.
 
 ---
 
-## 📺 Block 2 — BOTSCHAFT (Stimme: Charlie oder Rachel · Stability 85 % · Style 0 %)
+## 📺 Block 2 — BOTSCHAFT (Stimme: **Sarah** `EXAVITQu4vr4xnSDxMaL` · Stability 100 % · Style 0 % · Speaker Boost OFF)
 
 > Generieren, dann **in Audacity nachbearbeiten**: Pitch-Shift −3 Halbtöne + Distortion (Schwellenwert 50, Lautstärke −12 dB). Optional: Bit-Crusher-Plugin für „digital glitch"-Effekt. Ziel: klingt wie aus einem Lautsprecher, nicht aus einem Mund.
 
@@ -375,7 +381,7 @@ Liberty City. Sechzehn Tage. Dann seht ihr, wer hier wirklich entscheidet.
 
 ---
 
-## 🧓 Block 3 — MR. CAMINO Zitat 1 (Stimme: George oder Bill · Stability 70 % · Style 15 %)
+## 🧓 Block 3 — MR. CAMINO Zitat 1 (Stimme: **George** `JBFqnCBsd6RMkjVDRZzb` · Stability 70 % · Style 15 %)
 
 > Generieren mit langsamer, schwerer Aussprache. Optional Reverb 12 % in Audacity drüberlegen für „Erinnerung"-Effekt.
 
@@ -383,7 +389,7 @@ Setz dich, Vito. Wenn du heute Nacht schießt… schießt deine Mutter dich näc
 
 ---
 
-## 🧓 Block 4 — MR. CAMINO Zitat 2 (Stimme: George oder Bill · Stability 70 % · Style 15 %)
+## 🧓 Block 4 — MR. CAMINO Zitat 2 (Stimme: **George** `JBFqnCBsd6RMkjVDRZzb` · Stability 70 % · Style 15 %)
 
 > Wie Block 3. Diesen Satz besonders langsam und schwer aussprechen lassen — er ist das Stadt-Zitat.
 
@@ -391,7 +397,7 @@ Liberty City verzeiht nichts. Aber sie vergisst alles… was nicht zweimal hinte
 
 ---
 
-## 🍵 Block 5 — FRANKIE Zitat 1 (Stimme: Brian oder Drew · Stability 45 % · Style 35 %)
+## 🍵 Block 5 — FRANKIE Zitat 1 (Stimme: **Brian** `nPczCjzI2devNBz1zQrb` · Stability 45 % · Style 35 %)
 
 > Stimme leicht rauh, alltäglich, ein bisschen müde. Kein Pathos.
 
@@ -399,7 +405,7 @@ Hideo hat dreimal geweint. Vito einmal. Camino kein einziges Mal.
 
 ---
 
-## 🍵 Block 6 — FRANKIE Zitat 2 (Stimme: Brian oder Drew · Stability 45 % · Style 35 %)
+## 🍵 Block 6 — FRANKIE Zitat 2 (Stimme: **Brian** `nPczCjzI2devNBz1zQrb` · Stability 45 % · Style 35 %)
 
 > Diesen Satz **leiser** generieren — fast geflüstert. Lange Pause nach „Damit der Stuhl" — kommt durch das „…" in der Schreibweise. Emotionaler Höhepunkt der Story.
 
