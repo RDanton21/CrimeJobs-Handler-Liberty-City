@@ -303,7 +303,7 @@ function dashboard() {
     },
     async loadRankingPreview() {
       try {
-        const data = await api.get("/api/missions/ranking?crime_only=true");
+        const data = await api.get("/api/missions/ranking?crime_only=false");
         this.topCrews = (data.crews || []).slice(0, 3);
         this.topDistricts = (data.districts || []).slice(0, 3);
       } catch (e) {
@@ -1180,8 +1180,8 @@ function rankingPage() {
     loading: true,
     error: "",
     rangeSince: "all",     // 'today' | '7d' | '30d' | 'all'
-    crimeOnly: true,
-    data: { crews: [], districts: [], since: null, crime_only: true },
+    crimeOnly: false,
+    data: { crews: [], districts: [], since: null, crime_only: false },
     _refreshTimer: null,
 
     async init() {
