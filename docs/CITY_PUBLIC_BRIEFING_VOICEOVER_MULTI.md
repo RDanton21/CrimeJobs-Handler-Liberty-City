@@ -33,7 +33,7 @@
 
 **[ERZÄHLER]**
 
-Liberty City. Drei Wörter… und mit ihnen vier Millionen Menschen, fünf Stadtteile, ein Hafen, ein Flughafen, eine Wall-Street-Schwester und eine Insel im Nebel.
+Liberty City. Zwei Wörter… und mit ihnen vier Millionen Menschen, fünf Stadtteile, ein Hafen, ein Flughafen, eine Wall-Street-Schwester und eine Insel im Nebel.
 
 Auf dem Papier eine moderne amerikanische Großstadt. Unter der Oberfläche eine Maschine. Aus Familien. Aus Banden. Aus stillen Vereinbarungen, die niemand je aufgeschrieben hat. Eine Maschine, die seit drei Jahrzehnten ohne offenen Krieg läuft.
 
@@ -203,7 +203,7 @@ Liberty City wird sich an euch erinnern… an die Nacht, in der es begann.
 
 …
 
-Liberty City. Drei Wörter. Eine Stadt. Sechzehn Tage.
+Liberty City. Zwei Wörter. Eine Stadt. Sechzehn Tage.
 
 Ab jetzt.
 
@@ -217,7 +217,7 @@ Generiere pro Sprecher einen Audio-Track. Jeder Block ist ein zusammenhängender
 
 ## 🎙 Block 1 — ERZÄHLER (Stimme: **Bill** `pqHfZKP75CvOlQylNhV4` · Stability 50 % · Style 35 % · Speaker Boost ON)
 
-Liberty City. Drei Wörter… und mit ihnen vier Millionen Menschen, fünf Stadtteile, ein Hafen, ein Flughafen, eine Wall-Street-Schwester und eine Insel im Nebel.
+Liberty City. Zwei Wörter… und mit ihnen vier Millionen Menschen, fünf Stadtteile, ein Hafen, ein Flughafen, eine Wall-Street-Schwester und eine Insel im Nebel.
 
 Auf dem Papier eine moderne amerikanische Großstadt. Unter der Oberfläche eine Maschine. Aus Familien. Aus Banden. Aus stillen Vereinbarungen, die niemand je aufgeschrieben hat. Eine Maschine, die seit drei Jahrzehnten ohne offenen Krieg läuft.
 
@@ -367,7 +367,7 @@ Liberty City wird sich an euch erinnern… an die Nacht, in der es begann.
 
 …
 
-Liberty City. Drei Wörter. Eine Stadt. Sechzehn Tage.
+Liberty City. Zwei Wörter. Eine Stadt. Sechzehn Tage.
 
 Ab jetzt.
 
