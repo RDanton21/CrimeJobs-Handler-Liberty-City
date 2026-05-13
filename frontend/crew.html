@@ -50,7 +50,15 @@
           <input x-model="crew.color_hex" type="color" class="bg-zinc-950 border border-zinc-800 rounded h-10 w-24 mb-3" />
           <label class="block text-xs text-zinc-400 mb-1">Hintergrund-Story</label>
           <textarea x-model="crew.story_background" rows="8"
+                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3"></textarea>
+
+          <label class="block text-xs text-zinc-400 mb-1">
+            🎯 Crime-Business <span class="text-zinc-500">(intern, fließt in KI-Prompt)</span>
+          </label>
+          <textarea x-model="crew.crime_business" rows="4"
+                    placeholder="Konkretes Geschäftsfeld der Crew — z.B. 'Drogenhandel: hauptsächlich Kokain über Hafen. Schutzgeld: Restaurants in Algonquin. Hehlerei: Luxus-Uhren.' Bleibt geheim, leitet KI bei Auftragsgenerierung."
                     class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2"></textarea>
+
           <div class="mt-3 flex gap-2">
             <button @click="saveCrew()" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded">Speichern</button>
             <button @click="deleteCrew()" class="px-4 py-2 bg-red-700 hover:bg-red-600 rounded">Löschen</button>
