@@ -87,19 +87,56 @@ Auf den Werbetafeln am Star Junction. Auf den Smartphones in Millionen Hosentasc
 
 **[BILL]**
 
-[thoughtful] Aber die Botschaft war nicht das einzige, was Liberty City heute morgen wachgerüttelt hat.
+[thoughtful] Doch die Botschaft war nicht das Einzige, das Liberty City heute Morgen aus dem Schlaf gerissen hat.
 
-[sad] Heute morgen blieb ein Stuhl leer. Zum ersten Mal seit sechsundzwanzig Jahren.
+[sad] Heute Morgen blieb ein Platz leer.
+Nicht irgendein Platz.
+Ein ganz bestimmter Stuhl.
 
-[reverent] Brass Plate Diner, Algonquin. Dritter Tisch links, vom Fenster aus gezählt. Da saß seit Sechsundneunzig jeden Morgen um halb acht und jeden Abend um sieben ein Mann, der für Liberty City wichtiger war als der Bürgermeister.
+Zum ersten Mal seit sechsundzwanzig Jahren.
 
-Sein Name war Mr. Camino.
+[reverent] Sie kennen doch den Brass Plate Diner, oder?
+Dritter Tisch links. Direkt am Fenster.
 
-Camino gehörte keiner Familie an. Hat nie geschossen, nie gestohlen. Aber wenn in dieser Stadt zwei Häuser einen Streit hatten, der gefährlich werden konnte, dann gingen die Boten zu seinem Tisch.
+Seit 1996 saß dort jeden Morgen um halb acht und jeden Abend Punkt sieben derselbe Mann. Still. Immer im selben Anzug. Immer mit derselben Tasse Kaffee vor sich.
 
-[dramatic] Sommer Sechsundneunzig. Vito Manschetti, damals zweiunddreißig, war außer sich. Die Famiglia Vargone hatte seinen kleinen Bruder am Hafen erschossen. Vito wollte Rache, noch in derselben Nacht. Wagen geladen, Männer bereit.
+Und manche behaupteten, dieser Mann hätte mehr Einfluss auf Liberty City gehabt als der eigentliche Head of Liberty City.
 
-Da klingelte sein Telefon. Eine Nummer, die nur drei Menschen in dieser Stadt kannten. Vito kam zum Brass Plate. Setzte sich. Und Camino sagte ihm einen einzigen Satz.
+[break]
+
+Sein Name…
+
+[break]
+
+…Mr. Camino.
+
+Camino gehörte keiner Familie an.
+Er trug keine Farben, führte keine Soldaten und besaß kein Territorium. Man hat ihn nie mit einer Waffe gesehen. Nie beim Stehlen. Nie bei Drohungen.
+
+Und trotzdem endeten an seinem Tisch Kriege, bevor sie begannen.
+
+Wenn zwei Familien kurz davor waren, die Stadt in Brand zu setzen, schickte man keine Killer. Man schickte Boten zum Brass Plate Diner.
+
+[dramatic] Sommer 1996.
+
+Vito Manschetti war damals zweiunddreißig Jahre alt — jung genug für Wut und alt genug für Macht. Die Famiglia Vargone hatte seinen kleinen Bruder am Hafen erschossen. Noch in derselben Nacht wollte Vito Vergeltung.
+
+Die Wagen standen bereit.
+Die Männer waren bewaffnet.
+Liberty City war nur Minuten davon entfernt, erneut zu brennen.
+
+Dann klingelte sein Telefon.
+
+Keine Stimme. Keine Erklärung.
+Nur eine Nummer.
+
+Eine Nummer, die angeblich nur drei Menschen in dieser Stadt kannten.
+
+Vito ließ alles stehen und fuhr zum Brass Plate.
+
+Er setzte sich an den dritten Tisch links.
+
+Und Camino sagte nur einen einzigen Satz.
 
 **[CAMINO]**
 
@@ -111,7 +148,7 @@ Da klingelte sein Telefon. Eine Nummer, die nur drei Menschen in dieser Stadt ka
 
 [thoughtful] So war Camino. Sechsundzwanzig Jahre lang.
 
-[sad] Seit heute morgen ist sein Stuhl leer. Sein Buch liegt aufgeschlagen wie immer, sein Earl Grey dampft daneben. Frankie Maloney, der Wirt, hat ihm den Tee trotzdem hingestellt. Morgen wird er es wieder tun.
+[sad] Seit heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Kaffee dampft nicht in der Tasse. Frankie Maloney, der Wirt, hat ihm den Kaffee trotzdem hingestellt. Morgen wird er es wieder tun.
 
 Wenn du Frankie fragst warum, sagt er nur einen Satz.
 
@@ -249,19 +286,56 @@ Auf den Werbetafeln am Star Junction. Auf den Smartphones in Millionen Hosentasc
 **Voice ID:** `pqHfZKP75CvOlQylNhV4` · Stability 50 % · Style 35 %
 
 ```
-[thoughtful] Aber die Botschaft war nicht das einzige, was Liberty City heute morgen wachgerüttelt hat.
+[thoughtful] Doch die Botschaft war nicht das Einzige, das Liberty City heute Morgen aus dem Schlaf gerissen hat.
 
-[sad] Heute morgen blieb ein Stuhl leer. Zum ersten Mal seit sechsundzwanzig Jahren.
+[sad] Heute Morgen blieb ein Platz leer.
+Nicht irgendein Platz.
+Ein ganz bestimmter Stuhl.
 
-[reverent] Brass Plate Diner, Algonquin. Dritter Tisch links, vom Fenster aus gezählt. Da saß seit Sechsundneunzig jeden Morgen um halb acht und jeden Abend um sieben ein Mann, der für Liberty City wichtiger war als der Bürgermeister.
+Zum ersten Mal seit sechsundzwanzig Jahren.
 
-Sein Name war Mr. Camino.
+[reverent] Sie kennen doch den Brass Plate Diner, oder?
+Dritter Tisch links. Direkt am Fenster.
 
-Camino gehörte keiner Familie an. Hat nie geschossen, nie gestohlen. Aber wenn in dieser Stadt zwei Häuser einen Streit hatten, der gefährlich werden konnte, dann gingen die Boten zu seinem Tisch.
+Seit 1996 saß dort jeden Morgen um halb acht und jeden Abend Punkt sieben derselbe Mann. Still. Immer im selben Anzug. Immer mit derselben Tasse Kaffee vor sich.
 
-[dramatic] Sommer Sechsundneunzig. Vito Manschetti, damals zweiunddreißig, war außer sich. Die Famiglia Vargone hatte seinen kleinen Bruder am Hafen erschossen. Vito wollte Rache, noch in derselben Nacht. Wagen geladen, Männer bereit.
+Und manche behaupteten, dieser Mann hätte mehr Einfluss auf Liberty City gehabt als der eigentliche Head of Liberty City.
 
-Da klingelte sein Telefon. Eine Nummer, die nur drei Menschen in dieser Stadt kannten. Vito kam zum Brass Plate. Setzte sich. Und Camino sagte ihm einen einzigen Satz.
+[break]
+
+Sein Name…
+
+[break]
+
+…Mr. Camino.
+
+Camino gehörte keiner Familie an.
+Er trug keine Farben, führte keine Soldaten und besaß kein Territorium. Man hat ihn nie mit einer Waffe gesehen. Nie beim Stehlen. Nie bei Drohungen.
+
+Und trotzdem endeten an seinem Tisch Kriege, bevor sie begannen.
+
+Wenn zwei Familien kurz davor waren, die Stadt in Brand zu setzen, schickte man keine Killer. Man schickte Boten zum Brass Plate Diner.
+
+[dramatic] Sommer 1996.
+
+Vito Manschetti war damals zweiunddreißig Jahre alt — jung genug für Wut und alt genug für Macht. Die Famiglia Vargone hatte seinen kleinen Bruder am Hafen erschossen. Noch in derselben Nacht wollte Vito Vergeltung.
+
+Die Wagen standen bereit.
+Die Männer waren bewaffnet.
+Liberty City war nur Minuten davon entfernt, erneut zu brennen.
+
+Dann klingelte sein Telefon.
+
+Keine Stimme. Keine Erklärung.
+Nur eine Nummer.
+
+Eine Nummer, die angeblich nur drei Menschen in dieser Stadt kannten.
+
+Vito ließ alles stehen und fuhr zum Brass Plate.
+
+Er setzte sich an den dritten Tisch links.
+
+Und Camino sagte nur einen einzigen Satz.
 ```
 
 ---
@@ -285,7 +359,7 @@ Da klingelte sein Telefon. Eine Nummer, die nur drei Menschen in dieser Stadt ka
 
 [thoughtful] So war Camino. Sechsundzwanzig Jahre lang.
 
-[sad] Seit heute morgen ist sein Stuhl leer. Sein Buch liegt aufgeschlagen wie immer, sein Earl Grey dampft daneben. Frankie Maloney, der Wirt, hat ihm den Tee trotzdem hingestellt. Morgen wird er es wieder tun.
+[sad] Seit heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Kaffee dampft nicht in der Tasse. Frankie Maloney, der Wirt, hat ihm den Kaffee trotzdem hingestellt. Morgen wird er es wieder tun.
 
 Wenn du Frankie fragst warum, sagt er nur einen Satz.
 ```
