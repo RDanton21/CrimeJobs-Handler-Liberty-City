@@ -140,7 +140,11 @@ Und Camino sagte nur einen einzigen Satz.
 
 **[CAMINO]**
 
-[stern] Setz dich, Vito. [pauses] Wenn du heute Nacht schießt, [intense] schießt deine Mutter dich nächstes Jahr selbst tot. Weil sie keinen Sohn mehr hat, der etwas wert ist.
+[stern] Setz dich, Vito. Ich weiß genau, was du vorhast.
+[pauses] Aber bevor du heute Nacht den ersten Schuss abgibst, denk einen Moment weiter als bis zur Rache.
+[intense] Denn wenn du diesen Krieg beginnst, dauert es nicht lange, bis deine Mutter auch dich zu Grabe tragen muss.
+Und daran… würde sie zerbrechen.
+Weil sie dann ihren letzten Sohn verliert.
 
 **[BILL]**
 
@@ -345,7 +349,11 @@ Und Camino sagte nur einen einzigen Satz.
 **Voice ID:** `xVObCw3gG96REsnh3t2I` · Model: Eleven v3 · Stability 70 % · Style 15 % · langsame Aussprache
 
 ```
-[stern] Setz dich, Vito. [pauses] Wenn du heute Nacht schießt, [intense] schießt deine Mutter dich nächstes Jahr selbst tot. Weil sie keinen Sohn mehr hat, der etwas wert ist.
+[stern] Setz dich, Vito. Ich weiß genau, was du vorhast.
+[pauses] Aber bevor du heute Nacht den ersten Schuss abgibst, denk einen Moment weiter als bis zur Rache.
+[intense] Denn wenn du diesen Krieg beginnst, dauert es nicht lange, bis deine Mutter auch dich zu Grabe tragen muss.
+Und daran… würde sie zerbrechen.
+Weil sie dann ihren letzten Sohn verliert.
 ```
 
 ---
