@@ -150,9 +150,32 @@ Weil sie dann ihren letzten Sohn verliert.
 
 [calm] Drei Stunden später war der Krieg vorbei. Drei Tote. Kein vierter.
 
-[thoughtful] So war Camino. Sechsundzwanzig Jahre lang.
+[thoughtful] So war Camino. Und das war erst der Anfang.
 
-[sad] Seit heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Kaffee dampft nicht in der Tasse. Frankie Maloney, der Wirt, hat ihm den Kaffee trotzdem hingestellt. Morgen wird er es wieder tun.
+[dramatic] Sieben Jahre später. 2003. Hideo Tanaka kam aus Tokio nach Liberty City. Oyabun der Nishiki-kai Yakuza. Er wollte Algonquin. Und Vito Manschetti — inzwischen Patriarch der Familie — wollte Krieg.
+
+[thoughtful] Camino lud beide am selben Abend in den Brass Plate Diner.
+Hideo brachte eine Stadtteilkarte.
+Vito brachte eine Flasche Whisky.
+
+[serious] Camino lehnte den Whisky ab. Er bot beiden Kaffee an.
+Niemand wagte, ihn abzulehnen.
+
+Vier Stunden saßen sie an seinem Tisch. Niemand außerhalb des Diners hat je erfahren, was gesprochen wurde.
+
+Aber am Ende stand der Pakt, der Algonquin bis heute zusammenhält.
+
+[thoughtful] Frankie Maloney, der Wirt — der einzige Mensch, der die ganze Szene mitbekommen hat — fasst diesen Abend bis heute mit einem Satz zusammen.
+
+[serious] Hideo hat dreimal geweint.
+Vito einmal.
+Und Camino… kein einziges Mal.
+
+[sad] Sechsundzwanzig Jahre lang lief das so.
+
+Bis heute Morgen.
+
+Heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Kaffee dampft nicht in der Tasse. Frankie Maloney hat ihm den Kaffee trotzdem hingestellt. Morgen wird er es wieder tun.
 
 Wenn du Frankie fragst warum, sagt er nur einen Satz.
 
@@ -385,9 +408,32 @@ Weil sie dann ihren letzten Sohn verliert.
 ```
 [calm] Drei Stunden später war der Krieg vorbei. Drei Tote. Kein vierter.
 
-[thoughtful] So war Camino. Sechsundzwanzig Jahre lang.
+[thoughtful] So war Camino. Und das war erst der Anfang.
 
-[sad] Seit heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Kaffee dampft nicht in der Tasse. Frankie Maloney, der Wirt, hat ihm den Kaffee trotzdem hingestellt. Morgen wird er es wieder tun.
+[dramatic] Sieben Jahre später. 2003. Hideo Tanaka kam aus Tokio nach Liberty City. Oyabun der Nishiki-kai Yakuza. Er wollte Algonquin. Und Vito Manschetti — inzwischen Patriarch der Familie — wollte Krieg.
+
+[thoughtful] Camino lud beide am selben Abend in den Brass Plate Diner.
+Hideo brachte eine Stadtteilkarte.
+Vito brachte eine Flasche Whisky.
+
+[serious] Camino lehnte den Whisky ab. Er bot beiden Kaffee an.
+Niemand wagte, ihn abzulehnen.
+
+Vier Stunden saßen sie an seinem Tisch. Niemand außerhalb des Diners hat je erfahren, was gesprochen wurde.
+
+Aber am Ende stand der Pakt, der Algonquin bis heute zusammenhält.
+
+[thoughtful] Frankie Maloney, der Wirt — der einzige Mensch, der die ganze Szene mitbekommen hat — fasst diesen Abend bis heute mit einem Satz zusammen.
+
+[serious] Hideo hat dreimal geweint.
+Vito einmal.
+Und Camino… kein einziges Mal.
+
+[sad] Sechsundzwanzig Jahre lang lief das so.
+
+Bis heute Morgen.
+
+Heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Kaffee dampft nicht in der Tasse. Frankie Maloney hat ihm den Kaffee trotzdem hingestellt. Morgen wird er es wieder tun.
 
 Wenn du Frankie fragst warum, sagt er nur einen Satz.
 ```
