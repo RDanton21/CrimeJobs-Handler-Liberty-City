@@ -1,8 +1,10 @@
 # Liberty City — Öffentliche Grundstory zum Event-Start
 
-**Datum:** 04.09.2026
+**Datum (in-story):** 04.09.2026 (Director's Cut)
 **Zielgruppe:** ALLE Bewohner Liberty Citys — Crime-Crews, Zivilisten, Gewerbetreibende, Behörden, Medien
 **Zweck:** Discord-Veröffentlichung vor dem Event-Start. Liefert allen Spielern dieselbe Ausgangslage, unabhängig von Rolle.
+
+> 📅 **Für die Pre-Event-Präsentation am 28.08.2026, 18:00 Uhr** wird stattdessen die Motion-Comic-Kurzversion verwendet: [`CITY_PUBLIC_BRIEFING_VOICEOVER_MOTION_COMIC.md`](CITY_PUBLIC_BRIEFING_VOICEOVER_MOTION_COMIC.md) — 3–5 Min, Botschaft + Caminos Verschwinden auf den 28.08. datiert, Cliffhanger Richtung Event-Start am 04.09.2026.
 
 > ⚠ **Spielleiter-Hinweis (NICHT mit-veröffentlichen):** Das Probespiel und die wahre Identität des Big Boss bleiben **strikt intern**. Diese Datei enthält **keinen** Reveal — sie zeigt nur, was jeder Bürger Liberty Citys spüren, sehen und hören kann. Der Twist (Head of Liberty City Francis J. Underwood = Big Boss) wird erst am Tag 16 aufgelöst (siehe `EVENT_FINALE.md`).
 
