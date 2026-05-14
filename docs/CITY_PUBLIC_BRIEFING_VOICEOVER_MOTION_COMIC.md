@@ -100,7 +100,19 @@ Dritter Tisch links. Direkt am Fenster.
 
 Seit 1996 saß dort jeden Morgen um halb acht und jeden Abend Punkt sieben derselbe Mann. Still. Immer im selben Anzug. Immer mit derselben Tasse Tee vor sich.
 
-Und manche behaupteten, dieser Mann hätte mehr Einfluss auf Liberty City gehabt als der eigentliche Head of Liberty City.
+[thoughtful] Vor ihm auf dem Tisch lag immer dasselbe Buch. „Der Pate". Italienische Originalausgabe von 1969. Aufgeschlagen auf Seite 187.
+
+Seit zwölf Jahren dieselbe Seite.
+
+Niemand hat ihn je darin lesen sehen.
+
+[serious] Und vor ihm — zwei Stühle.
+
+Den linken nahm man, wenn man etwas brauchte. Den rechten, wenn man etwas brachte. Drei Tassen Tee auf dem Tisch hießen: es wird geredet. War das Buch zugeklappt, hörte Camino zu. Lag es aufgeschlagen, dachte er nach.
+
+Niemand hat ihm diese Regeln je beigebracht. Niemand hat sie aufgeschrieben. Aber in sechsundzwanzig Jahren hat sie auch keiner gebrochen.
+
+[reverent] Und manche behaupteten, dieser Mann hätte mehr Einfluss auf Liberty City gehabt als der eigentliche Head of Liberty City.
 
 [break]
 
@@ -134,9 +146,11 @@ Eine Nummer, die angeblich nur drei Menschen in dieser Stadt kannten.
 
 Vito ließ alles stehen und fuhr zum Brass Plate.
 
-Er setzte sich an den dritten Tisch links.
+Er setzte sich auf den linken Stuhl. Den Stuhl der Bittsteller.
 
-Und Camino sagte nur einen einzigen Satz.
+Camino schlug sein Buch zu.
+
+Und sagte nur einen einzigen Satz.
 
 **[CAMINO]**
 
@@ -175,7 +189,7 @@ Und Camino… kein einziges Mal.
 
 Bis heute Morgen.
 
-Heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Tee dampft nicht in der Tasse. Frankie Maloney hat ihm den Tee trotzdem hingestellt. Morgen wird er es wieder tun.
+Heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Tee dampft nicht in der Tasse. Sein Buch liegt aufgeschlagen — wie immer auf Seite 187. Frankie Maloney hat den Tee trotzdem aufgegossen. Morgen wird er es wieder tun.
 
 Wenn du Frankie fragst warum, sagt er nur einen Satz.
 
@@ -346,7 +360,19 @@ Dritter Tisch links. Direkt am Fenster.
 
 Seit 1996 saß dort jeden Morgen um halb acht und jeden Abend Punkt sieben derselbe Mann. Still. Immer im selben Anzug. Immer mit derselben Tasse Tee vor sich.
 
-Und manche behaupteten, dieser Mann hätte mehr Einfluss auf Liberty City gehabt als der eigentliche Head of Liberty City.
+[thoughtful] Vor ihm auf dem Tisch lag immer dasselbe Buch. „Der Pate". Italienische Originalausgabe von 1969. Aufgeschlagen auf Seite 187.
+
+Seit zwölf Jahren dieselbe Seite.
+
+Niemand hat ihn je darin lesen sehen.
+
+[serious] Und vor ihm — zwei Stühle.
+
+Den linken nahm man, wenn man etwas brauchte. Den rechten, wenn man etwas brachte. Drei Tassen Tee auf dem Tisch hießen: es wird geredet. War das Buch zugeklappt, hörte Camino zu. Lag es aufgeschlagen, dachte er nach.
+
+Niemand hat ihm diese Regeln je beigebracht. Niemand hat sie aufgeschrieben. Aber in sechsundzwanzig Jahren hat sie auch keiner gebrochen.
+
+[reverent] Und manche behaupteten, dieser Mann hätte mehr Einfluss auf Liberty City gehabt als der eigentliche Head of Liberty City.
 
 [break]
 
@@ -380,9 +406,11 @@ Eine Nummer, die angeblich nur drei Menschen in dieser Stadt kannten.
 
 Vito ließ alles stehen und fuhr zum Brass Plate.
 
-Er setzte sich an den dritten Tisch links.
+Er setzte sich auf den linken Stuhl. Den Stuhl der Bittsteller.
 
-Und Camino sagte nur einen einzigen Satz.
+Camino schlug sein Buch zu.
+
+Und sagte nur einen einzigen Satz.
 ```
 
 ---
@@ -433,7 +461,7 @@ Und Camino… kein einziges Mal.
 
 Bis heute Morgen.
 
-Heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Tee dampft nicht in der Tasse. Frankie Maloney hat ihm den Tee trotzdem hingestellt. Morgen wird er es wieder tun.
+Heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Tee dampft nicht in der Tasse. Sein Buch liegt aufgeschlagen — wie immer auf Seite 187. Frankie Maloney hat den Tee trotzdem aufgegossen. Morgen wird er es wieder tun.
 
 Wenn du Frankie fragst warum, sagt er nur einen Satz.
 ```
