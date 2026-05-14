@@ -158,7 +158,8 @@ Wenn du Frankie fragst warum, sagt er nur einen Satz.
 
 **[FRANKIE]**
 
-[whispers] [sadly] Damit der Stuhl… [pauses] nicht das Falsche denkt.
+[whispers] [sadly] Damit der leere Stuhl…
+[pauses] nicht glaubt, dass diese Stadt ihn schon vergessen hat.
 
 ---
 
@@ -380,7 +381,8 @@ Wenn du Frankie fragst warum, sagt er nur einen Satz.
 **Wichtig:** Leiser generieren, fast geflüstert. Lange Pause vor „nicht das Falsche".
 
 ```
-[whispers] [sadly] Damit der Stuhl… [pauses] nicht das Falsche denkt.
+[whispers] [sadly] Damit der leere Stuhl…
+[pauses] nicht glaubt, dass diese Stadt ihn schon vergessen hat.
 ```
 
 ---
