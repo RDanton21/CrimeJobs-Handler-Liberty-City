@@ -98,7 +98,7 @@ Zum ersten Mal seit sechsundzwanzig Jahren.
 [reverent] Sie kennen doch den Brass Plate Diner, oder?
 Dritter Tisch links. Direkt am Fenster.
 
-Seit 1996 saß dort jeden Morgen um halb acht und jeden Abend Punkt sieben derselbe Mann. Still. Immer im selben Anzug. Immer mit derselben Tasse Kaffee vor sich.
+Seit 1996 saß dort jeden Morgen um halb acht und jeden Abend Punkt sieben derselbe Mann. Still. Immer im selben Anzug. Immer mit derselben Tasse Tee vor sich.
 
 Und manche behaupteten, dieser Mann hätte mehr Einfluss auf Liberty City gehabt als der eigentliche Head of Liberty City.
 
@@ -158,7 +158,7 @@ Weil sie dann ihren letzten Sohn verliert.
 Hideo brachte eine Stadtteilkarte.
 Vito brachte eine Flasche Whisky.
 
-[serious] Camino lehnte den Whisky ab. Er bot beiden Kaffee an.
+[serious] Camino lehnte den Whisky ab. Er bot beiden Tee an.
 Niemand wagte, ihn abzulehnen.
 
 Vier Stunden saßen sie an seinem Tisch. Niemand außerhalb des Diners hat je erfahren, was gesprochen wurde.
@@ -175,7 +175,7 @@ Und Camino… kein einziges Mal.
 
 Bis heute Morgen.
 
-Heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Kaffee dampft nicht in der Tasse. Frankie Maloney hat ihm den Kaffee trotzdem hingestellt. Morgen wird er es wieder tun.
+Heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Tee dampft nicht in der Tasse. Frankie Maloney hat ihm den Tee trotzdem hingestellt. Morgen wird er es wieder tun.
 
 Wenn du Frankie fragst warum, sagt er nur einen Satz.
 
@@ -190,7 +190,7 @@ Wenn du Frankie fragst warum, sagt er nur einen Satz.
 
 [grim] Aber Liberty City war nicht lange ohne Stimme.
 
-[serious] Noch während Frankie den Kaffee neben den leeren Stuhl stellt, hat sich heute jemand anderes gemeldet.
+[serious] Noch während Frankie den Tee neben den leeren Stuhl stellt, hat sich heute jemand anderes gemeldet.
 
 Eine fremde Stimme. Niemand kennt sie. Niemand weiß ihren Namen. Niemand hat sie je gesehen.
 
@@ -344,7 +344,7 @@ Zum ersten Mal seit sechsundzwanzig Jahren.
 [reverent] Sie kennen doch den Brass Plate Diner, oder?
 Dritter Tisch links. Direkt am Fenster.
 
-Seit 1996 saß dort jeden Morgen um halb acht und jeden Abend Punkt sieben derselbe Mann. Still. Immer im selben Anzug. Immer mit derselben Tasse Kaffee vor sich.
+Seit 1996 saß dort jeden Morgen um halb acht und jeden Abend Punkt sieben derselbe Mann. Still. Immer im selben Anzug. Immer mit derselben Tasse Tee vor sich.
 
 Und manche behaupteten, dieser Mann hätte mehr Einfluss auf Liberty City gehabt als der eigentliche Head of Liberty City.
 
@@ -416,7 +416,7 @@ Weil sie dann ihren letzten Sohn verliert.
 Hideo brachte eine Stadtteilkarte.
 Vito brachte eine Flasche Whisky.
 
-[serious] Camino lehnte den Whisky ab. Er bot beiden Kaffee an.
+[serious] Camino lehnte den Whisky ab. Er bot beiden Tee an.
 Niemand wagte, ihn abzulehnen.
 
 Vier Stunden saßen sie an seinem Tisch. Niemand außerhalb des Diners hat je erfahren, was gesprochen wurde.
@@ -433,7 +433,7 @@ Und Camino… kein einziges Mal.
 
 Bis heute Morgen.
 
-Heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Kaffee dampft nicht in der Tasse. Frankie Maloney hat ihm den Kaffee trotzdem hingestellt. Morgen wird er es wieder tun.
+Heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Tee dampft nicht in der Tasse. Frankie Maloney hat ihm den Tee trotzdem hingestellt. Morgen wird er es wieder tun.
 
 Wenn du Frankie fragst warum, sagt er nur einen Satz.
 ```
@@ -459,7 +459,7 @@ Wenn du Frankie fragst warum, sagt er nur einen Satz.
 ```
 [grim] Aber Liberty City war nicht lange ohne Stimme.
 
-[serious] Noch während Frankie den Kaffee neben den leeren Stuhl stellt, hat sich heute jemand anderes gemeldet.
+[serious] Noch während Frankie den Tee neben den leeren Stuhl stellt, hat sich heute jemand anderes gemeldet.
 
 Eine fremde Stimme. Niemand kennt sie. Niemand weiß ihren Namen. Niemand hat sie je gesehen.
 
