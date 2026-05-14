@@ -27,23 +27,41 @@
 
 **[BILL]**
 
-[serious] Liberty City. Zwei Wörter, mehr brauchst du nicht.
+[serious] Zwei Wörter. „Liberty City."
+Klingt nach einer Stadt wie jede andere. Doch hinter diesem Namen steckt mehr als Straßen, Hochhäuser und Neonlichter.[break]
+[thoughtful] Wenn man jemanden fragen würde, was Liberty City wirklich ist, bekäme man wahrscheinlich keine Erklärung — sondern eher eine Warnung.
 
-Vier Millionen Menschen, fünf Stadtteile, ein Hafen, ein Flughafen, eine Wall Street und eine Insel im Nebel. Auf dem Papier eine moderne amerikanische Großstadt. In Wahrheit eine Maschine, die seit drei Jahrzehnten ohne offenen Krieg läuft. Mafia, Bratva, Yakuza, Motorrad-Clubs, Straßencrews — einundzwanzig Familien, die ihre Reviere besser kennen als die Stadtplaner.
+Vier Millionen Einwohner. Fünf Bezirke. Ein Hafen, der niemals stillsteht. Ein Flughafen, an dem mehr landet, als offiziell ankommt. Eine Wall Street aus Glas und Macht. Und irgendwo dazwischen eine Insel, die morgens im Nebel verschwindet.
+[break]
+Auf dem Papier wirkt alles modern. Sauber. Amerikanisch.
+Doch unter der Oberfläche läuft die Stadt nach anderen Regeln. Seit über dreißig Jahren ohne einen offenen Krieg. Keine Explosionen in den Nachrichten. Keine Straßenschlachten. Nur stille Abkommen, alte Namen und Grenzen, die niemand auf Karten einzeichnet.
 
-[thoughtful] Algonquin: Wolkenkratzer aus Glas und Geld. Im siebenundvierzigsten Stock des Civic Tower brennt nachts eine Lampe, die nie ausgeht. Da sitzt Underwood, der Head of Liberty City. Manche sagen, er schläft nicht. Manche sagen, er muss nicht.
+Mafiafamilien. Bratva. Yakuza. Motorradclubs. Straßencrews.
+Jede Gruppierung kennt ihren Platz. Jeder Bezirk hat seine eigenen Gesetze.
 
-Bohan: Diesel, Plátanos, Brücken über den East River. Werkstätten, die Türen reparieren, ohne nach Versicherungspapieren zu fragen.
+Und genau dort beginnt Liberty City erst wirklich.
 
-Broker: Hafen, Nebel über den Containern. Die russische Bratva, die alles weiß und über alles schweigt.
+[thoughtful] Im Herzen der Stadt liegt Algonquin.
+Wolkenkratzer aus Glas und Geld ziehen sich bis in die Nacht hinein über den Himmel. Hoch oben im Civic Tower brennt ein einzelnes Licht, das niemals ausgeht. Dort sitzt Francis J. Underwood — der Head of Liberty City. Manche sagen, er schläft nie. Andere sagen, er müsse es auch nicht.
 
-Colony Island: eine Insel im Wasser, die zu viel weiß und nichts sagt. Die Fähre fährt zweimal am Tag. Mehr nicht.
+Von dort aus führen die Straßen hinunter nach Bohan.
+Dorthin, wo der Geruch von Diesel zwischen den Häusern hängt und Werkstätten hinter rostigen Toren mehr reparieren als nur Motoren. Hier werden Probleme gelöst, ohne dass jemand Formulare ausfüllt oder Fragen stellt.
 
-Dukes: Vorstadt-Häuser tagsüber, Werkstätten nachts. Dazwischen ein Flughafen, an dem Container verschwinden, bevor sie auf den Frachtbriefen stehen.
+Folgt man den Brücken weiter Richtung Wasser, landet man in Broker.
+Nebel zieht über die Containerhäfen, während Kräne wie stumme Wächter über den Docks stehen. Die russische Bratva kontrolliert hier die Lieferketten der Stadt — leise, präzise und ohne Aufmerksamkeit zu wollen.
 
-[pauses] Vor dreißig Jahren hat diese Stadt zum letzten Mal gebrannt. Seitdem läuft alles nach unsichtbaren Regeln.
+Mitten zwischen den Strömungen liegt schließlich Colony Island.
+Eine kleine Insel, die wirkt, als hätte die Stadt sie vergessen. Doch genau deshalb weiß sie zu viel. Die Fähre fährt zweimal täglich. Wer dort Geschäfte macht, tut das selten zufällig.
 
-[dramatic] Bis heute.
+Und östlich davon beginnt Dukes.
+Tagsüber wirken die Straßen ruhig — Vorstadthäuser, kleine Läden, Familienleben. Doch nachts öffnen sich Werkstatttore, Motoren starten und Lieferungen wechseln ihre Besitzer. Direkt daneben liegt der Flughafen. Ein Ort, an dem Container verschwinden können, bevor sie jemals auf einem Frachtbrief auftauchen.
+
+[long pause] Vor dreißig Jahren hat diese Stadt zum letzten Mal offen gebrannt.
+Seitdem halten unsichtbare Regeln alles zusammen.
+
+[dramatic]
+Doch Regeln halten nur so lange…
+bis jemand entscheidet, sie zu brechen.
 
 ---
 
@@ -148,23 +166,41 @@ Dateien-Reihenfolge für Audacity-Mischung:
 **Voice ID:** `pqHfZKP75CvOlQylNhV4` · Model: Eleven v3 · Stability 50 % · Style 35 % · Speaker Boost ON
 
 ```
-[serious] Liberty City. Zwei Wörter, mehr brauchst du nicht.
+[serious] Zwei Wörter. „Liberty City."
+Klingt nach einer Stadt wie jede andere. Doch hinter diesem Namen steckt mehr als Straßen, Hochhäuser und Neonlichter.[break]
+[thoughtful] Wenn man jemanden fragen würde, was Liberty City wirklich ist, bekäme man wahrscheinlich keine Erklärung — sondern eher eine Warnung.
 
-Vier Millionen Menschen, fünf Stadtteile, ein Hafen, ein Flughafen, eine Wall Street und eine Insel im Nebel. Auf dem Papier eine moderne amerikanische Großstadt. In Wahrheit eine Maschine, die seit drei Jahrzehnten ohne offenen Krieg läuft. Mafia, Bratva, Yakuza, Motorrad-Clubs, Straßencrews — einundzwanzig Familien, die ihre Reviere besser kennen als die Stadtplaner.
+Vier Millionen Einwohner. Fünf Bezirke. Ein Hafen, der niemals stillsteht. Ein Flughafen, an dem mehr landet, als offiziell ankommt. Eine Wall Street aus Glas und Macht. Und irgendwo dazwischen eine Insel, die morgens im Nebel verschwindet.
+[break]
+Auf dem Papier wirkt alles modern. Sauber. Amerikanisch.
+Doch unter der Oberfläche läuft die Stadt nach anderen Regeln. Seit über dreißig Jahren ohne einen offenen Krieg. Keine Explosionen in den Nachrichten. Keine Straßenschlachten. Nur stille Abkommen, alte Namen und Grenzen, die niemand auf Karten einzeichnet.
 
-[thoughtful] Algonquin: Wolkenkratzer aus Glas und Geld. Im siebenundvierzigsten Stock des Civic Tower brennt nachts eine Lampe, die nie ausgeht. Da sitzt Underwood, der Head of Liberty City. Manche sagen, er schläft nicht. Manche sagen, er muss nicht.
+Mafiafamilien. Bratva. Yakuza. Motorradclubs. Straßencrews.
+Jede Gruppierung kennt ihren Platz. Jeder Bezirk hat seine eigenen Gesetze.
 
-Bohan: Diesel, Plátanos, Brücken über den East River. Werkstätten, die Türen reparieren, ohne nach Versicherungspapieren zu fragen.
+Und genau dort beginnt Liberty City erst wirklich.
 
-Broker: Hafen, Nebel über den Containern. Die russische Bratva, die alles weiß und über alles schweigt.
+[thoughtful] Im Herzen der Stadt liegt Algonquin.
+Wolkenkratzer aus Glas und Geld ziehen sich bis in die Nacht hinein über den Himmel. Hoch oben im Civic Tower brennt ein einzelnes Licht, das niemals ausgeht. Dort sitzt Francis J. Underwood — der Head of Liberty City. Manche sagen, er schläft nie. Andere sagen, er müsse es auch nicht.
 
-Colony Island: eine Insel im Wasser, die zu viel weiß und nichts sagt. Die Fähre fährt zweimal am Tag. Mehr nicht.
+Von dort aus führen die Straßen hinunter nach Bohan.
+Dorthin, wo der Geruch von Diesel zwischen den Häusern hängt und Werkstätten hinter rostigen Toren mehr reparieren als nur Motoren. Hier werden Probleme gelöst, ohne dass jemand Formulare ausfüllt oder Fragen stellt.
 
-Dukes: Vorstadt-Häuser tagsüber, Werkstätten nachts. Dazwischen ein Flughafen, an dem Container verschwinden, bevor sie auf den Frachtbriefen stehen.
+Folgt man den Brücken weiter Richtung Wasser, landet man in Broker.
+Nebel zieht über die Containerhäfen, während Kräne wie stumme Wächter über den Docks stehen. Die russische Bratva kontrolliert hier die Lieferketten der Stadt — leise, präzise und ohne Aufmerksamkeit zu wollen.
 
-[pauses] Vor dreißig Jahren hat diese Stadt zum letzten Mal gebrannt. Seitdem läuft alles nach unsichtbaren Regeln.
+Mitten zwischen den Strömungen liegt schließlich Colony Island.
+Eine kleine Insel, die wirkt, als hätte die Stadt sie vergessen. Doch genau deshalb weiß sie zu viel. Die Fähre fährt zweimal täglich. Wer dort Geschäfte macht, tut das selten zufällig.
 
-[dramatic] Bis heute.
+Und östlich davon beginnt Dukes.
+Tagsüber wirken die Straßen ruhig — Vorstadthäuser, kleine Läden, Familienleben. Doch nachts öffnen sich Werkstatttore, Motoren starten und Lieferungen wechseln ihre Besitzer. Direkt daneben liegt der Flughafen. Ein Ort, an dem Container verschwinden können, bevor sie jemals auf einem Frachtbrief auftauchen.
+
+[long pause] Vor dreißig Jahren hat diese Stadt zum letzten Mal offen gebrannt.
+Seitdem halten unsichtbare Regeln alles zusammen.
+
+[dramatic]
+Doch Regeln halten nur so lange…
+bis jemand entscheidet, sie zu brechen.
 ```
 
 ---
