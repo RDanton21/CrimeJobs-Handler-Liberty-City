@@ -167,19 +167,38 @@ Wenn du Frankie fragst warum, sagt er nur einen Satz.
 
 [grim] Aber Liberty City war nicht lange ohne Stimme.
 
-[serious] Eine andere hat sich heute gemeldet. Niemand kennt sie. Niemand weiß ihren Namen.
+[serious] Noch während Frankie den Kaffee neben den leeren Stuhl stellt, hat sich heute jemand anderes gemeldet.
 
-[thoughtful] Aber sie verteilt schon Aufträge. Über Mittler, die aus dem Nichts auftauchen, eine Adresse murmeln, einen Umschlag übergeben und wieder verschwinden.
+Eine fremde Stimme. Niemand kennt sie. Niemand weiß ihren Namen. Niemand hat sie je gesehen.
 
-[intense] Die wenigen, die sie schon gehört haben, sagen alle dasselbe.
+[thoughtful] Aber sie verteilt schon Aufträge. Über Mittler, die aus dem Nichts auftauchen, eine Adresse murmeln, einen Umschlag übergeben und wieder verschwinden, bevor du sie überhaupt anschauen kannst.
 
-[grim] Sie scheint gefährlicher zu sein als Camino jemals war.
+[intense] Und die wenigen, die sie schon gehört haben, sind sich in einem Punkt einig.
 
-[pauses] [dramatic] In sechs Tagen, am vierten September, beginnt in dieser Stadt etwas, das sie so noch nicht erlebt hat.
+[grim] Sie ist kälter als Camino. Schneller. Härter. Sie kennt die alten Regeln nicht — und es ist ihr egal.
 
-[reverent] Sucht euch eure Rolle. Macht eure Werkzeuge bereit.
+[pauses]
 
-[softly] Liberty City wird sich an euch erinnern. An die Nacht, in der alles begonnen hat.
+[serious] Aber zwei Fragen halten heute Nacht jedes Hinterzimmer in dieser Stadt wach.
+
+[pauses] Wo ist Mr. Camino?
+
+[pauses] Und wer hat ihn aus dem Weg geräumt?
+
+[grim] Niemand stellt diese Fragen laut. Noch nicht.
+Aber die Antworten… [pauses] kommen.
+
+Und sie werden Liberty City verändern.
+
+[pauses] [dramatic] In sechs Tagen, am vierten September, beginnt etwas, das diese Stadt seit dreißig Jahren nicht mehr gesehen hat. Die unsichtbaren Regeln werden neu geschrieben. Reviere neu vermessen. Familien neu sortiert.
+
+Manche werden steigen.
+
+Manche werden verschwinden.
+
+[reverent] Sucht euch eure Rolle. Sortiert eure Männer. Schärft eure Werkzeuge.
+
+[softly] Denn Liberty City wird sich an euch erinnern. An die Nacht, in der alles begonnen hat.
 
 [pauses] [final] [low] Sechzehn Tage.
 
@@ -394,19 +413,38 @@ Wenn du Frankie fragst warum, sagt er nur einen Satz.
 ```
 [grim] Aber Liberty City war nicht lange ohne Stimme.
 
-[serious] Eine andere hat sich heute gemeldet. Niemand kennt sie. Niemand weiß ihren Namen.
+[serious] Noch während Frankie den Kaffee neben den leeren Stuhl stellt, hat sich heute jemand anderes gemeldet.
 
-[thoughtful] Aber sie verteilt schon Aufträge. Über Mittler, die aus dem Nichts auftauchen, eine Adresse murmeln, einen Umschlag übergeben und wieder verschwinden.
+Eine fremde Stimme. Niemand kennt sie. Niemand weiß ihren Namen. Niemand hat sie je gesehen.
 
-[intense] Die wenigen, die sie schon gehört haben, sagen alle dasselbe.
+[thoughtful] Aber sie verteilt schon Aufträge. Über Mittler, die aus dem Nichts auftauchen, eine Adresse murmeln, einen Umschlag übergeben und wieder verschwinden, bevor du sie überhaupt anschauen kannst.
 
-[grim] Sie scheint gefährlicher zu sein als Camino jemals war.
+[intense] Und die wenigen, die sie schon gehört haben, sind sich in einem Punkt einig.
 
-[pauses] [dramatic] In sechs Tagen, am vierten September, beginnt in dieser Stadt etwas, das sie so noch nicht erlebt hat.
+[grim] Sie ist kälter als Camino. Schneller. Härter. Sie kennt die alten Regeln nicht — und es ist ihr egal.
 
-[reverent] Sucht euch eure Rolle. Macht eure Werkzeuge bereit.
+[pauses]
 
-[softly] Liberty City wird sich an euch erinnern. An die Nacht, in der alles begonnen hat.
+[serious] Aber zwei Fragen halten heute Nacht jedes Hinterzimmer in dieser Stadt wach.
+
+[pauses] Wo ist Mr. Camino?
+
+[pauses] Und wer hat ihn aus dem Weg geräumt?
+
+[grim] Niemand stellt diese Fragen laut. Noch nicht.
+Aber die Antworten… [pauses] kommen.
+
+Und sie werden Liberty City verändern.
+
+[pauses] [dramatic] In sechs Tagen, am vierten September, beginnt etwas, das diese Stadt seit dreißig Jahren nicht mehr gesehen hat. Die unsichtbaren Regeln werden neu geschrieben. Reviere neu vermessen. Familien neu sortiert.
+
+Manche werden steigen.
+
+Manche werden verschwinden.
+
+[reverent] Sucht euch eure Rolle. Sortiert eure Männer. Schärft eure Werkzeuge.
+
+[softly] Denn Liberty City wird sich an euch erinnern. An die Nacht, in der alles begonnen hat.
 
 [pauses] [final] [low] Sechzehn Tage.
 
