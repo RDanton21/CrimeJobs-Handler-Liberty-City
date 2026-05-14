@@ -29,11 +29,21 @@
 
 [serious] Liberty City. Zwei Wörter, mehr brauchst du nicht.
 
-Vier Millionen Menschen. Fünf Stadtteile. Eine Maschine, die seit drei Jahrzehnten ohne offenen Krieg läuft.
+Vier Millionen Menschen, fünf Stadtteile, ein Hafen, ein Flughafen, eine Wall Street und eine Insel im Nebel. Auf dem Papier eine moderne amerikanische Großstadt. In Wahrheit eine Maschine, die seit drei Jahrzehnten ohne offenen Krieg läuft. Mafia, Bratva, Yakuza, Motorrad-Clubs, Straßencrews — einundzwanzig Familien, die ihre Reviere besser kennen als die Stadtplaner.
 
-[thoughtful] Algonquin: Wolkenkratzer aus Glas und Geld. Im siebenundvierzigsten Stock des Civic Tower brennt nachts eine Lampe, die nie ausgeht. Bohan: Diesel, Plátanos, Brücken über den East River. Broker: Hafen, Nebel, Bratva. Colony Island: eine Insel, die zu viel weiß und nichts sagt. Dukes: Vorstadt-Häuser tagsüber, Werkstätten nachts, dazwischen ein Flughafen, der nie still ist.
+[thoughtful] Algonquin: Wolkenkratzer aus Glas und Geld. Im siebenundvierzigsten Stock des Civic Tower brennt nachts eine Lampe, die nie ausgeht. Da sitzt Underwood, der Head of Liberty City. Manche sagen, er schläft nicht. Manche sagen, er muss nicht.
 
-[pauses] Bis heute.
+Bohan: Diesel, Plátanos, Brücken über den East River. Werkstätten, die Türen reparieren, ohne nach Versicherungspapieren zu fragen.
+
+Broker: Hafen, Nebel über den Containern. Die russische Bratva, die alles weiß und über alles schweigt.
+
+Colony Island: eine Insel im Wasser, die zu viel weiß und nichts sagt. Die Fähre fährt zweimal am Tag. Mehr nicht.
+
+Dukes: Vorstadt-Häuser tagsüber, Werkstätten nachts. Dazwischen ein Flughafen, an dem Container verschwinden, bevor sie auf den Frachtbriefen stehen.
+
+[pauses] Vor dreißig Jahren hat diese Stadt zum letzten Mal gebrannt. Seitdem läuft alles nach unsichtbaren Regeln.
+
+[dramatic] Bis heute.
 
 ---
 
@@ -140,11 +150,21 @@ Dateien-Reihenfolge für Audacity-Mischung:
 ```
 [serious] Liberty City. Zwei Wörter, mehr brauchst du nicht.
 
-Vier Millionen Menschen. Fünf Stadtteile. Eine Maschine, die seit drei Jahrzehnten ohne offenen Krieg läuft.
+Vier Millionen Menschen, fünf Stadtteile, ein Hafen, ein Flughafen, eine Wall Street und eine Insel im Nebel. Auf dem Papier eine moderne amerikanische Großstadt. In Wahrheit eine Maschine, die seit drei Jahrzehnten ohne offenen Krieg läuft. Mafia, Bratva, Yakuza, Motorrad-Clubs, Straßencrews — einundzwanzig Familien, die ihre Reviere besser kennen als die Stadtplaner.
 
-[thoughtful] Algonquin: Wolkenkratzer aus Glas und Geld. Im siebenundvierzigsten Stock des Civic Tower brennt nachts eine Lampe, die nie ausgeht. Bohan: Diesel, Plátanos, Brücken über den East River. Broker: Hafen, Nebel, Bratva. Colony Island: eine Insel, die zu viel weiß und nichts sagt. Dukes: Vorstadt-Häuser tagsüber, Werkstätten nachts, dazwischen ein Flughafen, der nie still ist.
+[thoughtful] Algonquin: Wolkenkratzer aus Glas und Geld. Im siebenundvierzigsten Stock des Civic Tower brennt nachts eine Lampe, die nie ausgeht. Da sitzt Underwood, der Head of Liberty City. Manche sagen, er schläft nicht. Manche sagen, er muss nicht.
 
-[pauses] Bis heute.
+Bohan: Diesel, Plátanos, Brücken über den East River. Werkstätten, die Türen reparieren, ohne nach Versicherungspapieren zu fragen.
+
+Broker: Hafen, Nebel über den Containern. Die russische Bratva, die alles weiß und über alles schweigt.
+
+Colony Island: eine Insel im Wasser, die zu viel weiß und nichts sagt. Die Fähre fährt zweimal am Tag. Mehr nicht.
+
+Dukes: Vorstadt-Häuser tagsüber, Werkstätten nachts. Dazwischen ein Flughafen, an dem Container verschwinden, bevor sie auf den Frachtbriefen stehen.
+
+[pauses] Vor dreißig Jahren hat diese Stadt zum letzten Mal gebrannt. Seitdem läuft alles nach unsichtbaren Regeln.
+
+[dramatic] Bis heute.
 ```
 
 ---
