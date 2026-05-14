@@ -67,9 +67,11 @@ bis jemand entscheidet, sie zu brechen.
 
 **[BILL]**
 
-[serious] Heute Nacht, am achtundzwanzigsten August, kurz vor Mitternacht, kam sie auf jeden Bildschirm dieser Stadt.
+[serious] Genau das ist heute Nacht passiert.
 
-Werbetafeln am Star Junction. Smartphones in Millionen Hosentaschen. U-Bahn-Anzeigen. Geldautomaten. Sogar die LED-Schilder über dem Algonquin-Tunnel.
+Achtundzwanzigster August. Kurz vor Mitternacht. Eine einzige Botschaft, die in derselben Sekunde überall in dieser Stadt erschien.
+
+Auf den Werbetafeln am Star Junction. Auf den Smartphones in Millionen Hosentaschen. In den U-Bahn-Anzeigen. Auf den Geldautomaten in jeder Bank-Lobby. Sogar auf den LED-Schildern über dem Algonquin-Tunnel.
 
 [intense] Siebzehn Sekunden lang dasselbe Bild. Schwarz, weiße Schrift, eine einzige Zeile.
 
@@ -210,9 +212,11 @@ bis jemand entscheidet, sie zu brechen.
 **Voice ID:** `pqHfZKP75CvOlQylNhV4` · Stability 50 % · Style 35 %
 
 ```
-[serious] Heute Nacht, am achtundzwanzigsten August, kurz vor Mitternacht, kam sie auf jeden Bildschirm dieser Stadt.
+[serious] Genau das ist heute Nacht passiert.
 
-Werbetafeln am Star Junction. Smartphones in Millionen Hosentaschen. U-Bahn-Anzeigen. Geldautomaten. Sogar die LED-Schilder über dem Algonquin-Tunnel.
+Achtundzwanzigster August. Kurz vor Mitternacht. Eine einzige Botschaft, die in derselben Sekunde überall in dieser Stadt erschien.
+
+Auf den Werbetafeln am Star Junction. Auf den Smartphones in Millionen Hosentaschen. In den U-Bahn-Anzeigen. Auf den Geldautomaten in jeder Bank-Lobby. Sogar auf den LED-Schildern über dem Algonquin-Tunnel.
 
 [intense] Siebzehn Sekunden lang dasselbe Bild. Schwarz, weiße Schrift, eine einzige Zeile.
 ```
