@@ -1,8 +1,10 @@
-# Liberty City — Motion-Comic-Voice-Over (3–5 Min)
+# Liberty City — Motion-Comic-Voice-Over (Kurzfassung, 3–5 Min)
 
-**Anlass:** Präsentation am **28.08.2026, 18:00 Uhr** als Motion-Comic-Trailer vor Event-Start (04.09.2026).
-**Format:** ElevenLabs v3, Multi-Voice (4 Sprecher), ~530 Wörter, ~4 Min Audio.
-**Zeitstrang:** Story-Ereignisse (Botschaft, Caminos Verschwinden) passieren am 28.08.2026. Spieler werden „live" mit der Inciting Incident konfrontiert. Das Event startet sechs Tage später.
+**Anlass:** Pre-Event-Präsentation am **28.08.2026, 18:00 Uhr** als Motion-Comic-Trailer vor Event-Start (04.09.2026).
+**Format:** ElevenLabs v3, Multi-Voice (4 Sprecher), ~630 Wörter, **~4.5 Min Audio**.
+**Zeitstrang:** Botschaft + Caminos Verschwinden passieren am 28.08.2026. Event startet sechs Tage später.
+
+> Die ausführliche 9-Min-Langfassung ist in der Git-Historie erhalten (Commit vor dem Kürzungs-Pass).
 
 ---
 
@@ -10,10 +12,10 @@
 
 | Sprecher | Voice ID | Wo |
 |---|---|---|
-| **Bill** (Erzähler) | `pqHfZKP75CvOlQylNhV4` | ~85 % des Texts (Akte 1, 2, 3 Erzähler-Teile, 4) |
-| **Sarah** (Botschaft) | `EXAVITQu4vr4xnSDxMaL` | Akt 2 (1 Zeile) |
-| **Mr. Camino** (Custom) | `xVObCw3gG96REsnh3t2I` | Akt 3 (Vito-Zitat) |
-| **Frankie** (Brian) | `nPczCjzI2devNBz1zQrb` | Akt 3 (Tee-Ritual-Zitat) |
+| **Bill** (Erzähler) | `pqHfZKP75CvOlQylNhV4` | Blöcke 1, 2, 4, 5, 7, 9 |
+| **Sarah** (Botschaft) | `EXAVITQu4vr4xnSDxMaL` | Block 3 |
+| **Mr. Camino** (Custom) | `xVObCw3gG96REsnh3t2I` | Block 6 |
+| **Frankie** (Brian) | `nPczCjzI2devNBz1zQrb` | Block 8 |
 
 **Model:** Eleven v3 (Alpha / Enhanced)
 
@@ -21,59 +23,30 @@
 
 ## 📖 Komplettes Skript mit Sprecher-Markern
 
-> Generiere pro Sprecher separat. Sprecher-Marker `[SPRECHER]` nur als Schnitt-Anweisung — NICHT in ElevenLabs einfügen.
-
 ---
 
 **[BILL]**
 
 [serious] Zwei Wörter. „Liberty City."
-Klingt nach einer Stadt wie jede andere. Doch hinter diesem Namen steckt mehr als Straßen, Hochhäuser und Neonlichter.[break]
-[thoughtful] Wenn man jemanden fragen würde, was Liberty City wirklich ist, bekäme man wahrscheinlich keine Erklärung — sondern eher eine Warnung.
+Klingt nach einer Stadt wie jede andere. Ist es aber nicht.
 
-Vier Millionen Einwohner. Fünf Bezirke. Ein Hafen, der niemals stillsteht. Ein Flughafen, an dem mehr landet, als offiziell ankommt. Eine Wall Street aus Glas und Macht. Und irgendwo dazwischen eine Insel, die morgens im Nebel verschwindet.
-[break]
-Auf dem Papier wirkt alles modern. Sauber. Amerikanisch.
-Doch unter der Oberfläche läuft die Stadt nach anderen Regeln. Seit über dreißig Jahren ohne einen offenen Krieg. Keine Explosionen in den Nachrichten. Keine Straßenschlachten. Nur stille Abkommen, alte Namen und Grenzen, die niemand auf Karten einzeichnet.
+[thoughtful] Vier Millionen Menschen. Fünf Bezirke. Mafia, Bratva, Yakuza, Motorradclubs, Straßencrews. Jede Familie kennt ihren Platz. Jeder Bezirk hat seine eigenen Gesetze.
 
-Mafiafamilien. Bratva. Yakuza. Motorradclubs. Straßencrews.
-Jede Gruppierung kennt ihren Platz. Jeder Bezirk hat seine eigenen Gesetze.
+Seit über dreißig Jahren läuft diese Stadt ohne einen offenen Krieg. Keine Explosionen in den Nachrichten. Keine Straßenschlachten. Nur stille Abkommen — und Grenzen, die niemand auf Karten einzeichnet.
 
-Und genau dort beginnt Liberty City erst wirklich.
+[dramatic] Eine Maschine, die perfekt funktioniert.
 
-[thoughtful] Im Herzen der Stadt liegt Algonquin.
-Wolkenkratzer aus Glas und Geld ziehen sich bis in die Nacht hinein über den Himmel. Hoch oben im Civic Tower brennt ein einzelnes Licht, das niemals ausgeht. Dort sitzt Francis J. Underwood — der Head of Liberty City. Manche sagen, er schläft nie. Andere sagen, er müsse es auch nicht.
-
-Von dort aus führen die Straßen hinunter nach Bohan.
-Dorthin, wo der Geruch von Diesel zwischen den Häusern hängt und Werkstätten hinter rostigen Toren mehr reparieren als nur Motoren. Hier werden Probleme gelöst, ohne dass jemand Formulare ausfüllt oder Fragen stellt.
-
-Folgt man den Brücken weiter Richtung Wasser, landet man in Broker.
-Nebel zieht über die Containerhäfen, während Kräne wie stumme Wächter über den Docks stehen. Die russische Bratva kontrolliert hier die Lieferketten der Stadt — leise, präzise und ohne Aufmerksamkeit zu wollen.
-
-Mitten zwischen den Strömungen liegt schließlich Colony Island.
-Eine kleine Insel, die wirkt, als hätte die Stadt sie vergessen. Doch genau deshalb weiß sie zu viel. Die Fähre fährt zweimal täglich. Wer dort Geschäfte macht, tut das selten zufällig.
-
-Und östlich davon beginnt Dukes.
-Tagsüber wirken die Straßen ruhig — Vorstadthäuser, kleine Läden, Familienleben. Doch nachts öffnen sich Werkstatttore, Motoren starten und Lieferungen wechseln ihre Besitzer. Direkt daneben liegt der Flughafen. Ein Ort, an dem Container verschwinden können, bevor sie jemals auf einem Frachtbrief auftauchen.
-
-[long pause] Vor dreißig Jahren hat diese Stadt zum letzten Mal offen gebrannt.
-Seitdem halten unsichtbare Regeln alles zusammen.
-
-[dramatic]
-Doch Regeln halten nur so lange…
-bis jemand entscheidet, sie zu brechen.
+[pauses] Bis heute.
 
 ---
 
 **[BILL]**
 
-[serious] Genau das ist heute Nacht passiert.
+[serious] Heute Nacht. Achtundzwanzigster August. Kurz vor Mitternacht.
 
-Achtundzwanzigster August. Kurz vor Mitternacht. Eine einzige Botschaft, die in derselben Sekunde überall in dieser Stadt erschien.
+In derselben Sekunde erschien auf jedem Bildschirm dieser Stadt dasselbe Bild. Werbetafeln, Smartphones, Geldautomaten, U-Bahn-Anzeigen.
 
-Auf den Werbetafeln am Star Junction. Auf den Smartphones in Millionen Hosentaschen. In den U-Bahn-Anzeigen. Auf den Geldautomaten in jeder Bank-Lobby. Sogar auf den LED-Schildern über dem Algonquin-Tunnel.
-
-[intense] Siebzehn Sekunden lang dasselbe Bild. Schwarz, weiße Schrift, eine einzige Zeile.
+[intense] Siebzehn Sekunden lang. Schwarz. Weiße Schrift. Eine einzige Zeile.
 
 **[SARAH]**
 
@@ -81,7 +54,7 @@ Auf den Werbetafeln am Star Junction. Auf den Smartphones in Millionen Hosentasc
 
 **[BILL]**
 
-[calm] Drei Stunden später brannten am Pier 41 drei Container aus. Niemand hat sich gemeldet, niemand will Verantwortung. Beides ist neu in dieser Stadt.
+[calm] Drei Stunden später brannten am Hafen drei Container aus. Niemand hat sich gemeldet. Niemand will Verantwortung.
 
 ---
 
@@ -89,68 +62,17 @@ Auf den Werbetafeln am Star Junction. Auf den Smartphones in Millionen Hosentasc
 
 [thoughtful] Doch die Botschaft war nicht das Einzige, das Liberty City heute Morgen aus dem Schlaf gerissen hat.
 
-[sad] Heute Morgen blieb ein Platz leer.
-Nicht irgendein Platz.
-Ein ganz bestimmter Stuhl.
+[sad] Heute Morgen blieb ein Stuhl leer. Im Brass Plate Diner, dritter Tisch links. Zum ersten Mal seit sechsundzwanzig Jahren.
 
-Zum ersten Mal seit sechsundzwanzig Jahren.
+[reverent] Dort saß seit 1996 jeden Morgen und jeden Abend derselbe Mann. Vor sich eine Tasse Tee, ein aufgeschlagenes Buch und zwei Stühle. Den linken nahm man, wenn man etwas brauchte. Den rechten, wenn man etwas brachte.
 
-[reverent] Sie kennen doch den Brass Plate Diner, oder?
-Dritter Tisch links. Direkt am Fenster.
+Sein Name war Mr. Camino.
 
-Seit 1996 saß dort jeden Morgen um halb acht und jeden Abend Punkt sieben derselbe Mann. Still. Immer im selben Anzug. Immer mit derselben Tasse Tee vor sich.
+Er gehörte keiner Familie an. Trug keine Farben, führte keine Soldaten. Man hat ihn nie mit einer Waffe gesehen. Und trotzdem endeten an seinem Tisch Kriege, bevor sie begannen.
 
-[thoughtful] Vor ihm auf dem Tisch lag immer dasselbe Buch. „Der Pate". Italienische Originalausgabe von 1969. Aufgeschlagen auf Seite 187.
+[dramatic] Sommer 1996. Vito Manschetti, zweiunddreißig Jahre alt, wollte Rache. Die Famiglia Vargone hatte seinen Bruder erschossen. Die Wagen standen bereit, die Männer waren bewaffnet. Liberty City war nur Minuten davon entfernt, zu brennen.
 
-Seit zwölf Jahren dieselbe Seite.
-
-Niemand hat ihn je darin lesen sehen.
-
-[serious] Und vor ihm — zwei Stühle.
-
-Den linken nahm man, wenn man etwas brauchte. Den rechten, wenn man etwas brachte. Drei Tassen Tee auf dem Tisch hießen: es wird geredet. War das Buch zugeklappt, hörte Camino zu. Lag es aufgeschlagen, dachte er nach.
-
-Niemand hat ihm diese Regeln je beigebracht. Niemand hat sie aufgeschrieben. Aber in sechsundzwanzig Jahren hat sie auch keiner gebrochen.
-
-[reverent] Und manche behaupteten, dieser Mann hätte mehr Einfluss auf Liberty City gehabt als der eigentliche Head of Liberty City.
-
-[break]
-
-Sein Name…
-
-[break]
-
-…Mr. Camino.
-
-Camino gehörte keiner Familie an.
-Er trug keine Farben, führte keine Soldaten und besaß kein Territorium. Man hat ihn nie mit einer Waffe gesehen. Nie beim Stehlen. Nie bei Drohungen.
-
-Und trotzdem endeten an seinem Tisch Kriege, bevor sie begannen.
-
-Wenn zwei Familien kurz davor waren, die Stadt in Brand zu setzen, schickte man keine Killer. Man schickte Boten zum Brass Plate Diner.
-
-[dramatic] Sommer 1996.
-
-Vito Manschetti war damals zweiunddreißig Jahre alt — jung genug für Wut und alt genug für Macht. Die Famiglia Vargone hatte seinen kleinen Bruder am Hafen erschossen. Noch in derselben Nacht wollte Vito Vergeltung.
-
-Die Wagen standen bereit.
-Die Männer waren bewaffnet.
-Liberty City war nur Minuten davon entfernt, erneut zu brennen.
-
-Dann klingelte sein Telefon.
-
-Keine Stimme. Keine Erklärung.
-Nur eine Nummer.
-
-Eine Nummer, die angeblich nur drei Menschen in dieser Stadt kannten.
-
-Vito ließ alles stehen und fuhr zum Brass Plate.
-
-Er setzte sich auf den linken Stuhl. Den Stuhl der Bittsteller.
-
-Camino schlug sein Buch zu.
-
-Und sagte nur einen einzigen Satz.
+Dann klingelte sein Telefon. Vito fuhr zum Brass Plate. Er setzte sich auf den linken Stuhl. Und Camino sagte nur einen einzigen Satz.
 
 **[CAMINO]**
 
@@ -164,82 +86,49 @@ Weil sie dann ihren letzten Sohn verliert.
 
 [calm] Drei Stunden später war der Krieg vorbei. Drei Tote. Kein vierter.
 
-[thoughtful] So war Camino. Und das war erst der Anfang.
+[thoughtful] So war Camino. Sechsundzwanzig Jahre lang. Drei Jahrzehnte Frieden — gehalten von einem einzigen Mann an einem einzigen Tisch.
 
-[dramatic] Sieben Jahre später. 2003. Hideo Tanaka kam aus Tokio nach Liberty City. Oyabun der Nishiki-kai Yakuza. Er wollte Algonquin. Und Vito Manschetti — inzwischen Patriarch der Familie — wollte Krieg.
+[sad] Und heute Morgen ist dieser Tisch leer. Sein Tee dampft nicht. Sein Buch liegt aufgeschlagen wie immer. Frankie Maloney, der Wirt, hat den Tee trotzdem aufgegossen.
 
-[thoughtful] Camino lud beide am selben Abend in den Brass Plate Diner.
-Hideo brachte eine Stadtteilkarte.
-Vito brachte eine Flasche Whisky.
-
-[serious] Camino lehnte den Whisky ab. Er bot beiden Tee an.
-Niemand wagte, ihn abzulehnen.
-
-Vier Stunden saßen sie an seinem Tisch. Niemand außerhalb des Diners hat je erfahren, was gesprochen wurde.
-
-Aber am Ende stand der Pakt, der Algonquin bis heute zusammenhält.
-
-[thoughtful] Frankie Maloney, der Wirt — der einzige Mensch, der die ganze Szene mitbekommen hat — fasst diesen Abend bis heute mit einem Satz zusammen.
-
-[serious] Hideo hat dreimal geweint.
-Vito einmal.
-Und Camino… kein einziges Mal.
-
-[sad] Sechsundzwanzig Jahre lang lief das so.
-
-Bis heute Morgen.
-
-Heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Tee dampft nicht in der Tasse. Sein Buch liegt aufgeschlagen — wie immer auf Seite 187. Frankie Maloney hat den Tee trotzdem aufgegossen. Morgen wird er es wieder tun.
-
-Wenn du Frankie fragst warum, sagt er nur einen Satz.
+Wenn man ihn fragt, warum, sagt er nur einen Satz.
 
 **[FRANKIE]**
 
-[whispers] [sadly] Damit der leere Stuhl…
-[pauses] nicht glaubt, dass diese Stadt ihn schon vergessen hat.
+[whispers] [sadly] Damit der leere Stuhl… [pauses] nicht glaubt, dass diese Stadt ihn schon vergessen hat.
 
 ---
 
 **[BILL]**
 
-[grim] Aber Liberty City war nicht lange ohne Stimme.
+[grim] Ohne Camino hat Liberty City seinen Vermittler verloren.
 
-[serious] Noch während Frankie den Tee neben den leeren Stuhl stellt, hat sich heute jemand anderes gemeldet.
+[serious] Und zum ersten Mal seit dreißig Jahren weiß keine der Familien mehr, woran sie ist. Die Mafia. Die Bratva. Die Yakuza. Die Crews auf der Straße. Sie alle haben sich auf einen Mann verlassen, der Streit geschlichtet hat, bevor Blut floss.
 
-Eine fremde Stimme. Niemand kennt sie. Niemand weiß ihren Namen. Niemand hat sie je gesehen.
+Dieser Mann ist weg. Und niemand weiß, wer jetzt das Sagen hat.
 
-[thoughtful] Aber sie verteilt schon Aufträge. Über Mittler, die aus dem Nichts auftauchen, eine Adresse murmeln, einen Umschlag übergeben und wieder verschwinden, bevor du sie überhaupt anschauen kannst.
+[grim] Doch die Stadt war nicht lange ohne Stimme.
 
-[intense] Und die wenigen, die sie schon gehört haben, sind sich in einem Punkt einig.
+Heute hat sich jemand Neues gemeldet. Niemand kennt ihn. Niemand weiß seinen Namen. Niemand hat ihn je gesehen.
 
-[grim] Sie ist kälter als Camino. Schneller. Härter. Sie kennt die alten Regeln nicht — und es ist ihr egal.
+Aber er verteilt schon Aufträge. Über Mittler, die aus dem Nichts auftauchen, einen Umschlag übergeben und wieder verschwinden.
 
-[pauses]
+[intense] Und die wenigen, die ihn schon gehört haben, sagen alle dasselbe.
+Er ist kälter als Camino. Härter. Er kennt die alten Regeln nicht — und es ist ihm egal.
 
-[serious] Aber zwei Fragen halten heute Nacht jedes Hinterzimmer in dieser Stadt wach.
+[grim] Camino hat sein ganzes Leben lang Kriege verhindert.
+[pauses] Dieser hier… scheint sie zu wollen.
+
+[serious] Zwei Fragen halten heute Nacht jedes Hinterzimmer der Stadt wach.
 
 [pauses] Wo ist Mr. Camino?
 
 [pauses] Und wer hat ihn aus dem Weg geräumt?
 
-[grim] Niemand stellt diese Fragen laut. Noch nicht.
-Aber die Antworten… [pauses] kommen.
+[dramatic] In sechs Tagen, am vierten September, bekommt Liberty City die Antwort.
 
-Und sie werden Liberty City verändern.
+Sechzehn Tage. Dann ist nichts mehr, wie es war.
 
-[pauses] [dramatic] In sechs Tagen, am vierten September, beginnt etwas, das diese Stadt seit dreißig Jahren nicht mehr gesehen hat. Die unsichtbaren Regeln werden neu geschrieben. Reviere neu vermessen. Familien neu sortiert.
-
-Manche werden steigen.
-
-Manche werden verschwinden.
-
-[reverent] Sucht euch eure Rolle. Sortiert eure Männer. Schärft eure Werkzeuge.
-
-[softly] Denn Liberty City wird sich an euch erinnern. An die Nacht, in der alles begonnen hat.
-
-[pauses] [final] [low] Sechzehn Tage.
-
-Ab jetzt.
+[final] [low] Ab jetzt.
 
 ---
 
@@ -248,75 +137,48 @@ Ab jetzt.
 Dateien-Reihenfolge für Audacity-Mischung:
 
 ```
-01_bill_akt1_intro.mp3
-02_bill_akt2_botschaft_setup.mp3
+01_bill_intro.mp3
+02_bill_botschaft_setup.mp3
 03_sarah_botschaft.mp3
-04_bill_akt2_hafenbrand.mp3
-05_bill_akt3_camino_setup.mp3
-06_camino_vito_zitat.mp3
-07_bill_akt3_zwischen.mp3
-08_frankie_tee_zitat.mp3
-09_bill_akt4_cliffhanger.mp3
+04_bill_hafenbrand.mp3
+05_bill_camino_vito.mp3
+06_camino_zitat.mp3
+07_bill_stuhl_leer.mp3
+08_frankie_zitat.mp3
+09_bill_cliffhanger.mp3
 ```
 
 ---
 
-## 🎙 Block 01 — Bill, Akt 1 (Cold Open + Stadt-Sweep)
+## 🎙 Block 01 — Bill, Akt 1 (Liberty City)
 
 **Voice ID:** `pqHfZKP75CvOlQylNhV4` · Model: Eleven v3 · Stability 50 % · Style 35 % · Speaker Boost ON
 
 ```
 [serious] Zwei Wörter. „Liberty City."
-Klingt nach einer Stadt wie jede andere. Doch hinter diesem Namen steckt mehr als Straßen, Hochhäuser und Neonlichter.[break]
-[thoughtful] Wenn man jemanden fragen würde, was Liberty City wirklich ist, bekäme man wahrscheinlich keine Erklärung — sondern eher eine Warnung.
+Klingt nach einer Stadt wie jede andere. Ist es aber nicht.
 
-Vier Millionen Einwohner. Fünf Bezirke. Ein Hafen, der niemals stillsteht. Ein Flughafen, an dem mehr landet, als offiziell ankommt. Eine Wall Street aus Glas und Macht. Und irgendwo dazwischen eine Insel, die morgens im Nebel verschwindet.
-[break]
-Auf dem Papier wirkt alles modern. Sauber. Amerikanisch.
-Doch unter der Oberfläche läuft die Stadt nach anderen Regeln. Seit über dreißig Jahren ohne einen offenen Krieg. Keine Explosionen in den Nachrichten. Keine Straßenschlachten. Nur stille Abkommen, alte Namen und Grenzen, die niemand auf Karten einzeichnet.
+[thoughtful] Vier Millionen Menschen. Fünf Bezirke. Mafia, Bratva, Yakuza, Motorradclubs, Straßencrews. Jede Familie kennt ihren Platz. Jeder Bezirk hat seine eigenen Gesetze.
 
-Mafiafamilien. Bratva. Yakuza. Motorradclubs. Straßencrews.
-Jede Gruppierung kennt ihren Platz. Jeder Bezirk hat seine eigenen Gesetze.
+Seit über dreißig Jahren läuft diese Stadt ohne einen offenen Krieg. Keine Explosionen in den Nachrichten. Keine Straßenschlachten. Nur stille Abkommen — und Grenzen, die niemand auf Karten einzeichnet.
 
-Und genau dort beginnt Liberty City erst wirklich.
+[dramatic] Eine Maschine, die perfekt funktioniert.
 
-[thoughtful] Im Herzen der Stadt liegt Algonquin.
-Wolkenkratzer aus Glas und Geld ziehen sich bis in die Nacht hinein über den Himmel. Hoch oben im Civic Tower brennt ein einzelnes Licht, das niemals ausgeht. Dort sitzt Francis J. Underwood — der Head of Liberty City. Manche sagen, er schläft nie. Andere sagen, er müsse es auch nicht.
-
-Von dort aus führen die Straßen hinunter nach Bohan.
-Dorthin, wo der Geruch von Diesel zwischen den Häusern hängt und Werkstätten hinter rostigen Toren mehr reparieren als nur Motoren. Hier werden Probleme gelöst, ohne dass jemand Formulare ausfüllt oder Fragen stellt.
-
-Folgt man den Brücken weiter Richtung Wasser, landet man in Broker.
-Nebel zieht über die Containerhäfen, während Kräne wie stumme Wächter über den Docks stehen. Die russische Bratva kontrolliert hier die Lieferketten der Stadt — leise, präzise und ohne Aufmerksamkeit zu wollen.
-
-Mitten zwischen den Strömungen liegt schließlich Colony Island.
-Eine kleine Insel, die wirkt, als hätte die Stadt sie vergessen. Doch genau deshalb weiß sie zu viel. Die Fähre fährt zweimal täglich. Wer dort Geschäfte macht, tut das selten zufällig.
-
-Und östlich davon beginnt Dukes.
-Tagsüber wirken die Straßen ruhig — Vorstadthäuser, kleine Läden, Familienleben. Doch nachts öffnen sich Werkstatttore, Motoren starten und Lieferungen wechseln ihre Besitzer. Direkt daneben liegt der Flughafen. Ein Ort, an dem Container verschwinden können, bevor sie jemals auf einem Frachtbrief auftauchen.
-
-[long pause] Vor dreißig Jahren hat diese Stadt zum letzten Mal offen gebrannt.
-Seitdem halten unsichtbare Regeln alles zusammen.
-
-[dramatic]
-Doch Regeln halten nur so lange…
-bis jemand entscheidet, sie zu brechen.
+[pauses] Bis heute.
 ```
 
 ---
 
-## 🎙 Block 02 — Bill, Akt 2 Setup (Botschaft-Einleitung)
+## 🎙 Block 02 — Bill, Akt 2 Setup (Die Botschaft)
 
 **Voice ID:** `pqHfZKP75CvOlQylNhV4` · Stability 50 % · Style 35 %
 
 ```
-[serious] Genau das ist heute Nacht passiert.
+[serious] Heute Nacht. Achtundzwanzigster August. Kurz vor Mitternacht.
 
-Achtundzwanzigster August. Kurz vor Mitternacht. Eine einzige Botschaft, die in derselben Sekunde überall in dieser Stadt erschien.
+In derselben Sekunde erschien auf jedem Bildschirm dieser Stadt dasselbe Bild. Werbetafeln, Smartphones, Geldautomaten, U-Bahn-Anzeigen.
 
-Auf den Werbetafeln am Star Junction. Auf den Smartphones in Millionen Hosentaschen. In den U-Bahn-Anzeigen. Auf den Geldautomaten in jeder Bank-Lobby. Sogar auf den LED-Schildern über dem Algonquin-Tunnel.
-
-[intense] Siebzehn Sekunden lang dasselbe Bild. Schwarz, weiße Schrift, eine einzige Zeile.
+[intense] Siebzehn Sekunden lang. Schwarz. Weiße Schrift. Eine einzige Zeile.
 ```
 
 ---
@@ -324,7 +186,7 @@ Auf den Werbetafeln am Star Junction. Auf den Smartphones in Millionen Hosentasc
 ## 📺 Block 03 — Sarah (Botschaft)
 
 **Voice ID:** `EXAVITQu4vr4xnSDxMaL` · Model: Eleven v3 · Stability 100 % · Style 0 % · Speaker Boost OFF
-**Nach Generierung:** Audacity Pitch-Shift −3 + Distortion (Schwellenwert 50, Lautstärke −12 dB)
+**Nach Generierung:** Audacity Pitch-Shift −3 + Distortion
 
 ```
 [monotone] Liberty City. Sechzehn Tage. Dann seht ihr, wer hier wirklich entscheidet.
@@ -337,80 +199,29 @@ Auf den Werbetafeln am Star Junction. Auf den Smartphones in Millionen Hosentasc
 **Voice ID:** `pqHfZKP75CvOlQylNhV4` · Stability 50 % · Style 35 %
 
 ```
-[calm] Drei Stunden später brannten am Pier 41 drei Container aus. Niemand hat sich gemeldet, niemand will Verantwortung. Beides ist neu in dieser Stadt.
+[calm] Drei Stunden später brannten am Hafen drei Container aus. Niemand hat sich gemeldet. Niemand will Verantwortung.
 ```
 
 ---
 
-## 🎙 Block 05 — Bill, Akt 3 Setup (Camino-Vorstellung + Vito-Setup)
+## 🎙 Block 05 — Bill, Akt 3 (Camino-Vorstellung + Vito-Setup)
 
 **Voice ID:** `pqHfZKP75CvOlQylNhV4` · Stability 50 % · Style 35 %
 
 ```
 [thoughtful] Doch die Botschaft war nicht das Einzige, das Liberty City heute Morgen aus dem Schlaf gerissen hat.
 
-[sad] Heute Morgen blieb ein Platz leer.
-Nicht irgendein Platz.
-Ein ganz bestimmter Stuhl.
+[sad] Heute Morgen blieb ein Stuhl leer. Im Brass Plate Diner, dritter Tisch links. Zum ersten Mal seit sechsundzwanzig Jahren.
 
-Zum ersten Mal seit sechsundzwanzig Jahren.
+[reverent] Dort saß seit 1996 jeden Morgen und jeden Abend derselbe Mann. Vor sich eine Tasse Tee, ein aufgeschlagenes Buch und zwei Stühle. Den linken nahm man, wenn man etwas brauchte. Den rechten, wenn man etwas brachte.
 
-[reverent] Sie kennen doch den Brass Plate Diner, oder?
-Dritter Tisch links. Direkt am Fenster.
+Sein Name war Mr. Camino.
 
-Seit 1996 saß dort jeden Morgen um halb acht und jeden Abend Punkt sieben derselbe Mann. Still. Immer im selben Anzug. Immer mit derselben Tasse Tee vor sich.
+Er gehörte keiner Familie an. Trug keine Farben, führte keine Soldaten. Man hat ihn nie mit einer Waffe gesehen. Und trotzdem endeten an seinem Tisch Kriege, bevor sie begannen.
 
-[thoughtful] Vor ihm auf dem Tisch lag immer dasselbe Buch. „Der Pate". Italienische Originalausgabe von 1969. Aufgeschlagen auf Seite 187.
+[dramatic] Sommer 1996. Vito Manschetti, zweiunddreißig Jahre alt, wollte Rache. Die Famiglia Vargone hatte seinen Bruder erschossen. Die Wagen standen bereit, die Männer waren bewaffnet. Liberty City war nur Minuten davon entfernt, zu brennen.
 
-Seit zwölf Jahren dieselbe Seite.
-
-Niemand hat ihn je darin lesen sehen.
-
-[serious] Und vor ihm — zwei Stühle.
-
-Den linken nahm man, wenn man etwas brauchte. Den rechten, wenn man etwas brachte. Drei Tassen Tee auf dem Tisch hießen: es wird geredet. War das Buch zugeklappt, hörte Camino zu. Lag es aufgeschlagen, dachte er nach.
-
-Niemand hat ihm diese Regeln je beigebracht. Niemand hat sie aufgeschrieben. Aber in sechsundzwanzig Jahren hat sie auch keiner gebrochen.
-
-[reverent] Und manche behaupteten, dieser Mann hätte mehr Einfluss auf Liberty City gehabt als der eigentliche Head of Liberty City.
-
-[break]
-
-Sein Name…
-
-[break]
-
-…Mr. Camino.
-
-Camino gehörte keiner Familie an.
-Er trug keine Farben, führte keine Soldaten und besaß kein Territorium. Man hat ihn nie mit einer Waffe gesehen. Nie beim Stehlen. Nie bei Drohungen.
-
-Und trotzdem endeten an seinem Tisch Kriege, bevor sie begannen.
-
-Wenn zwei Familien kurz davor waren, die Stadt in Brand zu setzen, schickte man keine Killer. Man schickte Boten zum Brass Plate Diner.
-
-[dramatic] Sommer 1996.
-
-Vito Manschetti war damals zweiunddreißig Jahre alt — jung genug für Wut und alt genug für Macht. Die Famiglia Vargone hatte seinen kleinen Bruder am Hafen erschossen. Noch in derselben Nacht wollte Vito Vergeltung.
-
-Die Wagen standen bereit.
-Die Männer waren bewaffnet.
-Liberty City war nur Minuten davon entfernt, erneut zu brennen.
-
-Dann klingelte sein Telefon.
-
-Keine Stimme. Keine Erklärung.
-Nur eine Nummer.
-
-Eine Nummer, die angeblich nur drei Menschen in dieser Stadt kannten.
-
-Vito ließ alles stehen und fuhr zum Brass Plate.
-
-Er setzte sich auf den linken Stuhl. Den Stuhl der Bittsteller.
-
-Camino schlug sein Buch zu.
-
-Und sagte nur einen einzigen Satz.
+Dann klingelte sein Telefon. Vito fuhr zum Brass Plate. Er setzte sich auf den linken Stuhl. Und Camino sagte nur einen einzigen Satz.
 ```
 
 ---
@@ -429,41 +240,18 @@ Weil sie dann ihren letzten Sohn verliert.
 
 ---
 
-## 🎙 Block 07 — Bill, Akt 3 Zwischen (Camino-Auflösung + Frankie-Setup)
+## 🎙 Block 07 — Bill, Akt 3 Schluss (Auflösung + leerer Stuhl)
 
 **Voice ID:** `pqHfZKP75CvOlQylNhV4` · Stability 50 % · Style 35 %
 
 ```
 [calm] Drei Stunden später war der Krieg vorbei. Drei Tote. Kein vierter.
 
-[thoughtful] So war Camino. Und das war erst der Anfang.
+[thoughtful] So war Camino. Sechsundzwanzig Jahre lang. Drei Jahrzehnte Frieden — gehalten von einem einzigen Mann an einem einzigen Tisch.
 
-[dramatic] Sieben Jahre später. 2003. Hideo Tanaka kam aus Tokio nach Liberty City. Oyabun der Nishiki-kai Yakuza. Er wollte Algonquin. Und Vito Manschetti — inzwischen Patriarch der Familie — wollte Krieg.
+[sad] Und heute Morgen ist dieser Tisch leer. Sein Tee dampft nicht. Sein Buch liegt aufgeschlagen wie immer. Frankie Maloney, der Wirt, hat den Tee trotzdem aufgegossen.
 
-[thoughtful] Camino lud beide am selben Abend in den Brass Plate Diner.
-Hideo brachte eine Stadtteilkarte.
-Vito brachte eine Flasche Whisky.
-
-[serious] Camino lehnte den Whisky ab. Er bot beiden Tee an.
-Niemand wagte, ihn abzulehnen.
-
-Vier Stunden saßen sie an seinem Tisch. Niemand außerhalb des Diners hat je erfahren, was gesprochen wurde.
-
-Aber am Ende stand der Pakt, der Algonquin bis heute zusammenhält.
-
-[thoughtful] Frankie Maloney, der Wirt — der einzige Mensch, der die ganze Szene mitbekommen hat — fasst diesen Abend bis heute mit einem Satz zusammen.
-
-[serious] Hideo hat dreimal geweint.
-Vito einmal.
-Und Camino… kein einziges Mal.
-
-[sad] Sechsundzwanzig Jahre lang lief das so.
-
-Bis heute Morgen.
-
-Heute Morgen ist sein Stuhl leer. Sein Anzug hängt nicht über der Stuhllehne, sein Tee dampft nicht in der Tasse. Sein Buch liegt aufgeschlagen — wie immer auf Seite 187. Frankie Maloney hat den Tee trotzdem aufgegossen. Morgen wird er es wieder tun.
-
-Wenn du Frankie fragst warum, sagt er nur einen Satz.
+Wenn man ihn fragt, warum, sagt er nur einen Satz.
 ```
 
 ---
@@ -471,11 +259,10 @@ Wenn du Frankie fragst warum, sagt er nur einen Satz.
 ## 🍵 Block 08 — Frankie (Tee-Zitat)
 
 **Voice ID:** `nPczCjzI2devNBz1zQrb` · Model: Eleven v3 · Stability 45 % · Style 35 %
-**Wichtig:** Leiser generieren, fast geflüstert. Lange Pause vor „nicht das Falsche".
+**Wichtig:** Leiser generieren, fast geflüstert.
 
 ```
-[whispers] [sadly] Damit der leere Stuhl…
-[pauses] nicht glaubt, dass diese Stadt ihn schon vergessen hat.
+[whispers] [sadly] Damit der leere Stuhl… [pauses] nicht glaubt, dass diese Stadt ihn schon vergessen hat.
 ```
 
 ---
@@ -485,71 +272,62 @@ Wenn du Frankie fragst warum, sagt er nur einen Satz.
 **Voice ID:** `pqHfZKP75CvOlQylNhV4` · Stability 50 % · Style 35 %
 
 ```
-[grim] Aber Liberty City war nicht lange ohne Stimme.
+[grim] Ohne Camino hat Liberty City seinen Vermittler verloren.
 
-[serious] Noch während Frankie den Tee neben den leeren Stuhl stellt, hat sich heute jemand anderes gemeldet.
+[serious] Und zum ersten Mal seit dreißig Jahren weiß keine der Familien mehr, woran sie ist. Die Mafia. Die Bratva. Die Yakuza. Die Crews auf der Straße. Sie alle haben sich auf einen Mann verlassen, der Streit geschlichtet hat, bevor Blut floss.
 
-Eine fremde Stimme. Niemand kennt sie. Niemand weiß ihren Namen. Niemand hat sie je gesehen.
+Dieser Mann ist weg. Und niemand weiß, wer jetzt das Sagen hat.
 
-[thoughtful] Aber sie verteilt schon Aufträge. Über Mittler, die aus dem Nichts auftauchen, eine Adresse murmeln, einen Umschlag übergeben und wieder verschwinden, bevor du sie überhaupt anschauen kannst.
+[grim] Doch die Stadt war nicht lange ohne Stimme.
 
-[intense] Und die wenigen, die sie schon gehört haben, sind sich in einem Punkt einig.
+Heute hat sich jemand Neues gemeldet. Niemand kennt ihn. Niemand weiß seinen Namen. Niemand hat ihn je gesehen.
 
-[grim] Sie ist kälter als Camino. Schneller. Härter. Sie kennt die alten Regeln nicht — und es ist ihr egal.
+Aber er verteilt schon Aufträge. Über Mittler, die aus dem Nichts auftauchen, einen Umschlag übergeben und wieder verschwinden.
 
-[pauses]
+[intense] Und die wenigen, die ihn schon gehört haben, sagen alle dasselbe.
+Er ist kälter als Camino. Härter. Er kennt die alten Regeln nicht — und es ist ihm egal.
 
-[serious] Aber zwei Fragen halten heute Nacht jedes Hinterzimmer in dieser Stadt wach.
+[grim] Camino hat sein ganzes Leben lang Kriege verhindert.
+[pauses] Dieser hier… scheint sie zu wollen.
+
+[serious] Zwei Fragen halten heute Nacht jedes Hinterzimmer der Stadt wach.
 
 [pauses] Wo ist Mr. Camino?
 
 [pauses] Und wer hat ihn aus dem Weg geräumt?
 
-[grim] Niemand stellt diese Fragen laut. Noch nicht.
-Aber die Antworten… [pauses] kommen.
+[dramatic] In sechs Tagen, am vierten September, bekommt Liberty City die Antwort.
 
-Und sie werden Liberty City verändern.
+Sechzehn Tage. Dann ist nichts mehr, wie es war.
 
-[pauses] [dramatic] In sechs Tagen, am vierten September, beginnt etwas, das diese Stadt seit dreißig Jahren nicht mehr gesehen hat. Die unsichtbaren Regeln werden neu geschrieben. Reviere neu vermessen. Familien neu sortiert.
-
-Manche werden steigen.
-
-Manche werden verschwinden.
-
-[reverent] Sucht euch eure Rolle. Sortiert eure Männer. Schärft eure Werkzeuge.
-
-[softly] Denn Liberty City wird sich an euch erinnern. An die Nacht, in der alles begonnen hat.
-
-[pauses] [final] [low] Sechzehn Tage.
-
-Ab jetzt.
+[final] [low] Ab jetzt.
 ```
 
 ---
 
 # 🎧 Audacity-Mischung (Kurz-Anleitung)
 
-1. **Alle 9 MP3-Dateien importieren** (Datei → Import → Audio → alle markieren)
-2. **In Reihenfolge auf Timeline** legen — Dateinamen sortieren automatisch
-3. **Effekte pro Track:**
-   - **Botschaft (03):** Pitch-Shift −3 Halbtöne + Distortion (Schwellenwert 50, Lautstärke −12 dB) — für synthetischen Bildschirm-Effekt
-   - **Camino-Zitat (06):** Reverb 12 % (Room Size 30 %, Damping 50 %) — für „Erinnerung"-Wirkung
-   - **Frankie-Zitat (08):** Lautstärke −4 dB + leicht EQ Bass anheben (80 Hz +2 dB) — fast geflüstert
-4. **Master:** Compressor 3:1 (Threshold −18 dB), dann Normalize auf −1 dB
-5. **Schluss:** 2 Sek Stille anhängen
-6. **Optional Cinematic:** dezenter Drone-Ton/Klavier auf separatem Track bei −22 dB
-7. **Export:** MP3 192 kbps, Dateiname `Liberty_City_Botschaft_2026.mp3`
+1. **Alle 9 MP3-Dateien importieren** und in Reihenfolge auf Timeline legen (Dateinamen sortieren automatisch)
+2. **Effekte pro Track:**
+   - **Botschaft (03):** Pitch-Shift −3 Halbtöne + Distortion (Schwellenwert 50, Lautstärke −12 dB)
+   - **Camino-Zitat (06):** Reverb 12 % (Erinnerungs-Effekt)
+   - **Frankie-Zitat (08):** Lautstärke −4 dB + Bass +2 dB bei 80 Hz
+3. **Master:** Compressor 3:1 (Threshold −18 dB), dann Normalize auf −1 dB
+4. **Schluss:** 2 Sek Stille anhängen
+5. **Optional Cinematic:** dezenter Drone-Ton bei −22 dB unterlegen
+6. **Export:** MP3 192 kbps, `Liberty_City_Botschaft_2026.mp3`
 
 ---
 
 # ✅ Quick-Check vor Export
 
-- [ ] Wortzahl: ~530 Wörter, ~4 Min Audio
-- [ ] Botschaft + Hafenbrand + Camino + leerer Stuhl + Vito-Anekdote + Cliffhanger alle drin
-- [ ] Datum „achtundzwanzigsten August" (NICHT vierten September) in Akt 2
-- [ ] „In sechs Tagen, am vierten September" in Akt 4 — Event-Start korrekt verortet
-- [ ] Vito-Anekdote in Vergangenheitsform („war außer sich", „kam zum Brass Plate")
-- [ ] „Eine andere Stimme" — gefährlicher als Camino — Cliffhanger gesetzt
+- [ ] Wortzahl: ~630 Wörter, ~4.5 Min Audio
+- [ ] Botschaft + Camino + leerer Stuhl + Vito-Anekdote + Cliffhanger drin
+- [ ] Datum „achtundzwanzigsten August" (NICHT vierten September) in Block 2
+- [ ] „In sechs Tagen, am vierten September" in Block 9
+- [ ] Crime-Crews-Orientierungsverlust in Block 9 vorhanden
+- [ ] „kälter als Camino / Camino verhinderte Kriege, dieser will sie" in Block 9
+- [ ] Vito-Anekdote in Vergangenheitsform
 - [ ] Underwood NICHT namentlich genannt (Reveal bleibt für Tag 16)
 
 ---
@@ -557,7 +335,6 @@ Ab jetzt.
 # 📂 Verwandte Dokumente
 
 - [`CITY_PUBLIC_BRIEFING.md`](CITY_PUBLIC_BRIEFING.md) — die volle Grundstory
-- [`CITY_PUBLIC_BRIEFING_DISCORD.md`](CITY_PUBLIC_BRIEFING_DISCORD.md) — 5-Block Discord-Kurzversion
-- [`CITY_PUBLIC_BRIEFING_VOICEOVER_MULTI.md`](CITY_PUBLIC_BRIEFING_VOICEOVER_MULTI.md) — 13-Min Director's Cut (mit altem 04.09.-Datum)
-- **diese Datei** — 3-5-Min Motion-Comic (28.08. Zeitstrang, Cliffhanger zum Event-Start)
+- [`MOTION_COMIC_STORYBOARD.md`](MOTION_COMIC_STORYBOARD.md) — Storyboard + Sora-Prompts (⚠ auf 9-Min-Langfassung ausgelegt — muss für diese Kurzfassung angepasst werden)
+- [`CITY_PUBLIC_BRIEFING_VOICEOVER_MULTI.md`](CITY_PUBLIC_BRIEFING_VOICEOVER_MULTI.md) — 13-Min Director's Cut
 - [`EVENT_FINALE.md`](EVENT_FINALE.md) — Tag-16-Reveal mit Underwood-Identität
