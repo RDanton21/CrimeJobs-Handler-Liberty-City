@@ -1,254 +1,265 @@
-# SEKT6R — Crime-Jobs-Handler Liberty City
+<div align="center">
 
-Admin-Tool für ein **GTA-V-Liberty-City-Roleplay-Projekt**. KI generiert kryptische,
-atmosphärische Crime-Aufträge pro Gang, sendet sie über einen Discord-Bot
-(„Il Padrino") in crew-spezifische Channels. Crime-Bosse reagieren mit
-👍 / 👎 / ❌ — Status fließt automatisch zurück ins Admin-Dashboard. Pro Gang
-sequenzielle Storyline mit Berücksichtigung der Beziehungen zwischen den Gangs.
+# 🎭 SEKT6R — Crime Automation
 
-> **Status:** Im Aufbau. RP-Server-Launch geplant für **September 2026**.
+**KI-gestütztes Admin-Tool für GTA-V Roleplay-Server**
 
----
+Generiert atmosphärische Crime-Aufträge per KI, verteilt sie über Discord an Gang-Channels und verfolgt Reaktionen im Live-Dashboard. Inklusive Personal-Bedarf-Planung, Mittler-System und automatischer Konsistenz-Prüfung.
 
-## Features
+![Status](https://img.shields.io/badge/status-stable-green)
+![Python](https://img.shields.io/badge/python-3.11%E2%80%933.14-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-async-009688)
+![Discord](https://img.shields.io/badge/discord.py-2.5%2B-5865F2)
+![License](https://img.shields.io/badge/license-Proprietary-red)
 
-### Mission-Workflow
-- **KI-generiert** — Aufträge entstehen aus Crew-Story, Beziehungen und Mission-Historie. Automatische Verzweigung nach letzter Reaktion (👍 → Story konsequent fortführen, 👎 → andere Richtung)
-- **Roh-Input umschreiben** — Klartext-Briefing wird im RP-Stil verschlüsselt, Locations und Rollen in die Welt der Gang übersetzt
-- **Manueller Versand** — Klartext direkt an Discord, ohne KI
-- **Zusatzinfos** — werden 1:1 an den KI-Output gehängt (Adressen, GPS, Codes), nicht von der KI berührt
-- **Bild-Anhang** — Bild zur Mission, wird mit dem Auftrag im Discord gepostet
-- **Umformulieren** — neuer KI-Wurf des aktuellen Drafts mit Story-Kontext
-- **Countdown** — Min/Std/Tage; Discord rendert `<t:UNIX:R>` live als „in 2 Stunden", aktualisiert sich client-seitig automatisch
-- **Zeitversetzter Versand** — `scheduled_send_at`; Bot-Watcher (alle 30 s) sendet automatisch zum Zeitpunkt
-- **Reaktions-Tracking** — Single-Vote: Bot entfernt andere Emojis nach erster Boss-Reaktion, fremde Reaktionen werden gelöscht
-- **Versager-Sprüche** — Pool von Sprüchen, die der Bot nach abgelaufener Deadline (ohne Reaktion) zufällig postet
-- **Reaktions-Antworten** — Pool von Antworten nach 👍/👎/❌, zufällig gewählt
+[Features](#-features) · [Installation](#-installation) · [Dokumentation](#-dokumentation) · [Screenshots](#-screenshots)
 
-### Bulk-Operationen
-- **Massen-Auftrag** an alle Gangs / nach Stadtteil / manuelle Auswahl
-- **Drei Modi** — Klartext direkt, KI-Roh-Input umschreiben, KI aus Story generieren
-- **Vorschau bei KI-Modi** — einmaliger KI-Aufruf, editierbar, dann an alle gleichzeitig
-- **Parallel-Dispatch** — `asyncio.Semaphore(5)` im Backend, 30 Crews in Sekunden statt Minuten
-- **Alle aktiven Aufträge archivieren** — Top-Nav-Button, mit Discord-Cleanup
-
-### Boss-Feedback aus Zusatzinfo-Channel
-- Pro Crew zweiter Discord-Channel für Boss-Klartext-Antworten
-- Bot pollt den Channel, ordnet Texte per Zeitfenster der jeweiligen Mission zu
-- **Bilder/Attachments** werden inline im UI angezeigt
-- **Notifications** — Crew-Karte auf Dashboard pulsiert gelb wenn neuer Boss-Text da ist (`localStorage`-Tracking pro Browser)
-
-### Dashboard
-- **Reaktions-Statistik** mit Filtern: Stadtteil / Gang / Zeitraum (Heute / 7 Tage / 30 Tage / Gesamt)
-- **Klick auf Stats-Kachel** filtert die Card-Liste auf den gewählten Status
-- **Stadtteil-Tags** auf den Crew-Karten (Algonquin / Bohan / Broker / Colony Island / Dukes)
-- **Sortierung** nach Stadtteil, dann alphabetisch
-- **Border-Farbe** der Karte zeigt letzten Reaktions-Status (grün/rot/gelb/neutral)
-- **Auto-Refresh** alle 5 Sekunden (Stats, Notifications, Crew-Liste)
-
-### Performance-Ranking
-- **Eigene Seite `/ranking`** mit Crew-Ranking (Top-Liste, sortiert nach Punkten)
-- **Top-3-Widget** auch im Dashboard (Link „Vollständiges Ranking →")
-- **Top 3 visuell hervorgehoben** mit Gold/Silber/Bronze-Border
-- **Filter**: Zeitraum (Heute / 7 Tage / 30 Tage / Gesamt) + optional „Nur Crime-Crews"
-- **Auto-Refresh** alle 15–20 Sekunden
-
-**Punkteverteilung pro Mission:**
-
-| Status | Symbol | Punkte | Bedeutung |
-|---|:---:|:---:|---|
-| `approved` | 👍 Erledigt | **+2** | Crew hat den Auftrag erfolgreich erledigt |
-| `rejected` | 👎 Fehlgeschlagen | **−1** | Crew hat es versucht und ist gescheitert |
-| `cancelled` | ❌ Nicht durchführbar | **0** | Crew hat abgelehnt — neutral |
-| `pending` | ⏳ Wartet | **0** | Auftrag läuft noch, noch keine Reaktion |
-| `draft` | — | **0** | Auftrag noch nicht gesendet |
-
-**Formel:** `crew_points = (approved × 2) + (rejected × −1)`
-
-Konstanten in [`backend/routes_missions.py`](backend/routes_missions.py) → `RANKING_POINTS` dict (5-Sekunden-Anpassung möglich).
-
-### Archiv
-- **Globale Archive-Page** über alle Crews mit Crew-Filter
-- **Snapshot beim Archivieren** — Boss-Texte aus Info-Channel + Versager-Reply + Reaktions-Antwort werden als JSON gespeichert, bevor sie aus Discord gelöscht werden
-- **PDF-Export** pro Mission (reportlab) — Auftragstext, Bild, Boss-Feedback inkl. archivierter Bot-Replies
-- **Mass-Purge** mit doppeltem Confirm
-- **Restore** und endgültiges Löschen pro Mission
-
-### KI-Konfiguration
-- **Anthropic** (Claude) und **OpenAI** als Provider, im UI umschaltbar
-- Default `claude-sonnet-4-6`
-- **Multiple System-Prompts** — beliebig viele Varianten speicherbar, eine aktivierbar (z.B. „Default kryptisch", „Casual", „Hart-Boiled")
-- **API-Keys** in DB oder `.env`, im UI nur als „gesetzt: ja/nein" sichtbar
+</div>
 
 ---
 
-## Tech-Stack
+## 🚀 Was ist das?
 
-| Schicht | Stack |
+Ein vollständiges **Admin-Backend für Roleplay-Communities**, das den Spielleiter-Aufwand drastisch reduziert. Statt jeden Auftrag manuell zu schreiben, generiert eine KI atmosphärische Briefings auf Basis von Gang-Story und Beziehungen — und ein Discord-Bot verteilt sie automatisch an die richtigen Channels.
+
+**Zielgruppe:** RP-Server-Owner (FiveM, RedM, eigenständige Communities), die professionelles Crime-Auftragsmanagement ohne Schreib-Marathons wollen.
+
+```
+┌────────────────────────────────────────────────────────┐
+│  Spielleiter klickt "Generieren"                       │
+│         ↓                                              │
+│  KI schreibt atmosphärischen Crime-Auftrag             │
+│  + automatischen Personal-Bedarf (NPCs/Mittler)        │
+│         ↓                                              │
+│  Discord-Bot postet im Crew-Channel                    │
+│  + Personal-Briefing im Spielleiter-Channel            │
+│         ↓                                              │
+│  Crew reagiert mit 👍 / 👎 / ❌                          │
+│         ↓                                              │
+│  Live-Update im Dashboard + Ranking-Punkte             │
+└────────────────────────────────────────────────────────┘
+```
+
+## ✨ Features
+
+### KI-Auftrags-Generierung
+- 🤖 **Anthropic Claude + OpenAI** als Provider (umschaltbar)
+- 📝 **Story-bewusste Generierung** — KI nutzt Gang-Background, Beziehungen, Mission-Historie
+- 🔁 **Drei Modi**: Frei generiert · Roh-Input umschreiben · Manueller Klartext
+- ✂️ **Auto-Cleaner**: entfernt Pseudo-Aktennummern, Reaktions-Aufforderungen, wandelt Zahlwörter zu Ziffern
+- ⏰ **Server-Zeitfenster** — KI respektiert Aktivitätszeiten der Community
+- 💬 **Multiple System-Prompts** speicherbar, eine aktivierbar
+
+### Discord-Bot („Il Padrino")
+- 📤 **Automatischer Versand** an Crew-Channels mit Embeds und Reaktionen
+- ⏳ **Scheduled-Send** — Bot-Watcher sendet zur geplanten Zeit
+- 🎙 **Boss-Feedback-Polling** aus separatem Zusatzinfo-Channel
+- 🔄 **Replace-Previous-Pattern** für Ranking-Posts (immer aktuell, kein Spam)
+- 📊 **Tägliche Ranking-Embeds** — Top-3-Hype + Gesamt-Ranking
+
+### Personal-Bedarf-System ⭐ NEU
+- 🎭 **Auto-Generierung** von NPC- und Mittler-Briefings parallel zum Auftrag
+- 👥 **15 NPC-Archetypen** (Hafenmeister, Politiker, Bankleiter, etc.) als Pool
+- 📋 **6 Massen-Auftrag-Templates** (Tag 2/4/7/9/10) für Event-Kampagnen
+- 📤 **Auto-Post in Spielleiter-Channel** beim Mission-Send
+- 🖥 **Live-Dashboard-Widget** mit 30 s Polling + Browser-Notifications
+- ✎ **Inline-Editor** auf Crew-Seite und Dashboard
+
+### Mittler-Verwaltung ⭐ NEU
+- 👤 **Read-Only-Übersicht** der Quest-Geber (Miguel, Maklerin, Pater, Fixer, Witwe, Skrupellose)
+- ✎ **In-Page-Editor** mit Quick-Insert für neue Mittler
+- 🔍 **KI-Konsistenz-Check** — vergleicht Mittler-Profile mit aktueller Event-Story
+- 🤖 **Auto-Apply pro Empfehlung** — KI macht die Edit, du bestätigst im Split-Screen-Preview
+- 💾 **Auto-Backups** als `.bak` vor jeder Änderung
+
+### Crew/Gang-Management
+- 🏘 **Stadtteil-Zuordnung** (Algonquin, Bohan, Broker, Colony Island, Dukes)
+- 🔗 **Beziehungs-Editor** (allied / rival / hostile / business / neutral) → KI nutzt das als Story-Treiber
+- 🎨 **Crew-Farben** für visuelle Unterscheidung
+- ⭐ **Bonus-Punkte** — manuell +/− im Crew-Detail
+- 💼 **Crime-Business-Hinweise** als KI-Kompass (intern, nicht im Auftrag sichtbar)
+
+### Live-Dashboard
+- 📈 **Reaktions-Statistik** mit Stadtteil/Crew/Zeitraum-Filtern
+- 🎯 **Klick-Filter** — Status-Kachel anklicken filtert die Crew-Liste
+- 🔔 **Notifications** — Crew-Karten pulsieren bei neuem Boss-Feedback
+- 🔄 **Auto-Refresh** alle 5 Sekunden
+- 🚀 **Massen-Auftrag-Versand** — alle/Stadtteil/manuelle Auswahl mit parallelem Dispatch
+
+### Ranking-System
+- 🏆 **Eigene Seite** mit vollständigem Crew-Ranking
+- 🥇 **Top-3 mit Gold/Silber/Bronze**
+- 📊 **Punkte-Formel**: `approved × 2 + rejected × −1 + bonus_points`
+- ⏱ **Zeitraum-Filter** (Heute / 7 Tage / 30 Tage / Gesamt)
+- 🔄 **Reset-Stichtag** mit doppeltem Confirm
+- 📅 **Tägliche Discord-Posts** mit dynamischen Titeln (Pool)
+
+### Story-Editor
+- 📝 **Whitelist-basierter Markdown-Editor** für Kern-Story-Files
+- 💾 **Auto-Backup** als `.bak`
+- 📚 **8 Story-Dokumente** editierbar (Briefing, Timeline, Finale, etc.)
+- 🎭 **Mittler-Tab** mit eigener Edit-Ansicht
+
+### Archiv & Export
+- 📦 **Soft-Delete** mit Snapshot des Boss-Feedbacks vor Discord-Cleanup
+- 📄 **PDF-Export** pro Mission (reportlab)
+- 🗂 **Globale Archive-Page** mit Crew-Filter
+- 🔄 **Restore** und endgültiges Löschen
+
+## 🏗 Tech-Stack
+
+| Schicht | Technologie |
 |---|---|
-| Backend | Python 3.11+/3.14, FastAPI, SQLAlchemy 2 (async), SQLite + aiosqlite |
-| Bot | discord.py 2.5+ (eigener Prozess, interne HTTP-API auf `127.0.0.1:8001`) |
-| Frontend | Vanilla HTML + Alpine.js + Tailwind (CDN, kein Build) |
-| AI | Anthropic SDK + OpenAI SDK |
-| PDF | reportlab |
-| Auth | HTTP-Basic, lokal auf `127.0.0.1:8000` |
-| Service-Mgmt | NSSM (Windows-Services, Auto-Start beim Boot) |
+| **Backend** | Python 3.11+/3.14, FastAPI, SQLAlchemy 2 async, SQLite + aiosqlite |
+| **Discord-Bot** | discord.py 2.5+ als eigener Prozess (HTTP-API auf 127.0.0.1:8001) |
+| **Frontend** | Vanilla HTML + Alpine.js + Tailwind CSS (CDN, kein Build-Step) |
+| **KI-Provider** | Anthropic SDK (Claude) + OpenAI SDK (GPT) |
+| **PDF** | reportlab |
+| **Auth** | HTTP-Basic Auth, lokal auf 127.0.0.1 |
+| **Markdown** | marked.js + Mini-Fallback-Renderer |
+| **Service-Mgmt** | NSSM (Windows-Services, Auto-Start beim Boot) |
 
----
-
-## Architektur
-
-```
-┌──────────────┐ HTTP-Basic  ┌─────────────────┐
-│   Browser    │────────────▶│ FastAPI Backend │
-└──────────────┘ :8000       │  (uvicorn)      │
-                              └────────┬────────┘
-                                       │ httpx
-                                       ▼
-                              ┌─────────────────┐
-                              │   discord.py    │ Discord Gateway
-                              │      Bot        │◀──────────────▶ Discord
-                              │   (HTTP :8001)  │
-                              └─────────────────┘
-                                       ▲
-                                       │ both processes
-                                       ▼
-                              ┌─────────────────┐
-                              │ SQLite (WAL)    │
-                              └─────────────────┘
-```
-
-- **Bot ist eigener Prozess** weil Discord-Gateway-Connection persistent sein muss
-- **Backend ↔ Bot** Kommunikation: interne HTTP-API (`/send`, `/delete_message`,
-  `/delete_in_range`, `/read_channel`)
-- **Beide Prozesse** lesen/schreiben dieselbe SQLite (WAL-Mode, low concurrency)
-- **API-Keys** nur in DB/`.env`, Frontend bekommt nur `*_set: bool` zurück
-- **Server bindet nur auf 127.0.0.1** — kein Port-Forward, lokal-only
-
-### Daten-Modell (SQLite, auto-migriert)
-- `crews` — Gangs (Name, Story, Discord-Channel-IDs, Stadtteil, Farbe)
-- `crew_relations` — Beziehungen zwischen Gangs (allied / rival / hostile / business / neutral)
-- `missions` — Aufträge mit Status, AI-Provider, Image, Discord-Refs, Deadline,
-  Schedule, archiviertes Boss-Feedback (JSON), Reply-IDs für Versager und
-  Reaktion
-- `expiry_messages` — Pool für Versager-Sprüche bei abgelaufener Deadline
-- `reaction_messages` — Pool für Reaktions-Antworten nach 👍/👎/❌
-- `system_prompts` — KI-System-Prompt-Varianten (eine aktiv)
-- `settings` — KV-Store für API-Keys + Default-Modelle
-
----
-
-## Setup
+## 📦 Installation
 
 ### Voraussetzungen
-- **Python 3.11–3.14** im PATH
-- **Discord-Bot-Application** (Token vorhanden)
-  - Privileged Intent **„Message Content Intent"** im Developer Portal aktivieren
-- **Discord-Bot-Permissions** im Server: Kanäle ansehen, Nachrichten senden, Embed Links,
-  Dateien anhängen, Nachrichtenverlauf anzeigen, Reaktionen hinzufügen, Nachrichten verwalten
-- **API-Keys** für Claude und/oder OpenAI
 
-### Installation
+- Python 3.11–3.14 im PATH
+- Discord Bot Application ([Anleitung in CONFIGURATION.md](docs/CONFIGURATION.md#discord-bot-einrichten))
+- API-Key für Anthropic Claude und/oder OpenAI
+
+### Quick-Start
 
 ```bash
+# Repo clonen
 git clone https://github.com/RDanton21/CrimeJobs-Handler-Liberty-City.git
 cd CrimeJobs-Handler-Liberty-City
 
-# Windows
+# Setup (Windows)
 scripts\setup.bat
 
-# Linux/Mac (manuell)
+# Setup (Linux/macOS)
 python -m venv .venv
-.venv\Scripts\activate    # Windows
-source .venv/bin/activate  # Linux/Mac
+source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 ```
 
-### `.env` befüllen
+### `.env` Minimal-Konfiguration
 
 ```env
 DISCORD_BOT_TOKEN=<dein bot token>
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=<starkes passwort>
 
-# Optional (kann auch im UI gesetzt werden)
+# Optional — kann auch im Web-UI gesetzt werden
 ANTHROPIC_API_KEY=
 OPENAI_API_KEY=
 ```
 
-### Lokal starten
+### Starten
 
 ```bash
-# Beide Prozesse parallel
+# Windows — beide Prozesse parallel
 scripts\run_all.bat
+
+# Linux/macOS — separate Terminals
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+python -m backend.bot
 ```
 
-Browser öffnen: <http://127.0.0.1:8000> → Login → Crew anlegen → Mission generieren.
+Browser öffnen: <http://127.0.0.1:8000> → Login → Gang anlegen → Mission generieren.
 
-### Als Windows-Service (Auto-Start)
+### Production-Setup mit Auto-Start
 
-Als Administrator:
+Als Administrator auf Windows:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\install_services.ps1
-nssm start CrimeAutoBot
 nssm start CrimeAutoBackend
+nssm start CrimeAutoBot
 ```
 
-Logs: `logs\backend.log`, `logs\bot.log`
+Vollständige Anleitung: **[docs/INSTALLATION.md](docs/INSTALLATION.md)**
 
-Status:
-```powershell
-Get-Service CrimeAutoBot, CrimeAutoBackend
-```
+## 📚 Dokumentation
 
-Siehe **[DEPLOY.md](DEPLOY.md)** für vollständige Deploy-Doku.
+| Datei | Inhalt |
+|---|---|
+| **[INSTALLATION.md](docs/INSTALLATION.md)** | Detaillierte Installation, Windows-Services, Linux-Setup |
+| **[DISCORD_BOT_SETUP.md](docs/DISCORD_BOT_SETUP.md)** ⭐ | **Idiotensichere Schritt-für-Schritt-Anleitung** für die Discord-Bot-Konfiguration (auch ohne Vorerfahrung) |
+| **[CONFIGURATION.md](docs/CONFIGURATION.md)** | Alle Settings im Detail, KI-Provider-Konfiguration, Channel-IDs, System-Prompts |
+| **[FEATURES.md](docs/FEATURES.md)** | Komplette Feature-Übersicht mit Screenshots und Workflows |
+| **[ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)** | Spielleiter-Handbuch — Best Practices, Event-Setup, Personal-Planung |
+| **[API.md](docs/API.md)** | Komplette REST-API-Referenz mit Endpoints, Schemas, Beispielen |
+| **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Tech-Architektur, Datenmodell, Backend/Bot-Kommunikation |
+| **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** | Häufige Probleme + Lösungen, Log-Analyse, Debug-Workflows |
 
----
+## 🔒 Sicherheits-Hinweise
 
-## Workflow (UI)
-
-1. **Dashboard** → „+ Neue Gang" mit Name, Discord-Channel-ID, Zusatzinfo-Channel-ID, Stadtteil
-2. Auf Crew klicken → **Hintergrund-Story** + **Beziehungen** zu anderen Gangs anlegen
-3. Tab **„KI generiert"** → Provider wählen → Generate
-   ODER Tab **„Eigenen Text umschreiben"** → Klartext-Roh-Input → KI verschlüsselt im Stil
-4. Optional: **Countdown** setzen, **Bild** anhängen, **Zusatzinfos** ergänzen, **Senden um** wählen
-5. Draft editieren → **„An Discord senden"** (oder bei gesetztem Schedule: Bot übernimmt)
-6. Boss reagiert → Bot postet Reaktions-Antwort → UI zeigt nach max. 5 Sek
-7. Boss schreibt im **Zusatzinfo-Channel** Klartext-Antwort → Karte pulsiert auf Dashboard
-8. **📦 Archivieren** → Snapshot + Discord-Cleanup → später auf Archive-Page einsehbar oder als PDF exportierbar
-
----
-
-## Update-Workflow (Solo-Setup)
-
-Auf Dev-PC:
-```bash
-git add -A && git commit -m "..." && git push
-```
-
-Auf Dedicated:
-```powershell
-cd D:\Crime-Automation
-git pull
-Restart-Service CrimeAutoBackend, CrimeAutoBot   # als Admin
-```
-
-DB-Migrationen laufen automatisch in `backend/db.py` (`init_db()` →
-`_migrate_add_column_if_missing`).
-
----
-
-## Sicherheits-Hinweise
-
-- Backend lauscht **nur auf 127.0.0.1** — nicht von außen erreichbar
-- Bot-API ebenfalls **nur auf 127.0.0.1:8001** — nicht von außen erreichbar
-- Für Remote-Zugriff: SSH-Tunnel oder Tailscale empfohlen, **kein direktes Port-Forwarding**
+- Backend lauscht **nur auf 127.0.0.1** — von außen nicht erreichbar
+- Bot-API ebenfalls **nur auf 127.0.0.1:8001**
+- Für Remote-Zugriff: **SSH-Tunnel** oder **Tailscale** empfohlen, **kein direktes Port-Forwarding**
 - `.env` niemals committen — enthält Bot-Token und API-Keys
+- `.gitignore` ignoriert `.env`, `*.bak`, `logs/`, `data/*.db`
+
+## 🗺 Workflow im Überblick
+
+```mermaid
+graph LR
+    A[Crew anlegen] --> B[Hintergrund-Story]
+    B --> C[Beziehungen]
+    C --> D[KI-Auftrag generieren]
+    D --> E[Personal-Brief auto-generiert]
+    E --> F[Draft editieren]
+    F --> G[An Discord senden]
+    G --> H[Crew reagiert]
+    H --> I[Live im Dashboard]
+    I --> J{Archivieren?}
+    J -->|Ja| K[Snapshot + PDF-Export]
+    J -->|Nein| H
+```
+
+## 🆕 Was ist neu?
+
+### v2.0 — Personal-Bedarf-System + Mittler-Tab
+- 🎭 **Automatische NPC-/Mittler-Generierung** pro Auftrag
+- 📤 **Discord-Auto-Post** in Spielleiter-Channel beim Mission-Send
+- 🖥 **Live-Widget** mit Browser-Notifications
+- 🔍 **KI-Konsistenz-Check** zwischen Mittlern und aktueller Story
+- 🤖 **Auto-Apply** von KI-Empfehlungen mit Split-Screen-Preview
+- 📚 **Vollständige Dokumentation** in `docs/`
+
+### v1.0 — Initial Release
+- Vollständiges Mission-Management
+- Discord-Bot mit Embed-Posts und Reaktions-Tracking
+- KI-Generator (Anthropic + OpenAI)
+- Live-Dashboard mit Stats und Ranking
+
+## 🤝 Beitragen
+
+Dieses Projekt ist aktuell für eine spezifische RP-Community entwickelt. Pull-Requests werden im Einzelfall geprüft.
+
+Bug-Reports und Feature-Vorschläge gerne als **Issue** auf GitHub.
+
+## 📄 Lizenz
+
+**Proprietary** — Privat-Projekt für die SEKT6R RP-Community. Nicht für kommerzielle Wiederverwendung freigegeben.
+
+Bei Interesse an Lizenzierung für andere Communities: Kontaktaufnahme über GitHub-Issues.
+
+## 🙏 Credits
+
+- **Big Boss** — RDanton21 ([@RDanton21](https://github.com/RDanton21))
+- **Development** — Mit Unterstützung von Claude (Anthropic)
+- **Story-Setting** — Liberty City (GTA IV-Inspiration)
+- **Bot-Persona** — „Il Padrino"
 
 ---
 
-## Lizenz
+<div align="center">
 
-Privat-Projekt für RP-Community. Keine offene Lizenz.
+**Built for Roleplay. Powered by AI. Designed for Storytelling.**
+
+[⬆ Nach oben](#-sekt6r--crime-automation)
+
+</div>

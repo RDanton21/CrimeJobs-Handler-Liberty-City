@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Liberty City Progress</title>
+  <link rel="stylesheet" href="progress.css" />
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+  <div class="wrap">
+    <div class="card">
+      <div class="cityBg" aria-hidden="true">
+        <div class="stars"></div>
+        <div class="moon"></div>
+        <svg class="skyline" viewBox="0 0 980 120" preserveAspectRatio="xMidYMax slice">
+          <path d="M0,120 L0,80 L40,80 L40,60 L90,60 L90,90 L130,90 L130,45 L150,45 L150,30 L165,30 L165,45 L185,45 L185,70 L240,70 L240,55 L300,55 L300,85 L340,85 L340,40 L360,40 L360,25 L372,25 L372,40 L400,40 L400,65 L470,65 L470,50 L520,50 L520,80 L560,80 L560,35 L575,35 L575,18 L585,18 L585,35 L620,35 L620,60 L690,60 L690,48 L740,48 L740,75 L800,75 L800,55 L860,55 L860,82 L920,82 L920,62 L980,62 L980,120 Z" fill="#070c1c"/>
+          <g fill="#04060f">
+            <rect x="180" y="58" width="46" height="62"/><rect x="200" y="40" width="6" height="20"/>
+            <rect x="636" y="44" width="52" height="76"/><rect x="660" y="24" width="5" height="22"/>
+          </g>
+          <g>
+            <rect class="win tw" x="188" y="66" width="6" height="6"/><rect class="win" x="200" y="66" width="6" height="6"/><rect class="win" x="212" y="66" width="6" height="6"/>
+            <rect class="win" x="188" y="80" width="6" height="6"/><rect class="win tw" x="200" y="80" width="6" height="6"/><rect class="win" x="212" y="80" width="6" height="6"/>
+            <rect class="win" x="188" y="94" width="6" height="6"/><rect class="win" x="200" y="94" width="6" height="6"/><rect class="win tw" x="212" y="94" width="6" height="6"/>
+            <rect class="win" x="644" y="54" width="6" height="6"/><rect class="win tw" x="658" y="54" width="6" height="6"/><rect class="win" x="672" y="54" width="6" height="6"/>
+            <rect class="win" x="644" y="70" width="6" height="6"/><rect class="win" x="658" y="70" width="6" height="6"/><rect class="win tw" x="672" y="70" width="6" height="6"/>
+            <rect class="win tw" x="644" y="86" width="6" height="6"/><rect class="win" x="658" y="86" width="6" height="6"/><rect class="win" x="672" y="86" width="6" height="6"/>
+            <rect class="win" x="644" y="102" width="6" height="6"/><rect class="win" x="658" y="102" width="6" height="6"/><rect class="win tw" x="672" y="102" width="6" height="6"/>
+          </g>
+        </svg>
+      </div>
+      <div class="header">
+        <div class="title">🗽 Welcome to <span class="lib">Liberty City</span></div>
+        <div class="subtitle">5EKTOR wird live gehen, wenn das Goal erreicht wurde.</div>
+        <div class="subtitle2">Geplanter Eventzeitraum: <span class="bold">07.08.2026 18:00 – 16.08.2026 23:59</span></div>
+      </div>
+
+      <div class="barRow">
+        <div class="barShell" aria-label="Fortschritt">
+          <div class="barFill" id="barFill"></div>
+          <div class="barOver" id="barOver"></div>
+          <div class="barTicks" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="pct" id="pct">0%</div>
+      </div>
+
+      <div class="meta">
+        <div class="metaLeft">
+          <div class="chip" id="chipState">Verbinde…</div>
+          <div class="chip overBadge" id="overBadge" style="display:none">🔥 ÜBER GOAL</div>
+        </div>
+        <div class="mono" id="last">—</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="progress.js"></script>
+</body>
+</html>

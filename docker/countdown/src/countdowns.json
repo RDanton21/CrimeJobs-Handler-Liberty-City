@@ -1,0 +1,25 @@
+{
+  "update_seconds": 60,
+  "countdowns": [
+    {
+      "id": "cd_42deeaad",
+      "enabled": true,
+      "badge": "NR. 02",
+      "title": "Announcement #2",
+      "subtitle": "Premiere auf YouTube",
+      "target_iso": "2026-07-05T16:00:00+02:00",
+      "channel_id": 1431545143458271322,
+      "youtube_url": "https://youtu.be/E1pshZYFKBg"
+    },
+    {
+      "badge": "Die Story",
+      "title": "Liberty City erwacht...",
+      "subtitle": "Die Story für die kommenden 9 Tage",
+      "target_iso": "2026-08-06T18:00:00+02:00",
+      "channel_id": 1505513237255426099,
+      "youtube_url": "",
+      "enabled": true,
+      "id": "cd_e32d798c"
+    }
+  ]
+}

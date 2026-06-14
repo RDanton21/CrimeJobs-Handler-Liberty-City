@@ -1,0 +1,10 @@
+.env
+state.json
+*.log
+__pycache__/
+*.pyc
+venv/
+.venv/
+.DS_Store
+preview.png
+libs/

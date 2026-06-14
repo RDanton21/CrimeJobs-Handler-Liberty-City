@@ -1,0 +1,282 @@
+# =============================================================================
+# SEKT6R Bot-Stack — Docker Compose
+# =============================================================================
+# Setup: Hostinger KVM 2 (8GB RAM, 2 vCPU) + Cloudflare DNS+Proxy
+# Domains: bots.sektorrp.eu + crime/liberty/ticket/countdown.bots.sektorrp.eu
+#
+# Start auf VPS:
+#   cp .env.example .env
+#   nano .env  # Werte eintragen (Discord-Tokens, API-Keys, etc.)
+#   docker compose up -d
+#
+# Logs anschauen:
+#   docker compose logs -f <service>
+#
+# Restart eines Services:
+#   docker compose restart <service>
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # caddy — Reverse-Proxy mit Auto-HTTPS (Let's Encrypt)
+  # Verteilt eingehenden HTTPS-Traffic an die Bot-Services anhand der Subdomain
+  # ---------------------------------------------------------------------------
+  caddy:
+    image: caddy:2-alpine
+    container_name: sekt6r-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"  # HTTP/3
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - sekt6r-net
+    depends_on:
+      - kommandozentrale
+      - crime-backend
+      - liberty-relay
+      - ticket-bot
+      - countdown-bot
+
+  # ---------------------------------------------------------------------------
+  # kommandozentrale — Web-Dashboard zum Steuern aller Bots
+  # Bindet Docker-Socket, um Container Start/Stop/Logs/Status zu zeigen
+  # Route: https://bots.sektorrp.eu/
+  # ---------------------------------------------------------------------------
+  kommandozentrale:
+    build:
+      context: ./kommandozentrale
+      dockerfile: Dockerfile
+    container_name: sekt6r-kommandozentrale
+    restart: unless-stopped
+    environment:
+      ADMIN_USERNAME: "${KZ_ADMIN_USERNAME:-admin}"
+      ADMIN_PASSWORD: "${KZ_ADMIN_PASSWORD}"
+      TZ: Europe/Berlin
+    volumes:
+      # Docker-Socket für Container-Steuerung (read-only)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - sekt6r-net
+
+  # ---------------------------------------------------------------------------
+  # crime-backend — Il Padrino (Crime Automation FastAPI-Backend)
+  # Route: https://crime.bots.sektorrp.eu/
+  # ---------------------------------------------------------------------------
+  crime-backend:
+    build:
+      context: ../
+      dockerfile: docker/crime/Dockerfile.backend
+    container_name: sekt6r-crime-backend
+    restart: unless-stopped
+    environment:
+      DISCORD_BOT_TOKEN: "${CRIME_DISCORD_BOT_TOKEN}"
+      DISCORD_GUILD_ID: "${CRIME_DISCORD_GUILD_ID}"
+      ANTHROPIC_API_KEY: "${CRIME_ANTHROPIC_API_KEY}"
+      OPENAI_API_KEY: "${CRIME_OPENAI_API_KEY:-}"
+      DEFAULT_AI_PROVIDER: "${CRIME_DEFAULT_AI_PROVIDER:-anthropic}"
+      DEFAULT_CLAUDE_MODEL: "${CRIME_DEFAULT_CLAUDE_MODEL:-claude-sonnet-4-5-20250929}"
+      DEFAULT_OPENAI_MODEL: "${CRIME_DEFAULT_OPENAI_MODEL:-gpt-4o}"
+      ADMIN_USERNAME: "${CRIME_ADMIN_USERNAME}"
+      ADMIN_PASSWORD: "${CRIME_ADMIN_PASSWORD}"
+      BACKEND_HOST: "0.0.0.0"
+      BACKEND_PORT: "8000"
+      BOT_API_URL: "http://crime-bot:8001"
+      DB_PATH: "/app/data/crime.db"
+      IMAGE_DIR: "/app/data/images"
+      TZ: Europe/Berlin
+    volumes:
+      - crime_data:/app/data
+      - crime_logs:/app/logs
+    networks:
+      - sekt6r-net
+
+  # ---------------------------------------------------------------------------
+  # crime-bot — Il Padrino Discord-Bot (separater Prozess, eigene HTTP-API)
+  # ---------------------------------------------------------------------------
+  crime-bot:
+    build:
+      context: ../
+      dockerfile: docker/crime/Dockerfile.bot
+    container_name: sekt6r-crime-bot
+    restart: unless-stopped
+    environment:
+      DISCORD_BOT_TOKEN: "${CRIME_DISCORD_BOT_TOKEN}"
+      DISCORD_GUILD_ID: "${CRIME_DISCORD_GUILD_ID}"
+      BACKEND_URL: "http://crime-backend:8000"
+      ADMIN_USERNAME: "${CRIME_ADMIN_USERNAME}"
+      ADMIN_PASSWORD: "${CRIME_ADMIN_PASSWORD}"
+      BOT_API_HOST: "0.0.0.0"
+      BOT_API_PORT: "8001"
+      DB_PATH: "/app/data/crime.db"
+      TZ: Europe/Berlin
+    volumes:
+      - crime_data:/app/data
+      - crime_logs:/app/logs
+    networks:
+      - sekt6r-net
+    depends_on:
+      - crime-backend
+
+  # ---------------------------------------------------------------------------
+  # liberty-relay — Liberty City Donations (Ko-fi + Twitch + Admin-Panel)
+  # Route: https://liberty.bots.sektorrp.eu/
+  # OBS-Overlay läuft lokal auf deinem Streaming-PC (holt Daten von hier)
+  # ---------------------------------------------------------------------------
+  liberty-relay:
+    build:
+      context: ./liberty
+      dockerfile: Dockerfile
+    container_name: sekt6r-liberty
+    restart: unless-stopped
+    environment:
+      DISCORD_WEBHOOK_URL: "${LIBERTY_DISCORD_WEBHOOK_URL}"
+      DISCORD_USERNAME: "${LIBERTY_DISCORD_USERNAME:-Liberty City}"
+      DISCORD_AVATAR_URL: "${LIBERTY_DISCORD_AVATAR_URL:-}"
+      LIBERTY_EMOJI: "${LIBERTY_EMOJI:-🗽}"
+      GOAL_NETTO_EUR: "${LIBERTY_GOAL_NETTO_EUR:-100}"
+      PROGRESS_BAR_LENGTH: "${LIBERTY_PROGRESS_BAR_LENGTH:-12}"
+      TWITCH_CLIENT_ID: "${LIBERTY_TWITCH_CLIENT_ID}"
+      TWITCH_CLIENT_SECRET: "${LIBERTY_TWITCH_CLIENT_SECRET}"
+      TWITCH_BROADCASTER_LOGIN: "${LIBERTY_TWITCH_BROADCASTER_LOGIN}"
+      TWITCH_BROADCASTER_ID: "${LIBERTY_TWITCH_BROADCASTER_ID}"
+      TWITCH_EVENTSUB_SECRET: "${LIBERTY_TWITCH_EVENTSUB_SECRET}"
+      KOFI_VERIFICATION_TOKEN: "${LIBERTY_KOFI_VERIFICATION_TOKEN}"
+      KOFI_FEE_PERCENT: "${LIBERTY_KOFI_FEE_PERCENT:-5}"
+      PAYPAL_FEE_PERCENT: "${LIBERTY_PAYPAL_FEE_PERCENT:-2.49}"
+      PAYPAL_FEE_FIXED: "${LIBERTY_PAYPAL_FEE_FIXED:-0.35}"
+      KOFI_LISTEN_HOST: "0.0.0.0"
+      KOFI_LISTEN_PORT: "8080"
+      DASHBOARD_LISTEN_HOST: "0.0.0.0"
+      DASHBOARD_LISTEN_PORT: "8081"
+      OBS_OVERLAY_ORIGIN: "${LIBERTY_OBS_OVERLAY_ORIGIN:-*}"
+      ADMIN_USER: "${LIBERTY_ADMIN_USER}"
+      ADMIN_PASS: "${LIBERTY_ADMIN_PASS}"
+      TEBEX_SECRET_KEY: "${LIBERTY_TEBEX_SECRET_KEY:-}"
+      LEADERBOARD_CACHE_TTL: "${LIBERTY_LEADERBOARD_CACHE_TTL:-60}"
+      STATUS_REPOST_TO_BOTTOM: "${LIBERTY_STATUS_REPOST_TO_BOTTOM:-true}"
+      STATUS_REPOST_COOLDOWN_SEC: "${LIBERTY_STATUS_REPOST_COOLDOWN_SEC:-300}"
+      LOG_FILE: "/app/logs/liberty.log"
+      LOG_MAX_BYTES: "${LIBERTY_LOG_MAX_BYTES:-5242880}"
+      LOG_BACKUP_COUNT: "${LIBERTY_LOG_BACKUP_COUNT:-3}"
+      TZ: Europe/Berlin
+    volumes:
+      - liberty_data:/app/data       # JSON-Files (Goals, Cases, etc.)
+      - liberty_logs:/app/logs
+    networks:
+      - sekt6r-net
+
+  # ---------------------------------------------------------------------------
+  # whitelist-bot — Discord-Bot, sync zu externer sektorrp.eu Webseiten-DB
+  # Kein Web-UI, läuft nur Discord-seitig
+  # ---------------------------------------------------------------------------
+  whitelist-bot:
+    build:
+      context: ./whitelist
+      dockerfile: Dockerfile
+    container_name: sekt6r-whitelist
+    restart: unless-stopped
+    environment:
+      BOT_TOKEN: "${WHITELIST_BOT_TOKEN}"
+      DB_HOST: "${WHITELIST_DB_HOST}"
+      DB_NAME: "${WHITELIST_DB_NAME}"
+      DB_USER: "${WHITELIST_DB_USER}"
+      DB_PASS: "${WHITELIST_DB_PASS}"
+      GUILD_ID: "${WHITELIST_GUILD_ID}"
+      WHITELIST_ROLE_ID: "${WHITELIST_ROLE_ID}"
+      TZ: Europe/Berlin
+    networks:
+      - sekt6r-net
+
+  # ---------------------------------------------------------------------------
+  # ticket-bot — RAG-gestützte Ticket-Verwaltung mit Claude + Knowledge-Base
+  # Route: https://ticket.bots.sektorrp.eu/
+  # ---------------------------------------------------------------------------
+  ticket-bot:
+    build:
+      context: ./ticket
+      dockerfile: Dockerfile
+    container_name: sekt6r-ticket
+    restart: unless-stopped
+    environment:
+      DISCORD_TOKEN: "${TICKET_DISCORD_TOKEN}"
+      ANTHROPIC_API_KEY: "${TICKET_ANTHROPIC_API_KEY}"
+      DISCORD_GUILD_ID: "${TICKET_DISCORD_GUILD_ID}"
+      TICKET_CHANNEL_ID: "${TICKET_CHANNEL_ID}"
+      MOD_ROLE_ID: "${TICKET_MOD_ROLE_ID}"
+      TICKET_ACCESS_ROLE_ID: "${TICKET_ACCESS_ROLE_ID}"
+      TICKET_CATEGORY_ID: "${TICKET_CATEGORY_ID}"
+      TICKET_ARCHIVE_CHANNEL_ID: "${TICKET_ARCHIVE_CHANNEL_ID:-}"
+      CLAUDE_MODEL: "${TICKET_CLAUDE_MODEL:-claude-sonnet-4-5-20250929}"
+      EMBED_MODEL: "${TICKET_EMBED_MODEL:-sentence-transformers/multilingual-e5-small}"
+      CONFIDENCE_THRESHOLD: "${TICKET_CONFIDENCE_THRESHOLD:-0.6}"
+      MAX_TOKENS: "${TICKET_MAX_TOKENS:-1500}"
+      TOP_K: "${TICKET_TOP_K:-5}"
+      SNIPPET_THRESHOLD: "${TICKET_SNIPPET_THRESHOLD:-0.3}"
+      SILENT_MENTIONS: "${TICKET_SILENT_MENTIONS:-true}"
+      ADMIN_USER: "${TICKET_ADMIN_USER}"
+      ADMIN_PASSWORD: "${TICKET_ADMIN_PASSWORD}"
+      ADMIN_HOST: "0.0.0.0"
+      ADMIN_PORT: "5555"
+      HF_HOME: "/app/hf-cache"  # Cache für sentence-transformers-Modell
+      TZ: Europe/Berlin
+    volumes:
+      - ticket_data:/app/data
+      - ticket_kb:/app/kb
+      - ticket_hf:/app/hf-cache   # Persistenter Modell-Cache, ~ 130 MB
+      - ticket_logs:/app/logs
+    networks:
+      - sekt6r-net
+
+  # ---------------------------------------------------------------------------
+  # countdown-bot — Countdown-Verwaltung mit Discord + Web-Admin
+  # Route: https://countdown.bots.sektorrp.eu/
+  # ---------------------------------------------------------------------------
+  countdown-bot:
+    build:
+      context: ./countdown
+      dockerfile: Dockerfile
+    container_name: sekt6r-countdown
+    restart: unless-stopped
+    environment:
+      DISCORD_TOKEN: "${COUNTDOWN_DISCORD_TOKEN}"
+      ADMIN_HOST: "0.0.0.0"
+      ADMIN_PORT: "5601"
+      TZ: Europe/Berlin
+    volumes:
+      - countdown_data:/app/data   # countdowns.json + state.json
+      - countdown_logs:/app/logs
+    networks:
+      - sekt6r-net
+
+
+# =============================================================================
+# Volumes — persistente Daten überleben Container-Restart und docker compose down
+# =============================================================================
+volumes:
+  caddy_data:        # Let's Encrypt Zertifikate
+  caddy_config:      # Caddy-Runtime-Config
+  crime_data:        # SQLite-DB + Images
+  crime_logs:
+  liberty_data:      # JSON-Files (Goals, Cases, Dedupe)
+  liberty_logs:
+  ticket_data:       # ChromaDB-Index
+  ticket_kb:         # Knowledge-Base-Dokumente
+  ticket_hf:         # Embedding-Modell Cache
+  ticket_logs:
+  countdown_data:    # countdowns.json + state.json
+  countdown_logs:
+
+
+# =============================================================================
+# Network — internes Bridge-Netzwerk, alle Container reden über Container-Namen
+# =============================================================================
+networks:
+  sekt6r-net:
+    driver: bridge
+    name: sekt6r-net

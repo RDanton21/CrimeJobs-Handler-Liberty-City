@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SEKT6R Kommandozentrale</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0a0a0f 0%, #16161f 100%);
+      color: #f4f4f5;
+    }
+    .glow-red { box-shadow: 0 0 30px rgba(239, 68, 68, 0.3); }
+    .glow-pink { box-shadow: 0 0 20px rgba(236, 72, 153, 0.4); }
+    @keyframes pulse-green { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .pulse-running { animation: pulse-green 2s ease-in-out infinite; }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <div x-data="kommandozentrale()" x-init="init()" class="max-w-7xl mx-auto p-4 sm:p-6">
+
+    <!-- Header -->
+    <header class="mb-6">
+      <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+        <div>
+          <h1 class="text-3xl sm:text-4xl font-black tracking-tight bg-gradient-to-r from-red-500 via-pink-500 to-purple-500 bg-clip-text text-transparent">
+            SEKT6R
+          </h1>
+          <p class="text-xs uppercase tracking-widest text-zinc-500 -mt-1">Kommandozentrale</p>
+        </div>
+        <div class="flex items-center gap-3 text-sm">
+          <span x-show="systemStats.now" class="text-zinc-400" x-text="formatTime(systemStats.now)"></span>
+          <button @click="refreshAll()"
+                  :disabled="loading"
+                  class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-xs">
+            <span x-show="!loading">↻ Refresh</span>
+            <span x-show="loading">…</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- System-Stats-Leiste -->
+      <div x-show="systemStats.cpu_percent !== undefined"
+           class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs bg-zinc-900/60 border border-zinc-800 rounded-lg p-3">
+        <div>
+          <div class="text-zinc-500">CPU</div>
+          <div class="font-bold" x-text="`${systemStats.cpu_percent}% / ${systemStats.cpu_count} Cores`"></div>
+        </div>
+        <div>
+          <div class="text-zinc-500">RAM</div>
+          <div class="font-bold" x-text="`${systemStats.memory?.used_gb}GB / ${systemStats.memory?.total_gb}GB (${systemStats.memory?.percent}%)`"></div>
+        </div>
+        <div>
+          <div class="text-zinc-500">Disk</div>
+          <div class="font-bold" x-text="`${systemStats.disk?.used_gb}GB / ${systemStats.disk?.total_gb}GB (${systemStats.disk?.percent}%)`"></div>
+        </div>
+        <div>
+          <div class="text-zinc-500">Uptime</div>
+          <div class="font-bold" x-text="formatUptime(systemStats.uptime_seconds)"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Error -->
+    <p x-show="error" x-text="error"
+       class="text-red-400 text-sm bg-red-900/30 border border-red-800 rounded p-3 mb-4"></p>
+
+    <!-- Service-Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <template x-for="svc in services" :key="svc.service">
+        <article class="bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 hover:border-zinc-700 transition">
+          <!-- Status-Indicator + Label -->
+          <header class="flex items-start justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2">
+              <span x-text="svc.icon" class="text-2xl"></span>
+              <div>
+                <h2 class="font-bold" x-text="svc.label"></h2>
+                <p class="text-xs text-zinc-500" x-text="svc.container"></p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1">
+              <span :class="statusDot(svc.status)" class="w-2 h-2 rounded-full"></span>
+              <span class="text-xs uppercase tracking-wider" :class="statusTextColor(svc.status)" x-text="statusLabel(svc.status)"></span>
+            </div>
+          </header>
+
+          <!-- Stats (CPU/RAM) wenn running -->
+          <div x-show="svc.status === 'running'" class="grid grid-cols-2 gap-2 text-xs mb-3">
+            <div class="bg-zinc-950/60 rounded px-2 py-1">
+              <div class="text-zinc-500">CPU</div>
+              <div class="font-mono" x-text="`${svc.cpu_percent}%`"></div>
+            </div>
+            <div class="bg-zinc-950/60 rounded px-2 py-1">
+              <div class="text-zinc-500">RAM</div>
+              <div class="font-mono" x-text="`${svc.mem_used_mb} MB`"></div>
+            </div>
+          </div>
+
+          <!-- Uptime -->
+          <div x-show="svc.started_at" class="text-xs text-zinc-500 mb-3">
+            seit <span x-text="formatRelative(svc.started_at)"></span>
+          </div>
+
+          <!-- Action-Buttons -->
+          <div class="flex flex-wrap gap-1.5">
+            <button x-show="svc.status === 'running'"
+                    @click="action(svc.service, 'restart')"
+                    :disabled="busyService === svc.service"
+                    class="text-xs px-2.5 py-1 rounded bg-amber-700 hover:bg-amber-600 disabled:opacity-50">
+              ↻ Restart
+            </button>
+            <button x-show="svc.status === 'running'"
+                    @click="action(svc.service, 'stop')"
+                    :disabled="busyService === svc.service"
+                    class="text-xs px-2.5 py-1 rounded bg-red-800 hover:bg-red-700 disabled:opacity-50">
+              ⏸ Stop
+            </button>
+            <button x-show="svc.status !== 'running'"
+                    @click="action(svc.service, 'start')"
+                    :disabled="busyService === svc.service"
+                    class="text-xs px-2.5 py-1 rounded bg-green-700 hover:bg-green-600 disabled:opacity-50">
+              ▶ Start
+            </button>
+            <button @click="openLogs(svc.service)"
+                    class="text-xs px-2.5 py-1 rounded bg-zinc-700 hover:bg-zinc-600">
+              📄 Logs
+            </button>
+            <a x-show="svc.ui_url" :href="svc.ui_url" target="_blank"
+               class="text-xs px-2.5 py-1 rounded bg-blue-700 hover:bg-blue-600">
+              ▶ Open UI
+            </a>
+          </div>
+        </article>
+      </template>
+    </div>
+
+    <p x-show="services.length === 0 && !loading" class="text-zinc-500 text-center py-12">
+      Keine Container gefunden. Stack noch nicht deployt?
+    </p>
+
+    <!-- Logs-Modal -->
+    <div x-show="logsOpen" x-transition.opacity
+         class="fixed inset-0 z-50 bg-black/80 p-2 sm:p-4 flex items-center justify-center"
+         @keydown.escape.window="logsOpen = false">
+      <div class="bg-zinc-900 border border-zinc-700 rounded-lg shadow-2xl w-full h-full flex flex-col max-w-6xl"
+           style="height: calc(100vh - 1rem);">
+        <header class="px-4 py-3 border-b border-zinc-800 flex items-center justify-between flex-wrap gap-2 shrink-0">
+          <h3 class="text-sm font-semibold">
+            📄 Logs — <span class="text-zinc-400" x-text="logsService"></span>
+          </h3>
+          <div class="flex gap-2">
+            <button @click="loadLogs(logsService)"
+                    class="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700">
+              ↻ Refresh
+            </button>
+            <button @click="logsOpen = false"
+                    class="text-xs px-2 py-1 rounded bg-zinc-700 hover:bg-zinc-600">
+              ✕
+            </button>
+          </div>
+        </header>
+        <pre class="flex-1 overflow-auto scrollbar-thin bg-zinc-950 p-4 text-xs font-mono whitespace-pre-wrap" x-text="logsContent"></pre>
+      </div>
+    </div>
+
+    <footer class="text-center text-xs text-zinc-600 mt-8 pb-4">
+      SEKT6R RP · Kommandozentrale v2.0 · Docker-Stack
+    </footer>
+  </div>
+
+  <script>
+    function kommandozentrale() {
+      return {
+        services: [],
+        systemStats: {},
+        loading: false,
+        error: "",
+        busyService: null,
+        logsOpen: false,
+        logsService: "",
+        logsContent: "",
+
+        async init() {
+          await this.refreshAll();
+          setInterval(() => this.refreshAll(true), 5000);
+        },
+
+        async refreshAll(silent = false) {
+          if (!silent) this.loading = true;
+          this.error = "";
+          try {
+            const [svcs, sys] = await Promise.all([
+              this.api("/api/services"),
+              this.api("/api/system"),
+            ]);
+            this.services = svcs;
+            this.systemStats = sys;
+          } catch (e) {
+            this.error = "Fehler: " + e.message;
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        async action(service, verb) {
+          if (verb === "stop" || verb === "restart") {
+            if (!confirm(`${verb} ${service}?`)) return;
+          }
+          this.busyService = service;
+          try {
+            await this.api(`/api/services/${service}/${verb}`, "POST");
+            await this.refreshAll(true);
+          } catch (e) {
+            alert(e.message);
+          } finally {
+            this.busyService = null;
+          }
+        },
+
+        async openLogs(service) {
+          this.logsService = service;
+          this.logsOpen = true;
+          this.logsContent = "Lade…";
+          await this.loadLogs(service);
+        },
+
+        async loadLogs(service) {
+          try {
+            const r = await this.api(`/api/services/${service}/logs?tail=300`);
+            this.logsContent = r.logs || "(leer)";
+          } catch (e) {
+            this.logsContent = "Fehler: " + e.message;
+          }
+        },
+
+        async api(path, method = "GET") {
+          const r = await fetch(path, {
+            method,
+            credentials: "include",
+          });
+          if (!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
+          return r.json();
+        },
+
+        statusDot(s) {
+          return {
+            running: "bg-green-500 pulse-running",
+            exited: "bg-red-500",
+            paused: "bg-amber-500",
+            restarting: "bg-amber-500 pulse-running",
+            not_found: "bg-zinc-600",
+            error: "bg-red-700",
+          }[s] || "bg-zinc-500";
+        },
+
+        statusTextColor(s) {
+          return {
+            running: "text-green-400",
+            exited: "text-red-400",
+            paused: "text-amber-400",
+            restarting: "text-amber-400",
+            not_found: "text-zinc-500",
+            error: "text-red-400",
+          }[s] || "text-zinc-400";
+        },
+
+        statusLabel(s) {
+          return {
+            running: "running",
+            exited: "stopped",
+            paused: "paused",
+            restarting: "restarting",
+            not_found: "nicht da",
+            error: "error",
+          }[s] || s;
+        },
+
+        formatTime(iso) {
+          if (!iso) return "";
+          return new Date(iso).toLocaleString("de-DE", {
+            day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit",
+          });
+        },
+
+        formatRelative(iso) {
+          if (!iso) return "—";
+          const then = new Date(iso);
+          const now = new Date();
+          const sec = Math.floor((now - then) / 1000);
+          if (sec < 60) return `${sec}s`;
+          if (sec < 3600) return `${Math.floor(sec / 60)}m`;
+          if (sec < 86400) return `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`;
+          return `${Math.floor(sec / 86400)}d ${Math.floor((sec % 86400) / 3600)}h`;
+        },
+
+        formatUptime(sec) {
+          if (!sec) return "—";
+          const d = Math.floor(sec / 86400);
+          const h = Math.floor((sec % 86400) / 3600);
+          const m = Math.floor((sec % 3600) / 60);
+          return `${d}d ${h}h ${m}m`;
+        },
+      };
+    }
+  </script>
+</body>
+</html>

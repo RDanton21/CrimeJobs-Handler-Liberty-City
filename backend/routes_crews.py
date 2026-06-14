@@ -66,7 +66,7 @@ async def crew_notifications(session: AsyncSession = Depends(get_session)):
         try:
             async with httpx.AsyncClient(timeout=5.0) as cli:
                 r = await cli.post(
-                    "http://127.0.0.1:8001/read_channel",
+                    f"{settings.bot_api_url}/read_channel",
                     json={"channel_id": channel_id, "limit": 10, "oldest_first": False},
                 )
             if r.status_code >= 400:
@@ -229,7 +229,7 @@ async def get_crew_boss_info(crew_id: int, session: AsyncSession = Depends(get_s
     async with httpx.AsyncClient(timeout=15.0) as cli:
         try:
             r = await cli.post(
-                "http://127.0.0.1:8001/read_channel",
+                f"{settings.bot_api_url}/read_channel",
                 json={
                     "channel_id": crew.info_channel_id,
                     "after_iso": earliest.isoformat(),
@@ -362,7 +362,7 @@ async def post_crime_business(
     try:
         async with httpx.AsyncClient(timeout=15.0) as cli:
             r = await cli.post(
-                "http://127.0.0.1:8001/post_text",
+                f"{settings.bot_api_url}/post_text",
                 json={"channel_id": crew.crime_business_channel_id, "content": content},
             )
         if r.status_code >= 400:

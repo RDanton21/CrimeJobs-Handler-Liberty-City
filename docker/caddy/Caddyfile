@@ -1,0 +1,117 @@
+# =============================================================================
+# SEKT6R Bot-Stack — Caddy Reverse-Proxy
+# =============================================================================
+# Routet eingehende HTTPS-Requests an die richtigen Bot-Container.
+# Caddy holt automatisch Let's Encrypt-Zertifikate.
+# Cloudflare proxy'd dann mit eigenem Cert nach außen.
+# =============================================================================
+
+{
+    # E-Mail für Let's Encrypt (Renewal-Notifications)
+    # WICHTIG: in .env als CADDY_ACME_EMAIL setzen
+    email {env.CADDY_ACME_EMAIL}
+
+    # Logs nach stdout für `docker logs`
+    log {
+        output stdout
+        format console
+        level INFO
+    }
+}
+
+# -----------------------------------------------------------------------------
+# https://bots.sektorrp.eu  →  Kommandozentrale (Haupt-Dashboard)
+# -----------------------------------------------------------------------------
+bots.sektorrp.eu {
+    reverse_proxy kommandozentrale:8000
+
+    header {
+        # Security-Headers
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    log {
+        output file /data/logs/bots.log
+        format console
+    }
+}
+
+# -----------------------------------------------------------------------------
+# https://crime.bots.sektorrp.eu  →  Il Padrino (Crime Automation Backend)
+# -----------------------------------------------------------------------------
+crime.bots.sektorrp.eu {
+    reverse_proxy crime-backend:8000
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    log {
+        output file /data/logs/crime.log
+        format console
+    }
+}
+
+# -----------------------------------------------------------------------------
+# https://liberty.bots.sektorrp.eu  →  Liberty Donations Admin-Panel
+# -----------------------------------------------------------------------------
+liberty.bots.sektorrp.eu {
+    # /webhook/* geht zum Ko-fi-Listener (Port 8080)
+    @webhook path /webhook/* /kofi/* /twitch/*
+    reverse_proxy @webhook liberty-relay:8080
+
+    # Alles andere zum Admin-Panel (gleicher Port, anderer Path)
+    reverse_proxy liberty-relay:8080
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    log {
+        output file /data/logs/liberty.log
+        format console
+    }
+}
+
+# -----------------------------------------------------------------------------
+# https://ticket.bots.sektorrp.eu  →  Ticket-Bot Admin-Panel
+# -----------------------------------------------------------------------------
+ticket.bots.sektorrp.eu {
+    reverse_proxy ticket-bot:5555
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    log {
+        output file /data/logs/ticket.log
+        format console
+    }
+}
+
+# -----------------------------------------------------------------------------
+# https://countdown.bots.sektorrp.eu  →  Countdown-Manager
+# -----------------------------------------------------------------------------
+countdown.bots.sektorrp.eu {
+    reverse_proxy countdown-bot:5601
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    log {
+        output file /data/logs/countdown.log
+        format console
+    }
+}

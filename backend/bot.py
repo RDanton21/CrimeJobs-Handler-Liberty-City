@@ -798,9 +798,9 @@ async def main():
 
     runner = web.AppRunner(build_http_app())
     await runner.setup()
-    site = web.TCPSite(runner, "127.0.0.1", 8001)
+    site = web.TCPSite(runner, settings.bot_api_host, settings.bot_api_port)
     await site.start()
-    log.info("Bot HTTP API auf http://127.0.0.1:8001")
+    log.info("Bot HTTP API auf http://%s:%d", settings.bot_api_host, settings.bot_api_port)
 
     try:
         await client.start(settings.discord_bot_token)

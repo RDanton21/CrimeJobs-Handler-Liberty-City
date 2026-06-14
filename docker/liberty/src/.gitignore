@@ -1,0 +1,30 @@
+# Secrets / Credentials
+.env
+user_token.json
+
+# Runtime State
+case_files.jsonl
+stats.json
+stats.json.bak.*.json
+stats_backup.json
+dedupe.json
+goal_*.json
+goal_reached*.json
+status_message.json
+status_meta.json
+status_*.json
+current_stream_start.json
+admin_config.json
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+# Cert store / misc
+roots.sst

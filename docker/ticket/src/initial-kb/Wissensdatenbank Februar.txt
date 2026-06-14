@@ -1,0 +1,86 @@
+RDM (Random Deathmatch)
+
+RDM liegt vor, wenn ein Spieler einen anderen ohne klaren, ausgespielten RP-Hintergrund angreift oder tötet. Gewalt darf im RP nur nach nachvollziehbarer Eskalation, Bedrohung oder Story erfolgen, sodass beide Seiten die Situation verstehen und ausspielen können.
+Beispiel: Du erschießt jemanden auf der Straße, nur weil er dich angerempelt hat, ohne vorherige Drohung oder Konflikt.
+-----------------------
+VDM (Vehicle Deathmatch)
+
+VDM bezeichnet das gezielte Töten oder schwere Verletzen mit einem Fahrzeug, wobei das Auto bewusst als Waffe genutzt wird. Fahrzeuge sind im RP Transportmittel, kein Ersatz für Waffen oder Nahkampf.
+Beispiel: Du fährst absichtlich mit hoher Geschwindigkeit auf einen Spieler auf dem Gehweg zu, um ihn zu töten.
+-----------------------
+Fail-RP
+
+Fail-RP ist Verhalten, das unrealistisch, unlogisch oder regelwidrig ist und die Glaubwürdigkeit der RP-Welt zerstört. Dazu gehört das Ignorieren von Verletzungen, physikalischen Grenzen oder realistischen Reaktionen.
+Beispiel: Dein Auto überschlägt sich mehrfach bei einem Unfall und du steigst aus, rennst los und spielst keine Verletzungen aus.
+-----------------------
+Power-RP
+
+Power-RP bedeutet, dass du anderen Spielern Handlungen oder Ergebnisse aufzwingst, ohne ihnen eine faire Reaktionschance zu lassen. Gutes RP lässt offen, wie eine Situation ausgeht, und respektiert die Möglichkeiten aller Beteiligten.
+Beispiel: Du schreibst „schlägt dich bewusstlos“, ohne dass der andere reagieren oder ausspielen kann.
+-----------------------
+Combat Logging
+
+Combat Logging ist das Verlassen des Spiels während oder kurz vor einer RP-Situation, um Konsequenzen zu vermeiden. Das unterbricht Szenen und nimmt anderen Spielern ihren RP-Abschluss.
+Beispiel: Du loggst aus, während dich die Polizei festnimmt, damit du nicht ins Gefängnis musst.
+-----------------------
+IC (In Character)
+
+IC umfasst alles, was dein Charakter innerhalb der Spielwelt erlebt, weiß und entscheidet. Nur Informationen, die dein Charakter im RP erhalten hat, dürfen sein Handeln beeinflussen.
+Beispiel: Dein Charakter weiß von einem Drogenlabor, weil er es im RP entdeckt hat – nicht, weil du es aus einem Guide kennst.
+-----------------------
+OOC (Out of Character)
+
+OOC beschreibt alles außerhalb des Rollenspiels, z. B. reale Gespräche, Discord, Streams oder Serverregeln. OOC-Wissen darf nicht ins RP einfließen.
+Beispiel: Du sagst im Voice-RP „OOC kurz, mein Mikro spinnt“.
+-----------------------
+Meta-Gaming
+
+Meta-Gaming ist die Nutzung von OOC-Wissen im IC, wodurch RP verfälscht oder unfair beeinflusst wird. Dadurch werden Ermittlungen, Überraschungen und Story zerstört.
+Beispiel: Du siehst im Stream, wo jemand versteckt ist, und findest ihn im RP ohne jeden Hinweis.
+-----------------------
+Backseat Gaming
+
+Backseat Gaming liegt vor, wenn man anderen Spielern OOC Anweisungen oder Kritik während ihres RPs gibt. Das stört den Spielfluss und setzt Spieler unter Druck.
+Beispiel: Du sagst während einer Schießerei: „Du musst jetzt Deckung nehmen, sonst spielst du falsch.“
+-----------------------
+Character Break
+
+Ein Character Break ist das Verlassen der Rolle, z. B. durch OOC-Sprache, Witze oder Regelhinweise mitten im RP. Das reißt alle Beteiligten aus der Immersion.
+Beispiel: Du lachst und sagst im RP: „Haha, das war grad voll verbuggt.“
+-----------------------
+New Life Rule (NLR)
+
+Die NLR besagt, dass sich dein Charakter nach dem Tod nicht an die vorherige Situation erinnern darf. Dadurch wird verhindert, dass Konflikte direkt fortgesetzt oder Informationen missbraucht werden.
+Beispiel: Nach dem Tod darfst du nicht sofort zurückfahren, um deinen Mörder zu suchen.
+-----------------------
+Perma-Death (PD)
+
+Perma-Death bedeutet, dass ein Charakter endgültig stirbt und nicht weitergespielt wird. PD wird meist bewusst für starke Story-Abschlüsse genutzt.
+Beispiel: Ein Mafioso stirbt im großen Finale seiner Story und wird nicht erneut erstellt.
+-----------------------
+Downed / Bewusstlos
+
+Ein downed Charakter ist kampfunfähig und darf nicht aktiv handeln oder eingreifen. Oft ist Kommunikation nur eingeschränkt oder gar nicht erlaubt.
+Beispiel: Du liegst nach einem Schuss bewusstlos am Boden und darfst keine Funksprüche absetzen.
+-----------------------
+Cop-Baiting
+
+Cop-Baiting ist das absichtliche Provozieren der Polizei ohne RP-Hintergrund, um Action zu erzwingen. Es wird als schlechtes RP angesehen.
+Beispiel: Du fährst ständig mit Absicht in Polizeisperren, nur um verfolgt zu werden.
+-----------------------
+PIT-Manöver
+
+Ein PIT-Manöver ist eine Polizeitaktik, um ein flüchtendes Fahrzeug kontrolliert zum Stillstand zu bringen. Es darf nur unter bestimmten RP- und Sicherheitsbedingungen erfolgen.
+Beispiel: Die Polizei setzt ein PIT-Manöver bei niedriger Geschwindigkeit ein, um eine Verfolgung zu beenden.
+-----------------------
+Grinding
+
+Grinding ist das monotone Farmen von Geld oder Items ohne nennenswertes RP. Es wird oft als liebloses oder niedriges RP angesehen.
+Beispiel: Du fährst stundenlang dieselbe Route, ohne mit irgendwem zu interagieren oder RP zu erzeugen.
+-----------------------
+Bugs (im RP-Kontext)
+
+Erläuterung:
+Bugs sind technische Fehler oder Fehlfunktionen des Spiels, die nicht beabsichtigt sind. Auf Sektor dürfen Bugs nicht absichtlich ausgenutzt werden, da sie einen unfairen Vorteil verschaffen und die Immersion zerstören. Grundsätzlich gilt: Was technisch falsch läuft, darf im RP nicht zu deinem Vorteil genutzt werden, sondern muss realistisch oder regelkonform ausgespielt werden.
+Solltest du einen Bug feststellen, solltest du das dem Team über das Ticketsystem mitteilen.
+-----------------------

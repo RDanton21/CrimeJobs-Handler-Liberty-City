@@ -282,7 +282,7 @@ async def post_personnel_to_discord(
         try:
             async with httpx.AsyncClient(timeout=10.0) as cli:
                 await cli.post(
-                    "http://127.0.0.1:8001/delete_message",
+                    f"{app_settings.bot_api_url}/delete_message",
                     json={"channel_id": channel_id,
                           "message_id": m.personnel_discord_message_id},
                 )
@@ -324,7 +324,7 @@ async def post_personnel_to_discord(
     try:
         async with httpx.AsyncClient(timeout=15.0) as cli:
             r = await cli.post(
-                "http://127.0.0.1:8001/send_embed",
+                f"{app_settings.bot_api_url}/send_embed",
                 json={"channel_id": channel_id, "embed": embed_payload},
             )
             r.raise_for_status()

@@ -1,0 +1,334 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@500;700;900&display=swap');
+
+/* 5ektor-Hausschrift, lokal gehostet (offline/stream-stabil) */
+@font-face{
+  font-family:"Neuropol X";
+  src: url("Neuropol.otf") format("opentype");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Transparent background for OBS & clean web look */
+:root{
+  --bg: rgba(10, 10, 14, 0.55);
+  --bg2: rgba(18, 18, 24, 0.72);
+  --stroke: rgba(255,255,255,0.10);
+  --text: rgba(255,255,255,0.95);
+  --muted: rgba(255,255,255,0.72);
+
+  --c1: #3E2F5B; /* purple */
+  --c2: #E94560; /* red */
+  --c3: #FFD800; /* yellow */
+  --c4: #4EFF00; /* green */
+
+  --shadow: 0 10px 28px rgba(0,0,0,0.35);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background: transparent;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+}
+.wrap{
+  width: 100%;
+  height: 100%;
+  padding: 18px;
+}
+.card{
+  width: 100%;
+  max-width: 980px;
+  background: linear-gradient(180deg, var(--bg), var(--bg2));
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 16px 18px 14px;
+  backdrop-filter: blur(10px);
+}
+
+.header .title{
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+.header .subtitle{
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.header .subtitle2{
+  margin-top: 2px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.78);
+}
+.bold{font-weight: 800;}
+
+.barRow{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.barShell{
+  position: relative;
+  flex: 1;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
+  overflow:hidden;
+}
+.barFill{
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: var(--c1);
+  transition: width 650ms cubic-bezier(.2,.8,.2,1), background 350ms ease;
+}
+.barFill.glow{
+  box-shadow: 0 0 14px rgba(78,255,0,0.55), 0 0 28px rgba(78,255,0,0.25);
+}
+
+.barTicks{
+  position:absolute;
+  inset:0;
+  display:flex;
+  pointer-events:none;
+}
+.barTicks span{
+  flex:1;
+  border-right: 1px dashed rgba(255,255,255,0.10);
+}
+.barTicks span:last-child{border-right:none}
+
+.pct{
+  min-width: 96px;
+  text-align:right;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.35);
+}
+
+.meta{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.chip{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.85);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  color: rgba(255,255,255,0.78);
+  text-align:right;
+}
+
+/* --- Donation pulse: kurzer Leucht-Puls am Balken + Pop der Prozentzahl --- */
+@keyframes donateGlow{
+  0%   { box-shadow: 0 0 0 rgba(0,229,255,0); }
+  25%  { box-shadow: 0 0 18px rgba(0,229,255,0.9), 0 0 36px rgba(255,43,214,0.5); }
+  100% { box-shadow: 0 0 0 rgba(0,229,255,0); }
+}
+.barShell.bump{
+  animation: donateGlow 950ms ease-out;
+}
+
+@keyframes pctPop{
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.32); }
+  100% { transform: scale(1); }
+}
+.pct.bump{
+  animation: pctPop 950ms cubic-bezier(.2,.8,.2,1);
+  transform-origin: right center;
+}
+
+/* --- Overcharge: zweite Füllschicht über 100% (füllt sich erneut von links) --- */
+.barOver{
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff2bd6, #3aa6ff, #ff2bd6);
+  background-size: 200% 100%;
+  box-shadow: 0 0 14px rgba(255,43,214,0.75), 0 0 26px rgba(0,229,255,0.45);
+  transition: width 650ms cubic-bezier(.2,.8,.2,1);
+  animation: overShimmer 1.8s linear infinite;
+  z-index: 2;
+}
+@keyframes overShimmer{
+  0%   { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.overBadge{
+  background: linear-gradient(90deg, rgba(255,43,214,0.22), rgba(0,229,255,0.22));
+  border-color: rgba(0,229,255,0.55);
+  color: #dff6ff;
+}
+
+/* --- Konfetti-Canvas (Goal erreicht) --- */
+#confetti{
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.metaLeft{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ===================== 5EKTOR Neon Theme ===================== */
+:root{
+  --neon-cyan:#3aa6ff; --neon-magenta:#b13c8f;
+  --glow-cyan: rgba(0,229,255,0.18); --glow-magenta: rgba(255,43,214,0.18);
+  --txt:#f4f6ff; --txt-dim:#b6bcd6; --txt-mute:#7e84a3;
+  --font-display:"Neuropol X","Orbitron","Segoe UI",system-ui,sans-serif;
+  --font-body:"Inter","Segoe UI",system-ui,sans-serif;
+}
+body{ font-family: var(--font-body); }
+
+.card{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)),
+    linear-gradient(180deg, rgba(5,5,11,0.60) 0%, rgba(2,2,5,0.50) 100%);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:24px;
+  position:relative; overflow:hidden;
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 0 40px rgba(0,229,255,0.10),
+    0 0 60px rgba(255,43,214,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+/* Neon-Eckenglow: cyan oben-links, magenta unten-rechts */
+.card::before{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    radial-gradient(70% 120% at 0% 0%, rgba(58,166,255,0.18), transparent 55%),
+    radial-gradient(70% 120% at 100% 100%, rgba(177,60,143,0.22), transparent 55%);
+}
+/* Neon-Hairline oben */
+.card::after{
+  content:""; position:absolute; left:16px; right:16px; top:0; height:1px; z-index:2;
+  background: linear-gradient(90deg, transparent, rgba(0,229,255,0.7), rgba(255,43,214,0.7), transparent);
+  pointer-events:none;
+}
+.card > .header,
+.card > .barRow,
+.card > .meta{ position:relative; z-index:3; }
+
+.cityBg{
+  position:absolute; inset:0;
+  z-index:1; pointer-events:none; overflow:hidden;
+  border-radius: inherit;
+}
+.stars{
+  position:absolute; left:0; right:0; top:0; bottom:42%;
+  opacity:.5;
+  background-image:
+    radial-gradient(1.5px 1.5px at 18% 32%, #cfe9ff, transparent),
+    radial-gradient(1px 1px at 68% 18%, #fff, transparent),
+    radial-gradient(1px 1px at 44% 52%, #cfe0ff, transparent),
+    radial-gradient(1.5px 1.5px at 86% 30%, #aee9ff, transparent),
+    radial-gradient(1px 1px at 32% 14%, #fff, transparent),
+    radial-gradient(1px 1px at 58% 60%, #fff, transparent);
+}
+/* dezenter Neon-Orb statt Mond */
+.moon{
+  position:absolute; top:14px; right:60px;
+  width:22px; height:22px; border-radius:50%;
+  background: radial-gradient(circle at 38% 38%, #aee9ff, #2a6cff);
+  box-shadow: 0 0 18px rgba(0,229,255,0.6);
+  opacity:.8;
+}
+.skyline{
+  position:absolute; left:0; right:0; bottom:0;
+  width:100%; height:64%;
+  display:block;
+  filter: drop-shadow(0 -2px 10px rgba(0,229,255,0.25));
+}
+.skyline .win{ fill:#3aa6ff; }
+@keyframes twinkle{ 0%,100%{opacity:.2} 50%{opacity:1} }
+.skyline .win.tw{ animation: twinkle 2.6s ease-in-out infinite; }
+
+/* Titel im 5EKTOR-Stil (Neon-Display-Font + Farbverlauf) */
+.header .title{
+  font-family: var(--font-display);
+  text-transform:uppercase; letter-spacing:3px; font-weight:700; font-size:24px;
+  color:var(--txt);
+  text-shadow: 0 0 18px rgba(0,229,255,0.25);
+}
+.header .title .lib{
+  background: linear-gradient(90deg, #3aa6ff, #ff2bd6);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter: drop-shadow(0 0 10px rgba(255,43,214,0.45));
+}
+.header .subtitle{ color:var(--txt-dim); }
+.header .subtitle2{ color:var(--txt-mute); }
+.header .subtitle2 .bold{ color:var(--txt-dim); }
+
+/* Balken im Neon-Stil */
+.barShell{
+  background: rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+}
+.barFill{
+  background: linear-gradient(90deg, #3aa6ff 0%, #6f7bff 55%, #b13c8f 100%);
+  box-shadow: 0 0 10px rgba(58,166,255,0.45);
+}
+.barFill.glow{
+  box-shadow: 0 0 16px rgba(0,229,255,0.6), 0 0 32px rgba(255,43,214,0.35);
+}
+.pct{
+  font-family: var(--font-display);
+  color: var(--txt);
+  text-shadow: 0 0 14px rgba(0,229,255,0.4);
+}
+.chip{
+  background: rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.14);
+  color: var(--txt-dim);
+}
+
+/* ===================== OBS-Layout 1920×1080: Box unten mittig ===================== */
+html, body{ height:100%; }
+body{ overflow:hidden; }
+.wrap{
+  width:100%;
+  min-height:100vh;
+  padding:0 0 48px;          /* Abstand zum unteren Bildrand */
+  display:flex;
+  align-items:flex-end;      /* Box nach unten */
+  justify-content:center;    /* Box horizontal mittig */
+}
+.card{
+  width:min(1100px, 92vw);   /* präsente Breite auf 1080p, zentriert */
+  max-width:none;
+}

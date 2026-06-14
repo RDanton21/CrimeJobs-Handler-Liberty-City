@@ -584,7 +584,7 @@ async def bulk_send(
             try:
                 async with httpx.AsyncClient(timeout=60.0) as cli:
                     r = await cli.post(
-                        "http://127.0.0.1:8001/send", json={"mission_id": m.id}
+                        f"{settings.bot_api_url}/send", json={"mission_id": m.id}
                     )
                 if r.status_code >= 400:
                     return {
@@ -983,7 +983,7 @@ async def post_ranking_to_discord(
             try:
                 async with httpx.AsyncClient(timeout=10.0) as cli:
                     await cli.post(
-                        "http://127.0.0.1:8001/delete_message",
+                        f"{settings.bot_api_url}/delete_message",
                         json={"channel_id": payload.channel_id, "message_id": prev_msg_id},
                     )
             except Exception:
@@ -996,7 +996,7 @@ async def post_ranking_to_discord(
 
     try:
         async with httpx.AsyncClient(timeout=15.0) as cli:
-            r = await cli.post("http://127.0.0.1:8001/send_embed", json=body)
+            r = await cli.post(f"{settings.bot_api_url}/send_embed", json=body)
     except Exception as exc:
         raise HTTPException(503, f"Bot nicht erreichbar: {exc}") from exc
 
@@ -1197,7 +1197,7 @@ async def send_to_discord(mission_id: int, session: AsyncSession = Depends(get_s
 
     async with httpx.AsyncClient(timeout=60.0) as cli:
         try:
-            r = await cli.post("http://127.0.0.1:8001/send", json={"mission_id": mission_id})
+            r = await cli.post(f"{settings.bot_api_url}/send", json={"mission_id": mission_id})
         except Exception as exc:
             raise HTTPException(503, f"Discord-Bot nicht erreichbar: {exc}") from exc
     if r.status_code >= 400:
@@ -1371,7 +1371,7 @@ async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_s
         try:
             async with httpx.AsyncClient(timeout=15.0) as cli:
                 r = await cli.post(
-                    "http://127.0.0.1:8001/read_channel",
+                    f"{settings.bot_api_url}/read_channel",
                     json={
                         "channel_id": crew.info_channel_id,
                         "after_iso": m.sent_at.isoformat(),
@@ -1418,7 +1418,7 @@ async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_s
         try:
             async with httpx.AsyncClient(timeout=30.0) as cli:
                 await cli.post(
-                    "http://127.0.0.1:8001/delete_in_range",
+                    f"{settings.bot_api_url}/delete_in_range",
                     json={
                         "channel_id": crew.info_channel_id,
                         "after_iso": m.sent_at.isoformat(),
@@ -1434,7 +1434,7 @@ async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_s
             try:
                 async with httpx.AsyncClient(timeout=15.0) as cli:
                     await cli.post(
-                        "http://127.0.0.1:8001/delete_message",
+                        f"{settings.bot_api_url}/delete_message",
                         json={
                             "channel_id": m.discord_channel_id,
                             "message_id": msg_id,
@@ -1452,7 +1452,7 @@ async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_s
             try:
                 async with httpx.AsyncClient(timeout=15.0) as cli:
                     await cli.post(
-                        "http://127.0.0.1:8001/delete_message",
+                        f"{settings.bot_api_url}/delete_message",
                         json={
                             "channel_id": personnel_channel,
                             "message_id": m.personnel_discord_message_id,
@@ -1497,7 +1497,7 @@ async def purge_mission(mission_id: int, session: AsyncSession = Depends(get_ses
             try:
                 async with httpx.AsyncClient(timeout=10.0) as cli:
                     await cli.post(
-                        "http://127.0.0.1:8001/delete_message",
+                        f"{settings.bot_api_url}/delete_message",
                         json={
                             "channel_id": personnel_channel,
                             "message_id": m.personnel_discord_message_id,

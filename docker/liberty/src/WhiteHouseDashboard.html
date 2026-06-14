@@ -1,0 +1,1156 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Liberty City • White House Dashboard</title>
+  <style>
+    :root{
+      --bg:#0b0f17;
+      --panel:#101826;
+      --panel2:#0e1522;
+      --text:#e7eefc;
+      --muted:#aab7d2;
+      --accent:#e94560;
+      --line:#22304a;
+      --ok:#43d17a;
+      --warn:#f4c152;
+      --bad:#ff5c6c;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background: radial-gradient(1200px 700px at 20% 0%, #15213a 0%, var(--bg) 60%),
+                  radial-gradient(900px 500px at 90% 20%, #2a1631 0%, var(--bg) 60%);
+      color:var(--text);
+    }
+    header{
+      padding:18px 18px 10px 18px;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      position:sticky; top:0; z-index:10;
+      background: linear-gradient(180deg, rgba(11,15,23,0.92), rgba(11,15,23,0.70));
+      backdrop-filter: blur(8px);
+    }
+    .row{display:flex; gap:14px; align-items:center; flex-wrap:wrap}
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:800; letter-spacing:0.4px;
+    }
+    .badge{
+      font-size:12px; padding:4px 9px; border-radius:999px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+    }
+    .badge.accent{border-color:rgba(233,69,96,0.55); color:#ffd6dc; background:rgba(233,69,96,0.14)}
+    .spacer{flex:1}
+    .statusDot{
+      width:10px; height:10px; border-radius:50%;
+      background: var(--warn);
+      box-shadow:0 0 0 3px rgba(244,193,82,0.20);
+      display:inline-block; vertical-align:middle; margin-right:8px;
+    }
+    .mono{font-family:var(--mono)}
+    .muted{color:var(--muted)}
+    main{padding:16px 18px 28px 18px}
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap:14px;
+    }
+    @media(max-width: 980px){
+      .grid{grid-template-columns:1fr}
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(16,24,38,0.90), rgba(10,16,28,0.85));
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:18px;
+      padding:14px 14px 12px 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .card h2{
+      margin:0 0 10px 0;
+      font-size:14px; font-weight:800;
+      letter-spacing:0.35px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      color:#f3f6ff;
+    }
+    .pill{
+      font-size:12px;
+      padding:4px 9px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.10);
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .controls{
+      display:grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    @media(max-width: 980px){
+      .controls{grid-template-columns:1fr 1fr}
+    }
+    .ctl label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px}
+    input, select, button{
+      width:100%;
+      box-sizing:border-box;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      padding:10px 10px;
+      outline:none;
+    }
+    /* Aufgeklapptes Dropdown: deckende dunkle Flaeche, sonst hellgrau auf weiss */
+    select option{
+      background:#11161f;
+      color:#e7eefc;
+    }
+    button{
+      cursor:pointer;
+      font-weight:700;
+      background: rgba(233,69,96,0.16);
+      border-color: rgba(233,69,96,0.50);
+    }
+    button:hover{background: rgba(233,69,96,0.22)}
+    .hint{font-size:12px; color:var(--muted); margin-top:6px; line-height:1.35}
+    .kpiGrid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+    @media(max-width: 980px){
+      .kpiGrid{grid-template-columns: repeat(2, 1fr)}
+    }
+    .metric{
+      background: rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px;
+      padding:12px 12px 10px 12px;
+    }
+    .metric .k{font-size:12px; color:var(--muted); margin-bottom:6px}
+    .metric .v{font-size:20px; font-weight:900; letter-spacing:0.2px}
+    .metric .s{font-size:12px; color:var(--muted); margin-top:3px}
+    .progress{
+      margin-top:12px;
+      border-radius:16px;
+      padding:12px;
+      background: rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .bar{
+      width:100%;
+      height:14px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.06);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(233,69,96,0.9), rgba(255,214,220,0.75));
+    }
+    .barMeta{
+      display:flex; justify-content:space-between; align-items:center;
+      margin-top:8px; font-size:12px; color:var(--muted);
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.08);
+      margin-top:10px;
+    }
+    th, td{
+      padding:10px 10px;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      font-size:12px;
+      vertical-align:top;
+    }
+    th{color:#f3f6ff; text-align:left; background: rgba(255,255,255,0.03); font-weight:800}
+    tr:last-child td{border-bottom:none}
+    .right{text-align:right}
+    .timeline{
+      max-height:360px; overflow:auto;
+      border-radius:14px; border:1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.08);
+      margin-top:10px;
+    }
+    .evt{
+      padding:10px 10px;
+      border-bottom:1px solid rgba(255,255,255,0.06);
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .evt:last-child{border-bottom:none}
+    .chip{
+      padding:4px 9px;
+      border-radius:999px;
+      font-size:12px;
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .chip.kofi{border-color: rgba(233,69,96,0.55); background: rgba(233,69,96,0.13); color:#ffd6dc}
+    .chip.tebex{border-color: rgba(245,158,11,0.55); background: rgba(245,158,11,0.13); color:#fde68a}
+    .chip.sub{border-color: rgba(255,255,255,0.18)}
+    .chip.bits{border-color: rgba(118,199,255,0.45); background: rgba(118,199,255,0.12); color:#d7f2ff}
+    .evtMain{flex:1}
+    .evtTitle{font-weight:900; font-size:13px}
+    .evtMeta{font-size:12px; color:var(--muted); margin-top:4px; line-height:1.35}
+    .logBox{
+      font-family:var(--mono);
+      font-size:12px;
+      white-space:pre-wrap;
+      background: rgba(0,0,0,0.20);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:14px;
+      padding:10px;
+      max-height:260px; overflow:auto;
+      margin-top:10px;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="row">
+    <div class="brand">
+      <span class="badge accent">🗽 Liberty City</span>
+      <span>White House Dashboard</span>
+      <span class="badge">Level 5 Clearance</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="badge">
+      <span class="statusDot" id="statusDot"></span>
+      <span id="statusText">Initialisiere…</span>
+    </div>
+    <div class="badge mono" id="clock">—</div>
+
+    <div class="badge" style="min-width:260px; flex:0 0 auto">
+      <div style="font-size:11px; color:var(--muted); margin-bottom:6px">Fortschritt (Netto)</div>
+      <div class="bar" style="height:10px"><div id="headerProgress"></div></div>
+      <div style="display:flex; justify-content:space-between; gap:8px; margin-top:6px; font-size:11px; color:var(--muted)">
+        <span class="mono" id="headerProgressLeft">—</span>
+        <span class="mono" id="headerProgressRight">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="ctl">
+      <label>API Base</label>
+      <input id="apiBase" value="" placeholder="leer lassen = automatisch" />
+      <div class="hint">Automatisch erkannt, falls leer. APIs: <span class="mono">/stats</span>, <span class="mono">/cases</span>.</div>
+    </div>
+
+    <div class="ctl">
+      <label>Auto-Refresh</label>
+      <select id="refreshEvery">
+        <option value="0" selected>Aus</option>
+        <option value="5">Alle 5 Sekunden</option>
+        <option value="10">Alle 10 Sekunden</option>
+        <option value="30">Alle 30 Sekunden</option>
+        <option value="300">Alle 5 Minuten</option>
+        <option value="600">Alle 10 Minuten</option>
+        <option value="1800">Alle 30 Minuten</option>
+        <option value="3600">Alle 1 Stunde</option>
+      </select>
+      <div class="hint">Tipp: 5–10 Minuten für Admin-Screens.</div>
+    </div>
+
+    <div class="ctl">
+      <label>Ziel (Goal) in €</label>
+      <input id="goalInput" value="2650" />
+      <div class="hint">Setzt das echte Goal zentral (admin_config.json) — gilt überall.</div>
+    </div>
+
+    <div class="ctl">
+      <label>Filter</label>
+      <select id="filter">
+        <option value="all" selected>Alles</option>
+        <option value="kofi">Ko-fi</option>
+        <option value="tebex">Tebex</option>
+        <option value="subs">Twitch Subs</option>
+        <option value="bits">Twitch Bits</option>
+      </select>
+      <div class="hint">Filter wirkt auf Timeline/Tag/Woche/Monat (nicht auf Top-Listen).</div>
+    </div>
+
+    <div class="ctl">
+      <label>Top-Zeitraum</label>
+      <select id="topRange">
+        <option value="all" selected>Gesamt (geladen)</option>
+        <option value="today">Heute (UTC)</option>
+        <option value="week">Diese Woche (ISO, UTC)</option>
+        <option value="month">Dieser Monat (UTC)</option>
+      </select>
+      <div class="hint">Beeinflusst nur die Top-Listen.</div>
+    </div>
+
+    <div class="ctl">
+      <label>Cases Limit</label>
+      <select id="limit">
+        <option value="100">100</option>
+        <option value="200" selected>200</option>
+        <option value="500">500</option>
+        <option value="1000">1000</option>
+        <option value="2000">2000</option>
+      </select>
+      <div class="hint">Für „Top overall“: 1000–2000.</div>
+    </div>
+
+    <div class="ctl">
+      <label>Aktion</label>
+      <button id="btnRefresh">Jetzt aktualisieren</button>
+      <div class="hint">Bei „Failed to fetch“: API Base prüfen oder Dashboard über <span class="mono">/dashboard</span> öffnen.</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="grid">
+    <!-- LEFT: KPIs + Timeline -->
+    <section class="card">
+      <h2>
+        Übersicht
+        <span class="pill mono" id="lastUpdated">—</span>
+      </h2>
+
+      <div class="kpiGrid">
+        <div class="metric">
+          <div class="k">Ko-fi (Brutto / Netto)</div>
+          <div class="v mono" id="kofiNet">—</div>
+          <div class="s mono" id="kofiGross">—</div>
+        </div>
+        <div class="metric">
+          <div class="k">Tebex (Brutto / Netto)</div>
+          <div class="v mono" id="tebexNet">—</div>
+          <div class="s mono" id="tebexGross">—</div>
+        </div>
+        <div class="metric">
+          <div class="k">Subs (Brutto / Netto)</div>
+          <div class="v mono" id="subsNet">—</div>
+          <div class="s mono" id="subsGross">—</div>
+        </div>
+        <div class="metric">
+          <div class="k">Gifted Subs</div>
+          <div class="v mono" id="giftCount">—</div>
+          <div class="s muted">Zähler aus Stats</div>
+        </div>
+        <div class="metric">
+          <div class="k">Bits (Wert)</div>
+          <div class="v mono" id="bitsValue">—</div>
+          <div class="s mono" id="bitsCount">—</div>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="k muted">Fortschritt (Netto gesamt)</div>
+        <div class="bar"><div id="barFill"></div></div>
+        <div class="barMeta">
+          <span class="mono" id="nettoTotal">—</span>
+          <span class="mono" id="goalText">—</span>
+        </div>
+      </div>
+
+      <h2 style="margin-top:14px">
+        Zeitachse (neueste Events)
+        <span class="pill mono" id="caseRange">—</span>
+      </h2>
+      <div class="timeline" id="timeline">
+        <div class="evt"><div class="evtMain muted">Keine Daten geladen.</div></div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Daily/Weekly/Monthly + Tops + Debug -->
+    <section class="card">
+      <h2>
+        Summen pro Tag (Netto)
+        <span class="pill mono" id="dayRange">—</span>
+      </h2>
+      <div class="hint">Aggregation auf Tages-/Wochen-/Monatsbasis (UTC) aus <span class="mono">/cases</span>.</div>
+
+      <div style="max-height:260px; overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Tag (UTC)</th>
+              <th class="right">Ko-fi</th>
+              <th class="right">Tebex</th>
+              <th class="right">Subs</th>
+              <th class="right">Bits</th>
+              <th class="right">Gesamt</th>
+            </tr>
+          </thead>
+          <tbody id="dailyBody">
+            <tr><td colspan="6" class="muted">Keine Daten geladen.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:12px; display:grid; grid-template-columns:1fr; gap:12px">
+        <div>
+          <h2 style="margin-top:0">
+            Summen pro Woche (Netto)
+            <span class="pill mono" id="weekRange">—</span>
+          </h2>
+          <div style="max-height:220px; overflow:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Woche (ISO, UTC)</th>
+                  <th class="right">Ko-fi</th>
+                  <th class="right">Tebex</th>
+                  <th class="right">Subs</th>
+                  <th class="right">Bits</th>
+                  <th class="right">Gesamt</th>
+                </tr>
+              </thead>
+              <tbody id="weeklyBody">
+                <tr><td colspan="6" class="muted">Keine Daten geladen.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <h2 style="margin-top:0">
+            Summen pro Monat (Netto)
+            <span class="pill mono" id="monthRange">—</span>
+          </h2>
+          <div style="max-height:220px; overflow:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>Monat (UTC)</th>
+                  <th class="right">Ko-fi</th>
+                  <th class="right">Tebex</th>
+                  <th class="right">Subs</th>
+                  <th class="right">Bits</th>
+                  <th class="right">Gesamt</th>
+                </tr>
+              </thead>
+              <tbody id="monthlyBody">
+                <tr><td colspan="6" class="muted">Keine Daten geladen.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="metric" style="margin-top:12px">
+        <div class="k">Top-Listen (aus /cases)</div>
+        <div class="hint">Top Donator (Ko-fi + Tebex), Top Cheerer (Bits), Top Gifter (Gift Subs) – berechnet aus geladenen Cases und dem ausgewählten <span class="mono">Top-Zeitraum</span>.</div>
+
+        <div style="display:grid; grid-template-columns:1fr; gap:10px; margin-top:10px">
+          <table>
+            <thead>
+              <tr>
+                <th>Top Donator</th>
+                <th class="right">Netto</th>
+              </tr>
+            </thead>
+            <tbody id="topDonatorBody">
+              <tr><td colspan="2" class="muted">Keine Daten.</td></tr>
+            </tbody>
+          </table>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Top Cheerer</th>
+                <th class="right">Bits</th>
+                <th class="right">Wert</th>
+              </tr>
+            </thead>
+            <tbody id="topCheererBody">
+              <tr><td colspan="3" class="muted">Keine Daten.</td></tr>
+            </tbody>
+          </table>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Top Gifter</th>
+                <th class="right">Gift Subs</th>
+                <th class="right">Netto</th>
+              </tr>
+            </thead>
+            <tbody id="topGifterBody">
+              <tr><td colspan="3" class="muted">Keine Daten.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h2 style="margin-top:12px">
+        Rohdaten & Diagnose
+        <span class="pill">Debug</span>
+      </h2>
+      <div class="hint">Wenn du das Dashboard per Doppelklick öffnest, brauchst du CORS. Einfacher: über <span class="mono">http://127.0.0.1:8080/dashboard</span> öffnen.</div>
+      <div class="logBox" id="logBox">[boot] ready</div>
+    </section>
+  </div>
+
+  <section class="card" id="lbCard" style="margin-top:14px">
+    <h2>
+      Top Donatoren
+      <span>
+        <button type="button" id="lbTabAll" class="pill" data-scope="all">All-Time</button>
+        <button type="button" id="lbTabCurrent" class="pill" data-scope="current">Current Stream</button>
+      </span>
+    </h2>
+    <div id="lbBody">
+      <div class="muted">Lade…</div>
+    </div>
+  </section>
+</main>
+
+<script>
+  // =========
+  // Helpers
+  // =========
+  const $ = (id) => document.getElementById(id);
+  const fmtEur = (n) => (Number(n||0)).toFixed(2) + " €";
+  const safe = (n) => {
+    const x = Number(n);
+    return Number.isFinite(x) ? x : 0;
+  };
+
+  const GOAL_KEY = "lc_dashboard_goal_eur";
+
+  function getGoal(){
+    const v = ($("goalInput") && $("goalInput").value) ? $("goalInput").value.trim() : "";
+    const n = parseFloat(v || (localStorage.getItem(GOAL_KEY) || "2650"));
+    return Number.isFinite(n) && n > 0 ? n : 2650;
+  }
+
+  function setGoalUI(n){
+    const val = (Number.isFinite(n) && n > 0) ? String(n) : "2650";
+    if ($("goalInput")) $("goalInput").value = val;
+    localStorage.setItem(GOAL_KEY, val);
+  }
+
+  function setStatus(kind, msg){
+    const dot = $("statusDot");
+    const txt = $("statusText");
+    if (kind === "ok"){
+      dot.style.background = "var(--ok)";
+      dot.style.boxShadow = "0 0 0 3px rgba(67,209,122,0.20)";
+      txt.textContent = msg || "OK";
+    } else if (kind === "bad"){
+      dot.style.background = "var(--bad)";
+      dot.style.boxShadow = "0 0 0 3px rgba(255,92,108,0.20)";
+      txt.textContent = msg || "Fehler";
+    } else {
+      dot.style.background = "var(--warn)";
+      dot.style.boxShadow = "0 0 0 3px rgba(244,193,82,0.20)";
+      txt.textContent = msg || "Warnung";
+    }
+  }
+
+  function log(line){
+    const box = $("logBox");
+    const ts = new Date().toISOString().replace("T"," ").replace("Z","");
+    box.textContent = `[${ts}] ${line}\n` + box.textContent;
+  }
+
+  function nowClock(){
+    const d = new Date();
+    $("clock").textContent = d.toLocaleString();
+  }
+  setInterval(nowClock, 1000);
+  nowClock();
+
+  function isoWeekKey(isoTs){
+    // Returns "YYYY-Www" for UTC timestamp
+    try{
+      const d = new Date(isoTs);
+      let year = d.getUTCFullYear();
+      let month = d.getUTCMonth();
+      let date = d.getUTCDate();
+      const utcDate = new Date(Date.UTC(year, month, date));
+      const dayNum = utcDate.getUTCDay() || 7; // Mon=1..Sun=7
+      utcDate.setUTCDate(utcDate.getUTCDate() + 4 - dayNum);
+      const isoYear = utcDate.getUTCFullYear();
+      const yearStart = new Date(Date.UTC(isoYear,0,1));
+      const weekNo = Math.ceil((((utcDate - yearStart) / 86400000) + 1) / 7);
+      const ww = String(weekNo).padStart(2,'0');
+      return isoYear + "-W" + ww;
+    }catch(e){
+      return "unknown";
+    }
+  }
+
+  function dayKeyUTC(isoTs){
+    try{ return String(isoTs||"").slice(0,10); }catch(e){ return "unknown"; }
+  }
+
+  function monthKey(isoTs){
+    try{ return String(isoTs||"").slice(0,7); }catch(e){ return "unknown"; }
+  }
+
+  function inTopRange(ev){
+    const r = ($("topRange") && $("topRange").value) ? $("topRange").value : "all";
+    if (r === "all") return true;
+
+    const ts = ev.ts || "";
+    const now = new Date();
+    const today = now.toISOString().slice(0,10); // UTC
+    if (r === "today"){
+      return dayKeyUTC(ts) === today;
+    }
+    if (r === "month"){
+      const cur = now.toISOString().slice(0,7); // YYYY-MM UTC
+      return monthKey(ts) === cur;
+    }
+    if (r === "week"){
+      const cur = isoWeekKey(now.toISOString());
+      return isoWeekKey(ts) === cur;
+    }
+    return true;
+  }
+
+  // =========
+  // API base autodetect
+  // =========
+  async function detectApiBase(){
+    // Dashboard + API (/stats, /cases) kommen vom selben Server -> selbe Origin.
+    const manual = ($("apiBase").value || "").trim();
+    if (manual) return manual.replace(/\/+$/,"");
+    let base = (location && location.origin && location.origin.startsWith("http"))
+               ? location.origin : "http://127.0.0.1:5000";
+    base = base.replace(/\/+$/,"");
+    log("API: " + base);
+    return base;
+  }
+
+  // =========
+  // Render
+  // =========
+  let _goalSynced = false;
+  function renderStats(s){
+    // Server-Goal nur beim ersten Laden ins Feld — danach bleibt die Eingabe stehen
+    if (!_goalSynced && s && Number(s.goal) > 0){
+      setGoalUI(Number(s.goal));
+      _goalSynced = true;
+    }
+    $("kofiNet").textContent = fmtEur(safe(s.kofi_netto_eur));
+    $("kofiGross").textContent = fmtEur(safe(s.kofi_brutto_eur)) + " brutto";
+
+    $("tebexNet").textContent = fmtEur(safe(s.tebex_netto_eur));
+    $("tebexGross").textContent = fmtEur(safe(s.tebex_brutto_eur)) + " brutto";
+
+    $("subsNet").textContent = fmtEur(safe(s.subs_netto_eur));
+    $("subsGross").textContent = fmtEur(safe(s.subs_brutto_eur)) + " brutto";
+
+    $("giftCount").textContent = String(Math.trunc(safe(s.gifted_subs_total)));
+    $("bitsValue").textContent = fmtEur(safe(s.bits_value_eur));
+    $("bitsCount").textContent = String(Math.trunc(safe(s.bits_total))) + " Bits";
+  }
+
+  function renderProgress(s){
+    const netto = safe(s.kofi_netto_eur) + safe(s.tebex_netto_eur) + safe(s.subs_netto_eur) + safe(s.bits_value_eur);
+    const goal = getGoal();
+    const pct = goal > 0 ? Math.max(0, Math.min(1, netto/goal)) : 0;
+    $("barFill").style.width = (pct*100).toFixed(1) + "%";
+    $("nettoTotal").textContent = "Netto gesamt: " + fmtEur(netto);
+    $("goalText").textContent = "Goal: " + fmtEur(goal) + " (" + Math.round(pct*100) + "%)";
+    // Header progress
+    const hp = $("headerProgress");
+    if (hp) hp.style.width = (pct*100).toFixed(1) + "%";
+    const hl = $("headerProgressLeft");
+    const hr = $("headerProgressRight");
+    if (hl) hl.textContent = fmtEur(netto);
+    if (hr) hr.textContent = "Goal " + fmtEur(goal) + " • " + Math.round(pct*100) + "%";
+  }
+
+  function typeChip(ev){
+    if (ev.type === "kofi") return '<span class="chip kofi">Ko-fi</span>';
+    if (ev.type === "tebex") return '<span class="chip tebex">Tebex</span>';
+    if (ev.type === "twitch_sub" || ev.type === "twitch_gift") return '<span class="chip sub">Subs</span>';
+    if (ev.type === "twitch_cheer") return '<span class="chip bits">Bits</span>';
+    return '<span class="chip">Event</span>';
+  }
+
+  function passesFilter(ev){
+    const f = $("filter").value;
+    if (f === "all") return true;
+    if (f === "kofi") return ev.type === "kofi";
+    if (f === "tebex") return ev.type === "tebex";
+    if (f === "subs") return ev.type === "twitch_sub" || ev.type === "twitch_gift";
+    if (f === "bits") return ev.type === "twitch_cheer";
+    return true;
+  }
+
+  function renderTimeline(cases){
+    const box = $("timeline");
+    box.innerHTML = "";
+    if (!cases.length){
+      box.innerHTML = '<div class="evt"><div class="evtMain muted">Keine Events (Filter/Limit prüfen).</div></div>';
+      $("caseRange").textContent = "—";
+      return;
+    }
+    const minTs = cases[cases.length-1].ts || "";
+    const maxTs = cases[0].ts || "";
+    $("caseRange").textContent = (minTs && maxTs) ? (String(minTs).slice(0,19) + " → " + String(maxTs).slice(0,19)) : "—";
+
+    for (const ev of cases.slice(0, 200)){
+      const d = ev.data || {};
+      let title = ev.type;
+      let meta = [];
+      if (ev.type === "kofi"){
+        title = "Ko-fi Donation";
+        meta.push("Donator: " + (d.from_name || "Unbekannt"));
+        meta.push("Netto: " + fmtEur(d.amount_netto_eur));
+      } else if (ev.type === "tebex"){
+        title = "Tebex-Shop-Kauf";
+        meta.push("Käufer: " + (d.player_name || d.from_name || "Unbekannt"));
+        meta.push("Netto: " + fmtEur(d.amount_netto_eur));
+      } else if (ev.type === "twitch_sub"){
+        title = "Twitch Sub";
+        meta.push("User: " + (d.user_name || "Unbekannt"));
+        meta.push("Tier: " + (d.tier_label || d.tier || "?"));
+        meta.push("Netto: " + fmtEur(d.amount_netto_eur));
+      } else if (ev.type === "twitch_gift"){
+        title = "Twitch Gift Subs";
+        meta.push("Gifter: " + (d.gifter || "Anonym"));
+        meta.push("Anzahl: " + (d.total ?? 1));
+        meta.push("Tier: " + (d.tier_label || d.tier || "?"));
+        meta.push("Netto: " + fmtEur(d.amount_netto_eur));
+      } else if (ev.type === "twitch_cheer"){
+        title = "Twitch Bits";
+        meta.push("User: " + (d.user_name || "Unbekannt"));
+        meta.push("Bits: " + (d.bits ?? 0));
+        meta.push("Wert: " + fmtEur(d.value_eur));
+        if (d.message) meta.push("Msg: " + d.message);
+      }
+      const ts = String(ev.ts || "").replace("T"," ").replace("Z","");
+      const el = document.createElement("div");
+      el.className = "evt";
+      el.innerHTML = `
+        ${typeChip(ev)}
+        <div class="evtMain">
+          <div class="evtTitle">${title}</div>
+          <div class="evtMeta muted"><span class="mono">${ts.slice(0,19)}</span><br>${meta.map(x=>escapeHtml(x)).join("<br>")}</div>
+        </div>
+      `;
+      box.appendChild(el);
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s||"").replace(/[&<>"']/g, (c) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  function sumByDay(cases){
+    const m = new Map();
+    let minK=null, maxK=null;
+    for (const ev of cases){
+      const k = dayKeyUTC(ev.ts);
+      if (!minK || k < minK) minK = k;
+      if (!maxK || k > maxK) maxK = k;
+      if (!m.has(k)) m.set(k, {kofi:0, tebex:0, subs:0, bits:0});
+      const a = m.get(k);
+      const t = ev.type;
+      const d = ev.data || {};
+      if (t === "kofi") a.kofi += safe(d.amount_netto_eur);
+      else if (t === "tebex") a.tebex += safe(d.amount_netto_eur);
+      else if (t === "twitch_sub" || t === "twitch_gift") a.subs += safe(d.amount_netto_eur);
+      else if (t === "twitch_cheer") a.bits += safe(d.value_eur);
+    }
+    return {m, minK, maxK};
+  }
+
+  function renderDaily(cases){
+    const {m, minK, maxK} = sumByDay(cases);
+    const keys = Array.from(m.keys()).sort().reverse();
+    $("dayRange").textContent = (minK && maxK) ? (minK + " → " + maxK) : "—";
+    const body = $("dailyBody");
+    body.innerHTML = "";
+    if (!keys.length){
+      body.innerHTML = '<tr><td colspan="6" class="muted">Keine Tagesdaten (Filter/Limit prüfen).</td></tr>';
+      return;
+    }
+    for (const k of keys){
+      const a = m.get(k);
+      const total = a.kofi + a.tebex + a.subs + a.bits;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="mono">${k}</td>
+        <td class="right mono">${fmtEur(a.kofi)}</td>
+        <td class="right mono">${fmtEur(a.tebex)}</td>
+        <td class="right mono">${fmtEur(a.subs)}</td>
+        <td class="right mono">${fmtEur(a.bits)}</td>
+        <td class="right mono"><strong>${fmtEur(total)}</strong></td>
+      `;
+      body.appendChild(tr);
+    }
+  }
+
+  function renderWeekly(cases){
+    const byWeek = new Map();
+    let minKey=null, maxKey=null;
+    for (const ev of cases){
+      const key = isoWeekKey(ev.ts);
+      if (!minKey || key < minKey) minKey = key;
+      if (!maxKey || key > maxKey) maxKey = key;
+      if (!byWeek.has(key)) byWeek.set(key, {kofi:0, tebex:0, subs:0, bits:0});
+      const agg = byWeek.get(key);
+      const t = ev.type;
+      const d = ev.data || {};
+      if (t === "kofi") agg.kofi += safe(d.amount_netto_eur);
+      else if (t === "tebex") agg.tebex += safe(d.amount_netto_eur);
+      else if (t === "twitch_sub" || t === "twitch_gift") agg.subs += safe(d.amount_netto_eur);
+      else if (t === "twitch_cheer") agg.bits += safe(d.value_eur);
+    }
+    const keys = Array.from(byWeek.keys()).sort().reverse();
+    $("weekRange").textContent = (minKey && maxKey) ? (minKey + " → " + maxKey) : "—";
+    const body = $("weeklyBody");
+    body.innerHTML = "";
+    if (!keys.length){
+      body.innerHTML = '<tr><td colspan="6" class="muted">Keine Wochendaten (Filter/Limit prüfen).</td></tr>';
+      return;
+    }
+    for (const k of keys){
+      const a = byWeek.get(k);
+      const total = a.kofi + a.tebex + a.subs + a.bits;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="mono">${k}</td>
+        <td class="right mono">${fmtEur(a.kofi)}</td>
+        <td class="right mono">${fmtEur(a.tebex)}</td>
+        <td class="right mono">${fmtEur(a.subs)}</td>
+        <td class="right mono">${fmtEur(a.bits)}</td>
+        <td class="right mono"><strong>${fmtEur(total)}</strong></td>
+      `;
+      body.appendChild(tr);
+    }
+  }
+
+  function renderMonthly(cases){
+    const byMonth = new Map();
+    let minKey=null, maxKey=null;
+    for (const ev of cases){
+      const key = monthKey(ev.ts);
+      if (!minKey || key < minKey) minKey = key;
+      if (!maxKey || key > maxKey) maxKey = key;
+      if (!byMonth.has(key)) byMonth.set(key, {kofi:0, tebex:0, subs:0, bits:0});
+      const agg = byMonth.get(key);
+      const t = ev.type;
+      const d = ev.data || {};
+      if (t === "kofi") agg.kofi += safe(d.amount_netto_eur);
+      else if (t === "tebex") agg.tebex += safe(d.amount_netto_eur);
+      else if (t === "twitch_sub" || t === "twitch_gift") agg.subs += safe(d.amount_netto_eur);
+      else if (t === "twitch_cheer") agg.bits += safe(d.value_eur);
+    }
+    const keys = Array.from(byMonth.keys()).sort().reverse();
+    $("monthRange").textContent = (minKey && maxKey) ? (minKey + " → " + maxKey) : "—";
+    const body = $("monthlyBody");
+    body.innerHTML = "";
+    if (!keys.length){
+      body.innerHTML = '<tr><td colspan="6" class="muted">Keine Monatsdaten (Filter/Limit prüfen).</td></tr>';
+      return;
+    }
+    for (const k of keys){
+      const a = byMonth.get(k);
+      const total = a.kofi + a.tebex + a.subs + a.bits;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="mono">${k}</td>
+        <td class="right mono">${fmtEur(a.kofi)}</td>
+        <td class="right mono">${fmtEur(a.tebex)}</td>
+        <td class="right mono">${fmtEur(a.subs)}</td>
+        <td class="right mono">${fmtEur(a.bits)}</td>
+        <td class="right mono"><strong>${fmtEur(total)}</strong></td>
+      `;
+      body.appendChild(tr);
+    }
+  }
+
+  function renderTopLists(cases){
+    const don = new Map(); // name -> netto
+    const cheer = new Map(); // name -> {bits, value}
+    const gift = new Map(); // name -> {subs, netto}
+
+    for (const ev of cases){
+      if (!inTopRange(ev)) continue;
+      const t = ev.type;
+      const d = ev.data || {};
+      if (t === "kofi"){
+        const name = (d.from_name || "Unbekannt").toString();
+        don.set(name, (don.get(name)||0) + safe(d.amount_netto_eur));
+      }else if (t === "tebex"){
+        const name = (d.player_name || d.from_name || "Unbekannt").toString();
+        don.set(name, (don.get(name)||0) + safe(d.amount_netto_eur));
+      }else if (t === "twitch_cheer"){
+        const name = (d.user_name || "Unbekannt").toString();
+        const cur = cheer.get(name) || {bits:0, value:0};
+        cur.bits += Math.trunc(safe(d.bits));
+        cur.value += safe(d.value_eur);
+        cheer.set(name, cur);
+      }else if (t === "twitch_gift"){
+        const name = (d.gifter || "Anonym").toString();
+        const cur = gift.get(name) || {subs:0, netto:0};
+        cur.subs += Math.trunc(safe(d.total));
+        cur.netto += safe(d.amount_netto_eur);
+        gift.set(name, cur);
+      }
+    }
+
+    function topEntries(map, valueFn){
+      return Array.from(map.entries())
+        .map(([k,v]) => ({k, v}))
+        .sort((a,b) => valueFn(b.v) - valueFn(a.v))
+        .slice(0, 10);
+    }
+
+    const topDon = topEntries(don, (v)=>v);
+    const topCheer = topEntries(cheer, (v)=>v.value);
+    const topGift = topEntries(gift, (v)=>v.netto);
+
+    const dBody = $("topDonatorBody");
+    dBody.innerHTML = "";
+    if (!topDon.length){
+      dBody.innerHTML = '<tr><td colspan="2" class="muted">Keine Daten.</td></tr>';
+    }else{
+      for (const it of topDon){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${escapeHtml(it.k)}</td><td class="right mono"><strong>${fmtEur(it.v)}</strong></td>`;
+        dBody.appendChild(tr);
+      }
+    }
+
+    const cBody = $("topCheererBody");
+    cBody.innerHTML = "";
+    if (!topCheer.length){
+      cBody.innerHTML = '<tr><td colspan="3" class="muted">Keine Daten.</td></tr>';
+    }else{
+      for (const it of topCheer){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${escapeHtml(it.k)}</td><td class="right mono">${it.v.bits}</td><td class="right mono"><strong>${fmtEur(it.v.value)}</strong></td>`;
+        cBody.appendChild(tr);
+      }
+    }
+
+    const gBody = $("topGifterBody");
+    gBody.innerHTML = "";
+    if (!topGift.length){
+      gBody.innerHTML = '<tr><td colspan="3" class="muted">Keine Daten.</td></tr>';
+    }else{
+      for (const it of topGift){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${escapeHtml(it.k)}</td><td class="right mono">${it.v.subs}</td><td class="right mono"><strong>${fmtEur(it.v.netto)}</strong></td>`;
+        gBody.appendChild(tr);
+      }
+    }
+  }
+
+  // =========
+  // Fetch & refresh
+  // =========
+  async function fetchJson(url){
+    const r = await fetch(url, {cache:"no-store"});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+  }
+
+  // ---------------------------------------------------------------
+  // Normalisiert ein case_files.jsonl-Event auf das einheitliche
+  // {type, data, ts}-Format, das die UI durchweg erwartet. Cases haben
+  // historisch zwei Formate: raw ({type, data, ts}) und sanitized
+  // ({source, category, username, amount, created_at}). Ohne diese
+  // Bruecke werden sanitized Eintraege (heute der Normalfall, inkl.
+  // Tebex) sonst gar nicht in den Tabellen/Top-Listen sichtbar.
+  // ---------------------------------------------------------------
+  function normalizeCase(ev){
+    if (!ev) return null;
+    if (ev.type && ev.data) return ev;        // schon raw -> nichts tun
+    const src = (ev.source || "").toUpperCase();
+    const cat = (ev.category || "").toUpperCase();
+    const ts  = ev.created_at || ev.ts || "";
+    const amount = Number(ev.amount) || 0;
+    const username = ev.username || "Unbekannt";
+    let type = "unknown", data = {};
+    if (src === "KOFI"){
+      type = "kofi";
+      data = {from_name: username, amount_netto_eur: amount, amount_brutto_eur: amount};
+    } else if (src === "TEBEX"){
+      type = "tebex";
+      data = {player_name: username, amount_netto_eur: amount, amount_brutto_eur: amount};
+    } else if (src === "TWITCH"){
+      if (cat === "GIFT"){
+        type = "twitch_gift";
+        data = {gifter: username, total: 1, amount_netto_eur: amount, tier_label: "?"};
+      } else if (cat === "BITS"){
+        type = "twitch_cheer";
+        data = {user_name: username, bits: 0, value_eur: amount};
+      } else {
+        type = "twitch_sub";
+        data = {user_name: username, amount_netto_eur: amount, tier_label: "?"};
+      }
+    }
+    return {type, data, ts};
+  }
+
+  async function refreshAll(){
+    try{
+      const base = (await detectApiBase()).replace(/\/+$/,"");
+      const limit = $("limit").value || "200";
+
+      const statsUrl = base + "/stats";
+      const casesUrl = base + "/cases?limit=" + encodeURIComponent(limit);
+
+      const [stats, cases] = await Promise.all([
+        fetchJson(statsUrl),
+        fetchJson(casesUrl),
+      ]);
+
+      renderStats(stats);
+      renderProgress(stats);
+
+      const allCases = (Array.isArray(cases) ? cases : []).map(normalizeCase).filter(Boolean);
+      const filtered = allCases.filter(passesFilter);
+
+      renderTimeline(filtered);
+      renderDaily(filtered);
+      renderWeekly(filtered);
+      renderMonthly(filtered);
+      renderTopLists(allCases);
+
+      $("lastUpdated").textContent = new Date().toLocaleTimeString();
+      setStatus("ok", "Live");
+    }catch(e){
+      setStatus("bad", "Failed to fetch");
+      log(String(e && e.message ? e.message : e));
+    }
+  }
+
+  // =========
+  // Auto refresh timer
+  // =========
+  let timer = null;
+  function startTimer(){
+    if (timer) clearInterval(timer);
+    timer = null;
+    const sec = parseInt($("refreshEvery").value || "0", 10) || 0;
+    if (sec > 0){
+      timer = setInterval(refreshAll, sec*1000);
+      log("Auto-Refresh: " + sec + "s");
+    } else {
+      log("Auto-Refresh: aus");
+    }
+  }
+
+  // =========
+  // Events
+  // =========
+  $("btnRefresh").addEventListener("click", refreshAll);
+  $("refreshEvery").addEventListener("change", startTimer);
+  $("filter").addEventListener("change", refreshAll);
+  $("limit").addEventListener("change", refreshAll);
+  $("apiBase").addEventListener("change", refreshAll);
+  $("topRange").addEventListener("change", refreshAll);
+
+  async function saveGoal(){
+    const n = parseFloat($("goalInput").value || "2650");
+    if (!Number.isFinite(n) || n <= 0){
+      log("Goal ungültig — setze zurück.");
+      setGoalUI(getGoal());
+      return;
+    }
+    setGoalUI(n);
+    try{
+      const base = (await detectApiBase()).replace(/\/+$/,"");
+      const r = await fetch(base + "/goal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ goal: n })
+      });
+      const j = await r.json();
+      if (!r.ok || !j.ok) throw new Error(j.error || ("HTTP " + r.status));
+      log("Goal zentral gespeichert: " + fmtEur(j.goal));
+    }catch(e){
+      log("Goal speichern fehlgeschlagen: " + (e && e.message ? e.message : e));
+    }
+    refreshAll();
+  }
+
+  $("goalInput").addEventListener("change", saveGoal);
+
+  // boot: restore goal, detect API, initial refresh
+  setGoalUI(parseFloat(localStorage.getItem(GOAL_KEY) || "2650"));
+  detectApiBase().then(() => {
+    refreshAll();
+    startTimer();
+  });
+
+  // ---- Leaderboard tab ----
+  let lbScope = "all";
+  const lbFmtEur = (n) => Number(n||0).toLocaleString("de-DE",
+    {minimumFractionDigits:2, maximumFractionDigits:2}) + " €";
+
+  function renderLeaderboard(donors){
+    const body = $("lbBody");
+    if (!donors || donors.length === 0){
+      body.innerHTML = '<div class="muted">Noch keine Spenden in diesem Zeitraum.</div>';
+      return;
+    }
+    const rows = donors.map((d, i) => {
+      const rank = i + 1;
+      const events = d.events > 1 ? ` <span class="muted">(${d.events})</span>` : "";
+      const name = String(d.name || "Anonym").replace(/[<>&]/g,
+        c => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]));
+      return `<tr>
+        <td class="mono" style="padding:6px 8px; opacity:0.7">#${rank}</td>
+        <td style="padding:6px 8px">${name}${events}</td>
+        <td class="mono" style="padding:6px 8px; text-align:right">${lbFmtEur(d.total_eur)}</td>
+      </tr>`;
+    }).join("");
+    body.innerHTML =
+      '<table style="width:100%; border-collapse:collapse"><tbody>' +
+      rows + '</tbody></table>';
+  }
+
+  async function refreshLeaderboard(){
+    try{
+      const r = await fetch(`/api/leaderboard?scope=${lbScope}&limit=20`,
+        {cache:"no-store"});
+      if(!r.ok) throw new Error("HTTP " + r.status);
+      const data = await r.json();
+      renderLeaderboard(data.donors || []);
+    }catch(e){
+      $("lbBody").innerHTML =
+        '<div class="muted">Leaderboard offline.</div>';
+    }
+  }
+
+  function setLbScope(scope){
+    lbScope = scope;
+    $("lbTabAll").style.background = scope === "all"
+      ? "rgba(233,69,96,0.18)" : "rgba(255,255,255,0.05)";
+    $("lbTabCurrent").style.background = scope === "current"
+      ? "rgba(233,69,96,0.18)" : "rgba(255,255,255,0.05)";
+    refreshLeaderboard();
+  }
+
+  $("lbTabAll").addEventListener("click", () => setLbScope("all"));
+  $("lbTabCurrent").addEventListener("click", () => setLbScope("current"));
+  setLbScope("all");
+  setInterval(refreshLeaderboard, 30000);
+</script>
+</body>
+</html>

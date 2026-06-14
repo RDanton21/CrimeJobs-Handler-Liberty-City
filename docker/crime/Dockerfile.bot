@@ -1,0 +1,24 @@
+# =============================================================================
+# Crime Automation — Discord-Bot (eigener Prozess)
+# =============================================================================
+FROM python:3.13-slim
+
+# Minimal-System-Deps für aiohttp + PIL
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r /app/requirements.txt
+
+# Bot teilt sich Backend-Code (Models, DB-Layer)
+COPY backend /app/backend
+
+RUN mkdir -p /app/data/images /app/logs
+
+EXPOSE 8001
+
+CMD ["python", "-m", "backend.bot"]

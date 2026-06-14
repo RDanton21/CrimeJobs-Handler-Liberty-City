@@ -1,0 +1,9 @@
+# Secrets — NIEMALS committen!
+.env
+.env.local
+.env.production
+
+# Volumes-Backups (lokal)
+*.bak
+*.dump
+*.sql
