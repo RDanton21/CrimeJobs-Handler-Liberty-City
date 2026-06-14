@@ -44,6 +44,7 @@ class Crew(Base):
     info_channel_id: Mapped[str] = mapped_column(String(40), default="")
     district: Mapped[str] = mapped_column(String(40), default="")
     color_hex: Mapped[str] = mapped_column(String(7), default="#b91c1c")
+    bonus_points: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     missions: Mapped[list["Mission"]] = relationship(
@@ -109,6 +110,12 @@ class Mission(Base):
     scheduled_send_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     reaction_reply_message_id: Mapped[str] = mapped_column(String(40), default="")
     reaction_reply_text: Mapped[str] = mapped_column(Text, default="")
+    # Admin-internes Personal-Briefing: welche NPCs/Mittler die Mission braucht.
+    # Markdown-Text, sichtbar im Dashboard-Widget & Mission-Detail.
+    personnel_brief: Mapped[str] = mapped_column(Text, default="")
+    personnel_updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    # ID der letzten Discord-Message im Admin-Channel (für Replace-Previous-Pattern)
+    personnel_discord_message_id: Mapped[str] = mapped_column(String(40), default="")
 
     crew: Mapped["Crew"] = relationship(back_populates="missions")
 
@@ -135,6 +142,16 @@ class ReactionMessage(Base):
     """Pool von Sprüchen, die nach jeder Boss-Reaktion (👍/👎/❌) zufällig
     als Reply im Auftrags-Channel gepostet werden."""
     __tablename__ = "reaction_messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
+class Top3TitlePoolMessage(Base):
+    """Pool von Embed-Titeln, die beim täglichen Top-3-Hype-Post zufällig
+    gewählt werden. Fallback: settings.ranking_top3_title wenn Pool leer."""
+    __tablename__ = "top3_title_pool"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     text: Mapped[str] = mapped_column(Text, nullable=False)

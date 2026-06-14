@@ -23,6 +23,7 @@
         <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
         <a href="/archive" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Archiv</a>
         <a href="/lore" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Lore</a>
+        <a href="/story" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Story</a>
         <a href="/ranking" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Ranking</a>
         <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
       </nav>
@@ -55,6 +56,43 @@
           <div class="mt-3 flex gap-2">
             <button @click="saveCrew()" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded">Speichern</button>
             <button @click="deleteCrew()" class="px-4 py-2 bg-red-700 hover:bg-red-600 rounded">Löschen</button>
+          </div>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+          <h2 class="text-lg font-semibold mb-1">🎁 Bonus-Punkte</h2>
+          <p class="text-xs text-zinc-400 mb-3">
+            Manuell vergebene Punkte zusätzlich zu den Mission-Punkten.
+            Wirkt sofort im Ranking. Negativ = Strafe.
+          </p>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="text-xs text-zinc-400">Aktuell:</span>
+            <span class="text-xl font-bold"
+                  :class="(crew.bonus_points || 0) > 0 ? 'text-green-400' : ((crew.bonus_points || 0) < 0 ? 'text-red-400' : 'text-zinc-400')"
+                  x-text="`${(crew.bonus_points || 0) >= 0 ? '+' : ''}${crew.bonus_points || 0} Pkt`"></span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 mb-2">
+            <button @click="adjustBonus(2)"
+                    class="px-3 py-2 bg-green-700 hover:bg-green-600 rounded text-sm font-medium">+2</button>
+            <button @click="adjustBonus(5)"
+                    class="px-3 py-2 bg-green-700 hover:bg-green-600 rounded text-sm font-medium">+5</button>
+            <button @click="adjustBonus(10)"
+                    class="px-3 py-2 bg-green-700 hover:bg-green-600 rounded text-sm font-medium">+10</button>
+            <button @click="adjustBonus(-2)"
+                    class="px-3 py-2 bg-red-800 hover:bg-red-700 rounded text-sm font-medium">−2</button>
+            <button @click="adjustBonus(-5)"
+                    class="px-3 py-2 bg-red-800 hover:bg-red-700 rounded text-sm font-medium">−5</button>
+            <button @click="adjustBonus(-10)"
+                    class="px-3 py-2 bg-red-800 hover:bg-red-700 rounded text-sm font-medium">−10</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="number" x-model.number="bonusFreeValue"
+                   placeholder="frei (z.B. 3)"
+                   class="bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-sm w-24" />
+            <button @click="adjustBonusFree()" :disabled="!bonusFreeValue"
+                    class="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 rounded text-xs">+/− anwenden</button>
+            <button @click="resetBonus()"
+                    class="ml-auto px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 rounded text-xs">↺ Auf 0</button>
           </div>
         </div>
 
@@ -417,6 +455,82 @@
               <div x-show="m.status !== 'draft'" class="whitespace-pre-wrap text-zinc-200 leading-relaxed"
                    x-text="m.content_final || m.content_generated"></div>
 
+              <!-- 🎭 Personal-Bedarf pro Mission (auch für Drafts editierbar) -->
+              <div class="mt-4 pt-3 border-t border-zinc-800">
+                <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                  <h4 class="text-xs font-semibold text-zinc-400">
+                    🎭 Personal-Bedarf
+                    <span x-show="m.personnel_updated_at" class="text-zinc-600 ml-1"
+                          x-text="`(zuletzt: ${formatDate(m.personnel_updated_at)})`"></span>
+                  </h4>
+                  <div class="flex items-center gap-1 flex-wrap">
+                    <button x-show="personnelChannelConfigured && personnelEditingId !== m.id && (m.personnel_brief || '').trim()"
+                            @click="postPersonnelToDiscordCrew(m)"
+                            :disabled="personnelPostingId === m.id"
+                            :title="m.personnel_discord_message_id
+                              ? 'Vorherigen Admin-Post ersetzen mit aktuellem Stand'
+                              : 'In Admin-Channel posten (Spielleitung)'"
+                            class="text-xs px-2 py-1 rounded bg-indigo-700 hover:bg-indigo-600 disabled:opacity-50">
+                      <span x-show="personnelPostingId !== m.id">
+                        <span x-show="m.personnel_discord_message_id">📤 Aktualisieren</span>
+                        <span x-show="!m.personnel_discord_message_id">📤 Posten</span>
+                      </span>
+                      <span x-show="personnelPostingId === m.id">Sende…</span>
+                    </button>
+                    <button x-show="personnelEditingId !== m.id"
+                            @click="startEditPersonnelCrew(m)"
+                            class="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700">
+                      ✎ bearbeiten
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Anzeige-Modus -->
+                <div x-show="personnelEditingId !== m.id">
+                  <div x-show="(m.personnel_brief || '').trim()"
+                       class="text-sm whitespace-pre-wrap text-zinc-200 bg-zinc-950 border border-zinc-800 rounded p-3"
+                       x-text="m.personnel_brief"></div>
+                  <div x-show="!(m.personnel_brief || '').trim()"
+                       class="text-xs text-zinc-500 italic">
+                    — kein Personal definiert. Klicke „✎ bearbeiten" für KI-Vorschlag, Vorlage oder freie Eingabe.
+                  </div>
+                </div>
+
+                <!-- Edit-Modus -->
+                <div x-show="personnelEditingId === m.id" class="space-y-2">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <label class="text-xs text-zinc-400">📋 Vorlage:</label>
+                    <select @change="applyPersonnelTemplateCrew($event.target.value); $event.target.value=''"
+                            class="bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-xs">
+                      <option value="">— wählen —</option>
+                      <template x-for="t in personnelTemplatesCrew" :key="t.id">
+                        <option :value="t.id" x-text="t.label"></option>
+                      </template>
+                    </select>
+                    <button @click="aiSuggestPersonnelCrew(m)" :disabled="personnelAiBusyCrew"
+                            title="KI-Vorschlag passend zum Auftragstext"
+                            class="px-2 py-1 rounded bg-purple-700 hover:bg-purple-600 disabled:opacity-50 text-xs">
+                      <span x-show="!personnelAiBusyCrew">🤖 KI-Vorschlag</span>
+                      <span x-show="personnelAiBusyCrew">KI denkt…</span>
+                    </button>
+                  </div>
+                  <textarea x-model="personnelDraftCrew" rows="8"
+                            placeholder="Mittler: ..."
+                            class="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-sm font-mono"></textarea>
+                  <div class="flex items-center gap-2">
+                    <button @click="savePersonnelCrew(m)" :disabled="personnelSavingCrew"
+                            class="px-3 py-1 rounded bg-green-700 hover:bg-green-600 disabled:opacity-50 text-sm">
+                      <span x-show="!personnelSavingCrew">💾 Speichern</span>
+                      <span x-show="personnelSavingCrew">Speichere…</span>
+                    </button>
+                    <button @click="cancelEditPersonnelCrew()"
+                            class="px-3 py-1 rounded bg-zinc-700 hover:bg-zinc-600 text-sm">
+                      Abbrechen
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <div x-show="bossInfoFor(m).length"
                    class="mt-4 pt-3 border-t border-zinc-800">
                 <h4 class="text-xs font-semibold text-zinc-400 mb-2">
@@ -456,6 +570,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=rewrite9"></script>
 </body>
 </html>

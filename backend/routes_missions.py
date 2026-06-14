@@ -1,6 +1,8 @@
 import asyncio
 import json
-from datetime import datetime, timedelta, timezone
+import random
+import re
+from datetime import date, datetime, timedelta, timezone
 from io import BytesIO
 from pathlib import Path
 from uuid import uuid4
@@ -35,7 +37,135 @@ from .ai import get_provider
 from .auth import require_admin
 from .config import settings
 from .db import get_session
-from .models import Crew, CrewRelation, Mission, MissionStatus, SystemPrompt
+from .models import Crew, CrewRelation, Mission, MissionStatus, SystemPrompt, Top3TitlePoolMessage
+from .personnel_ai import generate_personnel_brief as ai_personnel_brief
+
+
+# Matched z.B. "Vorgang 091-14.", "Vorgang 047-B.", "Vorgang 5/2026.",
+# auch mit Markdown-Quote-Prefix ">" davor und auch wenn direkt mit dem
+# ersten Satz auf derselben Zeile fortgesetzt wird.
+_CASE_NUMBER_PREFIX_RE = re.compile(
+    r"^\s*>?\s*(Vorgang|Akte|Aktenzeichen|Fall)\s*#?\s*[\w\d/\-–]+\.?\s+",
+    re.IGNORECASE,
+)
+
+# Matched am ENDE des Textes Konstruktionen wie
+# "👍 oder 👎.", "👍/👎", "👎 oder 👍 oder ❌."
+# — die KI hängt das als pseudo-Call-to-Action an, obwohl die Reaktionen
+# eh über Discord-Reactions kommen.
+_REACTION_TAIL_RE = re.compile(
+    r"[\s\n]*[👍👎❌](?:[\s/.,·]*(?:oder|or)?[\s/.,·]*[👍👎❌])+\s*[.!]?\s*\Z",
+    re.IGNORECASE,
+)
+
+
+def _strip_case_number_prefix(text: str) -> str:
+    """Entfernt führendes „Vorgang XYZ-XX." aus KI-generierten Texten.
+    Die KI hängt das gerne als Pseudo-Aktennummer dran, obwohl der
+    System-Prompt es nicht verlangt. Sicherheitsnetz, das unabhängig
+    vom aktiven System-Prompt funktioniert."""
+    if not text:
+        return text
+    return _CASE_NUMBER_PREFIX_RE.sub("", text, count=1).lstrip()
+
+
+def _strip_reaction_tail(text: str) -> str:
+    """Entfernt am Ende stehende „👍 oder 👎."-Konstruktionen — die
+    Reaktionen kommen ohnehin über Discord-Emoji-Reactions, der Hinweis
+    im Text ist Lärm."""
+    if not text:
+        return text
+    return _REACTION_TAIL_RE.sub("", text).rstrip()
+
+
+def _clean_ai_output(text: str) -> str:
+    """Kombi: Aktennummer am Anfang + Reaktions-Aufforderung am Ende +
+    ausgeschriebene Zahlen in Ziffern."""
+    return _digitize_german_numbers(
+        _strip_reaction_tail(_strip_case_number_prefix(text))
+    )
+
+
+# Deutsche Zahlwörter → Ziffern. Wird auf jeden KI-Output angewandt, weil
+# die KI gerne literarisch ausschreibt („acht Minuten") auch wenn der
+# System-Prompt es verbietet. Defensive Linie 2.
+def _build_german_number_map() -> dict[str, int]:
+    base = {
+        "zwei": 2, "zwo": 2, "drei": 3, "vier": 4, "fünf": 5,
+        "sechs": 6, "sieben": 7, "acht": 8, "neun": 9,
+        "zehn": 10, "elf": 11, "zwölf": 12,
+        "dreizehn": 13, "vierzehn": 14, "fünfzehn": 15,
+        "sechzehn": 16, "siebzehn": 17, "achtzehn": 18, "neunzehn": 19,
+        "zwanzig": 20, "dreißig": 30, "vierzig": 40, "fünfzig": 50,
+        "sechzig": 60, "siebzig": 70, "achtzig": 80, "neunzig": 90,
+        "hundert": 100, "tausend": 1000,
+    }
+    tens = ["zwanzig", "dreißig", "vierzig", "fünfzig",
+            "sechzig", "siebzig", "achtzig", "neunzig"]
+    ones = ["ein", "zwei", "drei", "vier", "fünf",
+            "sechs", "sieben", "acht", "neun"]
+    # Komposita 21–99 ("einundzwanzig" .. "neunundneunzig")
+    for t_idx, t_word in enumerate(tens, start=2):
+        for o_idx, o_word in enumerate(ones, start=1):
+            base[f"{o_word}und{t_word}"] = t_idx * 10 + o_idx
+    return base
+
+
+_NUM_WORDS = _build_german_number_map()
+# Sortieren nach Länge absteigend — sonst würde z.B. "drei" in
+# "dreiundzwanzig" zuerst greifen und Müll erzeugen.
+_NUM_PATTERN = re.compile(
+    r"\b(" + "|".join(
+        re.escape(w) for w, _ in sorted(_NUM_WORDS.items(),
+                                       key=lambda kv: -len(kv[0]))
+    ) + r")\b",
+    re.IGNORECASE,
+)
+
+
+def _digitize_german_numbers(text: str) -> str:
+    """Wandelt ausgeschriebene deutsche Zahlwörter in Ziffern um.
+    Erkennt 2–99 plus 'hundert'/'tausend'. Lässt 'ein/eine/einen' bewusst
+    in Ruhe (zu hohes Risiko, einen Artikel zu zerstören)."""
+    if not text:
+        return text
+
+    def _replace(m: re.Match) -> str:
+        word_lower = m.group(1).lower()
+        digit = _NUM_WORDS.get(word_lower)
+        return str(digit) if digit is not None else m.group(0)
+
+    return _NUM_PATTERN.sub(_replace, text)
+
+
+async def _resolve_default_provider(session: AsyncSession):
+    """Lädt Default-Provider aus Settings — für Sub-Calls wie Personal-Brief
+    in /manual und /bulk_send, wo der User keinen Provider explizit angibt."""
+    keys = {
+        "anthropic": await settings_get(session, "anthropic_api_key", settings.anthropic_api_key),
+        "openai": await settings_get(session, "openai_api_key", settings.openai_api_key),
+    }
+    models = {
+        "claude": await settings_get(session, "default_claude_model", settings.default_claude_model),
+        "openai": await settings_get(session, "default_openai_model", settings.default_openai_model),
+    }
+    provider_name = await settings_get(session, "default_provider", settings.default_ai_provider)
+    try:
+        return await get_provider(provider_name, keys=keys, models=models)
+    except Exception:
+        return None
+
+
+async def _generate_personnel_safe(session: AsyncSession, mission_text: str,
+                                   crew_name: str, crew_district: str) -> str:
+    """Defensiv: lädt Default-Provider und ruft Personal-AI. Bei jedem
+    Fehler leerer String — Mission soll NICHT blockieren wegen Personal."""
+    if not mission_text or not mission_text.strip():
+        return ""
+    provider = await _resolve_default_provider(session)
+    if provider is None:
+        return ""
+    return await ai_personnel_brief(provider, mission_text, crew_name, crew_district)
 from .prompts import (
     MissionContext,
     build_mission_suggestions_prompt,
@@ -50,6 +180,7 @@ from .schemas import (
     MissionRewriteRequest,
     MissionSuggestionsRequest,
     MissionUpdate,
+    RankingPostRequest,
     StatusOverrideRequest,
 )
 from .settings_store import get as settings_get
@@ -138,6 +269,7 @@ async def generate_mission(
         text = await provider.generate(user_prompt, model=payload.model, system_prompt=system_prompt_val)
     except Exception as exc:
         raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+    text = _clean_ai_output(text)
 
     deadline_at = None
     if payload.deadline_minutes and payload.deadline_minutes > 0:
@@ -146,6 +278,11 @@ async def generate_mission(
     final_text = text
     if payload.append_text and payload.append_text.strip():
         final_text = f"{text}\n\n---\n\n{payload.append_text.strip()}"
+
+    # KI-Vorschlag fürs Personal-Briefing (defensiv: bei Fehler leer)
+    personnel = await ai_personnel_brief(
+        provider, final_text, crew.name, crew.district or "", model=payload.model
+    )
 
     mission = Mission(
         crew_id=crew.id,
@@ -158,6 +295,8 @@ async def generate_mission(
         status=MissionStatus.DRAFT,
         deadline_at=deadline_at,
         scheduled_send_at=_normalize_naive_utc(payload.scheduled_send_at),
+        personnel_brief=personnel,
+        personnel_updated_at=datetime.utcnow() if personnel else None,
     )
     session.add(mission)
     await session.commit()
@@ -198,6 +337,7 @@ async def rewrite_mission(
         text = await provider.generate(user_prompt, model=payload.model, system_prompt=system_prompt_val)
     except Exception as exc:
         raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+    text = _clean_ai_output(text)
 
     deadline_at = None
     if payload.deadline_minutes and payload.deadline_minutes > 0:
@@ -206,6 +346,11 @@ async def rewrite_mission(
     final_text = text
     if payload.append_text and payload.append_text.strip():
         final_text = f"{text}\n\n---\n\n{payload.append_text.strip()}"
+
+    # KI-Vorschlag fürs Personal-Briefing (defensiv: bei Fehler leer)
+    personnel = await ai_personnel_brief(
+        provider, final_text, crew.name, crew.district or "", model=payload.model
+    )
 
     mission = Mission(
         crew_id=crew.id,
@@ -218,6 +363,8 @@ async def rewrite_mission(
         status=MissionStatus.DRAFT,
         deadline_at=deadline_at,
         scheduled_send_at=_normalize_naive_utc(payload.scheduled_send_at),
+        personnel_brief=personnel,
+        personnel_updated_at=datetime.utcnow() if personnel else None,
     )
     session.add(mission)
     await session.commit()
@@ -327,6 +474,8 @@ async def create_manual_mission(
         deadline_at = datetime.utcnow() + timedelta(minutes=payload.deadline_minutes)
 
     text = payload.content.strip()
+    # KI-Vorschlag fürs Personal-Briefing (defensiv: bei Fehler leer)
+    personnel = await _generate_personnel_safe(session, text, crew.name, crew.district or "")
     mission = Mission(
         crew_id=crew.id,
         ai_provider="manual",
@@ -338,6 +487,8 @@ async def create_manual_mission(
         status=MissionStatus.DRAFT,
         deadline_at=deadline_at,
         scheduled_send_at=_normalize_naive_utc(payload.scheduled_send_at),
+        personnel_brief=personnel,
+        personnel_updated_at=datetime.utcnow() if personnel else None,
     )
     session.add(mission)
     await session.commit()
@@ -362,6 +513,21 @@ async def bulk_send(
         deadline_at = datetime.utcnow() + timedelta(minutes=payload.deadline_minutes)
     schedule_at = _normalize_naive_utc(payload.scheduled_send_at)
 
+    # KI-Vorschlag fürs Personal-Briefing — einmal generieren mit erster
+    # Crew als Kontext, dann allen Missions zuweisen (sonst 21 KI-Calls).
+    # Der User kann pro Crew im Dashboard-Widget nachschärfen.
+    personnel = ""
+    first_crew = None
+    for cid in payload.crew_ids:
+        first_crew = await session.get(Crew, cid)
+        if first_crew:
+            break
+    if first_crew:
+        personnel = await _generate_personnel_safe(
+            session, text, first_crew.name, first_crew.district or ""
+        )
+    personnel_stamp = datetime.utcnow() if personnel else None
+
     # Phase 1: Missions sequentiell anlegen + Names sammeln
     creations: list[dict] = []
     for cid in payload.crew_ids:
@@ -381,6 +547,8 @@ async def bulk_send(
             status=MissionStatus.DRAFT,
             deadline_at=deadline_at,
             scheduled_send_at=schedule_at,
+            personnel_brief=personnel,
+            personnel_updated_at=personnel_stamp,
         )
         session.add(mission)
         creations.append({"crew_id": cid, "name": crew.name, "mission": mission, "error": None})
@@ -479,6 +647,16 @@ async def mission_ranking(
     from .seed_event_lore import FIRMS_TO_CREATE
     firm_names = {name for name, _district in FIRMS_TO_CREATE}
 
+    # Wenn since=None (= „Gesamt"): Reset-Stichtag aus Settings beachten,
+    # damit das Ranking nach einem Reset bei 0 startet.
+    if since is None:
+        reset_iso = (await settings_get(session, "ranking_reset_at", "")).strip()
+        if reset_iso:
+            try:
+                since = datetime.fromisoformat(reset_iso)
+            except (ValueError, TypeError):
+                pass
+
     # Alle Crews laden (fuer Metadata wie name/district/color_hex)
     crews_result = await session.execute(select(Crew).order_by(Crew.id))
     crews: list[Crew] = list(crews_result.scalars().all())
@@ -521,7 +699,9 @@ async def mission_ranking(
         cancelled = counts.get(MissionStatus.CANCELLED.value, 0)
         pending = counts.get(MissionStatus.PENDING.value, 0)
         draft = counts.get(MissionStatus.DRAFT.value, 0)
-        points = approved * 2 + rejected * -1
+        bonus = int(c.bonus_points or 0)
+        mission_points = approved * 2 + rejected * -1
+        points = mission_points + bonus
         total = approved + rejected + cancelled + pending + draft
         crew_entries.append({
             "crew_id": c.id,
@@ -534,6 +714,8 @@ async def mission_ranking(
             "pending": pending,
             "total": total,
             "points": points,
+            "bonus_points": bonus,
+            "mission_points": mission_points,
         })
     crew_entries.sort(key=lambda e: (-e["points"], -e["approved"], e["name"]))
 
@@ -559,6 +741,288 @@ async def mission_ranking(
         "districts": district_entries,
         "since": since.isoformat() if since else None,
         "crime_only": crime_only,
+    }
+
+
+EVENT_START_DATE = date(2026, 8, 7)
+EVENT_END_DATE = date(2026, 8, 16)
+
+
+def _event_day_label(now: datetime | None = None) -> str:
+    """Liefert z.B. 'Tag 3 - 09.08.2026' für das aktuelle Event-Datum.
+    Vor Event-Start: 'Pre-Event (noch X Tage) - DD.MM.YYYY'.
+    Nach Event-Ende: 'Post-Event - DD.MM.YYYY'."""
+    today = (now or datetime.now()).date()
+    date_str = today.strftime("%d.%m.%Y")
+    if today < EVENT_START_DATE:
+        days_until = (EVENT_START_DATE - today).days
+        suffix = "morgen geht es los" if days_until == 1 else f"noch {days_until} Tage"
+        return f"Pre-Event ({suffix}) - {date_str}"
+    if today > EVENT_END_DATE:
+        return f"Post-Event - {date_str}"
+    day_num = (today - EVENT_START_DATE).days + 1
+    return f"Tag {day_num} - {date_str}"
+
+
+def _range_label_for(since: datetime | None) -> str:
+    if since is None:
+        return "Gesamt"
+    delta = datetime.utcnow() - since
+    if delta.total_seconds() < 26 * 3600:  # 26h Toleranz für "heute"
+        return "Heute"
+    if delta.days <= 7:
+        return "Letzte 7 Tage"
+    if delta.days <= 30:
+        return "Letzte 30 Tage"
+    return f"Seit {since.strftime('%d.%m.%Y')}"
+
+
+def _build_ranking_embed(
+    ranking: dict,
+    *,
+    since: datetime | None,
+    crime_only: bool,
+    title: str,
+    mode: str = "full",
+    top_n: int = 21,
+    show_district_aggregate: bool = True,
+) -> dict:
+    """Baut das Discord-Embed im Podest-Style (Design A) mit „Niemand behält
+    lange die Krone"-Footer (Design D).
+
+    mode='full' → Top 3 als 3 inline-Fields + „Plätze 4–N" als Field
+    mode='top3' → Nur die 3 inline-Fields (kompakt für täglichen Hype-Post)
+    """
+    medals = {0: "🥇", 1: "🥈", 2: "🥉"}
+    range_label = _range_label_for(since)
+    scope_label = "Crime" if crime_only else "Alle Crews"
+
+    crews_data = ranking.get("crews", []) or []
+    districts_data = ranking.get("districts", []) or []
+
+    # Description: knapper Header-Block
+    if mode == "top3":
+        day_label = _event_day_label()
+        header_lines = [
+            f"💀 **Stand: {day_label} · {scope_label}**",
+            "_Die drei Spitzenreiter — aktualisiert um diese Uhrzeit täglich._",
+        ]
+    else:
+        header_lines = [f"💀 **Stand:** {range_label} · {scope_label}"]
+    description = "\n".join(header_lines)
+
+    fields: list[dict] = []
+
+    # Top 3 als 3 inline-Fields (Podest-Style)
+    top3 = crews_data[:3]
+    for i, c in enumerate(top3):
+        medal = medals.get(i, f"#{i + 1}")
+        name = c.get("name", "?")
+        district = c.get("district", "") or "—"
+        points = c.get("points", 0)
+        value = (
+            f"_{district}_\n"
+            f"**`{points:+d} Pkt`**"
+        )
+        fields.append({
+            "name": f"{medal} {name}",
+            "value": value,
+            "inline": True,
+        })
+
+    # Wenn weniger als 3 Crews: leere Inline-Fields auffüllen (Layout-Stabilität)
+    while len(fields) < 3 and len(crews_data) > 0:
+        fields.append({"name": "​", "value": "​", "inline": True})
+
+    # Wenn mode='full': Plätze 4–N als kompakte Liste
+    if mode == "full":
+        rest_limit = min(max(1, top_n), 21)
+        rest = crews_data[3:rest_limit]
+        if rest:
+            rest_lines = []
+            for idx, c in enumerate(rest, start=4):
+                name = c.get("name", "?")
+                district = c.get("district", "") or "—"
+                points = c.get("points", 0)
+                rest_lines.append(
+                    f"`#{idx:>2}` **{name}** · _{district}_ · `{points:+d} Pkt`"
+                )
+            rest_value = "\n".join(rest_lines)
+            # Field-Value-Limit 1024 → ggf. aufteilen
+            if len(rest_value) <= 1020:
+                fields.append({
+                    "name": f"📋 Plätze 4–{len(rest) + 3}",
+                    "value": rest_value,
+                    "inline": False,
+                })
+            else:
+                # In zwei Hälften aufteilen
+                mid = len(rest_lines) // 2
+                fields.append({
+                    "name": f"📋 Plätze 4–{mid + 3}",
+                    "value": "\n".join(rest_lines[:mid]),
+                    "inline": False,
+                })
+                fields.append({
+                    "name": f"📋 Plätze {mid + 4}–{len(rest) + 3}",
+                    "value": "\n".join(rest_lines[mid:]),
+                    "inline": False,
+                })
+
+    # Stadtteil-Aggregat (nur im 'full'-Modus, kompakt)
+    if mode == "full" and show_district_aggregate and districts_data:
+        district_order = ["Algonquin", "Bohan", "Broker", "Colony Island", "Dukes"]
+        sorted_districts = sorted(
+            districts_data,
+            key=lambda d: (district_order.index(d["name"]) if d["name"] in district_order else 99),
+        )
+        district_lines = []
+        for d in sorted_districts:
+            name = d.get("name", "?")
+            pts = d.get("points", 0)
+            crew_count = d.get("crew_count", 0)
+            district_lines.append(
+                f"**{name}** · `{pts:+d} Pkt` · {crew_count} Crews"
+            )
+        fields.append({
+            "name": "🗺️ Stadtteil-Aggregat",
+            "value": "  ·  ".join(district_lines),
+            "inline": False,
+        })
+
+    embed = {
+        "title": title,
+        "description": description,
+        "color": 0xB91C1C,
+        "footer": {"text": "Liberty City RP · Niemand behält lange die Krone"},
+        "timestamp": datetime.utcnow().isoformat(),
+        "fields": fields,
+    }
+    return embed
+
+
+@router.post("/ranking/reset")
+async def reset_ranking(session: AsyncSession = Depends(get_session)):
+    """Setzt das Ranking zurück:
+    - Reset-Stichtag wird auf jetzt gesetzt (Missions davor zählen nicht mehr im 'Gesamt')
+    - bonus_points aller Crews werden auf 0 gesetzt
+    Daten in der DB bleiben erhalten — nur die Bewertung startet neu."""
+    from .settings_store import set_value as _set_setting
+
+    now_utc = datetime.utcnow()
+    await _set_setting(session, "ranking_reset_at", now_utc.isoformat())
+
+    # Alle Bonus-Punkte auf 0
+    res = await session.execute(select(Crew))
+    crews = list(res.scalars().all())
+    affected = 0
+    for crew in crews:
+        if crew.bonus_points != 0:
+            crew.bonus_points = 0
+            affected += 1
+    await session.commit()
+
+    return {
+        "ok": True,
+        "reset_at": now_utc.isoformat(),
+        "crews_total": len(crews),
+        "bonus_resets": affected,
+    }
+
+
+@router.post("/ranking/post-to-discord")
+async def post_ranking_to_discord(
+    payload: RankingPostRequest, session: AsyncSession = Depends(get_session)
+):
+    """Holt das aktuelle Ranking und postet ein hübsches Embed in einen Discord-Channel.
+
+    Modes:
+    - 'full' (default) = Podest + Plätze 4–N + Stadtteil-Aggregat
+    - 'top3' = nur Top 3 als kompakter Daily-Hype-Post
+    """
+    # 1) Ranking holen
+    ranking = await mission_ranking(
+        since=payload.since, crime_only=payload.crime_only, session=session
+    )
+
+    # 2) Embed bauen
+    mode = (payload.mode or "full").lower()
+    if mode not in ("full", "top3"):
+        mode = "full"
+
+    # Bei top3: zufälligen Titel aus Pool wählen (Fallback = payload.title)
+    effective_title = payload.title
+    if mode == "top3":
+        pool_res = await session.execute(select(Top3TitlePoolMessage))
+        pool_items = list(pool_res.scalars().all())
+        if pool_items:
+            effective_title = random.choice(pool_items).text
+
+    embed = _build_ranking_embed(
+        ranking,
+        since=payload.since,
+        crime_only=payload.crime_only,
+        title=effective_title,
+        mode=mode,
+        top_n=payload.top_n,
+        show_district_aggregate=payload.show_district_aggregate,
+    )
+
+    # 5) Vorheriges Embed im selben Modus löschen (falls vorhanden + replace_previous=True)
+    last_msg_key = f"ranking_{mode}_last_message_id" if mode in ("full", "top3") else None
+    if last_msg_key is None and mode == "full":
+        last_msg_key = "ranking_daily_last_message_id"
+    elif mode == "full":
+        last_msg_key = "ranking_daily_last_message_id"
+    elif mode == "top3":
+        last_msg_key = "ranking_top3_last_message_id"
+
+    if payload.replace_previous and last_msg_key:
+        prev_msg_id = (await settings_get(session, last_msg_key, "")).strip()
+        if prev_msg_id:
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as cli:
+                    await cli.post(
+                        "http://127.0.0.1:8001/delete_message",
+                        json={"channel_id": payload.channel_id, "message_id": prev_msg_id},
+                    )
+            except Exception:
+                pass  # Alte Message evtl. schon weg oder Channel gewechselt — ignorieren
+
+    # 6) Neuen Embed posten
+    body = {"channel_id": payload.channel_id, "embed": embed}
+    if payload.intro and payload.intro.strip():
+        body["content"] = payload.intro.strip()
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as cli:
+            r = await cli.post("http://127.0.0.1:8001/send_embed", json=body)
+    except Exception as exc:
+        raise HTTPException(503, f"Bot nicht erreichbar: {exc}") from exc
+
+    if r.status_code >= 400:
+        raise HTTPException(502, f"Bot Fehler: {r.text}")
+
+    result = r.json()
+    new_msg_id = result.get("message_id") or ""
+
+    # 7) Neue Message-ID merken für nächstes Ersetzen
+    if last_msg_key and new_msg_id:
+        try:
+            from .settings_store import set_value as _set_setting
+            await _set_setting(session, last_msg_key, str(new_msg_id))
+        except Exception:
+            pass
+
+    crews_in_embed = 3 if mode == "top3" else min(len(ranking.get("crews", []) or []), payload.top_n)
+    return {
+        "ok": True,
+        "message_id": new_msg_id,
+        "crews_posted": crews_in_embed,
+        "scope": "Crime" if payload.crime_only else "Alle Crews",
+        "range": _range_label_for(payload.since),
+        "mode": mode,
+        "replaced_previous": payload.replace_previous,
     }
 
 
@@ -660,6 +1124,7 @@ async def rewrite_existing_mission(
         )
     except Exception as exc:
         raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+    new_text = _clean_ai_output(new_text)
 
     m.content_generated = new_text
     m.content_final = new_text
@@ -978,6 +1443,25 @@ async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_s
             except Exception:
                 pass  # Bot offline -> nur DB-Archiv
 
+    # Personal-Bedarf-Embed im Admin-Channel ebenfalls löschen
+    if m.personnel_discord_message_id:
+        personnel_channel = (
+            await settings_get(session, "personnel_admin_channel_id", "")
+        ).strip()
+        if personnel_channel:
+            try:
+                async with httpx.AsyncClient(timeout=15.0) as cli:
+                    await cli.post(
+                        "http://127.0.0.1:8001/delete_message",
+                        json={
+                            "channel_id": personnel_channel,
+                            "message_id": m.personnel_discord_message_id,
+                        },
+                    )
+            except Exception:
+                pass  # Bot offline -> Message bleibt orphan im Channel
+        m.personnel_discord_message_id = ""
+
     m.archived_at = datetime.utcnow()
     await session.commit()
     await session.refresh(m)
@@ -1003,6 +1487,24 @@ async def purge_mission(mission_id: int, session: AsyncSession = Depends(get_ses
     m = await session.get(Mission, mission_id)
     if not m:
         raise HTTPException(404, "Mission nicht gefunden")
+    # Falls noch Personal-Bedarf-Embed im Admin-Channel liegt (z.B. wenn
+    # direkt vom Draft gepurged wird ohne vorher zu archivieren), aufräumen.
+    if m.personnel_discord_message_id:
+        personnel_channel = (
+            await settings_get(session, "personnel_admin_channel_id", "")
+        ).strip()
+        if personnel_channel:
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as cli:
+                    await cli.post(
+                        "http://127.0.0.1:8001/delete_message",
+                        json={
+                            "channel_id": personnel_channel,
+                            "message_id": m.personnel_discord_message_id,
+                        },
+                    )
+            except Exception:
+                pass
     if m.image_path:
         try:
             Path(m.image_path).unlink(missing_ok=True)

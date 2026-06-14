@@ -35,7 +35,7 @@ Sechs Persönlichkeiten, alle dem Big Boss loyal, aber jede mit eigenem Stil und
 
 **Was der User (= Big Boss) konkret tut:**
 - **Vorbereitung:** plant Story-Beats für die kommenden Tage (Master-Plot aus EVENT_TIMELINE.md)
-- **Briefing an Mittler:** verteilt vor jedem großen Tag (3, 6, 9, 12, 15, 16) das Voice-Over-Skript aus EVENT_BRIEFINGS_MASS.md an die Mittler — die wählen ihren Stil, übersetzen es eigenständig
+- **Briefing an Mittler:** verteilt vor jedem großen Tag (2, 4, 7, 9, 10) das Voice-Over-Skript aus EVENT_BRIEFINGS_MASS.md an die Mittler — die wählen ihren Stil, übersetzen es eigenständig
 - **Zwischen den großen Tagen:** verteilt Themen / lose Auftrags-Ideen an einzelne Mittler, die selbständig RP-Begegnungen organisieren
 - **Reaktionen sammeln:** liest Discord-Channels, Info-Channels, hört Mittler-Feedback aus dem In-Game-Spiel
 
@@ -55,9 +55,9 @@ Sechs Persönlichkeiten, alle dem Big Boss loyal, aber jede mit eigenem Stil und
 ## Big Boss tritt direkt auf — nur an folgenden Momenten
 
 1. **Onboarding-Video** (vor Event-Start, bereits in Discord-Channels)
-2. **Tag 10 Zwischenstand-Briefing** (optional — kann auch Miguel liefern)
-3. **Tag 14 Vor-Finale-Kurzansage**
-4. **Tag 16 Finale + Krönung** — direktes Voice-Over, keine Mittler
+2. **Tag 6 Zwischenstand-Briefing** (optional — kann auch Miguel liefern)
+3. **Tag 8 Vor-Finale-Kurzansage**
+4. **Tag 10 Finale + Krönung** — direktes Voice-Over, keine Mittler
 
 Sonst bleibt der Big Boss unsichtbar — das verstärkt seine Macht.
 
@@ -73,10 +73,10 @@ Sonst bleibt der Big Boss unsichtbar — das verstärkt seine Macht.
 
 **Schwerpunkt:** Klassische Briefings, formelle Auftragsübergaben, „offizielle" Big-Boss-Stimme. Crews wissen: wenn Miguel kommt, ist es ernst.
 
-**Beziehung zu Crews:** Distanziert. Bekommt selten persönlich Kontakt — er ist die Stimme, nicht der Mensch. Tritt bei den großen Massen-Aufträgen Tag 3, 9, 14 auf.
+**Beziehung zu Crews:** Distanziert. Bekommt selten persönlich Kontakt — er ist die Stimme, nicht der Mensch. Tritt bei den großen Massen-Aufträgen Tag 2, 6, 8 auf.
 
 **Typische Aufträge:**
-- Formelle Massen-Briefings (Tag 3, Tag 14)
+- Formelle Massen-Briefings (Tag 2, Tag 8 Vor-Finale)
 - „Du hast geliefert. Du wirst beobachtet." — kurze Bestätigungen ohne Aufwand
 - Konsequenz-Übergabe (wenn eine Crew etwas getan hat, das der Big Boss nicht akzeptiert)
 
@@ -140,7 +140,7 @@ Sonst bleibt der Big Boss unsichtbar — das verstärkt seine Macht.
 
 **Typische Aufträge:**
 - Schnelle Werkzeug-Lieferungen („Holt euch die Kiste an der Garage")
-- Logistik-Operationen (Tag 6 „Die Stille" wäre sein Briefing)
+- Logistik-Operationen (Tag 4 „Die Stille" wäre sein Briefing)
 - Stealth-Coordinations-Aufträge
 
 **Catchphrase / Stilanker:**
@@ -176,12 +176,12 @@ Sonst bleibt der Big Boss unsichtbar — das verstärkt seine Macht.
 **Sprechweise:** Tief, langsam, mit Pausen, die wie Schläge sitzen. Verwendet Vokabular aus dem Boxsport und dem Militär.
 **Erscheinung:** Anfang fünfzig, kräftig, Narbe an der Wange, immer mit Mantel auch im Sommer. Trägt Lederhandschuhe, die er nie auszieht.
 
-**Schwerpunkt:** Wenn der Big Boss eine harte Hand braucht, ruft er Den Skrupellosen. Sonderaufträge mit Eskalations-Element, Drohgesten gegen unfolgsame Crews, Tag-12-Verrats-Übergabe.
+**Schwerpunkt:** Wenn der Big Boss eine harte Hand braucht, ruft er Den Skrupellosen. Sonderaufträge mit Eskalations-Element, Drohgesten gegen unfolgsame Crews, Tag-7-Verrats-Übergabe.
 
 **Beziehung zu Crews:** Wird gefürchtet, nicht gemocht. Crews wechseln die Straßenseite, wenn sie ihn kommen sehen. Hat eine direkte Linie zum Big Boss.
 
 **Typische Aufträge:**
-- Tag-12-Verrats-Übergabe (der härteste Mittler für den härtesten Auftrag)
+- Tag-7-Verrats-Übergabe (der härteste Mittler für den härtesten Auftrag)
 - „Mach klar, was passiert, wenn die nicht liefern"
 - Direkte Vergeltungs-Aufträge nach Versagen
 
@@ -194,20 +194,18 @@ Sonst bleibt der Big Boss unsichtbar — das verstärkt seine Macht.
 
 Empfehlung, kann nach Spielleiter-Team-Verfügbarkeit angepasst werden:
 
-| Tag | Auftrag-Typ | Empfohlener Mittler |
-|---:|---|---|
-| 3 | Massen-Briefing „Der Tribut" | **Miguel** (formell, ernst) |
-| 4–5 | Individuell | Maklerin / Pater / Fixer (rotation) |
-| 6 | Massen-Briefing „Die Stille" | **Der Fixer** (passend zum Stealth-Thema) |
-| 7–8 | Individuell | Witwe / Maklerin / Pater |
-| 9 | Massen-Briefing „Die Botschaft" | **Der Skrupellose** (passend zur lauten Aktion) |
-| 10 | Zwischen-Briefing | **Miguel** (offizielle Bewertung) |
-| 11 | Individuell | Pater (Loyalitäts-Tests) |
-| 12 | Verrats-Auftrag (privat an Top-3) | **Der Skrupellose** (passend zum harten Auftrag) |
-| 13 | Individuell (Konsequenzen) | Witwe / Pater (Trostspender / Beichten) |
-| 14 | Vor-Finale-Kurzansage | **Miguel** |
-| 15 | Finale „Die Krone" | **Big Boss DIREKT** (kein Mittler) |
-| 16 | Showdown & Krönung | **Big Boss DIREKT** |
+| Tag | Datum | Auftrag-Typ | Empfohlener Mittler |
+|---:|---|---|---|
+| 1 | 07.08.2026 (Fr) | Findung — keine System-Aufträge | Mittler tauchen subtil auf (Café/Garage) |
+| 2 | 08.08.2026 (Sa) | Massen-Briefing „Der Tribut" | **Miguel** (formell, ernst) |
+| 3 | 09.08.2026 (So) | Individuell (Konsolidierung + Info) | Maklerin / Pater / Fixer (Rotation) |
+| 4 | 10.08.2026 (Mo) | Massen-Briefing „Die Stille" | **Der Fixer** (passend zum Stealth-Thema) |
+| 5 | 11.08.2026 (Di) | Individuell (Reparatur + Verflechtung) | Witwe / Maklerin / Pater |
+| 6 | 12.08.2026 (Mi) | Zwischen-Briefing + Loyalitäts-Tests | **Miguel** (Bewertung) + Pater (Loyalität) |
+| 7 | 13.08.2026 (Do) | Verrats-Auftrag „Der Verrat" (privat an Top-3) | **Der Skrupellose** (passend zum harten Auftrag) |
+| 8 | 14.08.2026 (Fr) | Konsequenzen + Vor-Finale-Kurzansage | Witwe / Pater + **Miguel** (Vor-Finale abends) |
+| 9 | 15.08.2026 (Sa) | Massen-Briefing „Die Probe" (Rivalen) | **Miguel** (mit Big-Boss-Vorab-Briefing) |
+| 10 | 16.08.2026 (So) | Finale „Die Krone" + Showdown + Krönung (bis 23:59) | **Big Boss DIREKT** (kein Mittler) |
 
 ## RP-Hinweise für die Spielleiter
 
@@ -237,9 +235,9 @@ Empfehlung, kann nach Spielleiter-Team-Verfügbarkeit angepasst werden:
 
 Nur an folgenden Punkten — Big Boss DIREKT, nicht als Mittler:
 1. Onboarding (vor Event-Start, das bestehende Video)
-2. Tag 10 Zwischenstand (Miguel ODER direkt, je nach Dramatik-Wunsch)
-3. Tag 15 Finale-Briefing
-4. Tag 16 Showdown & Krönung
+2. Tag 6 Zwischenstand (Miguel ODER direkt, je nach Dramatik-Wunsch)
+3. Tag 9 Vor-Finale-Briefing (Rivalen-Test „Die Probe")
+4. Tag 10 Showdown & Krönung
 
 Sonst bleibt der Big Boss unsichtbar. Das verstärkt seine Macht.
 

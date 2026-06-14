@@ -221,11 +221,11 @@ Und die Stadt, die nie schläft, lernt zum ersten Mal seit dreißig Jahren, was 
 
 Was die Spieler aus diesem Eröffnungs-Briefing wissen sollen: Mr. Camino ist weg, die Stadt brodelt, der Big Boss bewegt sich im Hintergrund.
 
-Was sie **nicht** wissen sollen (Reveal erst Tag 15–16): Das ganze Event ist ein **Probespiel**. Mr. Caminos Verschwinden ist kein Zufall — der Big Boss hat ihn entfernt, um die alte Hierarchie zu sprengen und einen neuen Top-Lieutenant aus den Crews auszuwählen. Alle 16 Tage werden als Test geführt:
+Was sie **nicht** wissen sollen (Reveal erst Tag 9–10): Das ganze Event ist ein **Probespiel**. Mr. Caminos Verschwinden ist kein Zufall — der Big Boss hat ihn entfernt, um die alte Hierarchie zu sprengen und einen neuen Top-Lieutenant aus den Crews auszuwählen. Alle 10 Tage werden als Test geführt:
 
-- Tag 3, 6, 9, 12, 15: Massen-Aufträge prüfen Akkumulation, Stille, öffentliche Wirkung, Loyalität und Finale-Können
-- Tag 1–2: Findungsphase
-- Tag 16: Krönung der Sieger-Crew + Mr. Caminos Rückkehr unter Big-Boss-Kontrolle
+- Tag 2, 4, 7, 9: Massen-Aufträge prüfen Akkumulation, Stille, Loyalität und Rivalität
+- Tag 1: Findungsphase (Start 07.08.2026 18:00)
+- Tag 10: Finale-Coup + Krönung der Sieger-Crew + Mr. Caminos Rückkehr unter Big-Boss-Kontrolle (Ende 16.08.2026 23:59)
 
 Vollständige Spielleiter-Doku: [`EVENT_TIMELINE.md`](EVENT_TIMELINE.md), [`EVENT_BRIEFINGS_MASS.md`](EVENT_BRIEFINGS_MASS.md), [`QUEST_GIVERS.md`](QUEST_GIVERS.md), [`EVENT_FINALE.md`](EVENT_FINALE.md).
 

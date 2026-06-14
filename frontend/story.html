@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SEKT6R — Story</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+  <div x-data="storyPage()" x-init="init()" x-cloak class="max-w-6xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <h1>
+        <img src="/static/logo.png" alt="SEKT6R" class="h-12 w-auto" />
+      </h1>
+      <nav class="flex gap-2 text-sm flex-wrap items-center">
+        <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
+        <a href="/lore" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Lore</a>
+        <a href="/story" class="px-3 py-1.5 rounded bg-red-700 text-white">Story</a>
+        <a href="/archive" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Archiv</a>
+        <a href="/ranking" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Ranking</a>
+        <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
+      </nav>
+    </header>
+
+    <section class="mb-4">
+      <h2 class="text-xl font-semibold mb-1">📖 Story-Verwaltung</h2>
+      <p class="text-xs text-zinc-400">
+        Editiere die Markdown-Kern-Files direkt im Backend. Beim Speichern wird
+        automatisch eine <code class="text-zinc-300">.bak</code>-Kopie der vorherigen
+        Version neben der Datei abgelegt. Änderungen wirken sofort (Backend liest
+        die Files live, kein Restart nötig).
+      </p>
+    </section>
+
+    <!-- Fehler beim Laden -->
+    <div x-show="initError" class="mb-4 bg-red-950/40 border border-red-700 text-red-300 text-sm rounded p-3">
+      <strong>Fehler:</strong> <span x-text="initError"></span><br>
+      Tipp: F12 → Network → schau auf <code>/api/story/files</code> für Status-Code (401 = Login, 404 = Route fehlt → Backend-Restart).
+    </div>
+
+    <!-- Tab-Bar -->
+    <div x-show="files.length" class="flex gap-1 mb-4 border-b border-zinc-800 flex-wrap">
+      <template x-for="f in files" :key="f.filename">
+        <button @click="selectFile(f.filename)"
+                :class="activeFile === f.filename ? 'border-red-500 text-red-400' : 'border-transparent text-zinc-400 hover:text-zinc-200'"
+                class="px-3 py-2 text-sm border-b-2 -mb-px whitespace-nowrap">
+          <span x-text="f.label"></span>
+          <span class="text-xs text-zinc-600" x-text="f.exists ? `(${Math.round(f.size/1024)}KB)` : '(neu)'"></span>
+        </button>
+      </template>
+    </div>
+
+    <p x-show="loading" class="text-zinc-500 text-sm">Lade…</p>
+
+    <div x-show="!loading && activeFile" class="space-y-3">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <span class="text-sm text-zinc-400">
+          Datei: <code class="text-zinc-200" x-text="`docs/${activeFile}`"></code>
+          <span x-show="dirty" class="ml-2 text-amber-400">● ungespeichert</span>
+        </span>
+        <div class="flex items-center gap-2">
+          <button @click="saveFile()" :disabled="saving || !dirty"
+                  class="px-4 py-2 bg-green-600 hover:bg-green-500 disabled:opacity-40 rounded text-sm font-medium">
+            <span x-show="!saving">💾 Speichern</span>
+            <span x-show="saving">Speichere…</span>
+          </button>
+          <button @click="reload()" :disabled="loading || saving"
+                  class="px-3 py-2 bg-zinc-700 hover:bg-zinc-600 rounded text-sm">↺ Neu laden</button>
+          <p x-show="msg" x-text="msg" class="text-sm text-green-400 self-center"></p>
+        </div>
+      </div>
+      <textarea x-model="content" @input="dirty = true" rows="32"
+                spellcheck="false"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm font-mono leading-relaxed"></textarea>
+
+      <div class="text-xs text-zinc-500">
+        Zeichen: <span x-text="content.length"></span> ·
+        Zeilen: <span x-text="content.split('\n').length"></span>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

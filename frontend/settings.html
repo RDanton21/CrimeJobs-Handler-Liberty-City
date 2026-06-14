@@ -16,6 +16,7 @@
         <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
         <a href="/archive" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Archiv</a>
         <a href="/lore" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Lore</a>
+        <a href="/story" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Story</a>
         <a href="/ranking" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Ranking</a>
         <a href="/settings" class="px-3 py-1.5 rounded bg-red-700 text-white">Settings</a>
       </nav>
@@ -120,6 +121,209 @@
     </section>
 
     <section class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+      <h2 class="text-lg font-semibold mb-1">📅 Tägliches Ranking-Posting in Discord</h2>
+      <p class="text-xs text-zinc-400 mb-4">
+        Bot postet jeden Tag zur konfigurierten Uhrzeit das Ranking als
+        Embed in einen Discord-Channel. Toleranzfenster ±10 Min nach Soll-Zeit,
+        State wird tagesweise getrackt (kein Doppel-Post nach Service-Restart).
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox"
+                 :checked="rankingForm.ranking_daily_enabled === 'true'"
+                 @change="rankingForm.ranking_daily_enabled = $event.target.checked ? 'true' : 'false'" />
+          Tägliches Posting aktivieren
+        </label>
+        <div>
+          <label class="block text-xs text-zinc-400 mb-1">Uhrzeit (HH:MM, lokal)</label>
+          <input x-model="rankingForm.ranking_daily_time"
+                 type="text" placeholder="03:33" pattern="^\d{1,2}:\d{2}$"
+                 class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm w-32" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="block text-xs text-zinc-400 mb-1">Discord-Channel-ID</label>
+          <input x-model="rankingForm.ranking_daily_channel_id"
+                 type="text" placeholder="1431597687404236820"
+                 class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs text-zinc-400 mb-1">Zeitraum für Ranking</label>
+          <select x-model="rankingForm.ranking_daily_range"
+                  class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm">
+            <option value="today">Heute</option>
+            <option value="7d">Letzte 7 Tage</option>
+            <option value="30d">Letzte 30 Tage</option>
+            <option value="all">Gesamt</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 mb-3 flex-wrap">
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox"
+                 :checked="rankingForm.ranking_daily_crime_only === 'true'"
+                 @change="rankingForm.ranking_daily_crime_only = $event.target.checked ? 'true' : 'false'" />
+          Nur Crime-Crews (Zivil-Firmen ausblenden)
+        </label>
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox"
+                 :checked="rankingForm.ranking_daily_show_districts === 'true'"
+                 @change="rankingForm.ranking_daily_show_districts = $event.target.checked ? 'true' : 'false'" />
+          Stadtteil-Aggregat anhängen
+        </label>
+      </div>
+
+      <label class="block text-xs text-zinc-400 mb-1">Embed-Titel</label>
+      <input x-model="rankingForm.ranking_daily_title"
+             class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm mb-3" />
+
+      <label class="block text-xs text-zinc-400 mb-1">Begleittext über dem Embed (optional)</label>
+      <textarea x-model="rankingForm.ranking_daily_intro" rows="2"
+                placeholder="z.B. „Stand vom Vortag — wer hat geliefert?""
+                class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm mb-3"></textarea>
+
+      <div class="flex gap-2">
+        <button @click="saveRanking()"
+                class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded text-sm">💾 Speichern</button>
+        <p x-show="rankingMsg" x-text="rankingMsg" class="text-sm text-green-400 self-center"></p>
+      </div>
+    </section>
+
+    <section class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+      <h2 class="text-lg font-semibold mb-1">🥇 Daily-Top-3-Hype-Post</h2>
+      <p class="text-xs text-zinc-400 mb-4">
+        Zweiter Auto-Post — kompakt, nur die Top 3 in Inline-Sektionen
+        (Podest-Look). Eigener Channel + eigene Uhrzeit. Toleranzfenster
+        ±10 Min. Ideal für Daily-Hype am Morgen.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <label class="flex items-center gap-2 text-sm">
+          <input type="checkbox"
+                 :checked="top3Form.ranking_top3_enabled === 'true'"
+                 @change="top3Form.ranking_top3_enabled = $event.target.checked ? 'true' : 'false'" />
+          Daily Top-3 aktivieren
+        </label>
+        <div>
+          <label class="block text-xs text-zinc-400 mb-1">Uhrzeit (HH:MM, lokal)</label>
+          <input x-model="top3Form.ranking_top3_time"
+                 type="text" placeholder="08:00"
+                 class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm w-32" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="block text-xs text-zinc-400 mb-1">Discord-Channel-ID (Top 3)</label>
+          <input x-model="top3Form.ranking_top3_channel_id"
+                 type="text"
+                 class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs text-zinc-400 mb-1">Zeitraum</label>
+          <select x-model="top3Form.ranking_top3_range"
+                  class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm">
+            <option value="today">Heute</option>
+            <option value="7d">Letzte 7 Tage</option>
+            <option value="30d">Letzte 30 Tage</option>
+            <option value="all">Gesamt</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="flex items-center gap-2 text-sm mb-3">
+        <input type="checkbox"
+               :checked="top3Form.ranking_top3_crime_only === 'true'"
+               @change="top3Form.ranking_top3_crime_only = $event.target.checked ? 'true' : 'false'" />
+        Nur Crime-Crews
+      </label>
+
+      <label class="block text-xs text-zinc-400 mb-1">Embed-Titel (Fallback bei leerem Pool unten)</label>
+      <input x-model="top3Form.ranking_top3_title"
+             class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm mb-3" />
+
+      <label class="block text-xs text-zinc-400 mb-1">Begleittext (optional)</label>
+      <textarea x-model="top3Form.ranking_top3_intro" rows="2"
+                placeholder="z.B. „Wer steht heute auf dem Podest?""
+                class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm mb-3"></textarea>
+
+      <div class="flex gap-2">
+        <button @click="saveTop3()"
+                class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded text-sm">💾 Speichern</button>
+        <p x-show="top3Msg" x-text="top3Msg" class="text-sm text-green-400 self-center"></p>
+      </div>
+
+      <!-- Title-Pool: Random-Pick statt fester Titel -->
+      <div class="mt-5 pt-4 border-t border-zinc-800">
+        <h3 class="text-sm font-semibold mb-1">🎲 Titel-Pool für Random-Pick</h3>
+        <p class="text-xs text-zinc-400 mb-3">
+          Wenn dieser Pool nicht leer ist, wird bei jedem Top-3-Post ein
+          zufälliger Titel daraus genommen — der „Embed-Titel" oben dient nur
+          noch als Fallback bei leerem Pool. Markdown ist erlaubt
+          (z.B. <code class="text-zinc-300">**fett**</code>).
+        </p>
+
+        <div class="flex gap-2 mb-3">
+          <input x-model="newTop3Title"
+                 @keydown.enter="addTop3Title()"
+                 placeholder="Neuer Titel…"
+                 class="flex-1 bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+          <button @click="addTop3Title()"
+                  class="px-3 py-2 bg-green-600 hover:bg-green-500 rounded text-sm">+ Hinzufügen</button>
+        </div>
+
+        <ul class="space-y-2">
+          <template x-for="t in top3Titles" :key="t.id">
+            <li class="flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm">
+              <span x-text="t.text" class="flex-1 mr-2 whitespace-pre-wrap break-words"></span>
+              <button @click="deleteTop3Title(t.id)"
+                      title="Titel löschen"
+                      class="text-red-400 hover:text-red-300">×</button>
+            </li>
+          </template>
+        </ul>
+        <p x-show="top3Titles.length === 0" class="text-zinc-500 text-sm">
+          Pool ist leer — der Fallback-Titel oben wird verwendet.
+        </p>
+      </div>
+    </section>
+
+    <!-- Personal-Bedarf Admin-Channel -->
+    <section class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+      <h2 class="text-lg font-semibold mb-1">🎭 Personal-Bedarf — Admin-Channel</h2>
+      <p class="text-xs text-zinc-400 mb-3">
+        Discord-Channel, in den die Personal-Briefings über den
+        „📤 Posten"-Button im Dashboard-Widget gesendet werden.
+        Spielleitung sieht hier pro Mission: Crew, Slot (wann),
+        Stadtteil, Status und den vollen NPC-Plan. Jeder Post ersetzt
+        automatisch den vorherigen für dieselbe Mission.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="block text-xs text-zinc-400 mb-1">Discord-Channel-ID</label>
+          <input x-model="personnelChannelForm.personnel_admin_channel_id"
+                 type="text" placeholder="1515654327459381479"
+                 class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button @click="savePersonnelChannel()"
+                :disabled="personnelChannelSaving"
+                class="px-4 py-1.5 bg-green-700 hover:bg-green-600 disabled:opacity-50 rounded text-sm font-medium">
+          <span x-show="!personnelChannelSaving">💾 Speichern</span>
+          <span x-show="personnelChannelSaving">Speichere…</span>
+        </button>
+        <span x-show="personnelChannelMsg" x-text="personnelChannelMsg"
+              class="text-xs"
+              :class="personnelChannelMsgError ? 'text-red-400' : 'text-green-400'"></span>
+      </div>
+    </section>
+
+    <section class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg p-5">
       <h2 class="text-lg font-semibold mb-1">💬 Reaktions-Antworten (nach 👍 / 👎 / ❌)</h2>
       <p class="text-xs text-zinc-400 mb-3">
         Wenn der Boss reagiert, postet der Bot zufällig einen dieser Sprüche
@@ -190,6 +394,6 @@
     </section>
   </div>
 
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=personnel6"></script>
 </body>
 </html>

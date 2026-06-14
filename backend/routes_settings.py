@@ -26,6 +26,23 @@ async def get_settings(session: AsyncSession = Depends(get_session)):
         "default_openai_model": merged("default_openai_model", env_settings.default_openai_model),
         "system_prompt": db_vals.get("system_prompt", ""),
         "system_prompt_default": DEFAULT_SYSTEM_PROMPT,
+        # Tägliches Ranking-Posting
+        "ranking_daily_enabled": db_vals.get("ranking_daily_enabled", ""),
+        "ranking_daily_channel_id": db_vals.get("ranking_daily_channel_id", ""),
+        "ranking_daily_time": db_vals.get("ranking_daily_time", "03:33"),
+        "ranking_daily_range": db_vals.get("ranking_daily_range", "all"),
+        "ranking_daily_crime_only": db_vals.get("ranking_daily_crime_only", "true"),
+        "ranking_daily_show_districts": db_vals.get("ranking_daily_show_districts", "true"),
+        "ranking_daily_title": db_vals.get("ranking_daily_title", "🏆 Crew-Ranking — Liberty City"),
+        "ranking_daily_intro": db_vals.get("ranking_daily_intro", ""),
+        # Daily Top 3 Hype-Post (zweite Konfig)
+        "ranking_top3_enabled": db_vals.get("ranking_top3_enabled", ""),
+        "ranking_top3_channel_id": db_vals.get("ranking_top3_channel_id", ""),
+        "ranking_top3_time": db_vals.get("ranking_top3_time", "08:00"),
+        "ranking_top3_range": db_vals.get("ranking_top3_range", "all"),
+        "ranking_top3_crime_only": db_vals.get("ranking_top3_crime_only", "true"),
+        "ranking_top3_title": db_vals.get("ranking_top3_title", "🥇 Die Spitze von Liberty City"),
+        "ranking_top3_intro": db_vals.get("ranking_top3_intro", ""),
     }
 
 
@@ -41,9 +58,30 @@ async def update_settings(
         "default_claude_model": "default_claude_model",
         "default_openai_model": "default_openai_model",
         "system_prompt": "system_prompt",
+        "ranking_daily_enabled": "ranking_daily_enabled",
+        "ranking_daily_channel_id": "ranking_daily_channel_id",
+        "ranking_daily_time": "ranking_daily_time",
+        "ranking_daily_range": "ranking_daily_range",
+        "ranking_daily_crime_only": "ranking_daily_crime_only",
+        "ranking_daily_show_districts": "ranking_daily_show_districts",
+        "ranking_daily_title": "ranking_daily_title",
+        "ranking_daily_intro": "ranking_daily_intro",
+        "ranking_top3_enabled": "ranking_top3_enabled",
+        "ranking_top3_channel_id": "ranking_top3_channel_id",
+        "ranking_top3_time": "ranking_top3_time",
+        "ranking_top3_range": "ranking_top3_range",
+        "ranking_top3_crime_only": "ranking_top3_crime_only",
+        "ranking_top3_title": "ranking_top3_title",
+        "ranking_top3_intro": "ranking_top3_intro",
+        "personnel_admin_channel_id": "personnel_admin_channel_id",
     }
     for field, val in data.items():
         if val is None:
             continue
-        await set_value(session, mapping[field], val)
+        key = mapping.get(field)
+        if not key:
+            # Unbekanntes Settings-Feld → defensiv überspringen, nicht 500'en.
+            # Heißt: jemand hat Schema erweitert ohne Mapping zu pflegen.
+            continue
+        await set_value(session, key, val)
     return {"ok": True}

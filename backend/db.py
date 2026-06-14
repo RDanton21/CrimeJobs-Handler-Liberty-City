@@ -47,6 +47,20 @@ async def init_db() -> None:
         await _migrate_add_column_if_missing(
             conn, "crews", "crime_business_channel_id", "VARCHAR(40) NOT NULL DEFAULT ''"
         )
+        await _migrate_add_column_if_missing(
+            conn, "crews", "bonus_points", "INTEGER NOT NULL DEFAULT 0"
+        )
+        # Personal-Briefing pro Mission (Admin-intern, Dashboard-Widget)
+        await _migrate_add_column_if_missing(
+            conn, "missions", "personnel_brief", "TEXT NOT NULL DEFAULT ''"
+        )
+        await _migrate_add_column_if_missing(
+            conn, "missions", "personnel_updated_at", "DATETIME"
+        )
+        await _migrate_add_column_if_missing(
+            conn, "missions", "personnel_discord_message_id",
+            "VARCHAR(40) NOT NULL DEFAULT ''"
+        )
 
 
 async def _migrate_add_column_if_missing(conn, table: str, column: str, sql_type: str) -> None:

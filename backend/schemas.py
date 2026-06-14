@@ -14,6 +14,7 @@ class CrewBase(BaseModel):
     info_channel_id: str = ""
     district: str = ""
     color_hex: str = "#b91c1c"
+    bonus_points: int = 0
 
 
 class CrewCreate(CrewBase):
@@ -29,6 +30,12 @@ class CrewUpdate(BaseModel):
     info_channel_id: str | None = None
     district: str | None = None
     color_hex: str | None = None
+    bonus_points: int | None = None  # absolute Setzung — für Reset auf 0
+
+
+class BonusAdjustRequest(BaseModel):
+    """Inkrementelle Bonus-Vergabe. Positiv = Bonus, negativ = Strafe."""
+    points: int
 
 
 class CrimeBusinessSendRequest(BaseModel):
@@ -103,11 +110,24 @@ class BulkSendRequest(BaseModel):
     scheduled_send_at: datetime | None = None
 
 
+class RankingPostRequest(BaseModel):
+    channel_id: str
+    since: datetime | None = None
+    crime_only: bool = True
+    top_n: int = 21  # 21 Crime-Crews als Standard
+    title: str = "🏆 Crew-Ranking — Liberty City"
+    show_district_aggregate: bool = True
+    intro: str = ""  # optionaler Begleittext über dem Embed
+    mode: str = "full"  # 'full' = Podest + Rest 4–N, 'top3' = nur Top 3 inline
+    replace_previous: bool = True  # vorheriges Embed im Channel löschen vorm neuen Post
+
+
 class MissionUpdate(BaseModel):
     content_final: str | None = None
     image_path: str | None = None
     scheduled_send_at: datetime | None = None
     clear_scheduled_send_at: bool = False
+    personnel_brief: str | None = None
 
 
 class MissionOut(BaseModel):
@@ -129,6 +149,9 @@ class MissionOut(BaseModel):
     deadline_at: datetime | None
     scheduled_send_at: datetime | None = None
     archived_boss_info: str = ""
+    personnel_brief: str = ""
+    personnel_updated_at: datetime | None = None
+    personnel_discord_message_id: str = ""
 
 
 class StatusOverrideRequest(BaseModel):
@@ -151,6 +174,17 @@ class ReactionMessageCreate(BaseModel):
 
 
 class ReactionMessageOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    text: str
+    created_at: datetime
+
+
+class Top3TitlePoolCreate(BaseModel):
+    text: str
+
+
+class Top3TitlePoolOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     text: str
@@ -183,3 +217,19 @@ class SettingsUpdate(BaseModel):
     default_claude_model: str | None = None
     default_openai_model: str | None = None
     system_prompt: str | None = None
+    ranking_daily_enabled: str | None = None
+    ranking_daily_channel_id: str | None = None
+    ranking_daily_time: str | None = None
+    ranking_daily_range: str | None = None
+    ranking_daily_crime_only: str | None = None
+    ranking_daily_show_districts: str | None = None
+    ranking_daily_title: str | None = None
+    ranking_daily_intro: str | None = None
+    ranking_top3_enabled: str | None = None
+    ranking_top3_channel_id: str | None = None
+    ranking_top3_time: str | None = None
+    ranking_top3_range: str | None = None
+    ranking_top3_crime_only: str | None = None
+    ranking_top3_title: str | None = None
+    ranking_top3_intro: str | None = None
+    personnel_admin_channel_id: str | None = None

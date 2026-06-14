@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import discord
@@ -18,7 +18,7 @@ from sqlalchemy import select
 
 from .config import settings
 from .db import SessionLocal, init_db
-from .models import ExpiryMessage, Mission, MissionStatus, ReactionMessage
+from .models import Crew, ExpiryMessage, Mission, MissionStatus, ReactionMessage
 
 log = logging.getLogger("crime-bot")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
@@ -65,6 +65,8 @@ async def _update_mission_from_reaction(message_id: int, emoji_str: str) -> bool
 
 
 _watchers_started = False
+_last_daily_ranking_post_date = None  # date des letzten erfolgreichen Full-Posts
+_last_top3_ranking_post_date = None   # date des letzten erfolgreichen Top3-Posts
 
 
 @client.event
@@ -75,6 +77,120 @@ async def on_ready():
         _watchers_started = True
         client.loop.create_task(_deadline_watcher())
         client.loop.create_task(_scheduled_send_watcher())
+        client.loop.create_task(_daily_ranking_watcher())
+
+
+async def _daily_ranking_watcher():
+    """Background-Loop: prüft alle 30 Sek beide Ranking-Posts (Full + Top3)."""
+    await client.wait_until_ready()
+    while not client.is_closed():
+        try:
+            await _check_ranking_post("full")
+            await _check_ranking_post("top3")
+        except Exception:
+            log.exception("ranking watcher tick failed")
+        await asyncio.sleep(30)
+
+
+def _range_to_iso(range_setting: str) -> str | None:
+    range_setting = (range_setting or "all").lower()
+    if range_setting == "today":
+        d = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        return d.isoformat()
+    if range_setting == "7d":
+        return (datetime.utcnow() - timedelta(days=7)).isoformat()
+    if range_setting == "30d":
+        return (datetime.utcnow() - timedelta(days=30)).isoformat()
+    return None
+
+
+async def _check_ranking_post(mode: str) -> None:
+    """mode='full' liest 'ranking_daily_*' Settings, mode='top3' liest 'ranking_top3_*'."""
+    global _last_daily_ranking_post_date, _last_top3_ranking_post_date
+    from .settings_store import get as settings_get
+
+    prefix = "ranking_top3" if mode == "top3" else "ranking_daily"
+    default_time = "08:00" if mode == "top3" else "03:33"
+    default_title = (
+        "🥇 Die Spitze von Liberty City" if mode == "top3"
+        else "🏆 Crew-Ranking — Liberty City"
+    )
+
+    async with SessionLocal() as session:
+        enabled_raw = (await settings_get(session, f"{prefix}_enabled", "")).lower()
+        if enabled_raw not in ("1", "true", "yes", "on"):
+            return
+        channel_id = (await settings_get(session, f"{prefix}_channel_id", "")).strip()
+        if not channel_id:
+            return
+        time_str = (await settings_get(session, f"{prefix}_time", default_time)).strip()
+        try:
+            h, m = [int(x) for x in time_str.split(":")]
+        except (ValueError, AttributeError):
+            h, m = (8, 0) if mode == "top3" else (3, 33)
+
+        now_local = datetime.now()
+        today = now_local.date()
+        last_date = _last_top3_ranking_post_date if mode == "top3" else _last_daily_ranking_post_date
+        if last_date == today:
+            return
+        target = now_local.replace(hour=h, minute=m, second=0, microsecond=0)
+        if now_local < target:
+            return
+        if (now_local - target).total_seconds() > 600:
+            # Zu spät → diesen Tag überspringen, kein Spam beim Service-Spätstart
+            if mode == "top3":
+                _last_top3_ranking_post_date = today
+            else:
+                _last_daily_ranking_post_date = today
+            return
+
+        range_setting = await settings_get(session, f"{prefix}_range", "all")
+        crime_only_raw = (await settings_get(session, f"{prefix}_crime_only", "true")).lower()
+        title = await settings_get(session, f"{prefix}_title", default_title)
+        intro = await settings_get(session, f"{prefix}_intro", "")
+        # show_districts ist nur fürs 'full'-Embed relevant
+        show_districts_raw = (
+            await settings_get(session, "ranking_daily_show_districts", "true")
+        ).lower() if mode == "full" else "false"
+
+    payload = {
+        "channel_id": channel_id,
+        "since": _range_to_iso(range_setting),
+        "crime_only": crime_only_raw in ("1", "true", "yes", "on"),
+        "show_district_aggregate": show_districts_raw in ("1", "true", "yes", "on"),
+        "title": title,
+        "intro": intro,
+        "top_n": 25 if mode == "full" else 3,
+        "mode": mode,
+    }
+
+    try:
+        import httpx as _httpx
+    except ImportError:
+        log.warning("httpx fehlt — ranking post (%s) skipped", mode)
+        return
+    try:
+        async with _httpx.AsyncClient(timeout=30.0) as cli:
+            r = await cli.post(
+                "http://127.0.0.1:8000/api/missions/ranking/post-to-discord",
+                json=payload,
+                auth=(settings.admin_username, settings.admin_password),
+            )
+        if r.status_code >= 400:
+            log.warning("ranking post (%s) failed: %s %s", mode, r.status_code, r.text[:300])
+            return
+        result = r.json()
+        log.info(
+            "ranking %s posted to channel %s (msg %s, %s Crews)",
+            mode, channel_id, result.get("message_id"), result.get("crews_posted"),
+        )
+        if mode == "top3":
+            _last_top3_ranking_post_date = today
+        else:
+            _last_daily_ranking_post_date = today
+    except Exception as exc:
+        log.warning("ranking post (%s) error: %s", mode, exc)
 
 
 async def _scheduled_send_watcher():
@@ -269,6 +385,92 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 # ---- Internal HTTP API (Backend → Bot) ----
 
 
+async def _auto_post_personnel(session, mission: Mission) -> None:
+    """Postet den personnel_brief im Admin-Channel (falls konfiguriert).
+    Wird nach erfolgreichem Mission-Send aufgerufen. Defensiv: jeder Fehler
+    wird stillschweigend geloggt, damit der Mission-Send selbst nicht
+    blockiert. Nutzt das Replace-Previous-Pattern: alter Post wird gelöscht,
+    falls vorhanden."""
+    from .settings_store import get as settings_get
+
+    if not (mission.personnel_brief or "").strip():
+        return  # nichts zu posten
+    channel_id = (await settings_get(session, "personnel_admin_channel_id", "")).strip()
+    if not channel_id:
+        return  # Admin-Channel nicht konfiguriert -> Auto-Post deaktiviert
+
+    crew = await session.get(Crew, mission.crew_id)
+    if crew is None:
+        return
+
+    # Vorherigen Post löschen falls vorhanden
+    if mission.personnel_discord_message_id:
+        try:
+            ch = client.get_channel(int(channel_id)) or await client.fetch_channel(int(channel_id))
+            try:
+                old_msg = await ch.fetch_message(int(mission.personnel_discord_message_id))
+                await old_msg.delete()
+            except Exception:
+                pass
+        except Exception:
+            pass
+        mission.personnel_discord_message_id = ""
+
+    # Neuen Embed senden
+    try:
+        ch = client.get_channel(int(channel_id)) or await client.fetch_channel(int(channel_id))
+    except Exception as exc:
+        log.warning("personnel-auto-post: channel %s nicht erreichbar: %s", channel_id, exc)
+        return
+
+    # Farbe von #RRGGBB → int
+    color_hex = (crew.color_hex or "#b91c1c").strip().lstrip("#")
+    try:
+        color = int(color_hex, 16)
+    except (ValueError, TypeError):
+        color = 0xB91C1C
+
+    # Slot-Formatierung
+    slot = mission.scheduled_send_at or mission.sent_at or mission.created_at
+    slot_str = slot.strftime("%d.%m.%Y %H:%M") + " UTC" if slot else "ohne Slot"
+
+    status_label = {
+        "draft": "📝 geplant",
+        "pending": "🔴 live",
+        "approved": "✅ erledigt",
+        "rejected": "❌ abgelehnt",
+        "cancelled": "⏹ abgebrochen",
+    }.get(mission.status.value, mission.status.value)
+
+    embed = discord.Embed(
+        title=f"🎭 Personal-Bedarf — {crew.name}",
+        description=mission.personnel_brief.strip()[:4000],
+        color=color,
+    )
+    embed.add_field(name="Slot (wann)", value=slot_str, inline=True)
+    embed.add_field(name="Status", value=status_label, inline=True)
+    embed.add_field(name="Stadtteil", value=crew.district or "—", inline=True)
+
+    snippet = (mission.content_final or mission.content_generated or "").strip()
+    if snippet:
+        embed.add_field(
+            name="Auftrag (Auszug)",
+            value=(snippet[:300] + "…") if len(snippet) > 300 else snippet,
+            inline=False,
+        )
+
+    embed.set_footer(text=f"Mission #{mission.id} · Crew {crew.name} · auto-post bei Send")
+    embed.timestamp = mission.personnel_updated_at or datetime.utcnow()
+
+    try:
+        msg = await ch.send(embed=embed)
+        mission.personnel_discord_message_id = str(msg.id)
+        # Commit zusammen mit dem Caller — wir setzen nur das Feld, der
+        # nächste session.commit() schreibt es.
+    except Exception as exc:
+        log.warning("personnel-auto-post: send failed mission %s: %s", mission.id, exc)
+
+
 async def _post_mission_to_discord(session, mission: Mission) -> tuple[bool, str | None]:
     """Sendet eine DRAFT-Mission an Discord, setzt sent_at + status PENDING +
     discord_message_id, leert scheduled_send_at. Returns (ok, error)."""
@@ -310,6 +512,12 @@ async def _post_mission_to_discord(session, mission: Mission) -> tuple[bool, str
     mission.status = MissionStatus.PENDING
     mission.sent_at = datetime.utcnow()
     mission.scheduled_send_at = None
+    # Auto-Post den personnel_brief im Admin-Channel (falls konfiguriert)
+    # Defensiv: scheitert nie hart, sonst würde Mission-Send blockieren.
+    try:
+        await _auto_post_personnel(session, mission)
+    except Exception:
+        log.exception("auto-post personnel failed for mission %s", mission.id)
     await session.commit()
     return True, None
 
@@ -459,6 +667,60 @@ async def http_delete_in_range(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "deleted": deleted, "failed": failed})
 
 
+async def http_send_embed(request: web.Request) -> web.Response:
+    """POST /send_embed  body: {channel_id: str, content?: str, embed: {...}}
+    Embed-Felder: title, description, color (int), footer.text, timestamp (iso),
+    thumbnail_url, image_url, fields: [{name, value, inline}]"""
+    data = await request.json()
+    try:
+        channel_id = int(data["channel_id"])
+    except (KeyError, ValueError, TypeError):
+        return web.json_response({"error": "channel_id ungültig"}, status=400)
+
+    content = data.get("content", "") or ""
+    embed_data = data.get("embed") or {}
+
+    try:
+        channel = client.get_channel(channel_id) or await client.fetch_channel(channel_id)
+    except discord.NotFound:
+        return web.json_response({"error": "channel not found"}, status=404)
+    except discord.Forbidden:
+        return web.json_response({"error": "forbidden - channel access?"}, status=403)
+    except Exception as exc:
+        return web.json_response({"error": f"channel: {exc}"}, status=500)
+
+    embed = discord.Embed(
+        title=embed_data.get("title") or None,
+        description=embed_data.get("description") or None,
+        color=embed_data.get("color") or 0xB91C1C,
+    )
+    footer = embed_data.get("footer") or {}
+    if footer.get("text"):
+        embed.set_footer(text=footer["text"], icon_url=footer.get("icon_url") or None)
+    ts_iso = embed_data.get("timestamp")
+    if ts_iso:
+        try:
+            embed.timestamp = datetime.fromisoformat(ts_iso)
+        except (ValueError, TypeError):
+            pass
+    if embed_data.get("thumbnail_url"):
+        embed.set_thumbnail(url=embed_data["thumbnail_url"])
+    if embed_data.get("image_url"):
+        embed.set_image(url=embed_data["image_url"])
+    for field in embed_data.get("fields") or []:
+        name = field.get("name") or "​"
+        value = field.get("value") or "​"
+        embed.add_field(name=name, value=value, inline=bool(field.get("inline", False)))
+
+    try:
+        msg = await channel.send(content=content or None, embed=embed)
+    except Exception as exc:
+        log.exception("send_embed failed")
+        return web.json_response({"error": str(exc)}, status=500)
+
+    return web.json_response({"ok": True, "message_id": str(msg.id)})
+
+
 async def http_health(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "ready": client.is_ready()})
 
@@ -523,6 +785,7 @@ def build_http_app() -> web.Application:
         web.post("/delete_message", http_delete_message),
         web.post("/delete_in_range", http_delete_in_range),
         web.post("/read_channel", http_read_channel),
+        web.post("/send_embed", http_send_embed),
         web.get("/health", http_health),
     ])
     return app

@@ -18,8 +18,18 @@
         <a href="/" class="px-3 py-1.5 rounded bg-red-700 text-white">Dashboard</a>
         <a href="/archive" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Archiv</a>
         <a href="/lore" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Lore</a>
+        <a href="/story" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Story</a>
         <a href="/ranking" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Ranking</a>
         <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
+        <!-- Personal-Bedarf-Bell mit Counter -->
+        <button @click="ackPersonnel(); document.getElementById('personnel-widget')?.scrollIntoView({behavior:'smooth', block:'start'})"
+                class="relative px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700"
+                title="Personal-Bedarf — klicken zum Widget springen">
+          🔔
+          <span x-show="personnelUnseen > 0"
+                x-text="personnelUnseen"
+                class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center"></span>
+        </button>
         <button @click="archiveAllActive()" :disabled="archivingAll"
                 class="px-3 py-1.5 rounded bg-amber-700 hover:bg-amber-600 disabled:opacity-50 font-medium">
           <span x-show="!archivingAll">📦 Alle archivieren</span>
@@ -96,38 +106,6 @@
         Card-Liste gefiltert auf: <span x-text="statusLabel(statusFilter)"></span>
         <button @click="statusFilter = ''" class="ml-2 underline hover:text-zinc-200">zurücksetzen</button>
       </p>
-    </section>
-
-    <!-- Top-3-Ranking-Block -->
-    <section class="mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <h2 class="text-lg font-semibold">🏆 Top 3 — Performance-Ranking</h2>
-        <a href="/ranking" class="text-xs text-blue-400 hover:text-blue-300">
-          Vollständiges Ranking →
-        </a>
-      </div>
-      <ol class="space-y-1">
-        <template x-for="(c, idx) in topCrews" :key="c.crew_id">
-          <li class="flex items-center gap-2 px-3 py-2 rounded text-sm"
-              :class="[
-                idx === 0 ? 'bg-yellow-900/30 border border-yellow-700' :
-                idx === 1 ? 'bg-zinc-700/30 border border-zinc-600' :
-                            'bg-orange-900/30 border border-orange-800'
-              ]">
-            <span class="font-mono text-zinc-500 w-6" x-text="`#${idx + 1}`"></span>
-            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                  :style="`background-color: ${c.color_hex || '#71717a'}`"></span>
-            <span class="font-medium flex-1 truncate" x-text="c.name"></span>
-            <span class="text-xs text-zinc-400 hidden sm:inline" x-text="c.district"></span>
-            <span class="font-bold tabular-nums"
-                  :class="c.points > 0 ? 'text-green-400' : c.points < 0 ? 'text-red-400' : 'text-zinc-400'"
-                  x-text="`${c.points}P`"></span>
-          </li>
-        </template>
-        <li x-show="topCrews.length === 0" class="text-zinc-500 text-sm px-3 py-2">
-          Noch keine Crew-Daten.
-        </li>
-      </ol>
     </section>
 
     <section class="mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
@@ -258,6 +236,145 @@
       </div><!-- /showBulk -->
     </section>
 
+    <!-- ───── Personal-Bedarf-Widget (Live, 30s Polling) ───── -->
+    <section id="personnel-widget" class="mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <h2 class="text-lg font-semibold">
+          🎭 Personal-Bedarf
+          <span class="text-xs text-zinc-500 font-normal ml-1">
+            (<span x-text="personnel.count"></span> Missions · Auto-Update alle 30 s)
+          </span>
+        </h2>
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- Zeitraum-Picker -->
+          <div class="flex items-center gap-1 bg-zinc-950 border border-zinc-800 rounded text-xs">
+            <button @click="setPersonnelMode('active')"
+                    :class="personnelMode === 'active' ? 'bg-blue-700 text-white' : 'text-zinc-400 hover:text-zinc-200'"
+                    class="px-2 py-1 rounded-l">Alle aktiven</button>
+            <button @click="setPersonnelMode('24h')"
+                    :class="personnelMode === '24h' ? 'bg-blue-700 text-white' : 'text-zinc-400 hover:text-zinc-200'"
+                    class="px-2 py-1">24 h</button>
+            <button @click="setPersonnelMode('7d')"
+                    :class="personnelMode === '7d' ? 'bg-blue-700 text-white' : 'text-zinc-400 hover:text-zinc-200'"
+                    class="px-2 py-1">7 Tage</button>
+            <button @click="setPersonnelMode('30d')"
+                    :class="personnelMode === '30d' ? 'bg-blue-700 text-white' : 'text-zinc-400 hover:text-zinc-200'"
+                    class="px-2 py-1 rounded-r">30 Tage</button>
+          </div>
+          <span x-show="personnel.generated_at" class="text-xs text-zinc-500"
+                x-text="`Stand: ${new Date(personnel.generated_at + 'Z').toLocaleTimeString('de-DE')}`"></span>
+          <button @click="requestNotificationPermission()"
+                  title="Browser-Benachrichtigungen erlauben — du wirst auch außerhalb des Tabs informiert"
+                  class="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700">
+            🔔
+          </button>
+          <button @click="loadPersonnel()" class="text-xs px-2 py-1 rounded bg-blue-700 hover:bg-blue-600">
+            ↻ Jetzt
+          </button>
+        </div>
+      </div>
+
+      <div x-show="personnel.items.length === 0" class="text-sm text-zinc-500 py-4 text-center">
+        <span x-show="personnelMode === 'active'">Keine aktiven Missions im System (alle archiviert oder noch keine erstellt).</span>
+        <span x-show="personnelMode !== 'active'">Keine Missions im gewählten Zeitfenster.</span>
+      </div>
+
+      <div x-show="personnel.items.length > 0" class="space-y-2">
+        <template x-for="item in personnel.items" :key="item.mission_id">
+          <div class="bg-zinc-950 border border-zinc-800 rounded p-3"
+               :style="`border-left: 4px solid ${item.crew_color_hex}`">
+            <div class="flex items-start justify-between gap-3 flex-wrap mb-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold" x-text="item.crew_name"></span>
+                <span class="text-xs text-zinc-500" x-show="item.crew_district"
+                      x-text="`· ${item.crew_district}`"></span>
+                <span class="text-xs px-2 py-0.5 rounded"
+                      :class="personnelStatusBadge(item.status).cls"
+                      x-text="personnelStatusBadge(item.status).label"></span>
+                <span class="text-xs text-zinc-400" x-text="`⏱ ${formatSlotShort(item.slot)}`"></span>
+              </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <a :href="`/crew/${item.crew_id}`" class="text-xs text-blue-400 hover:underline">
+                  → Crew-Detail
+                </a>
+                <button x-show="personnelEditing !== item.mission_id && item.personnel_brief"
+                        @click="postPersonnelToDiscord(item)"
+                        :disabled="personnelPosting === item.mission_id"
+                        :title="item.personnel_discord_message_id
+                          ? 'Vorherigen Admin-Post ersetzen mit aktuellem Stand'
+                          : 'In Admin-Channel posten (Spielleitung)'"
+                        class="text-xs px-2 py-1 rounded bg-indigo-700 hover:bg-indigo-600 disabled:opacity-50">
+                  <span x-show="personnelPosting !== item.mission_id">
+                    <span x-show="item.personnel_discord_message_id">📤 Aktualisieren</span>
+                    <span x-show="!item.personnel_discord_message_id">📤 Posten</span>
+                  </span>
+                  <span x-show="personnelPosting === item.mission_id">Sende…</span>
+                </button>
+                <button x-show="personnelEditing !== item.mission_id"
+                        @click="startEditPersonnel(item)"
+                        class="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700">
+                  ✎ Personal bearbeiten
+                </button>
+              </div>
+            </div>
+
+            <div x-show="item.content_snippet" class="text-xs text-zinc-500 mb-2 italic"
+                 x-text="'„' + item.content_snippet + '…'"></div>
+
+            <!-- Anzeige-Modus -->
+            <div x-show="personnelEditing !== item.mission_id">
+              <div x-show="item.personnel_brief"
+                   class="text-sm whitespace-pre-wrap text-zinc-200"
+                   x-text="item.personnel_brief"></div>
+              <div x-show="!item.personnel_brief"
+                   class="text-sm text-zinc-500 italic">
+                — noch kein Personal definiert. Klicke „Personal bearbeiten".
+              </div>
+              <div x-show="item.personnel_updated_at" class="text-xs text-zinc-600 mt-1"
+                   x-text="`zuletzt geändert: ${new Date(item.personnel_updated_at + 'Z').toLocaleString('de-DE')}`"></div>
+            </div>
+
+            <!-- Edit-Modus -->
+            <div x-show="personnelEditing === item.mission_id" class="space-y-2">
+              <!-- Quick-Pick: Vorlage laden + KI-Vorschlag -->
+              <div class="flex items-center gap-2 flex-wrap">
+                <label class="text-xs text-zinc-400">📋 Vorlage:</label>
+                <select @change="applyPersonnelTemplate($event.target.value); $event.target.value=''"
+                        class="bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-xs">
+                  <option value="">— wählen —</option>
+                  <template x-for="t in personnelTemplates" :key="t.id">
+                    <option :value="t.id" x-text="t.label"></option>
+                  </template>
+                </select>
+                <button @click="aiSuggestPersonnel(item)" :disabled="personnelAiBusy"
+                        title="Lässt die KI einen Vorschlag passend zum Auftrag generieren"
+                        class="px-2 py-1 rounded bg-purple-700 hover:bg-purple-600 disabled:opacity-50 text-xs">
+                  <span x-show="!personnelAiBusy">🤖 KI-Vorschlag</span>
+                  <span x-show="personnelAiBusy">KI denkt…</span>
+                </button>
+                <span class="text-xs text-zinc-500 ml-auto">
+                  Markdown wird wörtlich angezeigt.
+                </span>
+              </div>
+              <textarea x-model="personnelDraft" rows="10"
+                        placeholder="Mittler: ..."
+                        class="w-full bg-zinc-950 border border-zinc-700 rounded p-2 text-sm font-mono"></textarea>
+              <div class="flex items-center gap-2">
+                <button @click="savePersonnel(item)" :disabled="personnelSaving"
+                        class="px-3 py-1 rounded bg-green-700 hover:bg-green-600 disabled:opacity-50 text-sm">
+                  <span x-show="!personnelSaving">💾 Speichern</span>
+                  <span x-show="personnelSaving">Speichere…</span>
+                </button>
+                <button @click="cancelEditPersonnel()" class="px-3 py-1 rounded bg-zinc-700 hover:bg-zinc-600 text-sm">
+                  Abbrechen
+                </button>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </section>
+
     <section class="mb-4 flex items-center justify-between flex-wrap gap-3">
       <h2 class="text-xl font-semibold">Gangs</h2>
       <div class="flex items-center gap-2">
@@ -335,8 +452,21 @@
     <p x-show="crews.length > 0 && filteredCrews.length === 0" class="text-zinc-500 mt-6">
       Keine Gang in <span x-text="districtFilter"></span>.
     </p>
+
+    <!-- Toast (Personal-Bedarf-Update) -->
+    <div x-show="personnelToast" x-transition
+         class="fixed bottom-4 right-4 bg-blue-700 border border-blue-500 text-white px-4 py-3 rounded-lg shadow-lg max-w-sm z-50 cursor-pointer"
+         @click="ackPersonnel(); document.getElementById('personnel-widget')?.scrollIntoView({behavior:'smooth', block:'start'}); personnelToast = ''">
+      <div class="text-sm font-medium" x-text="personnelToast"></div>
+      <div class="text-xs text-blue-200 mt-1">Klicken zum Widget springen</div>
+    </div>
+    <!-- Toast (Personal-Bedarf-Post-Bestätigung) -->
+    <div x-show="personnelPostToast" x-transition
+         class="fixed bottom-4 left-4 bg-indigo-700 border border-indigo-500 text-white px-4 py-3 rounded-lg shadow-lg max-w-sm z-50">
+      <div class="text-sm font-medium" x-text="personnelPostToast"></div>
+    </div>
   </div>
 
-  <script src="/static/app.js"></script>
+  <script src="/static/app.js?v=personnel6"></script>
 </body>
 </html>

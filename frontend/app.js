@@ -93,13 +93,26 @@ function dashboard() {
     statsFilter: { crew_id: "", range: "all" },
     districtFilter: "",
     statusFilter: "",
-    topCrews: [],
     DISTRICTS,
     showNew: false,
     draft: { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
     notifications: {},
     seenAt: JSON.parse(localStorage.getItem("crewSeenAt") || "{}"),
     archivingAll: false,
+    // Personal-Bedarf Live-Feed
+    personnelMode: localStorage.getItem("personnelMode") || "active",  // 'active' | '24h' | '7d' | '30d'
+    personnel: { items: [], count: 0, etag: "", generated_at: "" },
+    personnelEtag: localStorage.getItem("personnelEtagSeen") || "",
+    personnelChangeCount: 0,                   // wie viele Updates seit dem letzten "Bell-Klick"
+    personnelToast: "",                         // Toast-Banner-Text (auto-leer nach 6s)
+    personnelEditing: null,                     // mission_id, dessen Brief gerade editiert wird
+    personnelDraft: "",                         // Text-Buffer für Edit
+    personnelSaving: false,
+    personnelInitialLoad: true,                 // erstes Laden -> kein Toast
+    personnelTemplates: [],                     // Quick-Pick Vorlagen
+    personnelAiBusy: false,                     // KI-Vorschlag läuft
+    personnelPosting: null,                     // mission_id, dessen Post gerade läuft
+    personnelPostToast: "",                     // kurze Bestätigung nach erfolgreichem Post
     searchQuery: "",
     showBulk: false,
     bulkScope: "all",
@@ -288,26 +301,20 @@ function dashboard() {
       await this.loadCrews();
       await this.loadStats();
       await this.loadNotifications();
-      await this.loadRankingPreview();
+      await this.loadPersonnel();
+      // Templates einmalig — ändern sich nicht zur Laufzeit
+      try { this.personnelTemplates = (await api.get("/api/dashboard/personnel/templates")).templates || []; }
+      catch (e) { this.personnelTemplates = []; }
       setInterval(() => {
         this.loadCrews().catch(() => {});
         this.loadStats().catch(() => {});
         this.loadNotifications().catch(() => {});
       }, 5000);
-      // Ranking aendert sich langsamer -> seltener pollen
-      setInterval(() => { this.loadRankingPreview().catch(() => {}); }, 20000);
+      // Personal-Bedarf — 30s Polling mit ETag-Vergleich für Notifications
+      setInterval(() => { this.loadPersonnel().catch(() => {}); }, 30000);
     },
     async loadCrews() {
       this.crews = await api.get("/api/crews");
-    },
-    async loadRankingPreview() {
-      try {
-        const data = await api.get("/api/missions/ranking?crime_only=false");
-        this.topCrews = (data.crews || []).slice(0, 3);
-      } catch (e) {
-        // Stilles Schweigen — wenn Backend noch nicht restartet ist (404), bleibt
-        // die Liste leer und das Widget zeigt "Noch keine Daten".
-      }
     },
     async archiveAllActive() {
       let missions;
@@ -390,6 +397,162 @@ function dashboard() {
     statusClass: statusClassMap,
     cardBorder: cardBorderClass,
     formatDate,
+
+    // ---- Personal-Bedarf-Widget ----
+    async loadPersonnel() {
+      try {
+        let url = "/api/dashboard/personnel?mode=" + this.personnelMode;
+        if (this.personnelMode !== "active") {
+          const hoursMap = { "24h": 24, "7d": 168, "30d": 720 };
+          url = `/api/dashboard/personnel?mode=window&hours=${hoursMap[this.personnelMode] || 24}`;
+        }
+        const data = await api.get(url);
+        const newEtag = data.etag || "";
+        const prevEtag = this.personnel.etag || "";
+        this.personnel = data;
+        // Change-Detection: ETag hat sich geändert ggü. vorherigem Poll
+        if (!this.personnelInitialLoad && newEtag && newEtag !== prevEtag) {
+          this.personnelChangeCount++;
+          this.personnelToast = `🎭 Personal-Bedarf aktualisiert (${this.personnel.count} Missions)`;
+          setTimeout(() => { this.personnelToast = ""; }, 6000);
+          // Browser-Notification (wenn erlaubt + Tab nicht aktiv)
+          this._tryBrowserNotification(this.personnelToast);
+        }
+        this.personnelInitialLoad = false;
+      } catch (e) {
+        // Backend evtl. nicht restartet — leise sein, nicht im UI lärmen
+      }
+    },
+    get personnelUnseen() {
+      // Bell-Counter: alles, was seit dem letzten "ack" angekommen ist
+      return this.personnelChangeCount;
+    },
+    ackPersonnel() {
+      this.personnelChangeCount = 0;
+      this.personnelEtag = this.personnel.etag || "";
+      localStorage.setItem("personnelEtagSeen", this.personnelEtag);
+    },
+    setPersonnelMode(mode) {
+      this.personnelMode = mode;
+      localStorage.setItem("personnelMode", mode);
+      this.personnelInitialLoad = true;  // Modus-Wechsel ist keine Notification
+      this.loadPersonnel();
+    },
+    _tryBrowserNotification(text) {
+      try {
+        if (document.hidden && "Notification" in window && Notification.permission === "granted") {
+          new Notification("Crime Automation", { body: text, icon: "/static/logo.png" });
+        }
+      } catch (e) {}
+    },
+    async requestNotificationPermission() {
+      if (!("Notification" in window)) {
+        alert("Browser unterstützt keine Notifications.");
+        return;
+      }
+      const perm = await Notification.requestPermission();
+      alert(perm === "granted"
+        ? "Notifications aktiviert. Du wirst bei Personal-Änderungen benachrichtigt, wenn der Tab nicht aktiv ist."
+        : "Notifications wurden nicht erlaubt.");
+    },
+    formatSlotShort(iso) {
+      if (!iso) return "ohne Slot";
+      const d = new Date(iso.endsWith("Z") ? iso : iso + "Z");
+      const now = new Date();
+      const sameDay = d.toDateString() === now.toDateString();
+      const tomorrow = new Date(now); tomorrow.setDate(now.getDate() + 1);
+      const isTomorrow = d.toDateString() === tomorrow.toDateString();
+      const hhmm = d.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+      if (sameDay) return `heute ${hhmm}`;
+      if (isTomorrow) return `morgen ${hhmm}`;
+      return d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+    },
+    personnelStatusBadge(status) {
+      const map = {
+        draft: { label: "geplant", cls: "bg-zinc-700 text-zinc-200" },
+        pending: { label: "live", cls: "bg-amber-700 text-amber-100" },
+        approved: { label: "👍 fertig", cls: "bg-green-800 text-green-100" },
+        rejected: { label: "👎 fertig", cls: "bg-red-800 text-red-100" },
+        cancelled: { label: "❌", cls: "bg-zinc-700 text-zinc-300" },
+      };
+      return map[status] || { label: status, cls: "bg-zinc-700 text-zinc-200" };
+    },
+    // Edit-Flow
+    startEditPersonnel(item) {
+      this.personnelEditing = item.mission_id;
+      this.personnelDraft = item.personnel_brief || "";
+    },
+    cancelEditPersonnel() {
+      this.personnelEditing = null;
+      this.personnelDraft = "";
+    },
+    async savePersonnel(item) {
+      this.personnelSaving = true;
+      try {
+        await api.patch(`/api/dashboard/missions/${item.mission_id}/personnel`,
+                        { personnel_brief: this.personnelDraft });
+        this.personnelEditing = null;
+        this.personnelDraft = "";
+        // Sofort neu laden — der eigene Edit triggert den ETag-Change
+        // wir wollen das aber NICHT als Notification anzeigen
+        this.personnelInitialLoad = true;
+        await this.loadPersonnel();
+      } catch (e) {
+        alert("Fehler beim Speichern: " + (e.message || e));
+      } finally {
+        this.personnelSaving = false;
+      }
+    },
+    applyPersonnelTemplate(templateId) {
+      if (!templateId) return;
+      const t = this.personnelTemplates.find(t => t.id === templateId);
+      if (!t) return;
+      // Wenn Draft schon Inhalt hat -> nachfragen
+      if (this.personnelDraft && this.personnelDraft.trim()) {
+        if (!confirm(`Vorlage „${t.label}" laden? Der aktuelle Text wird überschrieben.`)) return;
+      }
+      this.personnelDraft = t.content || "";
+    },
+    async aiSuggestPersonnel(item) {
+      this.personnelAiBusy = true;
+      try {
+        const r = await api.post(`/api/dashboard/missions/${item.mission_id}/personnel/ai-suggest`, {});
+        if (this.personnelDraft && this.personnelDraft.trim()) {
+          if (!confirm("KI-Vorschlag laden? Der aktuelle Text wird überschrieben.")) return;
+        }
+        this.personnelDraft = r.suggestion || "";
+      } catch (e) {
+        alert("KI-Vorschlag fehlgeschlagen: " + (e.message || e));
+      } finally {
+        this.personnelAiBusy = false;
+      }
+    },
+    async postPersonnelToDiscord(item) {
+      if (!(item.personnel_brief || "").trim()) {
+        alert("Bitte erst Personal-Brief speichern, dann posten.");
+        return;
+      }
+      const replacing = !!item.personnel_discord_message_id;
+      const msg = replacing
+        ? `Personal-Brief für „${item.crew_name}" im Admin-Channel aktualisieren (vorherigen Post ersetzen)?`
+        : `Personal-Brief für „${item.crew_name}" in den Admin-Channel posten?`;
+      if (!confirm(msg)) return;
+      this.personnelPosting = item.mission_id;
+      try {
+        const r = await api.post(`/api/dashboard/missions/${item.mission_id}/personnel/post`, {});
+        this.personnelPostToast = replacing
+          ? `✓ Aktualisiert in Admin-Channel (Crew „${item.crew_name}")`
+          : `✓ Gepostet in Admin-Channel (Crew „${item.crew_name}")`;
+        setTimeout(() => { this.personnelPostToast = ""; }, 5000);
+        // Personnel neu laden — message_id ist jetzt gesetzt
+        this.personnelInitialLoad = true;
+        await this.loadPersonnel();
+      } catch (e) {
+        alert("Discord-Post fehlgeschlagen: " + (e.message || e));
+      } finally {
+        this.personnelPosting = null;
+      }
+    },
   };
 }
 
@@ -398,7 +561,8 @@ function crewPage() {
   const id = parseInt(location.pathname.split("/").pop(), 10);
   return {
     crewId: id,
-    crew: { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
+    crew: { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c", bonus_points: 0 },
+    bonusFreeValue: null,
     DISTRICTS,
     allCrews: [],
     relations: [],
@@ -427,6 +591,14 @@ function crewPage() {
     suggestionsLastStatus: "",  // 'approved' | 'rejected' | 'cancelled' | 'pending' | ''
     suggestionsMessage: "",
     suggestionsIsError: false,
+    // Personal-Brief — pro Mission auf dieser Crew-Seite
+    personnelEditingId: null,        // welche Mission gerade editiert wird
+    personnelDraftCrew: "",          // Edit-Buffer
+    personnelSavingCrew: false,
+    personnelAiBusyCrew: false,
+    personnelPostingId: null,        // Mission die gerade gepostet wird
+    personnelTemplatesCrew: [],       // Quick-Pick Vorlagen (einmal geladen)
+    personnelChannelConfigured: false, // gibt's eine Admin-Channel-ID in Settings?
 
     get otherCrews() {
       return this.allCrews.filter(c => c.id !== this.crewId);
@@ -439,11 +611,89 @@ function crewPage() {
     async init() {
       await Promise.all([this.loadCrew(), this.loadAllCrews(), this.loadRelations(), this.loadMissions()]);
       await this.loadBossInfo();
+      // Personal-Brief-Templates einmalig laden (für Quick-Pick im Edit-Modus)
+      try {
+        const r = await api.get("/api/dashboard/personnel/templates");
+        this.personnelTemplatesCrew = r.templates || [];
+      } catch (e) { this.personnelTemplatesCrew = []; }
+      // Settings checken: ist Admin-Channel gesetzt? (Posten-Button nur dann zeigen)
+      try {
+        const s = await api.get("/api/settings");
+        this.personnelChannelConfigured = !!(s.personnel_admin_channel_id || "").trim();
+      } catch (e) { this.personnelChannelConfigured = false; }
       // Auto-Refresh alle 5 Sek (fuer Discord-Reaktions-Updates + Boss-Texte)
       setInterval(() => {
         this.loadMissions().catch(() => {});
         this.loadBossInfo().catch(() => {});
       }, 5000);
+    },
+    // ---- Personal-Brief auf der Crew-Seite ----
+    startEditPersonnelCrew(m) {
+      this.personnelEditingId = m.id;
+      this.personnelDraftCrew = m.personnel_brief || "";
+    },
+    cancelEditPersonnelCrew() {
+      this.personnelEditingId = null;
+      this.personnelDraftCrew = "";
+    },
+    applyPersonnelTemplateCrew(templateId) {
+      if (!templateId) return;
+      const t = this.personnelTemplatesCrew.find(t => t.id === templateId);
+      if (!t) return;
+      if (this.personnelDraftCrew && this.personnelDraftCrew.trim()) {
+        if (!confirm(`Vorlage „${t.label}" laden? Der aktuelle Text wird überschrieben.`)) return;
+      }
+      this.personnelDraftCrew = t.content || "";
+    },
+    async aiSuggestPersonnelCrew(m) {
+      this.personnelAiBusyCrew = true;
+      try {
+        const r = await api.post(`/api/dashboard/missions/${m.id}/personnel/ai-suggest`, {});
+        if (this.personnelDraftCrew && this.personnelDraftCrew.trim()) {
+          if (!confirm("KI-Vorschlag laden? Der aktuelle Text wird überschrieben.")) return;
+        }
+        this.personnelDraftCrew = r.suggestion || "";
+      } catch (e) {
+        alert("KI-Vorschlag fehlgeschlagen: " + (e.message || e));
+      } finally {
+        this.personnelAiBusyCrew = false;
+      }
+    },
+    async savePersonnelCrew(m) {
+      this.personnelSavingCrew = true;
+      try {
+        const r = await api.patch(`/api/dashboard/missions/${m.id}/personnel`,
+                                  { personnel_brief: this.personnelDraftCrew });
+        // Lokales mission-Objekt updaten, damit Anzeige sofort frisch ist
+        m.personnel_brief = r.personnel_brief;
+        m.personnel_updated_at = r.personnel_updated_at;
+        this.personnelEditingId = null;
+        this.personnelDraftCrew = "";
+      } catch (e) {
+        alert("Fehler beim Speichern: " + (e.message || e));
+      } finally {
+        this.personnelSavingCrew = false;
+      }
+    },
+    async postPersonnelToDiscordCrew(m) {
+      if (!(m.personnel_brief || "").trim()) {
+        alert("Bitte erst Personal-Brief speichern, dann posten.");
+        return;
+      }
+      const replacing = !!m.personnel_discord_message_id;
+      const msg = replacing
+        ? `Personal-Brief im Admin-Channel aktualisieren (vorherigen Post ersetzen)?`
+        : `Personal-Brief in den Admin-Channel posten?`;
+      if (!confirm(msg)) return;
+      this.personnelPostingId = m.id;
+      try {
+        const r = await api.post(`/api/dashboard/missions/${m.id}/personnel/post`, {});
+        m.personnel_discord_message_id = r.message_id || "";
+      } catch (e) {
+        alert("Discord-Post fehlgeschlagen: " + (e.message || e));
+      } finally {
+        this.personnelPostingId = null;
+      }
     },
     async loadCrew() { this.crew = await api.get(`/api/crews/${this.crewId}`); },
     async loadAllCrews() { this.allCrews = await api.get("/api/crews"); },
@@ -513,6 +763,26 @@ function crewPage() {
       if (!confirm("Gang wirklich löschen?")) return;
       try { await api.del(`/api/crews/${this.crewId}`); location.href = "/"; }
       catch (e) { alert(e.message); }
+    },
+
+    async adjustBonus(delta) {
+      try {
+        this.crew = await api.post(`/api/crews/${this.crewId}/bonus`, { points: delta });
+      } catch (e) { alert(e.message); }
+    },
+    async adjustBonusFree() {
+      const n = parseInt(this.bonusFreeValue, 10);
+      if (!n) return;
+      try {
+        this.crew = await api.post(`/api/crews/${this.crewId}/bonus`, { points: n });
+        this.bonusFreeValue = null;
+      } catch (e) { alert(e.message); }
+    },
+    async resetBonus() {
+      if (!confirm("Bonus-Punkte auf 0 zurücksetzen?")) return;
+      try {
+        this.crew = await api.patch(`/api/crews/${this.crewId}`, { bonus_points: 0 });
+      } catch (e) { alert(e.message); }
     },
 
     // Schritt 1 — KI-Vorschau generieren. Wenn regenerate=true, ueberschreibt
@@ -815,7 +1085,18 @@ function crewPage() {
       this.rewritingMissionId = m.id;
       try {
         const updated = await api.post(`/api/missions/${m.id}/rewrite`);
-        Object.assign(m, updated);
+        // Defensive 3-Schritt-Update — Alpine.js erkennt bei einzelnen
+        // Array-Items nicht immer zuverlässig die Property-Änderung:
+        // 1) Felder direkt setzen (triggert x-model im Textarea)
+        m.content_final = updated.content_final;
+        m.content_generated = updated.content_generated;
+        m.ai_provider = updated.ai_provider;
+        m.personnel_brief = updated.personnel_brief;
+        m.personnel_updated_at = updated.personnel_updated_at;
+        // 2) Missions-Array komplett ersetzen — garantiert Rerender
+        this.missions = this.missions.map(x => x.id === m.id ? { ...x, ...updated } : x);
+        // 3) Frisch vom Backend als Backup-Sync
+        await this.loadMissions();
       } catch (e) { alert(e.message); }
       finally { this.rewritingMissionId = null; }
     },
@@ -916,6 +1197,66 @@ function archivePage() {
   };
 }
 
+// ---- Story Page ----
+function storyPage() {
+  return {
+    files: [],
+    activeFile: "",
+    content: "",
+    dirty: false,
+    loading: false,
+    saving: false,
+    msg: "",
+    initError: "",
+
+    async init() {
+      await this.refreshFileList();
+      if (this.files.length) await this.selectFile(this.files[0].filename);
+    },
+    async refreshFileList() {
+      try {
+        this.files = await api.get("/api/story/files");
+        this.initError = "";
+      } catch (e) {
+        this.initError = `Konnte Story-Files nicht laden: ${e.message}`;
+        console.error("storyPage refreshFileList:", e);
+      }
+    },
+    async selectFile(filename) {
+      if (this.dirty && !confirm("Ungespeicherte Änderungen verwerfen?")) return;
+      this.activeFile = filename;
+      this.loading = true;
+      this.dirty = false;
+      try {
+        const r = await api.get(`/api/story/file/${encodeURIComponent(filename)}`);
+        this.content = r.content || "";
+      } catch (e) { alert(e.message); }
+      finally { this.loading = false; }
+    },
+    async saveFile() {
+      if (!this.activeFile) return;
+      this.saving = true;
+      this.msg = "";
+      try {
+        await api.send(
+          `/api/story/file/${encodeURIComponent(this.activeFile)}`,
+          "PUT",
+          { content: this.content }
+        );
+        this.dirty = false;
+        this.msg = "✓ Gespeichert (Backup als .bak abgelegt)";
+        await this.refreshFileList();
+        setTimeout(() => { this.msg = ""; }, 3000);
+      } catch (e) { alert(e.message); }
+      finally { this.saving = false; }
+    },
+    async reload() {
+      if (this.dirty && !confirm("Ungespeicherte Änderungen verwerfen?")) return;
+      if (this.activeFile) await this.selectFile(this.activeFile);
+    },
+  };
+}
+
 // ---- Settings Page ----
 function settingsPage() {
   return {
@@ -937,12 +1278,63 @@ function settingsPage() {
     systemPrompts: [],
     editingPromptId: null,
     newPromptForm: { name: "", text: "" },
+    rankingForm: {
+      ranking_daily_enabled: "false",
+      ranking_daily_channel_id: "",
+      ranking_daily_time: "03:33",
+      ranking_daily_range: "all",
+      ranking_daily_crime_only: "true",
+      ranking_daily_show_districts: "true",
+      ranking_daily_title: "🏆 Crew-Ranking — Liberty City",
+      ranking_daily_intro: "",
+    },
+    rankingMsg: "",
+    top3Titles: [],
+    newTop3Title: "",
+    top3Form: {
+      ranking_top3_enabled: "false",
+      ranking_top3_channel_id: "",
+      ranking_top3_time: "08:00",
+      ranking_top3_range: "all",
+      ranking_top3_crime_only: "true",
+      ranking_top3_title: "🥇 Die Spitze von Liberty City",
+      ranking_top3_intro: "",
+    },
+    top3Msg: "",
+    // Personnel-Admin-Channel
+    personnelChannelForm: { personnel_admin_channel_id: "" },
+    personnelChannelSaving: false,
+    personnelChannelMsg: "",
+    personnelChannelMsgError: false,
     async init() {
       this.state = await api.get("/api/settings");
       this.form.default_provider = this.state.default_provider;
       this.form.default_claude_model = this.state.default_claude_model;
       this.form.default_openai_model = this.state.default_openai_model;
       this.form.system_prompt = this.state.system_prompt || "";
+      // Daily-Ranking-Konfig laden (Strings, weil settings_store nur strings hat)
+      for (const k of Object.keys(this.rankingForm)) {
+        if (this.state[k] !== undefined && this.state[k] !== "") this.rankingForm[k] = this.state[k];
+      }
+      // Defaults korrigieren wenn DB leer
+      if (!this.rankingForm.ranking_daily_enabled) this.rankingForm.ranking_daily_enabled = "false";
+      if (!this.rankingForm.ranking_daily_time) this.rankingForm.ranking_daily_time = "03:33";
+      if (!this.rankingForm.ranking_daily_range) this.rankingForm.ranking_daily_range = "all";
+      if (!this.rankingForm.ranking_daily_crime_only) this.rankingForm.ranking_daily_crime_only = "true";
+      if (!this.rankingForm.ranking_daily_show_districts) this.rankingForm.ranking_daily_show_districts = "true";
+      if (!this.rankingForm.ranking_daily_title) this.rankingForm.ranking_daily_title = "🏆 Crew-Ranking — Liberty City";
+      // Top3-Form befüllen
+      for (const k of Object.keys(this.top3Form)) {
+        if (this.state[k] !== undefined && this.state[k] !== "") this.top3Form[k] = this.state[k];
+      }
+      if (!this.top3Form.ranking_top3_enabled) this.top3Form.ranking_top3_enabled = "false";
+      if (!this.top3Form.ranking_top3_time) this.top3Form.ranking_top3_time = "08:00";
+      if (!this.top3Form.ranking_top3_range) this.top3Form.ranking_top3_range = "all";
+      if (!this.top3Form.ranking_top3_crime_only) this.top3Form.ranking_top3_crime_only = "true";
+      if (!this.top3Form.ranking_top3_title) this.top3Form.ranking_top3_title = "🥇 Die Spitze von Liberty City";
+      // Personnel-Channel-Form befüllen
+      this.personnelChannelForm.personnel_admin_channel_id = this.state.personnel_admin_channel_id || "";
+      await this.loadTop3Titles();
       await this.loadExpiryMessages();
       await this.loadReactionMessages();
       await this.loadSystemPrompts();
@@ -981,6 +1373,65 @@ function settingsPage() {
       try { await api.del(`/api/system-prompts/${id}`); await this.loadSystemPrompts(); }
       catch (e) { alert(e.message); }
     },
+    async saveRanking() {
+      try {
+        const payload = {};
+        for (const k of Object.keys(this.rankingForm)) {
+          payload[k] = String(this.rankingForm[k] || "");
+        }
+        await api.patch("/api/settings", payload);
+        this.rankingMsg = "Gespeichert.";
+        setTimeout(() => { this.rankingMsg = ""; }, 2500);
+      } catch (e) { alert(e.message); }
+    },
+    async loadTop3Titles() {
+      try { this.top3Titles = await api.get("/api/top3-title-pool"); }
+      catch (e) { /* silent */ }
+    },
+    async addTop3Title() {
+      const text = (this.newTop3Title || "").trim();
+      if (!text) return;
+      try {
+        await api.post("/api/top3-title-pool", { text });
+        this.newTop3Title = "";
+        await this.loadTop3Titles();
+      } catch (e) { alert(e.message); }
+    },
+    async deleteTop3Title(id) {
+      try { await api.del(`/api/top3-title-pool/${id}`); await this.loadTop3Titles(); }
+      catch (e) { alert(e.message); }
+    },
+
+    async saveTop3() {
+      try {
+        const payload = {};
+        for (const k of Object.keys(this.top3Form)) {
+          payload[k] = String(this.top3Form[k] || "");
+        }
+        await api.patch("/api/settings", payload);
+        this.top3Msg = "Gespeichert.";
+        setTimeout(() => { this.top3Msg = ""; }, 2500);
+      } catch (e) { alert(e.message); }
+    },
+    async savePersonnelChannel() {
+      this.personnelChannelSaving = true;
+      this.personnelChannelMsg = "";
+      this.personnelChannelMsgError = false;
+      try {
+        const id = String(this.personnelChannelForm.personnel_admin_channel_id || "").trim();
+        await api.patch("/api/settings", { personnel_admin_channel_id: id });
+        this.personnelChannelMsg = id
+          ? 'Gespeichert. Im Dashboard-Widget steht jetzt der "📤 Posten"-Button bereit.'
+          : 'Gespeichert (leer — Posten ist deaktiviert).';
+        setTimeout(() => { this.personnelChannelMsg = ""; }, 4000);
+      } catch (e) {
+        this.personnelChannelMsg = "Fehler: " + (e.message || e);
+        this.personnelChannelMsgError = true;
+      } finally {
+        this.personnelChannelSaving = false;
+      }
+    },
+
     async prefillPromptWithDefault() {
       try {
         const r = await api.get("/api/system-prompts/default");
@@ -1252,6 +1703,13 @@ function rankingPage() {
     crimeOnly: false,
     data: { crews: [], districts: [], since: null, crime_only: false },
     _refreshTimer: null,
+    // Discord-Post (One-Click, nutzt Settings)
+    posting: false,
+    postingMode: "",   // 'full' | 'top3' während aktiver Sendung
+    postResult: "",
+    postResultIsError: false,
+    // Ranking-Reset
+    resetting: false,
 
     async init() {
       await this.load();
@@ -1303,6 +1761,95 @@ function rankingPage() {
       if (idx === 1) return "medal-silver";
       if (idx === 2) return "medal-bronze";
       return "";
+    },
+
+    _rangeIsoFromKey(rangeKey) {
+      const now = new Date();
+      const utc = (d) => new Date(Date.UTC(
+        d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(),
+        d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds()
+      ));
+      if (rangeKey === "today") {
+        const d = new Date(); d.setHours(0, 0, 0, 0);
+        return utc(d).toISOString().replace(/\.\d{3}Z$/, "");
+      }
+      if (rangeKey === "7d") return utc(new Date(now.getTime() - 7 * 86400 * 1000)).toISOString().replace(/\.\d{3}Z$/, "");
+      if (rangeKey === "30d") return utc(new Date(now.getTime() - 30 * 86400 * 1000)).toISOString().replace(/\.\d{3}Z$/, "");
+      return null;
+    },
+
+    async _postFromSettings(mode) {
+      // Lädt die zur Mode passenden Settings (ranking_daily_* oder ranking_top3_*)
+      // und postet direkt. Keine Channel-Abfrage.
+      this.posting = true;
+      this.postingMode = mode;
+      this.postResult = "";
+      this.postResultIsError = false;
+      try {
+        const settings = await api.get("/api/settings");
+        const prefix = mode === "top3" ? "ranking_top3" : "ranking_daily";
+        const channelId = (settings[`${prefix}_channel_id`] || "").trim();
+        if (!channelId) {
+          throw new Error(`Channel-ID für ${mode === "top3" ? "Top 3" : "Gesamt"} ist in den Settings nicht gesetzt.`);
+        }
+        const rangeKey = settings[`${prefix}_range`] || "all";
+        const body = {
+          channel_id: channelId,
+          since: this._rangeIsoFromKey(rangeKey),
+          crime_only: (settings[`${prefix}_crime_only`] || "true").toLowerCase() === "true",
+          title: settings[`${prefix}_title`] || (mode === "top3"
+            ? "🥇 Die Spitze von Liberty City"
+            : "🏆 Crew-Ranking — Liberty City"),
+          intro: settings[`${prefix}_intro`] || "",
+          show_district_aggregate: mode === "full"
+            && (settings.ranking_daily_show_districts || "true").toLowerCase() === "true",
+          top_n: mode === "top3" ? 3 : 25,
+          mode: mode,
+        };
+        const r = await api.post("/api/missions/ranking/post-to-discord", body);
+        this.postResult = `✓ ${mode === "top3" ? "Top 3" : "Gesamt"} gepostet (${r.crews_posted} Crews · ${r.range} · ${r.scope})`;
+        setTimeout(() => { this.postResult = ""; }, 4000);
+      } catch (e) {
+        this.postResult = "Fehler: " + (e.message || e);
+        this.postResultIsError = true;
+      } finally {
+        this.posting = false;
+        this.postingMode = "";
+      }
+    },
+
+    async postFullNow() { await this._postFromSettings("full"); },
+    async postTop3Now() { await this._postFromSettings("top3"); },
+
+    async resetRanking() {
+      // Doppelter Confirm — destruktive Aktion.
+      if (!confirm(
+        "⚠ Ranking zurücksetzen?\n\n" +
+        "• Alle Bonus-Punkte werden auf 0 gesetzt.\n" +
+        "• Es wird ein neuer Stichtag (jetzt) gespeichert.\n" +
+        "• Im 'Gesamt'-View zählen nur noch Missions ab diesem Zeitpunkt.\n\n" +
+        "Bestehende Missions bleiben in der DB erhalten."
+      )) return;
+      if (!confirm("Wirklich? Das kann nur durch manuelles Eintragen wieder rückgängig gemacht werden.")) return;
+
+      this.resetting = true;
+      this.postResult = "";
+      this.postResultIsError = false;
+      try {
+        const r = await api.post("/api/missions/ranking/reset", {});
+        const stamp = (r && r.reset_at) ? new Date(r.reset_at + "Z").toLocaleString("de-DE") : "—";
+        this.postResult = `✓ Ranking zurückgesetzt (${r.bonus_resets} Crews mit Bonus genullt · Stichtag: ${stamp})`;
+        // Wenn aktuell ein Zeitraum-Filter aktiv ist, auf 'all' wechseln,
+        // damit der Effekt sofort sichtbar ist.
+        this.rangeSince = "all";
+        await this.load();
+        setTimeout(() => { this.postResult = ""; }, 6000);
+      } catch (e) {
+        this.postResult = "Fehler beim Reset: " + (e.message || e);
+        this.postResultIsError = true;
+      } finally {
+        this.resetting = false;
+      }
     },
   };
 }

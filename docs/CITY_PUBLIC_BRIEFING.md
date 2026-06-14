@@ -1,16 +1,16 @@
 # Liberty City — Öffentliche Grundstory zum Event-Start
 
-**Datum (in-story):** 04.09.2026 (Director's Cut)
+**Datum (in-story):** 07.08.2026 (Director's Cut)
 **Zielgruppe:** ALLE Bewohner Liberty Citys — Crime-Crews, Zivilisten, Gewerbetreibende, Behörden, Medien
 **Zweck:** Discord-Veröffentlichung vor dem Event-Start. Liefert allen Spielern dieselbe Ausgangslage, unabhängig von Rolle.
 
-> 📅 **Für die Pre-Event-Präsentation am 28.08.2026, 18:00 Uhr** wird stattdessen die Motion-Comic-Kurzversion verwendet: [`CITY_PUBLIC_BRIEFING_VOICEOVER_MOTION_COMIC.md`](CITY_PUBLIC_BRIEFING_VOICEOVER_MOTION_COMIC.md) — 3–5 Min, Botschaft + Caminos Verschwinden auf den 28.08. datiert, Cliffhanger Richtung Event-Start am 04.09.2026.
+> 📅 **Für die Pre-Event-Präsentation am 06.08.2026, 18:00 Uhr** wird stattdessen die Motion-Comic-Kurzversion verwendet: [`CITY_PUBLIC_BRIEFING_VOICEOVER_MOTION_COMIC.md`](CITY_PUBLIC_BRIEFING_VOICEOVER_MOTION_COMIC.md) — 3–5 Min, Botschaft + Caminos Verschwinden auf den 06.08. datiert, Cliffhanger Richtung Event-Start am 07.08.2026.
 
-> ⚠ **Spielleiter-Hinweis (NICHT mit-veröffentlichen):** Das Probespiel und die wahre Identität des Big Boss bleiben **strikt intern**. Diese Datei enthält **keinen** Reveal — sie zeigt nur, was jeder Bürger Liberty Citys spüren, sehen und hören kann. Der Twist (Head of Liberty City Francis J. Underwood = Big Boss) wird erst am Tag 16 aufgelöst (siehe `EVENT_FINALE.md`).
+> ⚠ **Spielleiter-Hinweis (NICHT mit-veröffentlichen):** Das Probespiel und die wahre Identität des Big Boss bleiben **strikt intern**. Diese Datei enthält **keinen** Reveal — sie zeigt nur, was jeder Bürger Liberty Citys spüren, sehen und hören kann. Der Twist (Head of Liberty City Francis J. Underwood = Big Boss) wird erst am Tag 10 aufgelöst (siehe `EVENT_FINALE.md`).
 
 ---
 
-## 🌆 Liberty City am 04.09.2026 — die Lage
+## 🌆 Liberty City am 07.08.2026 — die Lage
 
 Liberty City ist die größte Metropole an Amerikas Ostküste. Vier Millionen Menschen. Fünf Stadtteile. Ein Hafen, ein Flughafen, eine Wall-Street-Schwester, eine Industrie-Vorstadt und eine Insel im Nebel. Auf dem Papier eine moderne Stadt. Unter der Oberfläche: eine Maschine aus Familien, Banden und stillen Vereinbarungen.
 
@@ -53,7 +53,7 @@ Und dann verstehen einige in der Stadt: die Botschaft war keine PR-Aktion. Es wa
 
 > *„Liberty City steht. Liberty City wird stehen. Was in der vergangenen Nacht über unsere Bildschirme lief, ist ein digitaler Vandalismus — kein Anlass zur Sorge. Wir leben in einer Zeit, in der jeder Teenager mit einem Laptop sich für einen Propheten halten kann. Wir werden die Verantwortlichen finden. Wir werden sie der Justiz übergeben. Und wir werden weitermachen — wie immer, in dieser Stadt, die ich liebe."*
 >
-> *— Francis J. Underwood, Head of Liberty City, City Hall, 04.09.2026, 09:15 Uhr*
+> *— Francis J. Underwood, Head of Liberty City, City Hall, 07.08.2026, 09:15 Uhr*
 
 Er trägt einen dunkelgrauen Anzug. Er lächelt nicht. Er blickt drei Sekunden zu lange in eine bestimmte Kamera. Dann verlässt er das Podium, beantwortet keine Fragen.
 
@@ -278,7 +278,7 @@ Jeder in Liberty City, der versteht, was Camino bedeutete, versteht auch:
 
 ---
 
-## ❓ Was niemand öffentlich weiß (Reveal Tag 16)
+## ❓ Was niemand öffentlich weiß (Reveal Tag 10)
 
 - Wer die Botschaft gesendet hat
 - Dass „sechzehn Tage" eine echte Frist ist
@@ -290,22 +290,22 @@ Die Antwort kommt am 19./20. September.
 
 ---
 
-## 📈 Stimmungs-Bogen über 16 Tage
+## 📈 Stimmungs-Bogen über 10 Tage
 
 | Phase | Stadt-Wahrnehmung |
 |---|---|
-| **Tag 1–2** | Witz-Stimmung. „Cooler PR-Stunt." Aber: Hafen-Brand, Mr. Camino weg. Erste Zweifel. Underwood beruhigt — zu glatt. |
-| **Tag 3–6** | Erste echte Schlagzeilen. Memes verstummen. Journalisten kommen näher. Stadt fragt: ist das echt? |
-| **Tag 7–11** | Stadt akzeptiert: etwas passiert. Verschwörungs-Theorien überall. Underwood hält Sondersitzung des Stadtrats. |
-| **Tag 12–14** | Eskalation. Verrats-Vorwürfe in Stadtteilen. Wirtschaft wackelt. Underwood appelliert öffentlich an die „Einheit Liberty Citys". Niemand glaubt ihm ganz. |
-| **Tag 15** | „Sechzehnter Tag rückt näher." Atemloser Zustand. Jeder fühlt: morgen passiert was. |
-| **Tag 16** | Ein einzelnes Großereignis schockt die Stadt. Abends: die Stadt atmet auf. Die Wahrheit kommt — über einen Kanal, der niemand erwartet. Die Karten sind neu gemischt. |
+| **Tag 1** | Witz-Stimmung. „Cooler PR-Stunt." Aber: Hafen-Brand, Mr. Camino weg. Erste Zweifel. Underwood beruhigt — zu glatt. |
+| **Tag 2–3** | Erste echte Schlagzeilen. Memes verstummen. Journalisten kommen näher. Stadt fragt: ist das echt? |
+| **Tag 4–6** | Stadt akzeptiert: etwas passiert. Verschwörungs-Theorien überall. Underwood hält Sondersitzung des Stadtrats. |
+| **Tag 7–8** | Eskalation. Verrats-Vorwürfe in Stadtteilen. Wirtschaft wackelt. Underwood appelliert öffentlich an die „Einheit Liberty Citys". Niemand glaubt ihm ganz. |
+| **Tag 9** | „Letzter Tag rückt näher." Atemloser Zustand. Jeder fühlt: morgen passiert was. |
+| **Tag 10** | Ein einzelnes Großereignis schockt die Stadt. Abends bis 23:59: die Stadt atmet auf. Die Wahrheit kommt — über einen Kanal, den niemand erwartet. Die Karten sind neu gemischt. |
 
 ---
 
 ## 📣 Die eine Aufforderung an alle Spieler
 
-> *Liberty City schweigt nicht ewig. Sechzehn Tage. Dann seht ihr, wer in dieser Stadt wirklich entscheidet.*
+> *Liberty City schweigt nicht ewig. Zehn Tage. Dann seht ihr, wer in dieser Stadt wirklich entscheidet.*
 >
 > *Sucht euch eure Rolle — Täter, Zeuge, Opfer, Held, Memes-Macher, Verschwörer, Verräter, Beobachter. Macht euer Spiel. Ihr werdet erinnert daran sein, wo ihr in dieser Nacht wart.*
 
@@ -317,8 +317,8 @@ Die Antwort kommt am 19./20. September.
 - [`EVENT_BRIEFING.md`](EVENT_BRIEFING.md) — vertiefendes Crime-zentriertes Eröffnungs-Kapitel (Voice-Over-Skript)
 
 **Spielleiter-intern (NICHT mit-veröffentlichen):**
-- [`EVENT_TIMELINE.md`](EVENT_TIMELINE.md) — 16-Tage-Master-Plan
-- [`EVENT_BRIEFINGS_MASS.md`](EVENT_BRIEFINGS_MASS.md) — 6 Massen-Auftrags-Skripte
+- [`EVENT_TIMELINE.md`](EVENT_TIMELINE.md) — 10-Tage-Master-Plan
+- [`EVENT_BRIEFINGS_MASS.md`](EVENT_BRIEFINGS_MASS.md) — 5 Massen-Auftrags-Skripte + 1 Backup
 - [`QUEST_GIVERS.md`](QUEST_GIVERS.md) — Mittler-Profile
-- [`EVENT_FINALE.md`](EVENT_FINALE.md) — Tag-16-Auflösung inkl. Underwood-Reveal
+- [`EVENT_FINALE.md`](EVENT_FINALE.md) — Tag-10-Auflösung inkl. Underwood-Reveal
 - [`CREW_RELATIONS.md`](CREW_RELATIONS.md) — Beziehungs-Matrix

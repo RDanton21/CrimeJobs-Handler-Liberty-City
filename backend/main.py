@@ -9,12 +9,15 @@ from .auth import require_admin
 from .config import settings
 from .db import init_db
 from .routes_crews import router as crews_router
+from .routes_dashboard import router as dashboard_router
 from .routes_expiry import router as expiry_router
 from .routes_lore import router as lore_router
 from .routes_missions import router as missions_router
 from .routes_reaction import router as reaction_router
 from .routes_settings import router as settings_router
+from .routes_story import router as story_router
 from .routes_system_prompts import router as system_prompts_router
+from .routes_top3_titles import router as top3_titles_router
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIR = ROOT_DIR / "frontend"
@@ -36,6 +39,9 @@ app.include_router(expiry_router)
 app.include_router(reaction_router)
 app.include_router(system_prompts_router)
 app.include_router(lore_router)
+app.include_router(story_router)
+app.include_router(top3_titles_router)
+app.include_router(dashboard_router)
 
 
 @app.get("/api/health")
@@ -76,6 +82,11 @@ async def lore_page(_user: str = Depends(require_admin)):
 @app.get("/ranking")
 async def ranking_page(_user: str = Depends(require_admin)):
     return FileResponse(str(FRONTEND_DIR / "ranking.html"))
+
+
+@app.get("/story")
+async def story_page(_user: str = Depends(require_admin)):
+    return FileResponse(str(FRONTEND_DIR / "story.html"))
 
 
 @app.get("/favicon.ico")

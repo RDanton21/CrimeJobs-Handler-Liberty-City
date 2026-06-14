@@ -1,6 +1,6 @@
-# Tag 16 — Showdown & Krönung
+# Tag 10 — Showdown & Krönung
 
-**Datum:** 19.09.2026, Freitag
+**Datum:** 16.08.2026, Sonntag (Ende bis 23:59)
 **Spielleiter-Briefing für die finale Phase des Events**
 
 > 🔒 **DER GROSSE REVEAL — Spielleiter-intern, niemals vorab spoilern:**
@@ -9,9 +9,9 @@
 
 ---
 
-## Was passiert an Tag 16
+## Was passiert an Tag 10
 
-Tag 15 war der Rivalen-Test — alle Crews haben parallel ihre offenen Rechnungen mit rivalisierenden Crews beglichen. Tag 16 hat **zwei Akte**: tagsüber der letzte spektakuläre Coup (Sechster Massen-Auftrag, Punkte ×3), abends die Krönung.
+Tag 9 war der Rivalen-Test — alle Crews haben parallel ihre offenen Rechnungen mit rivalisierenden Crews beglichen. Tag 10 hat **zwei Akte**: tagsüber der letzte spektakuläre Coup (Fünfter Massen-Auftrag, Punkte ×3), abends die Krönung — alles bis 23:59.
 
 Die Phasen:
 
@@ -56,19 +56,19 @@ Die Phasen:
 
 ---
 
-## Spielleiter-Choreographie für Tag 16
+## Spielleiter-Choreographie für Tag 10
 
 ### Phase 1 — Der finale Coup (vormittags/mittags)
 
 - **Big Boss meldet sich direkt** (Voice-Over im Hauptchannel + alle Crew-Channels): Tag-16-Massen-Auftrag „Die Krone" wird verteilt.
-- **Skript:** siehe `EVENT_BRIEFINGS_MASS.md` → Tag 16 „Das Finale: Die Krone".
+- **Skript:** siehe `EVENT_BRIEFINGS_MASS.md` → Tag 10 „Das Finale: Die Krone" (Sektion vom 16.08.2026).
 - **Crews führen den Coup parallel aus.** Spielleiter dokumentiert Ergebnisse für Punkte ×3.
 - **Stimmung:** Höchste Anspannung. Jede Crew weiß, dass dieser Auftrag dreifach zählt.
 
 ### Phase 2 — Vorbereitung der Krönung (späterer Nachmittag)
 
 - **Coup-Ergebnisse werden bewertet:** Reaktionen (👍/👎/❌) pflegen, Punkte ×3 ins Ranking eintragen.
-- **Sieger-Crew wird aus dem Ranking ermittelt:** Top-1 nach allen 16 Tagen, Punkte aus Tag 16 ×3 eingerechnet.
+- **Sieger-Crew wird aus dem Ranking ermittelt:** Top-1 nach allen 10 Tagen, Punkte aus Tag 10 ×3 eingerechnet.
 - **Mittler werden unsichtbar.** Wenn eine Crew einen Mittler kontaktiert, antwortet er kurz: *„Heute Abend wisst ihr mehr."*
 - **Krönungs-Briefing wird angepasst:**
   - `[CREW-NAME]` → ersetzen durch den Crew-Namen
@@ -139,7 +139,7 @@ Mr. Camino wurde von **Underwood persönlich** kontaktiert — kein Mittler, kei
 
 Mr. Camino hat es angenommen. Vielleicht weil er erkannt hat, dass die Stadt sich ändern muss. Vielleicht weil er müde war, neutral zu sein. Vielleicht weil er gemerkt hat, dass Underwood — der Mann, der ihm 2024 nicht die Hand schütteln durfte — jetzt genug Macht hat, dass „Nein sagen" kein Optionsweg mehr ist. Vielleicht weil ein Teil von ihm das stille Spiel im Schatten attraktiver findet als die offene Vermittlung im Sonnenlicht.
 
-**Was an Tag 16 passiert:**
+**Was an Tag 10 passiert:**
 Mr. Camino kehrt zurück. Älter, langsamer, aber nicht gebrochen. Er sitzt jetzt in einem Café im Heimatstadtteil der Sieger-Crew. Sein alter Stuhl im Brass Plate bleibt leer — der Ort hat ausgedient. Sein neuer Stuhl steht für die Sieger-Crew bereit.
 
 Wenn die Crew ihn fragt, wer hinter allem steht, sagt er einen einzigen Satz:
@@ -195,14 +195,14 @@ Tie-Breaker (in dieser Reihenfolge):
 5. Spielleiter-Bauchgefühl (Crew, die das Event am besten getragen hat)
 
 ### Was wenn die Stimmung niedrig ist?
-Wenn Spieler im Event abgeflaut sind, kann Tag 16 als eine **Re-Energizer**-Show aufgezogen werden:
+Wenn Spieler im Event abgeflaut sind, kann Tag 10 als eine **Re-Energizer**-Show aufgezogen werden:
 - Krönungs-Voice-Over größer aufziehen (mit Hintergrundmusik, Atmosphäre)
 - Direkte Live-RP-Begegnung mit Big Boss (1× im ganzen Event)
 - Mr. Caminos Comeback als emotionaler Höhepunkt (lange Liebes-/Trauer-Sequenz)
 
 ---
 
-## Was kommt nach Tag 16?
+## Was kommt nach Tag 10?
 
 Das Event ist offiziell zu Ende. Aber Liberty City lebt weiter:
 - **Sieger-Crew** spielt jetzt mit Mr. Camino als Mittler, hat Privilegien aber auch Pflichten
@@ -246,13 +246,13 @@ Macht euch bereit.
 - **Audacity Compressor**: Ratio 3:1, Threshold −18 dB — gibt Stimme noch mehr Präsenz
 - **EQ**: leichte Höhen-Anhebung (3–5 kHz +2 dB), tiefe Bässe sauber (60 Hz +1 dB)
 - **Optional: dezenter Hall** (Reverb 8 %) — gibt Eindruck einer Pressekonferenz im Plenarsaal
-- **Sehr lange Pause** vor *„Ich stehe hinter ihr."* — der Schlüssel-Satz der gesamten 16 Tage
+- **Sehr lange Pause** vor *„Ich stehe hinter ihr."* — der Schlüssel-Satz der gesamten 10 Tage
 
 ---
 
 ## Verwandte Dokumente
 
-- [`EVENT_TIMELINE.md`](EVENT_TIMELINE.md) — 16-Tage-Übersicht
+- [`EVENT_TIMELINE.md`](EVENT_TIMELINE.md) — 10-Tage-Übersicht
 - [`EVENT_BRIEFINGS_MASS.md`](EVENT_BRIEFINGS_MASS.md) — die 6 Massen-Briefings (Tag 3, 6, 9, 12, 15, 16)
 - [`QUEST_GIVERS.md`](QUEST_GIVERS.md) — Mittler-Profile
 - [`EVENT_BRIEFING.md`](EVENT_BRIEFING.md) — Eröffnungs-Story (Tag 1)

@@ -13,6 +13,31 @@ KEYS = {
     "default_claude_model",
     "default_openai_model",
     "system_prompt",
+    # Tägliches Ranking-Posting in Discord
+    "ranking_daily_enabled",
+    "ranking_daily_channel_id",
+    "ranking_daily_time",       # "HH:MM" lokal
+    "ranking_daily_range",      # 'today' | '7d' | '30d' | 'all'
+    "ranking_daily_crime_only",
+    "ranking_daily_show_districts",
+    "ranking_daily_title",
+    "ranking_daily_intro",
+    # Zweite Konfig: täglicher Top-3-Hype-Post (eigener Channel + Zeit)
+    "ranking_top3_enabled",
+    "ranking_top3_channel_id",
+    "ranking_top3_time",
+    "ranking_top3_range",
+    "ranking_top3_crime_only",
+    "ranking_top3_title",
+    "ranking_top3_intro",
+    # IDs der letzten geposteten Messages — fürs Auto-Replace
+    "ranking_daily_last_message_id",
+    "ranking_top3_last_message_id",
+    # Reset-Stichtag: ab diesem Zeitpunkt zählen Missions im Ranking
+    "ranking_reset_at",
+    # Admin-Channel für Personal-Bedarf-Posts (Spielleitung sieht hier
+    # pro Mission Crew + Slot + NPC-Plan)
+    "personnel_admin_channel_id",
 }
 
 

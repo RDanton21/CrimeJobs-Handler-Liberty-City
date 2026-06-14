@@ -14,6 +14,7 @@ from .db import get_session
 from .models import Crew, CrewRelation, Mission
 from .prompts import build_crime_business_briefing_prompt
 from .schemas import (
+    BonusAdjustRequest,
     CrewCreate,
     CrewOut,
     CrewRelationBase,
@@ -137,6 +138,24 @@ async def delete_crew(crew_id: int, session: AsyncSession = Depends(get_session)
         raise HTTPException(404, "Crew nicht gefunden")
     await session.delete(crew)
     await session.commit()
+
+
+@router.post("/{crew_id}/bonus", response_model=CrewOut)
+async def adjust_crew_bonus(
+    crew_id: int,
+    payload: BonusAdjustRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Inkrementelle Bonus-Vergabe: addiert payload.points zum aktuellen Wert.
+    Positiv = Bonus, negativ = Strafe. Wirkt sofort im Ranking."""
+    crew = await session.get(Crew, crew_id)
+    if not crew:
+        raise HTTPException(404, "Crew nicht gefunden")
+    crew.bonus_points = (crew.bonus_points or 0) + int(payload.points)
+    await session.commit()
+    await session.refresh(crew)
+    await _attach_last_mission(session, crew)
+    return crew
 
 
 # ---- Relations ----
