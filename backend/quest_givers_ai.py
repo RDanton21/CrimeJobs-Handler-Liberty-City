@@ -37,6 +37,45 @@ def _strip_outer_codefence(text: str) -> str:
     return text
 
 
+def _parse_recommendations_from_bullets(report: str) -> list[dict]:
+    """Fallback wenn KI keinen JSON-Block liefert: parse die
+    `## Empfohlene nächste Schritte`-Sektion und mache aus jedem
+    Bullet-Point eine Recommendation. So sieht der User auch dann
+    Apply-Buttons, wenn die strukturierte Antwort fehlt."""
+    m = re.search(
+        r"##\s+Empfohlene\s+n[äa]chste\s+Schritte\s*\n+(.*?)(?:\n##\s+|\Z)",
+        report, re.DOTALL | re.IGNORECASE,
+    )
+    if not m:
+        return []
+    block = m.group(1)
+    recs: list[dict] = []
+    for line in block.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        # Bullet-Points: -, *, •, 1., 2., …
+        m_bullet = re.match(r"^(?:[-*•]|\d+[.)])\s+(.*)$", line)
+        if not m_bullet:
+            continue
+        instruction = m_bullet.group(1).strip()
+        # Markdown-Fett-Marker und überflüssige Whitespaces wegnehmen
+        clean = re.sub(r"\*\*([^*]+)\*\*", r"\1", instruction)
+        if len(clean) < 10:
+            continue
+        # Title = die ersten 6 Wörter (max 60 Zeichen)
+        words = clean.split()
+        title = " ".join(words[:6])
+        if len(title) > 60:
+            title = title[:57] + "…"
+        recs.append({
+            "title": title,
+            "instruction": clean,
+            "target": "Empfehlung",
+        })
+    return recs
+
+
 def _extract_recommendations_json(raw: str) -> tuple[str, list]:
     """Versucht 3 Strategien, das Recommendations-JSON aus der KI-Antwort
     rauszuholen. Liefert (report_ohne_json, recommendations_list). Wenn nichts
@@ -237,6 +276,14 @@ async def check_quest_givers_consistency(
 
     # Codefence-Wrapper entfernen, falls die KI den ganzen Report gewrappt hat
     report = _strip_outer_codefence(report)
+
+    # Fallback: wenn JSON-Recommendations leer sind, aus den
+    # "Empfohlene nächste Schritte"-Bullet-Points im Report ableiten.
+    # So sieht der User auch dann Apply-Buttons, wenn die KI das
+    # strukturierte Format verfehlt hat.
+    if not recommendations:
+        recommendations = _parse_recommendations_from_bullets(report)
+
     return report, recommendations
 
 
