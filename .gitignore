@@ -38,5 +38,8 @@ desktop.ini
 *.log
 logs/
 
+# Automatische Backups (vom Story-Editor & Konsistenz-Check vor Save)
+*.bak
+
 # Claude Code Worktrees + Plans (lokale Arbeitskopien, gehoeren nicht ins Repo)
 .claude/

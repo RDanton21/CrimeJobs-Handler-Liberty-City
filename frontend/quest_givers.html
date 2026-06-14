@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crime Automation — Mittler & NPCs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+  <style>
+    /* GitHub-artiges Markdown-Rendering, Dark-Theme */
+    .md h1 { font-size: 1.75rem; font-weight: 700; color: #fafafa; border-bottom: 1px solid #3f3f46; padding-bottom: 0.5rem; margin: 1.5rem 0 1rem; }
+    .md h2 { font-size: 1.4rem; font-weight: 600; color: #e4e4e7; border-bottom: 1px solid #27272a; padding-bottom: 0.35rem; margin: 1.75rem 0 0.75rem; }
+    .md h3 { font-size: 1.15rem; font-weight: 600; color: #d4d4d8; margin: 1.25rem 0 0.5rem; }
+    .md h4 { font-size: 1rem; font-weight: 600; color: #d4d4d8; margin: 1rem 0 0.5rem; }
+    .md p { margin: 0.75rem 0; line-height: 1.65; color: #d4d4d8; }
+    .md ul, .md ol { margin: 0.75rem 0; padding-left: 1.5rem; }
+    .md li { margin: 0.25rem 0; line-height: 1.6; color: #d4d4d8; }
+    .md strong { color: #fafafa; font-weight: 600; }
+    .md em { color: #a1a1aa; font-style: italic; }
+    .md code { background: #18181b; color: #fbbf24; padding: 0.1rem 0.4rem; border-radius: 0.25rem; font-size: 0.85em; }
+    .md pre { background: #09090b; border: 1px solid #27272a; padding: 0.85rem; border-radius: 0.5rem; overflow-x: auto; margin: 0.85rem 0; }
+    .md pre code { background: transparent; color: #e4e4e7; padding: 0; }
+    .md blockquote { border-left: 3px solid #b91c1c; padding-left: 1rem; margin: 0.85rem 0; color: #a1a1aa; font-style: italic; }
+    .md table { width: 100%; border-collapse: collapse; margin: 0.85rem 0; }
+    .md th, .md td { border: 1px solid #27272a; padding: 0.5rem 0.75rem; text-align: left; }
+    .md th { background: #18181b; color: #fafafa; font-weight: 600; }
+    .md td { color: #d4d4d8; }
+    .md hr { border: 0; border-top: 1px solid #27272a; margin: 1.5rem 0; }
+    .md a { color: #60a5fa; text-decoration: underline; }
+    .md a:hover { color: #93c5fd; }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+  <div x-data="questGiversPage()" x-init="init()" class="max-w-screen-xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <h1>
+        <img src="/static/logo.png" alt="SEKT6R" class="h-12 w-auto" />
+      </h1>
+      <nav class="flex gap-2 text-sm flex-wrap items-center">
+        <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
+        <a href="/archive" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Archiv</a>
+        <a href="/lore" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Lore</a>
+        <a href="/story" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Story</a>
+        <a href="/mittler" class="px-3 py-1.5 rounded bg-red-700 text-white">Mittler</a>
+        <a href="/ranking" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Ranking</a>
+        <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
+      </nav>
+    </header>
+
+    <section class="mb-6">
+      <h2 class="text-2xl font-semibold mb-2">🎭 Mittler & Personal-Pool</h2>
+      <p class="text-sm text-zinc-400">
+        Read-only-Übersicht der Quest-Geber-Rollen (Miguel, Maklerin, Pater, Fixer, Witwe, Skrupellose)
+        und des wiederverwendbaren NPC-Archetypen-Pools. Editieren über den
+        <a href="/story" class="text-blue-400 hover:underline">Story-Editor</a>.
+      </p>
+    </section>
+
+    <!-- Tab-Bar + Edit-Toolbar -->
+    <div class="border-b border-zinc-800 mb-6 flex items-end justify-between gap-2 flex-wrap">
+      <div class="flex gap-1">
+        <button @click="switchTab('givers')"
+                :class="activeTab === 'givers' ? 'bg-zinc-900 border-zinc-800 text-white border-b-transparent' : 'text-zinc-400 hover:text-zinc-200'"
+                class="px-4 py-2 rounded-t border border-transparent text-sm font-medium">
+          👤 Mittler (Quest-Geber)
+        </button>
+        <button @click="switchTab('personnel')"
+                :class="activeTab === 'personnel' ? 'bg-zinc-900 border-zinc-800 text-white border-b-transparent' : 'text-zinc-400 hover:text-zinc-200'"
+                class="px-4 py-2 rounded-t border border-transparent text-sm font-medium">
+          🎭 NPC-Pool
+        </button>
+      </div>
+      <div class="flex items-center gap-2 mb-1 flex-wrap">
+        <button x-show="!editing && activeTab === 'givers'"
+                @click="runConsistencyCheck()" :disabled="checking"
+                title="Vergleicht QUEST_GIVERS.md mit EVENT_BRIEFING + TIMELINE + CITY_PUBLIC_BRIEFING und meldet, ob die Mittler noch zur Story passen"
+                class="text-xs px-3 py-1.5 rounded bg-purple-700 hover:bg-purple-600 disabled:opacity-50 font-medium">
+          <span x-show="!checking">🔍 Konsistenz-Check (vs. Story)</span>
+          <span x-show="checking">KI prüft…</span>
+        </button>
+        <button x-show="!editing" @click="startEdit()"
+                class="text-xs px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">
+          ✎ Bearbeiten
+        </button>
+        <button x-show="!editing" @click="reload()"
+                class="text-xs px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">
+          ↻ Neu laden
+        </button>
+        <span x-show="saveMsg" x-text="saveMsg"
+              class="text-xs"
+              :class="saveError ? 'text-red-400' : 'text-green-400'"></span>
+      </div>
+    </div>
+
+    <!-- Lade-Status -->
+    <p x-show="loading" class="text-zinc-500 text-sm">Lade…</p>
+    <p x-show="error" x-text="error"
+       class="text-red-400 text-sm bg-red-900/30 border border-red-800 rounded p-3"></p>
+
+    <!-- Konsistenz-Check-Panel (KI-Report über/unter dem Content) -->
+    <section x-show="showCheckPanel"
+             class="mb-6 bg-purple-950/30 border border-purple-700 rounded-lg p-4">
+      <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <h3 class="text-base font-semibold text-purple-200">
+          🔍 Konsistenz-Check — Mittler vs. aktuelle Story
+        </h3>
+        <div class="flex items-center gap-2">
+          <button @click="runConsistencyCheck()" :disabled="checking"
+                  class="text-xs px-2 py-1 rounded bg-purple-700 hover:bg-purple-600 disabled:opacity-50">
+            <span x-show="!checking">↻ Erneut prüfen</span>
+            <span x-show="checking">…</span>
+          </button>
+          <button @click="closeCheckPanel()"
+                  class="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700">
+            ✕ Schließen
+          </button>
+        </div>
+      </div>
+
+      <div x-show="checking" class="text-sm text-purple-300 py-3">
+        KI vergleicht <code>QUEST_GIVERS.md</code> mit
+        <code>EVENT_BRIEFING.md</code>, <code>EVENT_TIMELINE.md</code> und
+        <code>CITY_PUBLIC_BRIEFING.md</code> — Moment…
+      </div>
+
+      <p x-show="checkError && !checking" x-text="checkError"
+         class="text-red-300 text-sm bg-red-900/40 border border-red-800 rounded p-3"></p>
+
+      <article x-show="checkReportHtml && !checking"
+               class="md text-sm leading-relaxed"
+               x-html="checkReportHtml"></article>
+
+      <!-- 🤖 Auto-Apply-Cards: pro Empfehlung ein Button -->
+      <div x-show="recommendations.length > 0 && !checking" class="mt-4 pt-3 border-t border-purple-800">
+        <h4 class="text-sm font-semibold text-purple-200 mb-2">
+          🤖 Automatische Umsetzung (<span x-text="recommendations.length"></span>)
+        </h4>
+        <p class="text-xs text-purple-300/80 mb-3">
+          Klick auf „Anwenden" lässt die KI die Datei entsprechend ändern.
+          Du siehst eine Vorschau und kannst übernehmen oder verwerfen.
+          Backup als <code>.bak</code> wird automatisch erstellt.
+        </p>
+        <div class="space-y-2">
+          <template x-for="(rec, idx) in recommendations" :key="idx">
+            <div class="bg-zinc-950 border border-purple-800/50 rounded p-3">
+              <div class="flex items-start justify-between gap-3 flex-wrap">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap mb-1">
+                    <span class="font-medium text-sm text-zinc-100" x-text="rec.title"></span>
+                    <span x-show="rec.target"
+                          class="text-xs px-2 py-0.5 rounded bg-zinc-800 text-zinc-400"
+                          x-text="`→ ${rec.target}`"></span>
+                  </div>
+                  <p class="text-xs text-zinc-400 leading-relaxed" x-text="rec.instruction"></p>
+                </div>
+                <button @click="applyRecommendation(idx)"
+                        :disabled="applyingIdx !== null"
+                        class="text-xs px-3 py-1.5 rounded bg-purple-700 hover:bg-purple-600 disabled:opacity-50 whitespace-nowrap">
+                  <span x-show="applyingIdx !== idx">🤖 Anwenden</span>
+                  <span x-show="applyingIdx === idx">KI editiert…</span>
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <div x-show="checkReport && !checking"
+           class="mt-3 pt-3 border-t border-purple-800 text-xs text-purple-300 flex items-center gap-2 flex-wrap">
+        <span>💡 Manuell:</span>
+        <button @click="activeTab = 'givers'; startEdit()"
+                class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700">
+          ✎ QUEST_GIVERS.md bearbeiten
+        </button>
+        <a href="/story" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700">
+          → Story-Editor
+        </a>
+      </div>
+    </section>
+
+    <!-- 🔬 Preview-Modal (nach KI-Edit) -->
+    <div x-show="previewOpen" x-transition.opacity
+         class="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+         @keydown.escape.window="cancelPreview()">
+      <div class="bg-zinc-900 border border-purple-700 rounded-lg shadow-2xl max-w-6xl w-full max-h-[90vh] flex flex-col">
+        <header class="px-5 py-3 border-b border-zinc-800 flex items-center justify-between gap-2 flex-wrap">
+          <h3 class="text-base font-semibold">
+            🔬 Vorschau — <span class="text-purple-300" x-text="previewTitle"></span>
+          </h3>
+          <div class="text-xs text-zinc-500">
+            <code>QUEST_GIVERS.md</code> · alt:
+            <span x-text="previewOldContent.length"></span> Zeichen ·
+            neu: <span x-text="previewNewContent.length"></span> Zeichen
+          </div>
+        </header>
+
+        <div class="flex-1 overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-2 p-3 min-h-0">
+          <div class="flex flex-col min-h-0">
+            <h4 class="text-xs uppercase tracking-wide text-zinc-500 mb-1">Vorher</h4>
+            <textarea readonly :value="previewOldContent"
+                      class="flex-1 w-full bg-zinc-950 border border-zinc-800 rounded p-3 text-xs font-mono leading-relaxed resize-none"></textarea>
+          </div>
+          <div class="flex flex-col min-h-0">
+            <h4 class="text-xs uppercase tracking-wide text-green-400 mb-1">Nachher (KI-Vorschlag, editierbar)</h4>
+            <textarea x-model="previewNewContent"
+                      class="flex-1 w-full bg-zinc-950 border border-green-800 rounded p-3 text-xs font-mono leading-relaxed resize-none"></textarea>
+          </div>
+        </div>
+
+        <footer class="px-5 py-3 border-t border-zinc-800 flex items-center gap-2 flex-wrap">
+          <button @click="confirmPreview()" :disabled="previewSaving"
+                  class="px-4 py-1.5 rounded bg-green-700 hover:bg-green-600 disabled:opacity-50 text-sm font-medium">
+            <span x-show="!previewSaving">💾 Übernehmen</span>
+            <span x-show="previewSaving">Speichere…</span>
+          </button>
+          <button @click="cancelPreview()" :disabled="previewSaving"
+                  class="px-4 py-1.5 rounded bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 text-sm">
+            Verwerfen
+          </button>
+          <span x-show="previewError" x-text="previewError"
+                class="text-xs text-red-400"></span>
+          <span class="text-xs text-zinc-500 ml-auto">
+            Esc = verwerfen · Backup als .bak vor Übernahme
+          </span>
+        </footer>
+      </div>
+    </div>
+
+    <!-- ANZEIGE-MODUS -->
+    <article x-show="!editing && activeTab === 'givers' && !loading"
+             class="md bg-zinc-900 border border-zinc-800 rounded-lg p-6"
+             x-html="giversHtml"></article>
+    <article x-show="!editing && activeTab === 'personnel' && !loading"
+             class="md bg-zinc-900 border border-zinc-800 rounded-lg p-6"
+             x-html="personnelHtml"></article>
+
+    <!-- EDIT-MODUS -->
+    <div x-show="editing" class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 space-y-3">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <h3 class="text-sm font-semibold text-zinc-300">
+          ✎ Bearbeiten: <code x-text="currentFilename" class="text-amber-300 text-xs"></code>
+        </h3>
+        <div class="flex items-center gap-2">
+          <button x-show="activeTab === 'givers'" @click="insertGiverTemplate()"
+                  title="Fügt einen Mittler-Block-Rohling ans Ende ein"
+                  class="text-xs px-2 py-1 rounded bg-blue-700 hover:bg-blue-600">
+            + Neuer Mittler
+          </button>
+          <button x-show="activeTab === 'personnel'" @click="insertNpcTemplate()"
+                  title="Fügt eine neue NPC-Tabellenzeile ans Ende ein"
+                  class="text-xs px-2 py-1 rounded bg-blue-700 hover:bg-blue-600">
+            + Neue NPC-Zeile
+          </button>
+        </div>
+      </div>
+
+      <textarea x-model="draft" rows="32"
+                spellcheck="false"
+                class="w-full bg-zinc-950 border border-zinc-700 rounded p-3 text-sm font-mono leading-relaxed"
+                placeholder="Markdown-Inhalt…"></textarea>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <button @click="save()" :disabled="saving"
+                class="px-4 py-1.5 rounded bg-green-700 hover:bg-green-600 disabled:opacity-50 text-sm font-medium">
+          <span x-show="!saving">💾 Speichern</span>
+          <span x-show="saving">Speichere…</span>
+        </button>
+        <button @click="cancelEdit()" class="px-4 py-1.5 rounded bg-zinc-700 hover:bg-zinc-600 text-sm">
+          Abbrechen
+        </button>
+        <span class="text-xs text-zinc-500 ml-auto">
+          Backup als <code>.bak</code> wird vor jedem Save erstellt.
+        </span>
+      </div>
+
+      <details class="text-xs text-zinc-400">
+        <summary class="cursor-pointer hover:text-zinc-200">📋 Hilfe — Markdown-Syntax</summary>
+        <div class="mt-2 space-y-1 pl-3">
+          <p><code class="text-amber-300">## Überschrift</code> — neuer Mittler / Abschnitt</p>
+          <p><code class="text-amber-300">**fett**</code> — Feldname hervorheben</p>
+          <p><code class="text-amber-300">- Punkt</code> — Aufzählung</p>
+          <p><code class="text-amber-300">&gt; *Zitat*</code> — Catchphrase</p>
+          <p><code class="text-amber-300">| a | b |</code> mit Trennzeile <code class="text-amber-300">|---|---|</code> — Tabelle</p>
+          <p><code class="text-amber-300">---</code> — horizontale Trennlinie zwischen Mittlern</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <script src="/static/app.js?v=mittler5"></script>
+</body>
+</html>

@@ -8,7 +8,7 @@ Bankkassierer, korrupter Cop, etc. Pro Mission wird im Admin-Panel ein
 Archetypen, aus denen jeder Brief schöpft.
 
 Wird sichtbar:
-- im **Mission-Detail** auf der Crew-Seite
+- im **Mission-Detail** auf der Gang-Seite
 - im **Dashboard-Widget „🎭 Personal-Bedarf — nächste 24 h"** mit Live-Update
 - bei Browser-Notification, wenn sich was ändert
 
@@ -20,7 +20,7 @@ Wird sichtbar:
 |---|---|---|
 | **A — Mittler** | 5–6 Personen (User + Team) als Quest-Geber | `QUEST_GIVERS.md` |
 | **B — Quest-NPCs** | Zielpersonen / Beteiligte im Auftrag | diese Datei |
-| **C — Eigene Crew-Member** | Spieler der Crime-Gang | regeln die Crews selbst |
+| **C — Eigene Gang-Member** | Spieler der Crime-Gang | regeln die Gangs selbst |
 
 Du planst nur A + B.
 
@@ -98,16 +98,16 @@ einfacher und der Live-Feed bleibt scannbar.
 ### Tag 2 — „Der Tribut" (08.08.2026)
 
 - **Mittler:** Miguel
-- **Quest-NPCs:** 5–7 Tribut-Pflichtige pro Crew. Die **13 Zivil-Firmen**
+- **Quest-NPCs:** 5–7 Tribut-Pflichtige pro Gang. Die **13 Zivil-Firmen**
   fungieren als Haupt-Tribut-Pflichtige (sind eh Spieler). Zusätzlich
-  pro Crew 1–2 „Widerständler"-NPCs aus dem Pool (#5 Bar/Restaurant,
+  pro Gang 1–2 „Widerständler"-NPCs aus dem Pool (#5 Bar/Restaurant,
   #6 Tankwart, #7 Mechaniker).
-- **Optional:** 1× #2 Korrupter LCPD für Crews, die Drohbacking brauchen
+- **Optional:** 1× #2 Korrupter LCPD für Gangs, die Drohbacking brauchen
 - **Team-Bedarf:** ~ 2 Personen (Miguel + 1 NPC-Spieler, rotierend)
 
 ### Tag 4 — „Die Stille" (10.08.2026)
 
-3 Stealth-Lieferungen pro Crew.
+3 Stealth-Lieferungen pro Gang.
 
 - **Mittler:** Der Fixer
 - **Quest-NPCs pro Lieferung:**
@@ -115,30 +115,30 @@ einfacher und der Live-Feed bleibt scannbar.
   - 1× **Wachmann/Hafenmeister** als Hindernis (#1, #12)
   - Optional: 1× **Augenzeuge** (#6 Tankwart, #13 Snitch) als Risiko-Vektor
 - **Team-Bedarf:** ~ 3 Personen (Fixer + 2 NPC-Spieler in Rotation)
-- **Workflow:** 30 % der Crews Live-RP, 70 % bekommen Auftrag schriftlich +
-  improvisieren mit eigenen Crew-Membern als NPCs
+- **Workflow:** 30 % der Gangs Live-RP, 70 % bekommen Auftrag schriftlich +
+  improvisieren mit eigenen Gang-Membern als NPCs
 
 ### Tag 7 — „Der Verrat" (13.08.2026)
 
-Privat an Top-3 — Sabotage einer schwächeren Crew.
+Privat an Top-3 — Sabotage einer schwächeren Gang.
 
 - **Mittler:** Der Skrupellose (privat, 3× hintereinander mit Top-3)
-- **Quest-NPCs:** **Keine** — Ziel ist eine andere Spieler-Crew
+- **Quest-NPCs:** **Keine** — Ziel ist eine andere Spieler-Gang
 - **Optional:** 1× #13 Snitch als „Wer hat geredet?"-Hebel
 - **Team-Bedarf:** **nur 1 Person** (Skrupellose). Geringster Personal-Tag.
 
 ### Tag 9 — „Die Probe" (15.08.2026)
 
-Rivalitäts-Eskalation — jede Crew gegen eine zugewiesene Rivalen-Crew.
+Rivalitäts-Eskalation — jede Gang gegen eine zugewiesene Rivalen-Gang.
 
-- **Mittler:** Miguel + Crew-Mittler (privat Rivalitäts-Info übergeben)
+- **Mittler:** Miguel + Gang-Mittler (privat Rivalitäts-Info übergeben)
 - **Quest-NPCs:** **Keine** — Spieler vs. Spieler
 - **Optional:** 1× #3 LCPD-Detective als „Hintergrund-Ermittler" zur Druck-Erhöhung
 - **Team-Bedarf:** ~ 2 Personen (Miguel + 1 für Schicht-Übergaben)
 
 ### Tag 10 — „Die Krone" (16.08.2026)
 
-Individueller Coup pro Crew — **personal-intensivster Tag**.
+Individueller Coup pro Gang — **personal-intensivster Tag**.
 
 | Coup-Typ | NPC-Bedarf |
 |---|---|
@@ -149,9 +149,9 @@ Individueller Coup pro Crew — **personal-intensivster Tag**.
 | Hafen-Heist | #1 Hafenmeister + #12 Hafenwache + #11 Trucker |
 | Drogen-Großschlag | #14 „Doc" + #11 Lieferant + #13 Informant |
 
-- **Mittler:** Big Boss direkt (Voice-Over) + Crew-Mittler für individuelle Übergaben
+- **Mittler:** Big Boss direkt (Voice-Over) + Gang-Mittler für individuelle Übergaben
 - **Team-Bedarf:** **maximum** — 4–6 Personen, jede in 2–3 Rollen rotierend
-- **Wichtig:** Coup-Typen pro Crew vorab festlegen (Rotation), damit nicht 21× Bank-Heist gleichzeitig läuft
+- **Wichtig:** Coup-Typen pro Gang vorab festlegen (Rotation), damit nicht 21× Bank-Heist gleichzeitig läuft
 
 ---
 

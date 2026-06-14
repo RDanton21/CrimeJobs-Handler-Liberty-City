@@ -4,11 +4,11 @@ Voice-Over-Skripte für die fünf Massen-Aufträge im 10-Tage-Event (07.08.–16
 
 - **Discord-tauglich**: ≤ 1900 Zeichen (Limit 2000, Reserve), als Voice-Over vorlesbar
 - **Big-Boss-Ton**: kalt, präzise, kompromisslos, mit gewählten Worten — jedes Wort hat Gewicht
-- **Konkret**: macht klar, was die Crew tun soll, mit Reviere/Schauplätzen verankert
+- **Konkret**: macht klar, was die Gang tun soll, mit Reviere/Schauplätzen verankert
 - **Performance-Klausel**: Hinweis, dass Machtverhältnisse wechseln können
 - **Variation**: jedes Skript hat einen anderen liefernden Mittler (für RP-Vielfalt)
 
-Liefer-Workflow: Spielleiter postet Skript als Voice-Over (oder Text) in den Crew-Discord-Channels + Massen-Auftrag im Crime-Automation-Tool.
+Liefer-Workflow: Spielleiter postet Skript als Voice-Over (oder Text) in den Gang-Discord-Channels + Massen-Auftrag im Crime-Automation-Tool.
 
 ---
 
@@ -16,11 +16,11 @@ Liefer-Workflow: Spielleiter postet Skript als Voice-Over (oder Text) in den Cre
 
 **Geliefert durch:** Miguel (klassischer Mittler — formell, präzise)
 **Massen-Auftrag-Titel:** Erster Test — Tribut der Stadt
-**Mechanik:** Jede Crew sammelt Tribut/Schutzgeld in ihrem Revier. 24 Stunden. KPI: absolute Summe.
+**Mechanik:** Jede Gang sammelt Tribut/Schutzgeld in ihrem Revier. 24 Stunden. KPI: absolute Summe.
 
 ### Voice-Over-Skript
 
-> *Eine Stadt schuldet ihren Crews Tribut. Nicht weil sie es will. Sondern weil sie es muss.*
+> *Eine Stadt schuldet ihren Gangs Tribut. Nicht weil sie es will. Sondern weil sie es muss.*
 >
 > *Eure Reviere wissen, wer ihr seid. Eure Geschäfte, eure Restaurants, eure Bars, eure Garagen — sie alle haben in den letzten Wochen gespürt, dass sich die Karten neu mischen. Jetzt ist der Moment, in dem sie das auch zahlen.*
 >
@@ -40,7 +40,7 @@ Liefer-Workflow: Spielleiter postet Skript als Voice-Over (oder Text) in den Cre
 
 **Geliefert durch:** Der Fixer (pragmatisch, schnoddrig, lösungsorientiert)
 **Massen-Auftrag-Titel:** Zweiter Test — drei Lieferungen, lautlos
-**Mechanik:** Drei Stealth-Operationen pro Crew. Bewertung: keine Polizei, keine Zeugen, keine Schlagzeile. KPI: Sauberkeit.
+**Mechanik:** Drei Stealth-Operationen pro Gang. Bewertung: keine Polizei, keine Zeugen, keine Schlagzeile. KPI: Sauberkeit.
 
 ### Voice-Over-Skript
 
@@ -48,7 +48,7 @@ Liefer-Workflow: Spielleiter postet Skript als Voice-Over (oder Text) in den Cre
 >
 > *Was am letzten Test gefehlt hat: Disziplin. Manche von euch haben geliefert. Manche haben Lärm gemacht. Beide haben dem Big Boss geantwortet — der Unterschied wurde registriert.*
 >
-> *Heute geht es um etwas anderes. Drei Lieferungen pro Crew müssen ihren Weg finden, ohne dass jemand merkt, dass sie überhaupt unterwegs waren. Was ihr transportiert, ist eure Sache. Wer es transportiert, ist eure Sache. Wann ihr es bewegt, ist eure Sache. Eine einzige Sache ist nicht eure Sache: dass jemand außerhalb eurer Crew davon weiß.*
+> *Heute geht es um etwas anderes. Drei Lieferungen pro Gang müssen ihren Weg finden, ohne dass jemand merkt, dass sie überhaupt unterwegs waren. Was ihr transportiert, ist eure Sache. Wer es transportiert, ist eure Sache. Wann ihr es bewegt, ist eure Sache. Eine einzige Sache ist nicht eure Sache: dass jemand außerhalb eurer Gang davon weiß.*
 >
 > *Kein LCPD am Tatort. Keine Zeugen, die später reden. Keine Fotos, die in einer Zeitung landen. Wer auch nur eine Streife in der Nähe seiner Lieferung hat, hat verloren.*
 >
@@ -62,29 +62,29 @@ Liefer-Workflow: Spielleiter postet Skript als Voice-Over (oder Text) in den Cre
 
 ## Tag 7 — „Der Verrat" ⚠ Wendepunkt · 13.08.2026 · Donnerstag (privat an Top-3)
 
-**Geliefert durch:** jeweiliger Crew-Mittler — privat, nicht öffentlich
-**Massen-Auftrag-Titel:** Sonderauftrag — nicht im Crew-Channel posten, sondern persönlich übergeben
-**Mechanik:** Big Boss kontaktiert Top-3-Ranking-Crews einzeln. Auftrag: Sabotage einer anderen, schwächeren Crew. Beide Antworten (annehmen + ablehnen) werden bewertet.
+**Geliefert durch:** jeweiliger Gang-Mittler — privat, nicht öffentlich
+**Massen-Auftrag-Titel:** Sonderauftrag — nicht im Gang-Channel posten, sondern persönlich übergeben
+**Mechanik:** Big Boss kontaktiert Top-3-Ranking-Gangs einzeln. Auftrag: Sabotage einer anderen, schwächeren Gang. Beide Antworten (annehmen + ablehnen) werden bewertet.
 
-### Voice-Over-Skript (an EINE der Top-3-Crews — Variante anpassen, je nachdem welche Crew sabotiert werden soll)
+### Voice-Over-Skript (an EINE der Top-3-Gangs — Variante anpassen, je nachdem welche Gang sabotiert werden soll)
 
 > *Wir sprechen unter uns. Was ich euch jetzt sage, verlässt diesen Tisch nicht.*
 >
 > *Ihr steht aktuell unter den ersten drei in meiner Liste. Das ist gut. Das ist verdient. Das ist auch ein Problem.*
 >
-> *Eine andere Crew zieht euch alle nach unten. Sie liefert nicht, sie bewegt sich nicht, sie ist im Weg. Die Stadt merkt es. Ich merke es. Bald merkt es auch das LCPD, und dann wird die Atmosphäre unangenehm — für alle.*
+> *Eine andere Gang zieht euch alle nach unten. Sie liefert nicht, sie bewegt sich nicht, sie ist im Weg. Die Stadt merkt es. Ich merke es. Bald merkt es auch das LCPD, und dann wird die Atmosphäre unangenehm — für alle.*
 >
 > *Ich biete euch einen Sonderauftrag. Entfernt das Problem. Wie ihr das macht, ist eure Entscheidung. Ein Lager, das brennt. Ein Lieutenant, der nicht mehr nach Hause kommt. Reviere, die ab morgen leer sind. Ihr kennt eure Werkzeuge.*
 >
-> *Wer den Auftrag annimmt, beweist Härte. Eine Crew, die in Liberty City herrschen will, braucht Härte. Wer ihn ablehnt, beweist… etwas anderes. Vielleicht Loyalität zur Stadt. Vielleicht Schwäche. Ich entscheide später, was es war.*
+> *Wer den Auftrag annimmt, beweist Härte. Eine Gang, die in Liberty City herrschen will, braucht Härte. Wer ihn ablehnt, beweist… etwas anderes. Vielleicht Loyalität zur Stadt. Vielleicht Schwäche. Ich entscheide später, was es war.*
 >
 > *Ihr habt vierundzwanzig Stunden. Eine Antwort, eine Tat oder eine Stille. Alle drei werden bewertet.*
 >
-> *Und denkt daran: dieser Auftrag existiert nicht. Wenn ich höre, dass eine andere Crew weiß, dass ich euch das angeboten habe, war es eure Crew, die geredet hat. Und ihr wisst, was dann passiert.*
+> *Und denkt daran: dieser Auftrag existiert nicht. Wenn ich höre, dass eine andere Gang weiß, dass ich euch das angeboten habe, war es eure Gang, die geredet hat. Und ihr wisst, was dann passiert.*
 >
 > *Schweigen ist Vorbereitung. Worte sind Konsequenzen.*
 
-**Spielleiter-Hinweis:** Jeder der Top-3 bekommt diesen Auftrag — entweder gegen die gleiche Schwächere Crew (verstärkter Druck auf das Opfer) oder gegen drei verschiedene Crews (jede Top-3 hat einen eigenen Sabotage-Ziel). Empfehlung: drei verschiedene Ziele, damit niemand zu hart getroffen wird und das Drama in mehreren Strängen läuft.
+**Spielleiter-Hinweis:** Jeder der Top-3 bekommt diesen Auftrag — entweder gegen die gleiche Schwächere Gang (verstärkter Druck auf das Opfer) oder gegen drei verschiedene Gangs (jede Top-3 hat einen eigenen Sabotage-Ziel). Empfehlung: drei verschiedene Ziele, damit niemand zu hart getroffen wird und das Drama in mehreren Strängen läuft.
 
 ---
 
@@ -92,15 +92,15 @@ Liefer-Workflow: Spielleiter postet Skript als Voice-Over (oder Text) in den Cre
 
 **Geliefert durch:** Miguel (mit Vorab-Briefing vom Big Boss)
 **Massen-Auftrag-Titel:** Vierter Test — die offenen Rechnungen
-**Mechanik:** Big Boss zwingt jede Crew, eine offene Rechnung mit einer ihrer **rivalisierenden Crews** zu begleichen. Pro Crew wird gezielt EINE Rivalität aktiviert (aus crew_relations: `rival` oder `hostile`). KPI: Schaden bei der Rivalen-Crew + eigene Reviere halten. Punkte ×2.
+**Mechanik:** Big Boss zwingt jede Gang, eine offene Rechnung mit einer ihrer **rivalisierenden Gangs** zu begleichen. Pro Gang wird gezielt EINE Rivalität aktiviert (aus crew_relations: `rival` oder `hostile`). KPI: Schaden bei der Rivalen-Gang + eigene Reviere halten. Punkte ×2.
 
 ### Voice-Over-Skript
 
 > *Neun Tage. Sieben Tage Aufträge. Drei Massen-Tests hinter euch. Eine Sache habt ihr in dieser Zeit alle aufgeschoben — und das war ein Fehler.*
 >
-> *Jede Crew in Liberty City hat eine offene Rechnung. Vielleicht zwei. Vielleicht mehr. Mit Crews, die ihr fürchtet, mit Crews, die ihr hasst, mit Crews, die euch in den letzten Tagen Reviere weggenommen haben oder die ihr verraten habt. Diese Rechnungen liegen offen. Und sie kosten euch Performance.*
+> *Jede Gang in Liberty City hat eine offene Rechnung. Vielleicht zwei. Vielleicht mehr. Mit Gangs, die ihr fürchtet, mit Gangs, die ihr hasst, mit Gangs, die euch in den letzten Tagen Reviere weggenommen haben oder die ihr verraten habt. Diese Rechnungen liegen offen. Und sie kosten euch Performance.*
 >
-> *Heute begleicht ihr sie. Eine pro Crew. Eure jeweilige Rivalen-Crew erfahrt ihr von eurem Mittler in den nächsten Stunden — sie ist nicht zufällig gewählt. Sie passt zu eurer Geschichte, eurer Schwäche, eurem unerledigten Konflikt.*
+> *Heute begleicht ihr sie. Eine pro Gang. Eure jeweilige Rivalen-Gang erfahrt ihr von eurem Mittler in den nächsten Stunden — sie ist nicht zufällig gewählt. Sie passt zu eurer Geschichte, eurer Schwäche, eurem unerledigten Konflikt.*
 >
 > *Wie ihr die Rechnung begleicht, ist eure Sache. Ein gebrochenes Versprechen, ein gestohlenes Lager, ein Mitglied, das ab heute woanders schläft. Brutale Direktheit oder kalter Schachzug — beide werden gewertet. Aber halbe Wege werden nicht gewertet. Halbe Wege werden bestraft.*
 >
@@ -111,10 +111,10 @@ Liefer-Workflow: Spielleiter postet Skript als Voice-Over (oder Text) in den Cre
 > *Eure Rivalen waren schon immer eure Geschichte. Heute werden sie eure Punkte.*
 
 **Spielleiter-Hinweis:**
-- Pro Crew wird gezielt eine `rival`- oder `hostile`-Beziehung aus `CREW_RELATIONS.md` aktiviert — die jeweiligen Mittler übergeben dem Crew-Boss diese Information privat
-- Welche Rivalen-Crew gewählt wird, soll dramaturgischen Wert haben (z. B. die spannendste pending Rivalität)
+- Pro Gang wird gezielt eine `rival`- oder `hostile`-Beziehung aus `CREW_RELATIONS.md` aktiviert — die jeweiligen Mittler übergeben dem Gang-Boss diese Information privat
+- Welche Rivalen-Gang gewählt wird, soll dramaturgischen Wert haben (z. B. die spannendste pending Rivalität)
 - Bewertung: Schaden für Rivalen (positiv) + eigene Verteidigung (positiv). Eskaliert vor dem Tag-10-Finale
-- Crew-Beziehungen können nach Tag 9 ihren Status ändern (z. B. `rival` → `hostile`)
+- Gang-Beziehungen können nach Tag 9 ihren Status ändern (z. B. `rival` → `hostile`)
 
 ---
 
@@ -122,19 +122,19 @@ Liefer-Workflow: Spielleiter postet Skript als Voice-Over (oder Text) in den Cre
 
 **Geliefert durch:** Big Boss DIREKT — Voice-Over-Video oder Live-Discord-Voice-Stream
 **Massen-Auftrag-Titel:** Das Finale — ein Coup, der die Krone trägt
-**Mechanik:** EIN spektakulärer Coup pro Crew, individualisiert vom jeweiligen Mittler (Bank-Überfall, Polit-Mord, Großentführung, Geldwäsche-Schlag, Hafen-Heist, etc.). KPI: Erfolg + Stil + Schaden für die Konkurrenz. Punkte werden ×3 ins Ranking eingerechnet. **Tag-10-Punkte entscheiden die Krone.**
+**Mechanik:** EIN spektakulärer Coup pro Gang, individualisiert vom jeweiligen Mittler (Bank-Überfall, Polit-Mord, Großentführung, Geldwäsche-Schlag, Hafen-Heist, etc.). KPI: Erfolg + Stil + Schaden für die Konkurrenz. Punkte werden ×3 ins Ranking eingerechnet. **Tag-10-Punkte entscheiden die Krone.**
 
 ### Voice-Over-Skript
 
 > *Neun Tage habt ihr unter mir gearbeitet. Ich habe gesehen, was ich sehen wollte. Heute spricht zu euch keiner meiner Männer. Heute spricht ihr mit mir. Direkt.*
 >
-> *Ihr wisst inzwischen, was diese zehn Tage waren. Ihr habt es noch nicht ausgesprochen, aber ihr habt es gefühlt. Eine Stadt wird neu sortiert. Eine Hierarchie wird neu geschrieben. Und eine Crew — eine einzige — bekommt am Ende den Platz, der bisher leer war.*
+> *Ihr wisst inzwischen, was diese zehn Tage waren. Ihr habt es noch nicht ausgesprochen, aber ihr habt es gefühlt. Eine Stadt wird neu sortiert. Eine Hierarchie wird neu geschrieben. Und eine Gang — eine einzige — bekommt am Ende den Platz, der bisher leer war.*
 >
-> *Heute entscheidet ihr selbst, ob ihr diese Crew seid.*
+> *Heute entscheidet ihr selbst, ob ihr diese Gang seid.*
 >
 > *Der letzte Auftrag ist nicht subtil. Er ist nicht leise. Er ist nicht klein. Er verlangt alles, was ihr in den letzten neun Tagen aufgebaut habt — eure Verbündeten, eure Kontakte, eure Reviere, eure Methoden, eure überlebten Rivalitäten. Eine einzige Aufgabe, ausgeführt unter euren Augen, ausgeführt gegen die Augen der ganzen Stadt.*
 >
-> *Was sie ist, erfährt jede Crew separat über ihren Mittler. Sie ist für jede Crew anders, aber gleich groß. Ein Coup. Eine Wahrheit. Ein Stück Liberty City, das nach dem heutigen Tag nicht mehr dasselbe sein wird. Und sie wird zugeschnitten sein — auf eure Story, auf eure Rivalen, auf eure Geschäfte.*
+> *Was sie ist, erfährt jede Gang separat über ihren Mittler. Sie ist für jede Gang anders, aber gleich groß. Ein Coup. Eine Wahrheit. Ein Stück Liberty City, das nach dem heutigen Tag nicht mehr dasselbe sein wird. Und sie wird zugeschnitten sein — auf eure Story, auf eure Rivalen, auf eure Geschäfte.*
 >
 > *Es gibt nur eine Regel: Erfolg. Wer scheitert, ist raus. Wer halb liefert, ist halb raus. Wer alles bringt, sitzt heute Abend an meinem Tisch.*
 >
@@ -143,10 +143,10 @@ Liefer-Workflow: Spielleiter postet Skript als Voice-Over (oder Text) in den Cre
 > *Bis 23:59 läuft die Uhr. Heute Abend verkündige ich, wer die Krone trägt.*
 
 **Spielleiter-Hinweis:**
-- Pro Crew einen passenden Finale-Coup individualisieren — die Mittler übergeben den konkreten Auftrag in privaten RP-Begegnungen kurz nach dem Big-Boss-Briefing
-- Coup-Themen passend zur Crew-Story UND zum aktivierten Rivalen aus Tag 9 (Eskalation in zwei Schichten)
-- ALLE Crews bekommen am Tag 10 etwas Spektakuläres — die Stadt brennt
-- Bewertung am Tag 10 Abend: jede Crew 0/1/2 oder erweiterte Skala (Spielleiter-Wahl), ×3 ins Ranking
+- Pro Gang einen passenden Finale-Coup individualisieren — die Mittler übergeben den konkreten Auftrag in privaten RP-Begegnungen kurz nach dem Big-Boss-Briefing
+- Coup-Themen passend zur Gang-Story UND zum aktivierten Rivalen aus Tag 9 (Eskalation in zwei Schichten)
+- ALLE Gangs bekommen am Tag 10 etwas Spektakuläres — die Stadt brennt
+- Bewertung am Tag 10 Abend: jede Gang 0/1/2 oder erweiterte Skala (Spielleiter-Wahl), ×3 ins Ranking
 - Krönung erfolgt am gleichen Abend vor 23:59 (siehe EVENT_FINALE.md)
 - 🔒 **Reveal-Schutz:** Die Big-Boss-Stimme in diesem Voice-Over MUSS verfremdet / verzerrt sein (Voice-Modulator, tiefe digitale Stimme, oder anonymer Text-Post ohne Audio). Underwoods natürliche Stimme darf hier noch nicht erkennbar sein — der eigentliche Reveal kommt erst nach der Krönung in Phase 3b (siehe `EVENT_FINALE.md`).
 

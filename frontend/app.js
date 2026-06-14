@@ -17,6 +17,7 @@ const api = {
     return r.json();
   },
   post(p, b) { return this.send(p, "POST", b); },
+  put(p, b) { return this.send(p, "PUT", b); },
   patch(p, b) { return this.send(p, "PATCH", b); },
   del(p) { return this.send(p, "DELETE"); },
   async upload(path, file) {
@@ -1849,6 +1850,258 @@ function rankingPage() {
         this.postResultIsError = true;
       } finally {
         this.resetting = false;
+      }
+    },
+  };
+}
+
+
+// ---- Mittler / Quest-Geber Page ----
+function questGiversPage() {
+  return {
+    activeTab: "givers",
+    loading: true,
+    error: "",
+    // Raw-Markdown pro Datei (für Edit-Modus)
+    giversRaw: "",
+    personnelRaw: "",
+    // Gerendertes HTML (für Anzeige-Modus)
+    giversHtml: "",
+    personnelHtml: "",
+    // Edit-State pro Tab
+    editing: false,           // true = aktueller Tab im Edit-Modus
+    draft: "",                // Textarea-Buffer
+    saving: false,
+    saveMsg: "",
+    saveError: false,
+
+    async init() { await this.reload(); },
+
+    async reload() {
+      this.loading = true;
+      this.error = "";
+      try {
+        const [givers, personnel] = await Promise.all([
+          api.get("/api/story/file/QUEST_GIVERS.md").catch(() => ({ content: "" })),
+          api.get("/api/story/file/QUEST_PERSONNEL.md").catch(() => ({ content: "" })),
+        ]);
+        this.giversRaw = givers.content || "";
+        this.personnelRaw = personnel.content || "";
+        this._render();
+      } catch (e) {
+        this.error = "Konnte Doku nicht laden: " + (e.message || e);
+      } finally {
+        this.loading = false;
+      }
+    },
+    _render() {
+      const empty = "*(Datei leer oder nicht vorhanden)*";
+      this.giversHtml = this._renderMarkdown(this.giversRaw || empty);
+      this.personnelHtml = this._renderMarkdown(this.personnelRaw || empty);
+    },
+    get currentFilename() {
+      return this.activeTab === "givers" ? "QUEST_GIVERS.md" : "QUEST_PERSONNEL.md";
+    },
+    get currentRaw() {
+      return this.activeTab === "givers" ? this.giversRaw : this.personnelRaw;
+    },
+    switchTab(tab) {
+      if (this.editing && !confirm("Edit-Modus verlassen? Ungespeicherte Änderungen gehen verloren.")) return;
+      this.activeTab = tab;
+      this.editing = false;
+      this.draft = "";
+      this.saveMsg = "";
+    },
+    startEdit() {
+      this.draft = this.currentRaw;
+      this.editing = true;
+      this.saveMsg = "";
+    },
+    cancelEdit() {
+      if (this.draft !== this.currentRaw &&
+          !confirm("Änderungen verwerfen?")) return;
+      this.editing = false;
+      this.draft = "";
+      this.saveMsg = "";
+    },
+    insertGiverTemplate() {
+      const tpl = `
+---
+
+## NEU. <Name> — „<Spitzname>"
+
+**Rolle:** <Hauptfunktion>
+**Stil:** <kurze Charakterisierung>
+**Sprechweise:** <wie redet er/sie>
+**Erscheinung:** <Aussehen, Alter, Kleidung>
+
+**Schwerpunkt:** <wofür wird er/sie gerufen>
+
+**Beziehung zu Crews:** <wie sie ihn/sie wahrnehmen>
+
+**Typische Aufträge:**
+- <Auftragstyp 1>
+- <Auftragstyp 2>
+- <Auftragstyp 3>
+
+**Catchphrase / Stilanker:**
+> *„<einprägsamer Satz>"*
+`;
+      this.draft = (this.draft || "").replace(/\s+$/, "") + tpl;
+    },
+    insertNpcTemplate() {
+      const tpl = `
+| <Nr> | **<Archetype-Name>** | <typischer Einsatz> | <Kostüm-Trigger> |`;
+      this.draft = (this.draft || "").replace(/\s+$/, "") + tpl;
+    },
+    // ---- Konsistenz-Check ----
+    checking: false,
+    checkReport: "",                // Markdown
+    checkReportHtml: "",            // Gerendertes HTML
+    checkError: "",
+    showCheckPanel: false,
+    recommendations: [],            // [{title, instruction, target}]
+    applyingIdx: null,              // Index der gerade laufenden Empfehlung
+    // Preview-Modal nach KI-Edit
+    previewOpen: false,
+    previewTitle: "",
+    previewOldContent: "",
+    previewNewContent: "",
+    previewSaving: false,
+    previewError: "",
+
+    _renderMarkdown(md) {
+      if (!md) return "";
+      // marked.js bevorzugt — 2 Varianten (v5+: marked.parse, v4: marked())
+      if (window.marked) {
+        if (typeof window.marked.parse === "function") return window.marked.parse(md);
+        if (typeof window.marked === "function") return window.marked(md);
+      }
+      // Mini-Fallback: deckt H1-H4, **fett**, *kursiv*, `code`, Listen, Absätze ab
+      const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const lines = md.split("\n");
+      const out = [];
+      let inList = false, paraBuf = [];
+      const flushPara = () => {
+        if (paraBuf.length) { out.push("<p>" + paraBuf.join(" ") + "</p>"); paraBuf = []; }
+      };
+      const closeList = () => { if (inList) { out.push("</ul>"); inList = false; } };
+      const inline = (s) => esc(s)
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>");
+      for (const ln of lines) {
+        const t = ln.trim();
+        if (!t) { flushPara(); closeList(); continue; }
+        let m;
+        if ((m = t.match(/^(#{1,6})\s+(.+)$/))) {
+          flushPara(); closeList();
+          out.push(`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`);
+        } else if (t.match(/^[-*]\s+/)) {
+          flushPara();
+          if (!inList) { out.push("<ul>"); inList = true; }
+          out.push("<li>" + inline(t.replace(/^[-*]\s+/, "")) + "</li>");
+        } else if (t === "---") {
+          flushPara(); closeList();
+          out.push("<hr>");
+        } else {
+          closeList();
+          paraBuf.push(inline(t));
+        }
+      }
+      flushPara(); closeList();
+      return out.join("\n");
+    },
+    async runConsistencyCheck() {
+      this.checking = true;
+      this.checkError = "";
+      this.showCheckPanel = true;
+      this.recommendations = [];
+      try {
+        const r = await api.post("/api/story/quest-givers/consistency-check", {});
+        this.checkReport = r.report || "";
+        this.recommendations = r.recommendations || [];
+        this.checkReportHtml = this._renderMarkdown(this.checkReport);
+      } catch (e) {
+        this.checkError = "Check fehlgeschlagen: " + (e.message || e);
+        this.checkReportHtml = "";
+        this.checkReport = "";
+        this.recommendations = [];
+      } finally {
+        this.checking = false;
+      }
+    },
+    closeCheckPanel() {
+      this.showCheckPanel = false;
+    },
+    async applyRecommendation(idx) {
+      const rec = this.recommendations[idx];
+      if (!rec) return;
+      this.applyingIdx = idx;
+      this.previewError = "";
+      try {
+        const r = await api.post(
+          "/api/story/quest-givers/apply-recommendation",
+          { instruction: rec.instruction }
+        );
+        this.previewTitle = rec.title;
+        this.previewOldContent = this.giversRaw;
+        this.previewNewContent = r.new_content || "";
+        this.previewOpen = true;
+      } catch (e) {
+        alert("KI-Edit fehlgeschlagen: " + (e.message || e));
+      } finally {
+        this.applyingIdx = null;
+      }
+    },
+    async confirmPreview() {
+      // Speichert den preview_new als neue QUEST_GIVERS.md (mit .bak-Backup
+      // durch den PUT-Endpoint)
+      this.previewSaving = true;
+      this.previewError = "";
+      try {
+        await api.put("/api/story/file/QUEST_GIVERS.md",
+                      { content: this.previewNewContent });
+        // Lokales Raw + Render updaten
+        this.giversRaw = this.previewNewContent;
+        this._render();
+        this.previewOpen = false;
+        this.saveMsg = "✓ Übernommen. Backup als .bak abgelegt.";
+        setTimeout(() => { this.saveMsg = ""; }, 4000);
+        // Konsistenz-Check neu laufen lassen, damit die Liste frisch ist
+        this.runConsistencyCheck();
+      } catch (e) {
+        this.previewError = "Speichern fehlgeschlagen: " + (e.message || e);
+      } finally {
+        this.previewSaving = false;
+      }
+    },
+    cancelPreview() {
+      if (this.previewSaving) return;
+      this.previewOpen = false;
+      this.previewNewContent = "";
+      this.previewError = "";
+    },
+    async save() {
+      this.saving = true;
+      this.saveMsg = "";
+      this.saveError = false;
+      try {
+        await api.put(`/api/story/file/${this.currentFilename}`,
+                      { content: this.draft });
+        // Lokales Raw + Render updaten
+        if (this.activeTab === "givers") this.giversRaw = this.draft;
+        else this.personnelRaw = this.draft;
+        this._render();
+        this.editing = false;
+        this.draft = "";
+        this.saveMsg = "✓ Gespeichert. Backup als .bak abgelegt.";
+        setTimeout(() => { this.saveMsg = ""; }, 4000);
+      } catch (e) {
+        this.saveMsg = "Fehler: " + (e.message || e);
+        this.saveError = true;
+      } finally {
+        this.saving = false;
       }
     },
   };

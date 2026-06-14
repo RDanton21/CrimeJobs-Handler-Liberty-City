@@ -52,7 +52,7 @@ Format des Briefings (Markdown, deutsch, prägnant):
 **Quest-NPCs:**
 - N× #<Nr> <Archetype>
   → Funktion: <was die Rolle im Auftrag tut>
-  → Location: <Ort/Stadtteil, passend zur Crew>
+  → Location: <Ort/Stadtteil, passend zur Gang>
   → Kostüm: <Trigger>
 
 **Slot:** <ungefähre Dauer + Zeitfenster>
@@ -61,8 +61,8 @@ Format des Briefings (Markdown, deutsch, prägnant):
 Regeln:
 - Maximal 4 NPC-Rollen pro Mission, sonst wird's unspielbar
 - Nutze NUR Archetypen aus dem Pool (mit Nummer)
-- Locations sollen zur Crew (Stadtteil) passen, wenn bekannt
-- Wenn der Auftrag rein Crew-vs-Crew ist (z. B. Verrats- oder Rivalitäts-Auftrag),
+- Locations sollen zur Gang (Stadtteil) passen, wenn bekannt
+- Wenn der Auftrag rein Gang-vs-Gang ist (z. B. Verrats- oder Rivalitäts-Auftrag),
   KEINE NPCs erfinden — nur Mittler nennen und kurz begründen warum keine NPCs
 - Keine Story-Wiederholung des Auftrags, NUR Personal-Planung
 - Antwort ist NUR der Markdown-Brief, kein Vor- oder Nachtext
@@ -75,7 +75,7 @@ Regeln:
 
 def build_personnel_prompt(mission_text: str, crew_name: str, crew_district: str) -> str:
     """Baut den User-Prompt für die Personnel-KI."""
-    district_line = f"Stadtteil der Crew: {crew_district}\n" if crew_district else ""
+    district_line = f"Stadtteil der Gang: {crew_district}\n" if crew_district else ""
     return f"""\
 {NPC_POOL_PROMPT_DE}
 
@@ -85,7 +85,7 @@ def build_personnel_prompt(mission_text: str, crew_name: str, crew_district: str
 
 Hier ist der Auftrag, für den du das Personal planen sollst:
 
-Crew: {crew_name}
+Gang: {crew_name}
 {district_line}
 Auftragstext:
 \"\"\"
@@ -146,7 +146,7 @@ TEMPLATES: list[dict] = [
 
 - 1× #5 Bar-/Restaurantchef ODER #6 Tankwart als „Widerständler"
   → Funktion: zahlt NICHT freiwillig — Eskalations-Spielraum
-  → Location: an einem zentralen Ort im Crew-Revier
+  → Location: an einem zentralen Ort im Gang-Revier
   → Kostüm: Schürze/Lokal-Logo bzw. Arbeitskleidung
 
 - Optional: 1× #2 Korrupter LCPD
@@ -178,7 +178,7 @@ TEMPLATES: list[dict] = [
 
 **Slot:** 45–60 Min pro Lieferung, gestaffelt über 2 Server-Abende (jeweils 17:00–02:00)
 **Team-Auslastung:** Fixer + 2 NPC-Spieler in Rotation
-**Hinweis:** Bei 21 Crews × 3 Lieferungen nur 30 % Live-RP, Rest schriftlich + Crew-Eigen-NPCs\
+**Hinweis:** Bei 21 Gangs × 3 Lieferungen nur 30 % Live-RP, Rest schriftlich + Gang-Eigen-NPCs\
 """
     },
     {
@@ -187,15 +187,15 @@ TEMPLATES: list[dict] = [
         "content": """\
 **Mittler:** Der Skrupellose (brutal-direkt, privat)
 
-**Quest-NPCs:** KEINE — Ziel ist eine andere Spieler-Crew.
-Das ist ein reiner Crew-vs-Crew-Auftrag, das Personal-Setup besteht
+**Quest-NPCs:** KEINE — Ziel ist eine andere Spieler-Gang.
+Das ist ein reiner Gang-vs-Gang-Auftrag, das Personal-Setup besteht
 aus dem Mittler allein.
 
 - Optional: 1× #13 Snitch
-  → Funktion: „Wer hat geredet?"-Hebel falls die Top-3-Crew mauert
+  → Funktion: „Wer hat geredet?"-Hebel falls die Top-3-Gang mauert
   → Location: später, falls Eskalation nötig
 
-**Slot:** 3× ~20 Min Mittler-Einzelgespräch mit jeweils einer Top-3-Crew, im Server-Fenster 17:00–02:00
+**Slot:** 3× ~20 Min Mittler-Einzelgespräch mit jeweils einer Top-3-Gang, im Server-Fenster 17:00–02:00
 **Team-Auslastung:** **nur 1 Person** (Skrupellose). Geringster Personal-Tag.\
 """
     },
@@ -203,11 +203,11 @@ aus dem Mittler allein.
         "id": "tag9_probe",
         "label": "Tag 9 — Die Probe (Rivalitäts-Eskalation)",
         "content": """\
-**Mittler:** Miguel + Crew-Mittler (Rotation)
+**Mittler:** Miguel + Gang-Mittler (Rotation)
 
 **Quest-NPCs:** KEINE — Spieler vs. Spieler.
-Jede Crew bekommt privat ihre zugewiesene Rivalen-Crew aus
-CREW_RELATIONS.md. Akteure sind ausschließlich Spieler-Crews.
+Jede Gang bekommt privat ihre zugewiesene Rivalen-Gang aus
+CREW_RELATIONS.md. Akteure sind ausschließlich Spieler-Gangs.
 
 - Optional: 1× #3 LCPD-Detective
   → Funktion: „Hintergrund-Ermittler" — erhöht Druck
@@ -221,7 +221,7 @@ CREW_RELATIONS.md. Akteure sind ausschließlich Spieler-Crews.
         "id": "tag10_krone",
         "label": "Tag 10 — Die Krone (individueller Coup)",
         "content": """\
-**Mittler:** Big Boss DIREKT (Voice-Over) + Crew-Mittler für Coup-Übergabe
+**Mittler:** Big Boss DIREKT (Voice-Over) + Gang-Mittler für Coup-Übergabe
 
 **Quest-NPCs:** abhängig vom zugewiesenen Coup-Typ:
 
@@ -232,9 +232,9 @@ CREW_RELATIONS.md. Akteure sind ausschließlich Spieler-Crews.
 - **Hafen-Heist:** #1 Hafenmeister + #12 Hafenwache + #11 Trucker
 - **Drogen-Großschlag:** #14 „Doc" + #11 Lieferant + #13 Informant
 
-**Slot:** 60–120 Min pro Crew, gestaffelt zwischen 19:00 und 02:00
+**Slot:** 60–120 Min pro Gang, gestaffelt zwischen 19:00 und 02:00
 **Team-Auslastung:** **maximum** — 4–6 Personen, jede in 2–3 Rollen rotierend
-**Wichtig:** Coup-Typen pro Crew vorab festlegen (Rotation), damit nicht 21× Bank-Heist parallel läuft.
+**Wichtig:** Coup-Typen pro Gang vorab festlegen (Rotation), damit nicht 21× Bank-Heist parallel läuft.
 
 → Konkreten Coup-Typ + NPCs in diesem Brief unten ergänzen.\
 """

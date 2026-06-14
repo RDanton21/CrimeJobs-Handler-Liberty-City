@@ -137,7 +137,7 @@ def build_user_prompt(ctx: MissionContext) -> str:
         "Pawn Shop, Taxi-Unternehmen, Polizei-/Justiz-Behörden, Abschleppdienst usw.), "
         "binde sie aktiv ein: als Schauplatz, als Zielort, als Mittelsmann, als Cover, "
         "als Erpressungsobjekt oder als Informant. Das macht den Auftrag konkreter und "
-        "verzahnt die Crew-Story mit der zivilen Welt von Liberty City."
+        "verzahnt die Gang-Story mit der zivilen Welt von Liberty City."
     )
 
     return "\n".join(parts)
@@ -146,12 +146,12 @@ def build_user_prompt(ctx: MissionContext) -> str:
 def build_crime_business_briefing_prompt(
     crew_name: str, crew_story: str, crime_business: str
 ) -> tuple[str, str]:
-    """Eigenstaendiger Prompt: KI formuliert das interne Crime-Business der Crew
+    """Eigenstaendiger Prompt: KI formuliert das interne Crime-Business der Gang
     in einen Briefing-Text um, der direkt in einen privaten Discord-Channel der
-    Crew gepostet wird.
+    Gang gepostet wird.
 
     Der Text wird so geschrieben, als waere er eine Anweisung 'von ganz oben' —
-    der Big Boss spricht durch seinen Mittelsmann zur Crew. Kalt, klar,
+    der Big Boss spricht durch seinen Mittelsmann zur Gang. Kalt, klar,
     kompromisslos. Macht deutlich:
       - Dies ist EUER zugewiesener Bereich.
       - Ihr habt euch darum zu kuemmern.
@@ -163,7 +163,7 @@ def build_crime_business_briefing_prompt(
     FIXED_OPENING = "Ihr wollt wissen, mit welchem Business ich euch betreuen werde: Dann passt gut auf..."
     sys = (
         "Du bist Sprecher eines unsichtbaren, unantastbaren 'Big Boss', der Liberty City "
-        "im Hintergrund steuert. Du verfasst ein internes Briefing an eine Crime-Crew — "
+        "im Hintergrund steuert. Du verfasst ein internes Briefing an eine Crime-Gang — "
         "kein verschluesselter Auftrag, sondern eine Klarstellung von ganz oben: 'Das ist "
         "euer zugewiesener Bereich. Kuemmert euch darum.'\n\n"
         "Tonalitaet: kalt, prazise, kompromisslos, mit gewaehlten Worten — jedes Wort hat "
@@ -178,8 +178,8 @@ def build_crime_business_briefing_prompt(
         f"  1. **PFLICHT-EROEFFNUNG (woertlich, exakt so):**\n"
         f"     {FIXED_OPENING}\n"
         f"     Der Text beginnt MIT genau dieser Zeile (eigene Zeile, dann Leerzeile, "
-        f"dann der Rest). Keine andere Anrede an die Crew vorher oder nachher.\n"
-        "  2. **Konkrete Benennung des Geschaeftsfeldes**: Die Crew MUSS nach dem Lesen "
+        f"dann der Rest). Keine andere Anrede an die Gang vorher oder nachher.\n"
+        "  2. **Konkrete Benennung des Geschaeftsfeldes**: Die Gang MUSS nach dem Lesen "
         "wissen, um welches Business es geht. Wenn das zugewiesene Crime-Business "
         "'Drogenhandel: Kokain ueber Hafen' lautet, muss der Text die Begriffe klar erkennen "
         "lassen — 'Kokain', 'Hafen', 'Container' o. ae. duerfen genannt werden. Wenn es "
@@ -189,15 +189,15 @@ def build_crime_business_briefing_prompt(
         "Aufzaehlung, sondern als Teil eines literarischen Befehlstextes. Beispiel-Ton: "
         "'Eure Ware ist weiss. Sie kommt ueber das Wasser. Die Container schweigen, eure "
         "Maenner am Hafen ebenso.'\n"
-        "  3. **Reviere & Schauplaetze** der Crew einweben (aus der Hintergrund-Story "
+        "  3. **Reviere & Schauplaetze** der Gang einweben (aus der Hintergrund-Story "
         "kommen Adressen, Stadtteile, Lokale, Verbindungen — diese aktiv nennen, damit die "
-        "Crew sieht, dass das Briefing auf SIE zugeschnitten ist).\n"
+        "Gang sieht, dass das Briefing auf SIE zugeschnitten ist).\n"
         "  4. **Performance-Klausel**: Hinweis, dass Machtverhaeltnisse in Liberty City "
         "wechseln koennen — wer liefert, wird groesser; wer scheitert, wird ersetzt oder verliert "
         "Reviere. Nicht aufgezaehlt, sondern als beilaeufige Tatsache eingewoben.\n"
         "  5. **PFLICHT-ABSCHLUSS** — letzter Absatz (1-2 kurze Saetze) macht klar: Es geht "
         "BALD los, aber der genaue Zeitpunkt liegt beim Big Boss. Der Big Boss meldet sich, "
-        "die Crew wartet. Variiere jedes Mal, kein Wort-fuer-Wort-Wiederholen. Beispiele "
+        "die Gang wartet. Variiere jedes Mal, kein Wort-fuer-Wort-Wiederholen. Beispiele "
         "fuer Tonalitaet und Inhalt (NICHT woertlich uebernehmen, neue Variante schreiben):\n"
         "     - 'Sobald es losgeht, erfahrt ihr es. Wir warten noch auf eure Lieferung.'\n"
         "     - 'Wann es soweit ist, entscheide ich. Bis dahin: Vorbereitung.'\n"
@@ -207,9 +207,9 @@ def build_crime_business_briefing_prompt(
         "     - 'Wir sind kurz vor dem ersten Zug. Wer dann zoegert, sitzt nicht am Tisch.'\n"
         "     - 'Die Uhr laeuft schon. Ihr seht sie nur noch nicht.'\n"
         "     Eigene Variante schreiben, die zum Geschaeftsfeld und zur Gang-Mentalitaet passt "
-        "(z. B. Hafen-Crews mit Wasser-/Schiff-Metaphern, MC mit Maschinen-/Strasse-Metaphern).\n\n"
+        "(z. B. Hafen-Gangs mit Wasser-/Schiff-Metaphern, MC mit Maschinen-/Strasse-Metaphern).\n\n"
         "Struktur: 4 bis 6 Absaetze, Gesamtlaenge <= 1800 Zeichen. Keine Ueberschrift, keine "
-        "Anrede ('Liebe Crew' verboten — der Big Boss schreibt nicht freundlich), keine "
+        "Anrede ('Liebe Gang' verboten — der Big Boss schreibt nicht freundlich), keine "
         "Aufzaehlungen mit Bullets, kein Emoji. Sprache: Deutsch."
     )
     parts = [f"## Gang\n{crew_name}"]
@@ -220,8 +220,8 @@ def build_crime_business_briefing_prompt(
     )
     parts.append(
         "\n## Aufgabe\n"
-        "Schreibe das Briefing der Crew. Es kommt von ganz oben — durch einen Mittelsmann an "
-        "die Crew gerichtet. Mache klar: dies ist ihr zugewiesenes Geschaeftsfeld, sie haben "
+        "Schreibe das Briefing der Gang. Es kommt von ganz oben — durch einen Mittelsmann an "
+        "die Gang gerichtet. Mache klar: dies ist ihr zugewiesenes Geschaeftsfeld, sie haben "
         "sich darum zu kuemmern, und die Machtverhaeltnisse in Liberty City koennen wechseln, "
         "je nachdem wie sie performen.\n\n"
         "WICHTIG: Das konkrete Geschaeftsfeld aus 'Zugewiesenes Crime-Business' MUSS aus dem "
@@ -229,10 +229,10 @@ def build_crime_business_briefing_prompt(
         "muessen Begriffe wie 'Kokain', 'Hafen', 'Container' im Text auftauchen. Wenn dort "
         "'Schutzgeld auf Restaurants in Algonquin' steht, muss 'Schutzgeld' (oder ein klares "
         "Synonym wie 'Tribut der Restaurants') sowie 'Restaurants in Algonquin' erkennbar sein. "
-        "Kein blosses Andeuten. Die Crew soll nach dem Lesen wissen: 'Aha, DAS machen wir.'\n\n"
+        "Kein blosses Andeuten. Die Gang soll nach dem Lesen wissen: 'Aha, DAS machen wir.'\n\n"
         "Verankere das Briefing zusaetzlich in der Hintergrund-Story der Gang: Schauplaetze, "
         "Reviere, Lokale, Rollen, Mentalitaet — diese aktiv nennen, damit das Briefing auf "
-        "DIESE Crew zugeschnitten wirkt, nicht generisch.\n\n"
+        "DIESE Gang zugeschnitten wirkt, nicht generisch.\n\n"
         "Gib nur den Briefing-Text aus, keine Erklaerung, keine Anmerkung."
     )
     return sys, "\n".join(parts)
@@ -256,7 +256,7 @@ def build_mission_suggestions_prompt(ctx: MissionContext) -> tuple[str, str]:
             "Der letzte Auftrag wurde '👍 erfolgreich erledigt'. Die drei Vorschlaege "
             "sollen die Story konsequent FORTFUEHREN — Eskalation, naechste Stufe, "
             "groesseres Ziel, hoeheres Risiko. Drei verschiedene Richtungen, in denen "
-            "die Crew an Boden gewinnt."
+            "die Gang an Boden gewinnt."
         ),
         "rejected": (
             "Der letzte Auftrag '👎 schlug fehl'. Die drei Vorschlaege sollen einen "
@@ -426,7 +426,7 @@ def build_rewrite_prompt(ctx: MissionContext, raw_input: str) -> str:
         "\n\n**Rivalitäten als Plot-Motor:** Wenn der Roh-Input einen Gegner / Zielperson / Reviere "
         "erwähnt und die Gang hat passende Rivalen oder Feinde, übersetze die Zielreferenz in eine "
         "Anspielung auf den konkreten Rivalen (über Revier-Namen, Rollen-Bezeichnungen, nicht direkt "
-        "den Crew-Namen). Verbündete & Geschäftspartner können als verdeckte Helfer oder Druckmittel "
+        "den Gang-Namen). Verbündete & Geschäftspartner können als verdeckte Helfer oder Druckmittel "
         "im Subtext mitschwingen."
         "\n\n**Firmen & Gewerbe einbeziehen:** Wenn der Roh-Input einen zivilen Akteur nennt (Lokal, "
         "Werkstatt, Pawn Shop, Taxi, Polizei, Justiz, Abschleppdienst) und die Gang-Story oder die "

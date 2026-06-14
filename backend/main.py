@@ -89,6 +89,12 @@ async def story_page(_user: str = Depends(require_admin)):
     return FileResponse(str(FRONTEND_DIR / "story.html"))
 
 
+@app.get("/mittler")
+async def quest_givers_page(_user: str = Depends(require_admin)):
+    """Read-Only-Ansicht der Quest-Geber (Mittler) + NPC-Pool."""
+    return FileResponse(str(FRONTEND_DIR / "quest_givers.html"))
+
+
 @app.get("/favicon.ico")
 async def favicon():
     return RedirectResponse("/static/favicon.svg")
