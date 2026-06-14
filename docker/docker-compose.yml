@@ -1,51 +1,22 @@
 # =============================================================================
-# SEKT6R Bot-Stack — Docker Compose
+# SEKT6R Bot-Stack — Docker Compose (mit bestehender Traefik-Integration)
 # =============================================================================
-# Setup: Hostinger KVM 2 (8GB RAM, 2 vCPU) + Cloudflare DNS+Proxy
+# Setup: Hostinger KVM 2 + Cloudflare DNS+Proxy + existierender Traefik
 # Domains: bots.sektorrp.eu + crime/liberty/ticket/countdown.bots.sektorrp.eu
+#
+# Traefik (im root_default-Network) routet HTTPS-Traffic automatisch
+# an unsere Container anhand der Labels.
 #
 # Start auf VPS:
 #   cp .env.example .env
 #   nano .env  # Werte eintragen (Discord-Tokens, API-Keys, etc.)
 #   docker compose up -d
-#
-# Logs anschauen:
-#   docker compose logs -f <service>
-#
-# Restart eines Services:
-#   docker compose restart <service>
 # =============================================================================
 
 services:
 
   # ---------------------------------------------------------------------------
-  # caddy — Reverse-Proxy mit Auto-HTTPS (Let's Encrypt)
-  # Verteilt eingehenden HTTPS-Traffic an die Bot-Services anhand der Subdomain
-  # ---------------------------------------------------------------------------
-  caddy:
-    image: caddy:2-alpine
-    container_name: sekt6r-caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"  # HTTP/3
-    volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    networks:
-      - sekt6r-net
-    depends_on:
-      - kommandozentrale
-      - crime-backend
-      - liberty-relay
-      - ticket-bot
-      - countdown-bot
-
-  # ---------------------------------------------------------------------------
   # kommandozentrale — Web-Dashboard zum Steuern aller Bots
-  # Bindet Docker-Socket, um Container Start/Stop/Logs/Status zu zeigen
   # Route: https://bots.sektorrp.eu/
   # ---------------------------------------------------------------------------
   kommandozentrale:
@@ -59,10 +30,18 @@ services:
       ADMIN_PASSWORD: "${KZ_ADMIN_PASSWORD}"
       TZ: Europe/Berlin
     volumes:
-      # Docker-Socket für Container-Steuerung (read-only)
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - sekt6r-net
+      - root_default
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "root_default"
+      traefik.http.routers.sekt6r-kz.entrypoints: "websecure"
+      traefik.http.routers.sekt6r-kz.rule: "Host(`bots.sektorrp.eu`)"
+      traefik.http.routers.sekt6r-kz.tls: "true"
+      traefik.http.routers.sekt6r-kz.tls.certresolver: "mytlschallenge"
+      traefik.http.services.sekt6r-kz.loadbalancer.server.port: "8000"
 
   # ---------------------------------------------------------------------------
   # crime-backend — Il Padrino (Crime Automation FastAPI-Backend)
@@ -95,9 +74,18 @@ services:
       - crime_logs:/app/logs
     networks:
       - sekt6r-net
+      - root_default
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "root_default"
+      traefik.http.routers.sekt6r-crime.entrypoints: "websecure"
+      traefik.http.routers.sekt6r-crime.rule: "Host(`crime.bots.sektorrp.eu`)"
+      traefik.http.routers.sekt6r-crime.tls: "true"
+      traefik.http.routers.sekt6r-crime.tls.certresolver: "mytlschallenge"
+      traefik.http.services.sekt6r-crime.loadbalancer.server.port: "8000"
 
   # ---------------------------------------------------------------------------
-  # crime-bot — Il Padrino Discord-Bot (separater Prozess, eigene HTTP-API)
+  # crime-bot — Il Padrino Discord-Bot (intern, kein Public-Route)
   # ---------------------------------------------------------------------------
   crime-bot:
     build:
@@ -108,7 +96,6 @@ services:
     environment:
       DISCORD_BOT_TOKEN: "${CRIME_DISCORD_BOT_TOKEN}"
       DISCORD_GUILD_ID: "${CRIME_DISCORD_GUILD_ID}"
-      BACKEND_URL: "http://crime-backend:8000"
       ADMIN_USERNAME: "${CRIME_ADMIN_USERNAME}"
       ADMIN_PASSWORD: "${CRIME_ADMIN_PASSWORD}"
       BOT_API_HOST: "0.0.0.0"
@@ -124,9 +111,8 @@ services:
       - crime-backend
 
   # ---------------------------------------------------------------------------
-  # liberty-relay — Liberty City Donations (Ko-fi + Twitch + Admin-Panel)
+  # liberty-relay — Du bist Liberty (Ko-fi + Twitch + Admin-Panel)
   # Route: https://liberty.bots.sektorrp.eu/
-  # OBS-Overlay läuft lokal auf deinem Streaming-PC (holt Daten von hier)
   # ---------------------------------------------------------------------------
   liberty-relay:
     build:
@@ -166,14 +152,23 @@ services:
       LOG_BACKUP_COUNT: "${LIBERTY_LOG_BACKUP_COUNT:-3}"
       TZ: Europe/Berlin
     volumes:
-      - liberty_data:/app/data       # JSON-Files (Goals, Cases, etc.)
+      - liberty_data:/app/data
       - liberty_logs:/app/logs
     networks:
       - sekt6r-net
+      - root_default
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "root_default"
+      traefik.http.routers.sekt6r-liberty.entrypoints: "websecure"
+      traefik.http.routers.sekt6r-liberty.rule: "Host(`liberty.bots.sektorrp.eu`)"
+      traefik.http.routers.sekt6r-liberty.tls: "true"
+      traefik.http.routers.sekt6r-liberty.tls.certresolver: "mytlschallenge"
+      traefik.http.services.sekt6r-liberty.loadbalancer.server.port: "8080"
 
   # ---------------------------------------------------------------------------
   # whitelist-bot — Discord-Bot, sync zu externer sektorrp.eu Webseiten-DB
-  # Kein Web-UI, läuft nur Discord-seitig
+  # (Discord-only, kein Public-Route)
   # ---------------------------------------------------------------------------
   whitelist-bot:
     build:
@@ -194,7 +189,7 @@ services:
       - sekt6r-net
 
   # ---------------------------------------------------------------------------
-  # ticket-bot — RAG-gestützte Ticket-Verwaltung mit Claude + Knowledge-Base
+  # ticket-bot — RAG-gestützte Ticket-Verwaltung (Discord + Claude + ChromaDB)
   # Route: https://ticket.bots.sektorrp.eu/
   # ---------------------------------------------------------------------------
   ticket-bot:
@@ -223,18 +218,27 @@ services:
       ADMIN_PASSWORD: "${TICKET_ADMIN_PASSWORD}"
       ADMIN_HOST: "0.0.0.0"
       ADMIN_PORT: "5555"
-      HF_HOME: "/app/hf-cache"  # Cache für sentence-transformers-Modell
+      HF_HOME: "/app/hf-cache"
       TZ: Europe/Berlin
     volumes:
       - ticket_data:/app/data
       - ticket_kb:/app/kb
-      - ticket_hf:/app/hf-cache   # Persistenter Modell-Cache, ~ 130 MB
+      - ticket_hf:/app/hf-cache
       - ticket_logs:/app/logs
     networks:
       - sekt6r-net
+      - root_default
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "root_default"
+      traefik.http.routers.sekt6r-ticket.entrypoints: "websecure"
+      traefik.http.routers.sekt6r-ticket.rule: "Host(`ticket.bots.sektorrp.eu`)"
+      traefik.http.routers.sekt6r-ticket.tls: "true"
+      traefik.http.routers.sekt6r-ticket.tls.certresolver: "mytlschallenge"
+      traefik.http.services.sekt6r-ticket.loadbalancer.server.port: "5555"
 
   # ---------------------------------------------------------------------------
-  # countdown-bot — Countdown-Verwaltung mit Discord + Web-Admin
+  # countdown-bot — Discord + Flask Web-Admin
   # Route: https://countdown.bots.sektorrp.eu/
   # ---------------------------------------------------------------------------
   countdown-bot:
@@ -249,34 +253,47 @@ services:
       ADMIN_PORT: "5601"
       TZ: Europe/Berlin
     volumes:
-      - countdown_data:/app/data   # countdowns.json + state.json
+      - countdown_data:/app/data
       - countdown_logs:/app/logs
     networks:
       - sekt6r-net
+      - root_default
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "root_default"
+      traefik.http.routers.sekt6r-countdown.entrypoints: "websecure"
+      traefik.http.routers.sekt6r-countdown.rule: "Host(`countdown.bots.sektorrp.eu`)"
+      traefik.http.routers.sekt6r-countdown.tls: "true"
+      traefik.http.routers.sekt6r-countdown.tls.certresolver: "mytlschallenge"
+      traefik.http.services.sekt6r-countdown.loadbalancer.server.port: "5601"
 
 
 # =============================================================================
-# Volumes — persistente Daten überleben Container-Restart und docker compose down
+# Volumes
 # =============================================================================
 volumes:
-  caddy_data:        # Let's Encrypt Zertifikate
-  caddy_config:      # Caddy-Runtime-Config
-  crime_data:        # SQLite-DB + Images
+  crime_data:
   crime_logs:
-  liberty_data:      # JSON-Files (Goals, Cases, Dedupe)
+  liberty_data:
   liberty_logs:
-  ticket_data:       # ChromaDB-Index
-  ticket_kb:         # Knowledge-Base-Dokumente
-  ticket_hf:         # Embedding-Modell Cache
+  ticket_data:
+  ticket_kb:
+  ticket_hf:
   ticket_logs:
-  countdown_data:    # countdowns.json + state.json
+  countdown_data:
   countdown_logs:
 
 
 # =============================================================================
-# Network — internes Bridge-Netzwerk, alle Container reden über Container-Namen
+# Networks
+# - sekt6r-net: internes Bridge-Network für Container-zu-Container
+# - root_default: EXTERN, existiert schon (Traefik+andere Services nutzen es)
 # =============================================================================
 networks:
   sekt6r-net:
     driver: bridge
     name: sekt6r-net
+
+  root_default:
+    external: true
+    name: root_default
