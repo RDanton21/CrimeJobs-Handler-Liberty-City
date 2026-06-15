@@ -27,5 +27,6 @@ RUN ln -sf /app/data/countdowns.json /app/countdowns.json \
 
 EXPOSE 5601
 
-# Startet bot.py (Discord) — admin.py wird vom bot.py als Thread gestartet
-CMD ["python", "bot.py"]
+# Start-Skript startet beide: bot.py (Discord, Foreground) + admin.py (Flask, Background)
+RUN chmod +x /app/start.sh
+CMD ["/app/start.sh"]
