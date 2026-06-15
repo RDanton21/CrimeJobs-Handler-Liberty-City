@@ -15,7 +15,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import requests
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect
 
 # Twitch (optional; enabled only if TWITCH_* env vars exist and twitchAPI is installed)
 try:
@@ -1219,6 +1219,12 @@ def overlay_static(filename: str):
     if safe.startswith("..") or os.path.isabs(safe):
         abort(404)
     return send_from_directory(overlay_dir, safe)
+
+
+# Root redirect zu /admin/ damit https://liberty-bot.../ nicht leer ist
+@app.route("/", methods=["GET"])
+def _root_redirect():
+    return redirect("/admin/", code=302)
 
 
 # Mount admin panel (Basic-Auth required via .env ADMIN_USER + ADMIN_PASS)

@@ -60,7 +60,7 @@ BOT_SERVICES = {
         "container": "sekt6r-liberty",
         "label": "Du bist Liberty",
         "icon": "🗽",
-        "ui_url": "https://liberty-bot.sektorrp.eu",
+        "ui_url": "https://liberty-bot.sektorrp.eu/admin/",
         "kind": "web",
     },
     "whitelist-bot": {
