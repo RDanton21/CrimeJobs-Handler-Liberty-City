@@ -46,7 +46,7 @@ BOT_SERVICES = {
         "container": "sekt6r-crime-backend",
         "label": "Il Padrino",
         "icon": "🎭",
-        "ui_url": "https://crime.bots.sektorrp.eu",
+        "ui_url": "https://crime-bot.sektorrp.eu",
         "kind": "web",
     },
     "crime-bot": {
@@ -60,7 +60,7 @@ BOT_SERVICES = {
         "container": "sekt6r-liberty",
         "label": "Du bist Liberty",
         "icon": "🗽",
-        "ui_url": "https://liberty.bots.sektorrp.eu",
+        "ui_url": "https://liberty-bot.sektorrp.eu",
         "kind": "web",
     },
     "whitelist-bot": {
@@ -74,14 +74,14 @@ BOT_SERVICES = {
         "container": "sekt6r-ticket",
         "label": "Ticket-System",
         "icon": "🎫",
-        "ui_url": "https://ticket.bots.sektorrp.eu",
+        "ui_url": "https://ticket-bot.sektorrp.eu",
         "kind": "web",
     },
     "countdown-bot": {
         "container": "sekt6r-countdown",
         "label": "Countdown",
         "icon": "⏰",
-        "ui_url": "https://countdown.bots.sektorrp.eu",
+        "ui_url": "https://countdown-bot.sektorrp.eu",
         "kind": "web",
     },
 }
