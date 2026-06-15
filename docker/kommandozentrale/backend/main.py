@@ -13,6 +13,7 @@ Features:
 """
 from __future__ import annotations
 
+import asyncio
 import os
 import secrets
 from datetime import datetime
@@ -219,14 +220,32 @@ async def service_status(service: str, _user: str = Depends(require_admin)):
     return get_container_status(service)
 
 
+def _do_restart(container_name: str) -> None:
+    """Sync-Wrapper für docker.restart — wird über asyncio.to_thread im Pool ausgeführt,
+    damit der Event-Loop nicht blockiert während der Container neu startet."""
+    c = docker_client.containers.get(container_name)
+    c.restart(timeout=10)
+
+
+def _do_start(container_name: str) -> None:
+    c = docker_client.containers.get(container_name)
+    c.start()
+
+
+def _do_stop(container_name: str) -> None:
+    c = docker_client.containers.get(container_name)
+    c.stop(timeout=10)
+
+
 @app.post("/api/services/{service}/restart")
 async def restart_service(service: str, _user: str = Depends(require_admin)):
     svc = BOT_SERVICES.get(service)
     if not svc:
         raise HTTPException(404, "Unknown service")
     try:
-        c = docker_client.containers.get(svc["container"])
-        c.restart()
+        # In Threadpool ausführen damit der FastAPI-Event-Loop nicht blockiert,
+        # während Docker den Container neu startet (kann 5-30 Sek dauern).
+        await asyncio.to_thread(_do_restart, svc["container"])
         return {"ok": True, "service": service, "action": "restarted"}
     except docker.errors.NotFound:
         raise HTTPException(404, f"Container {svc['container']} nicht gefunden")
@@ -240,8 +259,7 @@ async def start_service(service: str, _user: str = Depends(require_admin)):
     if not svc:
         raise HTTPException(404, "Unknown service")
     try:
-        c = docker_client.containers.get(svc["container"])
-        c.start()
+        await asyncio.to_thread(_do_start, svc["container"])
         return {"ok": True, "service": service, "action": "started"}
     except docker.errors.NotFound:
         raise HTTPException(404, f"Container {svc['container']} nicht gefunden")
@@ -255,8 +273,7 @@ async def stop_service(service: str, _user: str = Depends(require_admin)):
     if not svc:
         raise HTTPException(404, "Unknown service")
     try:
-        c = docker_client.containers.get(svc["container"])
-        c.stop(timeout=10)
+        await asyncio.to_thread(_do_stop, svc["container"])
         return {"ok": True, "service": service, "action": "stopped"}
     except docker.errors.NotFound:
         raise HTTPException(404, f"Container {svc['container']} nicht gefunden")
