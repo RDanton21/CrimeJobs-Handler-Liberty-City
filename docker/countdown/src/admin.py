@@ -1,3 +1,4 @@
+import os
 """SEKTOR Countdown — Admin-Panel (Flask).
 
 Verwaltet countdowns.json: Countdowns anlegen / bearbeiten / loeschen.
@@ -17,7 +18,7 @@ from flask import Flask, request, redirect
 ROOT = Path(__file__).parent
 COUNTDOWNS_PATH = ROOT / "countdowns.json"
 BERLIN = ZoneInfo("Europe/Berlin")
-HOST, PORT = "127.0.0.1", 5601
+HOST = os.getenv("ADMIN_HOST", "127.0.0.1"); PORT = int(os.getenv("ADMIN_PORT", "5601"))
 
 app = Flask(__name__)
 
