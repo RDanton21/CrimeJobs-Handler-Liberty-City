@@ -95,6 +95,12 @@ async def quest_givers_page(_user: str = Depends(require_admin)):
     return FileResponse(str(FRONTEND_DIR / "quest_givers.html"))
 
 
+@app.get("/personnel")
+async def personnel_page(_user: str = Depends(require_admin)):
+    """Personal-Bedarf: Live-Widget, früher im Dashboard, jetzt eigener Reiter."""
+    return FileResponse(str(FRONTEND_DIR / "personnel.html"))
+
+
 @app.get("/favicon.ico")
 async def favicon():
     return RedirectResponse("/static/favicon.svg")
