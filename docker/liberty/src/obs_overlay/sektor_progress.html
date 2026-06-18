@@ -87,8 +87,8 @@
       position:relative;
       overflow:hidden;
       border:1px solid var(--stroke);
-      border-radius:22px;
-      padding:20px 24px 18px;
+      border-radius:20px;
+      padding:13px 22px 12px;
       backdrop-filter: blur(14px);
       background:
         linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015)),
@@ -144,31 +144,21 @@
     .skyline .win.tw{ animation: twinkle 2.8s ease-in-out infinite; }
 
     /* --- Header --- */
-    .eyebrow{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:5px 12px; border-radius:999px;
-      border:1px solid rgba(232,178,74,0.5);
-      background: rgba(232,178,74,0.07);
-      color: var(--gold-bright);
-      font-family: var(--font-display);
-      font-size:11px; letter-spacing:2.5px; text-transform:uppercase; font-weight:700;
-    }
     .header .title{
-      margin-top:8px;
+      margin-top:0;
       font-family: var(--font-display);
       text-transform:uppercase; letter-spacing:5px; font-weight:800;
-      font-size:34px; line-height:1.05;
+      font-size:29px; line-height:1.02;
       color: var(--gold);
       background: linear-gradient(92deg, #F6D27A 0%, #E8B24A 45%, #C8901F 100%);
       -webkit-background-clip:text; background-clip:text; color:transparent;
       filter: drop-shadow(0 0 14px rgba(232,178,74,0.35));
     }
-    .header .subtitle{ margin-top:6px; font-size:14px; color: var(--muted); }
-    .header .subtitle2{ margin-top:2px; font-size:13px; color: var(--dim); }
+    .header .subtitle2{ margin-top:5px; font-size:13px; color: var(--dim); }
     .header .subtitle2 .bold{ font-weight:700; color: var(--muted); }
 
     /* --- Progress-Bar --- */
-    .barRow{ display:flex; align-items:center; gap:14px; margin-top:18px; }
+    .barRow{ display:flex; align-items:center; gap:14px; margin-top:12px; }
     .barShell{
       position:relative; flex:1; height:22px; border-radius:999px; overflow:hidden;
       background: rgba(0,0,0,0.35);
@@ -205,7 +195,7 @@
     }
 
     /* --- Meta-Zeile --- */
-    .meta{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:13px; }
+    .meta{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; }
     .metaLeft{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
     .chip{
       display:inline-flex; align-items:center; gap:8px;
@@ -262,9 +252,7 @@
       </div>
 
       <div class="header">
-        <span class="eyebrow">SEKTOR ROLEPLAY · 18+ COMMUNITY</span>
         <div class="title">Du bist Liberty</div>
-        <div class="subtitle">Spenden-Goal — 5EKTOR geht live, sobald das Ziel erreicht ist.</div>
         <div class="subtitle2">Eventzeitraum: <span class="bold">07.08.2026 18:00 – 16.08.2026 23:59</span></div>
       </div>
 
@@ -291,7 +279,7 @@
   // ============================================================
   //  KONFIGURATION
   // ============================================================
-  const DEFAULT_REMOTE_API = "https://liberty-bot.sektorrp.eu/api/stats";
+  const DEFAULT_REMOTE_API = "http://116.202.174.56:8080/api/stats";
 
   function getParam(name, fallback){
     const url = new URL(window.location.href);
