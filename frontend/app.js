@@ -1209,8 +1209,11 @@ function storyPage() {
     saving: false,
     msg: "",
     initError: "",
+    viewMode: "view",       // "view" = Prosa-Vorschau, "edit" = Textarea
+    pdfExporting: false,
 
     async init() {
+      if (window.marked) window.marked.setOptions({ breaks: false, gfm: true });
       await this.refreshFileList();
       if (this.files.length) await this.selectFile(this.files[0].filename);
     },
@@ -1228,6 +1231,7 @@ function storyPage() {
       this.activeFile = filename;
       this.loading = true;
       this.dirty = false;
+      this.viewMode = "view";   // bei Tab-Wechsel zurück zur Vorschau
       try {
         const r = await api.get(`/api/story/file/${encodeURIComponent(filename)}`);
         this.content = r.content || "";
@@ -1254,6 +1258,65 @@ function storyPage() {
     async reload() {
       if (this.dirty && !confirm("Ungespeicherte Änderungen verwerfen?")) return;
       if (this.activeFile) await this.selectFile(this.activeFile);
+    },
+    activeFileLabel() {
+      const f = this.files.find(x => x.filename === this.activeFile);
+      return f ? f.label : (this.activeFile || "");
+    },
+    renderMd(md) {
+      if (!md) return "";
+      if (window.marked && typeof window.marked.parse === "function") {
+        return window.marked.parse(md);
+      }
+      const div = document.createElement("div");
+      div.innerText = md;
+      return "<pre>" + div.innerHTML + "</pre>";
+    },
+    _slugifyForFilename(s) {
+      return (s || "story")
+        .toString()
+        .normalize("NFD").replace(/[̀-ͯ]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 80) || "story";
+    },
+    async exportFilePdf() {
+      if (!this.activeFile) return;
+      if (typeof window.html2pdf !== "function") {
+        alert("PDF-Library nicht geladen (html2pdf). Seite neu laden bitte.");
+        return;
+      }
+      const area = document.getElementById("pdf-render-area");
+      if (!area) {
+        alert("PDF-Render-Bereich fehlt im DOM.");
+        return;
+      }
+      this.pdfExporting = true;
+      try {
+        const title = this.activeFileLabel();
+        const subtitle = `Story · docs/${this.activeFile}`;
+        const contentHtml = this.renderMd(this.content || "");
+        area.innerHTML = `
+          <h1>${(title || "").replace(/</g, "&lt;")}</h1>
+          <div class="pdf-subtitle">${subtitle.replace(/</g, "&lt;")}</div>
+          ${contentHtml}
+        `;
+        const opts = {
+          margin:       [12, 12, 14, 12],
+          filename:     "story-" + this._slugifyForFilename(title) + ".pdf",
+          image:        { type: "jpeg", quality: 0.95 },
+          html2canvas:  { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+          jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" },
+          pagebreak:    { mode: ["css", "legacy"] },
+        };
+        await window.html2pdf().set(opts).from(area).save();
+      } catch (e) {
+        alert("PDF-Export fehlgeschlagen: " + (e.message || e));
+      } finally {
+        area.innerHTML = "";
+        this.pdfExporting = false;
+      }
     },
   };
 }

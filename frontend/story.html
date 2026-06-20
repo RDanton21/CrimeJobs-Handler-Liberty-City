@@ -6,6 +6,8 @@
   <title>SEKT6R — Story</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
   <link rel="stylesheet" href="/static/style.css" />
   <style>[x-cloak] { display: none !important; }</style>
 </head>
@@ -58,13 +60,29 @@
     <p x-show="loading" class="text-zinc-500 text-sm">Lade…</p>
 
     <div x-show="!loading && activeFile" class="space-y-3">
+      <!-- Toolbar -->
       <div class="flex items-center justify-between gap-3 flex-wrap">
         <span class="text-sm text-zinc-400">
           Datei: <code class="text-zinc-200" x-text="`docs/${activeFile}`"></code>
           <span x-show="dirty" class="ml-2 text-amber-400">● ungespeichert</span>
         </span>
-        <div class="flex items-center gap-2">
-          <button @click="saveFile()" :disabled="saving || !dirty"
+        <div class="flex items-center gap-2 flex-wrap">
+          <!-- View/Edit-Toggle -->
+          <div class="flex items-center gap-1 bg-zinc-950 border border-zinc-800 rounded text-xs">
+            <button @click="viewMode = 'view'"
+                    :class="viewMode === 'view' ? 'bg-blue-700 text-white' : 'text-zinc-400 hover:text-zinc-200'"
+                    class="px-3 py-1.5 rounded-l">👁 Anzeigen</button>
+            <button @click="viewMode = 'edit'"
+                    :class="viewMode === 'edit' ? 'bg-blue-700 text-white' : 'text-zinc-400 hover:text-zinc-200'"
+                    class="px-3 py-1.5 rounded-r">✎ Bearbeiten</button>
+          </div>
+          <button @click="exportFilePdf()" :disabled="pdfExporting"
+                  class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded text-sm disabled:opacity-50">
+            <span x-show="!pdfExporting">📄 PDF</span>
+            <span x-show="pdfExporting">Exportiere…</span>
+          </button>
+          <button x-show="viewMode === 'edit'"
+                  @click="saveFile()" :disabled="saving || !dirty"
                   class="px-4 py-2 bg-green-600 hover:bg-green-500 disabled:opacity-40 rounded text-sm font-medium">
             <span x-show="!saving">💾 Speichern</span>
             <span x-show="saving">Speichere…</span>
@@ -74,15 +92,32 @@
           <p x-show="msg" x-text="msg" class="text-sm text-green-400 self-center"></p>
         </div>
       </div>
-      <textarea x-model="content" @input="dirty = true" rows="32"
-                spellcheck="false"
-                class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm font-mono leading-relaxed"></textarea>
 
-      <div class="text-xs text-zinc-500">
-        Zeichen: <span x-text="content.length"></span> ·
-        Zeilen: <span x-text="content.split('\n').length"></span>
+      <!-- View-Modus: gerenderte Prosa -->
+      <div x-show="viewMode === 'view'"
+           class="bg-zinc-900 border border-zinc-800 rounded-lg p-6">
+        <article class="prose-lore">
+          <div x-show="!content.trim()" class="text-zinc-500 italic text-sm">
+            Diese Datei ist leer. Wechsel in den Edit-Modus um Inhalt hinzuzufügen.
+          </div>
+          <div x-show="content.trim()" x-html="renderMd(content)"></div>
+        </article>
+      </div>
+
+      <!-- Edit-Modus: Textarea -->
+      <div x-show="viewMode === 'edit'" class="space-y-2">
+        <textarea x-model="content" @input="dirty = true" rows="32"
+                  spellcheck="false"
+                  class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm font-mono leading-relaxed"></textarea>
+        <div class="text-xs text-zinc-500">
+          Zeichen: <span x-text="content.length"></span> ·
+          Zeilen: <span x-text="content.split('\n').length"></span>
+        </div>
       </div>
     </div>
+
+    <!-- Off-screen PDF-Render-Container -->
+    <div id="pdf-render-area" class="pdf-render-area" aria-hidden="true"></div>
   </div>
 
   <script src="/static/app.js"></script>
