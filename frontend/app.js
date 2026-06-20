@@ -533,17 +533,15 @@ function dashboard() {
         alert("Bitte erst Personal-Brief speichern, dann posten.");
         return;
       }
-      const replacing = !!item.personnel_discord_message_id;
-      const msg = replacing
-        ? `Personal-Brief für „${item.crew_name}" im Admin-Channel aktualisieren (vorherigen Post ersetzen)?`
-        : `Personal-Brief für „${item.crew_name}" in den Admin-Channel posten?`;
-      if (!confirm(msg)) return;
+      if (item.personnel_discord_message_id) {
+        alert("Personal-Bedarf wurde bereits gepostet. Erst Auftrag archivieren, wenn ein neuer Stand in den Admin-Channel soll.");
+        return;
+      }
+      if (!confirm(`Personal-Brief für „${item.crew_name}" in den Admin-Channel posten?`)) return;
       this.personnelPosting = item.mission_id;
       try {
-        const r = await api.post(`/api/dashboard/missions/${item.mission_id}/personnel/post`, {});
-        this.personnelPostToast = replacing
-          ? `✓ Aktualisiert in Admin-Channel (Crew „${item.crew_name}")`
-          : `✓ Gepostet in Admin-Channel (Crew „${item.crew_name}")`;
+        await api.post(`/api/dashboard/missions/${item.mission_id}/personnel/post`, {});
+        this.personnelPostToast = `✓ Gepostet in Admin-Channel (Crew „${item.crew_name}")`;
         setTimeout(() => { this.personnelPostToast = ""; }, 5000);
         // Personnel neu laden — message_id ist jetzt gesetzt
         this.personnelInitialLoad = true;
@@ -681,11 +679,11 @@ function crewPage() {
         alert("Bitte erst Personal-Brief speichern, dann posten.");
         return;
       }
-      const replacing = !!m.personnel_discord_message_id;
-      const msg = replacing
-        ? `Personal-Brief im Admin-Channel aktualisieren (vorherigen Post ersetzen)?`
-        : `Personal-Brief in den Admin-Channel posten?`;
-      if (!confirm(msg)) return;
+      if (m.personnel_discord_message_id) {
+        alert("Personal-Bedarf wurde bereits gepostet. Erst Auftrag archivieren, wenn ein neuer Stand in den Admin-Channel soll.");
+        return;
+      }
+      if (!confirm("Personal-Brief in den Admin-Channel posten?")) return;
       this.personnelPostingId = m.id;
       try {
         const r = await api.post(`/api/dashboard/missions/${m.id}/personnel/post`, {});

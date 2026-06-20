@@ -105,19 +105,21 @@
                 <a :href="`/crew/${item.crew_id}`" class="text-xs text-blue-400 hover:underline">
                   → Crew-Detail
                 </a>
-                <button x-show="personnelEditing !== item.mission_id && item.personnel_brief"
+                <!-- Posten-Button: nur sichtbar wenn noch nicht gepostet.
+                     Sobald gepostet, ist der Embed im Admin-Channel fix bis zum Archivieren. -->
+                <button x-show="personnelEditing !== item.mission_id && item.personnel_brief && !item.personnel_discord_message_id"
                         @click="postPersonnelToDiscord(item)"
                         :disabled="personnelPosting === item.mission_id"
-                        :title="item.personnel_discord_message_id
-                          ? 'Vorherigen Admin-Post ersetzen mit aktuellem Stand'
-                          : 'In Admin-Channel posten (Spielleitung)'"
+                        title="In Admin-Channel posten (Spielleitung) — danach bleibt der Embed dort bis zum Archivieren."
                         class="text-xs px-2 py-1 rounded bg-indigo-700 hover:bg-indigo-600 disabled:opacity-50">
-                  <span x-show="personnelPosting !== item.mission_id">
-                    <span x-show="item.personnel_discord_message_id">📤 Aktualisieren</span>
-                    <span x-show="!item.personnel_discord_message_id">📤 Posten</span>
-                  </span>
+                  <span x-show="personnelPosting !== item.mission_id">📤 Posten</span>
                   <span x-show="personnelPosting === item.mission_id">Sende…</span>
                 </button>
+                <span x-show="personnelEditing !== item.mission_id && item.personnel_discord_message_id"
+                      class="text-xs px-2 py-1 rounded bg-green-900/40 border border-green-700/50 text-green-300"
+                      title="Embed wurde gepostet. Beim Archivieren wird er entfernt.">
+                  ✓ Im Admin-Channel
+                </span>
                 <button x-show="personnelEditing !== item.mission_id"
                         @click="startEditPersonnel(item)"
                         class="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700">

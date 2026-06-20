@@ -389,12 +389,18 @@ async def _auto_post_personnel(session, mission: Mission) -> None:
     """Postet den personnel_brief im Admin-Channel (falls konfiguriert).
     Wird nach erfolgreichem Mission-Send aufgerufen. Defensiv: jeder Fehler
     wird stillschweigend geloggt, damit der Mission-Send selbst nicht
-    blockiert. Nutzt das Replace-Previous-Pattern: alter Post wird gelöscht,
-    falls vorhanden."""
+    blockiert.
+
+    Idempotent: postet pro Mission GENAU EINMAL. Wenn die Mission bereits
+    eine personnel_discord_message_id hat, bleibt der vorhandene Embed
+    unangetastet im Admin-Channel — erst Archivieren löscht ihn."""
     from .settings_store import get as settings_get
 
     if not (mission.personnel_brief or "").strip():
         return  # nichts zu posten
+    # Bereits gepostet -> nicht erneut, Embed soll bis zum Archivieren bleiben
+    if mission.personnel_discord_message_id:
+        return
     channel_id = (await settings_get(session, "personnel_admin_channel_id", "")).strip()
     if not channel_id:
         return  # Admin-Channel nicht konfiguriert -> Auto-Post deaktiviert
@@ -402,19 +408,6 @@ async def _auto_post_personnel(session, mission: Mission) -> None:
     crew = await session.get(Crew, mission.crew_id)
     if crew is None:
         return
-
-    # Vorherigen Post löschen falls vorhanden
-    if mission.personnel_discord_message_id:
-        try:
-            ch = client.get_channel(int(channel_id)) or await client.fetch_channel(int(channel_id))
-            try:
-                old_msg = await ch.fetch_message(int(mission.personnel_discord_message_id))
-                await old_msg.delete()
-            except Exception:
-                pass
-        except Exception:
-            pass
-        mission.personnel_discord_message_id = ""
 
     # Neuen Embed senden
     try:

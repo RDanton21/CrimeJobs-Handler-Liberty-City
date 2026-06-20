@@ -466,19 +466,21 @@
                           x-text="`(zuletzt: ${formatDate(m.personnel_updated_at)})`"></span>
                   </h4>
                   <div class="flex items-center gap-1 flex-wrap">
-                    <button x-show="personnelChannelConfigured && personnelEditingId !== m.id && (m.personnel_brief || '').trim()"
+                    <!-- Posten-Button: nur sichtbar wenn noch nicht gepostet.
+                         Nach erstem Post bleibt der Embed bis zum Archivieren. -->
+                    <button x-show="personnelChannelConfigured && personnelEditingId !== m.id && (m.personnel_brief || '').trim() && !m.personnel_discord_message_id"
                             @click="postPersonnelToDiscordCrew(m)"
                             :disabled="personnelPostingId === m.id"
-                            :title="m.personnel_discord_message_id
-                              ? 'Vorherigen Admin-Post ersetzen mit aktuellem Stand'
-                              : 'In Admin-Channel posten (Spielleitung)'"
+                            title="In Admin-Channel posten (Spielleitung) — danach bleibt der Embed dort bis zum Archivieren."
                             class="text-xs px-2 py-1 rounded bg-indigo-700 hover:bg-indigo-600 disabled:opacity-50">
-                      <span x-show="personnelPostingId !== m.id">
-                        <span x-show="m.personnel_discord_message_id">📤 Aktualisieren</span>
-                        <span x-show="!m.personnel_discord_message_id">📤 Posten</span>
-                      </span>
+                      <span x-show="personnelPostingId !== m.id">📤 Posten</span>
                       <span x-show="personnelPostingId === m.id">Sende…</span>
                     </button>
+                    <span x-show="personnelEditingId !== m.id && m.personnel_discord_message_id"
+                          class="text-xs px-2 py-1 rounded bg-green-900/40 border border-green-700/50 text-green-300"
+                          title="Embed wurde gepostet. Beim Archivieren wird er entfernt.">
+                      ✓ Im Admin-Channel
+                    </span>
                     <button x-show="personnelEditingId !== m.id"
                             @click="startEditPersonnelCrew(m)"
                             class="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700">

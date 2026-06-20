@@ -269,6 +269,17 @@ async def post_personnel_to_discord(
     if not (m.personnel_brief or "").strip():
         raise HTTPException(400, "Mission hat keinen Personal-Brief. Erst speichern, dann posten.")
 
+    # Idempotent: pro Mission GENAU EINMAL posten. Wenn bereits eine Message-ID
+    # gesetzt ist, bleibt der vorhandene Embed unangetastet — erst Archivieren
+    # löscht ihn. Re-Posting nach manuellen Discord-Aenderungen vermeidet
+    # ungewollte Dopplungen im Admin-Channel.
+    if m.personnel_discord_message_id:
+        raise HTTPException(
+            409,
+            "Personal-Bedarf für diese Mission wurde bereits gepostet. "
+            "Erst Auftrag archivieren wenn ein neuer Stand gepostet werden soll."
+        )
+
     channel_id = (await settings_get(session, "personnel_admin_channel_id", "")).strip()
     if not channel_id:
         raise HTTPException(
@@ -276,19 +287,6 @@ async def post_personnel_to_discord(
             "Kein Admin-Channel für Personal-Posts gesetzt. "
             "Bitte in den Settings 'personnel_admin_channel_id' eintragen."
         )
-
-    # Vorherige Message löschen (falls vorhanden), best-effort
-    if m.personnel_discord_message_id:
-        try:
-            async with httpx.AsyncClient(timeout=10.0) as cli:
-                await cli.post(
-                    f"{app_settings.bot_api_url}/delete_message",
-                    json={"channel_id": channel_id,
-                          "message_id": m.personnel_discord_message_id},
-                )
-        except Exception:
-            pass  # alte Message vielleicht manuell gelöscht — egal, weiter
-        m.personnel_discord_message_id = ""
 
     slot = _slot_for(m)
     status_label = {
@@ -344,5 +342,4 @@ async def post_personnel_to_discord(
         "mission_id": m.id,
         "channel_id": channel_id,
         "message_id": new_msg_id,
-        "replaced_previous": bool(m.personnel_discord_message_id),
     }
