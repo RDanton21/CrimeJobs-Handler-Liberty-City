@@ -474,8 +474,11 @@ async def create_manual_mission(
         deadline_at = datetime.utcnow() + timedelta(minutes=payload.deadline_minutes)
 
     text = payload.content.strip()
-    # KI-Vorschlag fürs Personal-Briefing (defensiv: bei Fehler leer)
-    personnel = await _generate_personnel_safe(session, text, crew.name, crew.district or "")
+    # KEIN automatischer Personal-Brief fuer manuelle Missions:
+    # der User sendet einen klaren Klartext-Auftrag (z.B. nur Zusatzinfos
+    # wie Adresse/GPS), bekommt sonst aber ungewollt einen KI-Personal-
+    # Embed im Admin-Channel. Wer Personal will, generiert es im Widget
+    # ueber den 'KI-Vorschlag'-Button nachtraeglich.
     mission = Mission(
         crew_id=crew.id,
         ai_provider="manual",
@@ -487,8 +490,8 @@ async def create_manual_mission(
         status=MissionStatus.DRAFT,
         deadline_at=deadline_at,
         scheduled_send_at=_normalize_naive_utc(payload.scheduled_send_at),
-        personnel_brief=personnel,
-        personnel_updated_at=datetime.utcnow() if personnel else None,
+        personnel_brief="",
+        personnel_updated_at=None,
     )
     session.add(mission)
     await session.commit()
