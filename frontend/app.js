@@ -1210,6 +1210,14 @@ async function pdfFromHtml({ title, subtitle, contentHtml, filename }) {
     alert("PDF-Library nicht geladen (html2pdf). Bitte Seite neu laden.");
     return;
   }
+  // Wrapper: 1x1 px, overflow:hidden — verschluckt den eigentlichen
+  // Render-Container visuell, laesst ihn aber voll im DOM existieren.
+  const wrapper = document.createElement("div");
+  wrapper.setAttribute("aria-hidden", "true");
+  wrapper.style.cssText =
+    "position:fixed;top:0;left:0;width:1px;height:1px;overflow:hidden;" +
+    "pointer-events:none;z-index:0;";
+
   const area = document.createElement("div");
   area.className = "pdf-render-area";
   const safeTitle = (title || "").replace(/</g, "&lt;");
@@ -1219,21 +1227,33 @@ async function pdfFromHtml({ title, subtitle, contentHtml, filename }) {
     ${safeSubtitle ? `<div class="pdf-subtitle">${safeSubtitle}</div>` : ""}
     ${contentHtml || "<p><em>Kein Inhalt.</em></p>"}
   `;
-  document.body.appendChild(area);
-  // Browser muss Layout/Reflow durchfuehren damit html2canvas die Hoehe kennt
-  await new Promise(r => requestAnimationFrame(() => r()));
+  wrapper.appendChild(area);
+  document.body.appendChild(wrapper);
+
+  // 2 RAF-Ticks fuer sicheren Layout-Reflow (sonst kann html2canvas
+  // die Hoehe als 0 messen).
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
   try {
     const opts = {
       margin:      [12, 12, 14, 12],
       filename:    filename,
       image:       { type: "jpeg", quality: 0.95 },
-      html2canvas: { scale: 2, backgroundColor: "#ffffff", logging: false },
+      html2canvas: {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        logging: false,
+        // Element ist im wrapper visuell unsichtbar — windowWidth/Height
+        // helfen html2canvas die wahre Groesse zu sehen.
+        windowWidth: 720,
+        windowHeight: Math.max(area.scrollHeight, 1000),
+      },
       jsPDF:       { unit: "mm", format: "a4", orientation: "portrait" },
       pagebreak:   { mode: ["css", "legacy"] },
     };
     await window.html2pdf().set(opts).from(area).save();
   } finally {
-    if (area.parentNode) area.parentNode.removeChild(area);
+    if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
   }
 }
 

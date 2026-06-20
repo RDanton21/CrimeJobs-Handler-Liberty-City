@@ -100,18 +100,14 @@ input[type="color"] {
 .prose-lore tr:nth-child(even) td { background: #0c0c0e; }
 
 /* ─────────────────────────────────────────────
-   Off-screen PDF-Render-Container
-   html2canvas (intern von html2pdf) braucht das Element IM Viewport
-   damit es Inhalte rendert — daher absolute statt fixed, sichtbar via
-   Position/Z-Index aber durch opacity:0 unsichtbar fuer den User.
+   PDF-Render-Container — nur visuelle Regeln.
+   Position/Hiding macht der JS-Wrapper (siehe pdfFromHtml in app.js):
+   ein 1x1px overflow:hidden DIV, der diesen Container "verschluckt".
+   So bleibt der Container fuer html2canvas voll sichtbar (kein opacity:0,
+   kein off-screen left:-9999), aber der User sieht nur 1 unsichtbares
+   Pixel im DOM.
    ─────────────────────────────────────────────*/
 .pdf-render-area {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: -9999;
-  opacity: 0;
-  pointer-events: none;
   width: 720px;
   padding: 50px 60px;
   background: #ffffff;
