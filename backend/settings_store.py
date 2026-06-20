@@ -35,6 +35,9 @@ KEYS = {
     "ranking_top3_last_message_id",
     # Reset-Stichtag: ab diesem Zeitpunkt zählen Missions im Ranking
     "ranking_reset_at",
+    # Reset-Stichtag: ab diesem Zeitpunkt zählen Missions in der
+    # Reaktions-Statistik im Dashboard (Soft-Reset).
+    "stats_reset_at",
     # Admin-Channel für Personal-Bedarf-Posts (Spielleitung sieht hier
     # pro Mission Crew + Slot + NPC-Plan)
     "personnel_admin_channel_id",
