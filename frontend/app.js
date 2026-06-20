@@ -94,6 +94,7 @@ function dashboard() {
     statsFilter: { crew_id: "", range: "all" },
     districtFilter: "",
     statusFilter: "",
+    resettingStats: false,
     DISTRICTS,
     showNew: false,
     draft: { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
@@ -383,6 +384,22 @@ function dashboard() {
       if (since) params.set("since", since);
       const qs = params.toString() ? "?" + params.toString() : "";
       this.stats = await api.get(`/api/missions/stats${qs}`);
+    },
+    async resetStats() {
+      if (!confirm(
+        "Reaktions-Statistik wirklich zurücksetzen?\n\n" +
+        "Die Zähler werden auf 0 gesetzt — neue Missionen werden ab jetzt frisch gezählt. " +
+        "Bestehende Missionen bleiben im Archiv erhalten und sind weiter aufrufbar."
+      )) return;
+      this.resettingStats = true;
+      try {
+        await api.post("/api/missions/stats/reset");
+        await this.loadStats();
+      } catch (e) {
+        alert("Zurücksetzen fehlgeschlagen: " + (e.message || e));
+      } finally {
+        this.resettingStats = false;
+      }
     },
     async createCrew() {
       if (!this.draft.name.trim()) { alert("Name fehlt"); return; }

@@ -1037,21 +1037,50 @@ async def mission_stats(
     session: AsyncSession = Depends(get_session),
 ):
     """Reaktions-Aggregat: Anzahl Missions je Status, optional gefiltert nach
-    Crew, Stadtteil und Zeitfenster (created_at >= since). Archivierte werden mitgezählt."""
+    Crew, Stadtteil und Zeitfenster (created_at >= since). Archivierte werden mitgezählt.
+
+    Zusaetzlich wird ein per Soft-Reset gesetzter Cutoff angewendet
+    (Setting: stats_reset_at, ISO-Timestamp). Daten vor dem Cutoff werden
+    ausgeblendet, Datenbank bleibt unangetastet."""
+    reset_at_str = (await settings_get(session, "stats_reset_at", "")).strip()
+    reset_at: datetime | None = None
+    if reset_at_str:
+        try:
+            reset_at = datetime.fromisoformat(reset_at_str.replace("Z", ""))
+        except ValueError:
+            reset_at = None
+
+    effective_since = since
+    if reset_at and (effective_since is None or reset_at > effective_since):
+        effective_since = reset_at
+
     q = select(Mission.status, func.count(Mission.id)).group_by(Mission.status)
     if crew_id is not None:
         q = q.where(Mission.crew_id == crew_id)
     if district:
         q = q.join(Crew, Crew.id == Mission.crew_id).where(Crew.district == district)
-    if since is not None:
-        q = q.where(Mission.created_at >= since)
+    if effective_since is not None:
+        q = q.where(Mission.created_at >= effective_since)
     res = await session.execute(q)
     counts = {s.value: 0 for s in MissionStatus}
     for status, count in res.all():
         key = status.value if hasattr(status, "value") else str(status)
         counts[key] = count
     counts["total"] = sum(counts.values())
+    counts["reset_at"] = reset_at.isoformat() if reset_at else None
     return counts
+
+
+@router.post("/stats/reset")
+async def reset_mission_stats(session: AsyncSession = Depends(get_session)):
+    """Setzt die Reaktions-Statistik auf 0 zurueck. Implementiert als Soft-Reset:
+    speichert einen Cutoff-Timestamp (stats_reset_at). Alle Missions die VOR
+    dem Reset erstellt wurden, werden in der Zaehlung uebersprungen. Datenbank
+    bleibt unveraendert — Missions bleiben weiter aufrufbar (Archiv, Crew-Detail)."""
+    from .settings_store import set_value as _set_setting
+    now = datetime.utcnow()
+    await _set_setting(session, "stats_reset_at", now.isoformat())
+    return {"ok": True, "reset_at": now.isoformat()}
 
 
 @router.get("/{mission_id}", response_model=MissionOut)
