@@ -7,24 +7,155 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
   <link rel="stylesheet" href="/static/style.css" />
   <style>
-    .prose-lore h2 { font-size: 1.5rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #fafafa; }
-    .prose-lore h3 { font-size: 1.15rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.5rem; color: #f4f4f5; }
-    .prose-lore p { margin-bottom: 0.85rem; line-height: 1.65; color: #d4d4d8; }
-    .prose-lore blockquote { border-left: 3px solid #b91c1c; padding-left: 1rem; margin: 1rem 0; color: #a1a1aa; font-style: italic; }
-    .prose-lore ul { margin-left: 1.5rem; margin-bottom: 0.85rem; list-style: disc; color: #d4d4d8; }
-    .prose-lore ol { margin-left: 1.5rem; margin-bottom: 0.85rem; list-style: decimal; color: #d4d4d8; }
-    .prose-lore li { margin-bottom: 0.3rem; line-height: 1.55; }
+    /* ───── Bildschirm-Lesbarkeit ───── */
+    .prose-lore {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      max-width: 75ch;
+      color: #e4e4e7;
+    }
+    .prose-lore h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #fafafa;
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+    }
+    .prose-lore h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-top: 1.75rem;
+      margin-bottom: 0.75rem;
+      color: #f4f4f5;
+      line-height: 1.3;
+    }
+    .prose-lore h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #e4e4e7;
+    }
+    .prose-lore p {
+      margin-bottom: 1.1rem;
+      line-height: 1.75;
+      color: #e4e4e7;
+    }
+    .prose-lore blockquote {
+      border-left: 3px solid #b91c1c;
+      padding: 0.5rem 1.25rem;
+      margin: 1.25rem 0;
+      color: #a1a1aa;
+      font-style: italic;
+      background: rgba(185, 28, 28, 0.05);
+    }
+    .prose-lore ul {
+      margin-left: 1.75rem;
+      margin-bottom: 1.1rem;
+      list-style: disc;
+      color: #e4e4e7;
+    }
+    .prose-lore ol {
+      margin-left: 1.75rem;
+      margin-bottom: 1.1rem;
+      list-style: decimal;
+      color: #e4e4e7;
+    }
+    .prose-lore li { margin-bottom: 0.5rem; line-height: 1.7; }
     .prose-lore strong { color: #fafafa; font-weight: 600; }
-    .prose-lore em { color: #e4e4e7; font-style: italic; }
-    .prose-lore a { color: #f87171; text-decoration: underline; }
-    .prose-lore code { background: #18181b; padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-size: 0.85em; color: #fca5a5; }
-    .prose-lore hr { border-color: #3f3f46; margin: 1.5rem 0; }
-    .prose-lore table { border-collapse: collapse; margin: 1rem 0; width: 100%; font-size: 0.9rem; }
-    .prose-lore th, .prose-lore td { border: 1px solid #3f3f46; padding: 0.4rem 0.7rem; text-align: left; }
+    .prose-lore em { color: #f4f4f5; font-style: italic; }
+    .prose-lore a { color: #fca5a5; text-decoration: underline; text-underline-offset: 2px; }
+    .prose-lore code {
+      background: #18181b;
+      padding: 0.15rem 0.4rem;
+      border-radius: 0.3rem;
+      font-size: 0.9em;
+      color: #fca5a5;
+      border: 1px solid #27272a;
+    }
+    .prose-lore hr { border-color: #3f3f46; margin: 2rem 0; }
+    .prose-lore table {
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      width: 100%;
+      font-size: 0.95rem;
+    }
+    .prose-lore th, .prose-lore td {
+      border: 1px solid #3f3f46;
+      padding: 0.6rem 0.9rem;
+      text-align: left;
+    }
     .prose-lore th { background: #18181b; color: #fafafa; font-weight: 600; }
     .prose-lore tr:nth-child(even) td { background: #0c0c0e; }
+
+    /* ───── Off-screen PDF-Render-Container ─────
+       Wird nur durch html2pdf gerendert, schwarz-auf-weiß für gute Lesbarkeit. */
+    .pdf-render-area {
+      position: fixed;
+      left: -10000px;
+      top: 0;
+      width: 720px;
+      padding: 50px 60px;
+      background: #ffffff;
+      color: #18181b;
+      font-family: Georgia, 'Cambria', 'Times New Roman', serif;
+      font-size: 13pt;
+      line-height: 1.7;
+    }
+    .pdf-render-area h1 {
+      font-size: 26pt;
+      font-weight: 700;
+      margin: 0 0 0.4rem 0;
+      color: #18181b;
+      border-bottom: 2px solid #b91c1c;
+      padding-bottom: 0.5rem;
+    }
+    .pdf-render-area .pdf-subtitle {
+      color: #71717a;
+      font-size: 11pt;
+      margin-bottom: 2rem;
+      font-style: italic;
+    }
+    .pdf-render-area h2 {
+      font-size: 18pt;
+      font-weight: 700;
+      margin: 1.5rem 0 0.7rem 0;
+      color: #18181b;
+    }
+    .pdf-render-area h3 {
+      font-size: 14pt;
+      font-weight: 600;
+      margin: 1.25rem 0 0.5rem 0;
+      color: #27272a;
+    }
+    .pdf-render-area p { margin: 0 0 0.85rem 0; color: #27272a; }
+    .pdf-render-area blockquote {
+      border-left: 3px solid #b91c1c;
+      padding: 0.3rem 1rem;
+      margin: 1rem 0;
+      color: #52525b;
+      font-style: italic;
+    }
+    .pdf-render-area ul, .pdf-render-area ol {
+      margin: 0 0 0.85rem 1.75rem;
+      color: #27272a;
+    }
+    .pdf-render-area li { margin-bottom: 0.35rem; }
+    .pdf-render-area strong { color: #18181b; font-weight: 700; }
+    .pdf-render-area em { color: #27272a; font-style: italic; }
+    .pdf-render-area hr { border: none; border-top: 1px solid #d4d4d8; margin: 1.5rem 0; }
+    .pdf-render-area table { border-collapse: collapse; margin: 1rem 0; width: 100%; font-size: 11pt; }
+    .pdf-render-area th, .pdf-render-area td {
+      border: 1px solid #d4d4d8;
+      padding: 0.4rem 0.7rem;
+      text-align: left;
+    }
+    .pdf-render-area th { background: #f4f4f5; }
   </style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen">
@@ -96,7 +227,12 @@
                 <span x-show="d.has_override" class="text-amber-500">✎ Lokaler Override aktiv</span>
                 <span x-show="!d.has_override" class="text-zinc-500">Original aus DISTRICTS.md</span>
               </div>
-              <div class="flex gap-2">
+              <div class="flex gap-2 flex-wrap">
+                <button @click="exportDistrictPdf(d)" :disabled="pdfExporting"
+                        class="text-xs px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 disabled:opacity-50">
+                  <span x-show="!pdfExporting">📄 PDF</span>
+                  <span x-show="pdfExporting">Exportiere…</span>
+                </button>
                 <button x-show="d.has_override"
                         @click="resetDistrict(d.slug)"
                         class="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300">
@@ -190,11 +326,17 @@
                     :style="`background-color: ${selectedCrew().color_hex || '#71717a'}`"></span>
               <h2 class="text-2xl font-bold m-0" x-text="selectedCrew().name"></h2>
               <span class="text-xs text-zinc-500" x-text="selectedCrew().district || '—'"></span>
-              <button x-show="editingCrewId !== selectedCrew().id"
-                      @click="startEditCrew()"
-                      class="ml-auto text-xs px-3 py-1.5 rounded bg-blue-700 hover:bg-blue-600 text-white font-medium">
-                ✎ Story bearbeiten
-              </button>
+              <div x-show="editingCrewId !== selectedCrew().id" class="ml-auto flex gap-2">
+                <button @click="exportCrewPdf(selectedCrew())" :disabled="pdfExporting"
+                        class="text-xs px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 disabled:opacity-50">
+                  <span x-show="!pdfExporting">📄 PDF</span>
+                  <span x-show="pdfExporting">Exportiere…</span>
+                </button>
+                <button @click="startEditCrew()"
+                        class="text-xs px-3 py-1.5 rounded bg-blue-700 hover:bg-blue-600 text-white font-medium">
+                  ✎ Story bearbeiten
+                </button>
+              </div>
             </header>
 
             <!-- Lese-Modus -->
@@ -261,6 +403,9 @@
         </div>
       </main>
     </div>
+
+    <!-- Off-screen PDF-Render-Container — wird nur kurz mit Inhalt befüllt für html2pdf -->
+    <div id="pdf-render-area" class="pdf-render-area" aria-hidden="true"></div>
 
   </div>
 

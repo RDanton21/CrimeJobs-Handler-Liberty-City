@@ -1533,6 +1533,8 @@ function lorePage() {
     crewDraft: "",
     crewSaving: false,
     crewError: "",
+    // PDF-Export State
+    pdfExporting: false,
 
     async init() {
       // marked-Optionen sicher setzen (Lib via CDN in lore.html geladen)
@@ -1779,6 +1781,88 @@ function lorePage() {
         this.crewError = "Speichern fehlgeschlagen: " + (e.message || e);
       } finally {
         this.crewSaving = false;
+      }
+    },
+
+    // ───── PDF-Export ─────
+    _slugifyForFilename(s) {
+      return (s || "lore")
+        .toString()
+        .normalize("NFD").replace(/[̀-ͯ]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 80) || "lore";
+    },
+    async _renderHtmlToPdf({ title, subtitle, contentHtml, filename }) {
+      if (typeof window.html2pdf !== "function") {
+        alert("PDF-Library nicht geladen (html2pdf). Seite neu laden bitte.");
+        return;
+      }
+      const area = document.getElementById("pdf-render-area");
+      if (!area) {
+        alert("PDF-Render-Bereich fehlt im DOM.");
+        return;
+      }
+      const safeTitle = (title || "").replace(/</g, "&lt;");
+      const safeSubtitle = (subtitle || "").replace(/</g, "&lt;");
+      area.innerHTML = `
+        <h1>${safeTitle}</h1>
+        ${safeSubtitle ? `<div class="pdf-subtitle">${safeSubtitle}</div>` : ""}
+        ${contentHtml}
+      `;
+      const opts = {
+        margin:       [12, 12, 14, 12],   // mm
+        filename:     filename,
+        image:        { type: "jpeg", quality: 0.95 },
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak:    { mode: ["css", "legacy"] },
+      };
+      try {
+        await window.html2pdf().set(opts).from(area).save();
+      } finally {
+        area.innerHTML = "";   // wieder leeren damit nichts hängen bleibt
+      }
+    },
+    async exportDistrictPdf(district) {
+      if (!district) return;
+      this.pdfExporting = true;
+      try {
+        const contentHtml = this.renderMd(district.content_md);
+        const fname = "stadtteil-" + this._slugifyForFilename(district.name) + ".pdf";
+        await this._renderHtmlToPdf({
+          title: district.name,
+          subtitle: "Stadtteil-Lore · Liberty City",
+          contentHtml: contentHtml,
+          filename: fname,
+        });
+      } catch (e) {
+        alert("PDF-Export fehlgeschlagen: " + (e.message || e));
+      } finally {
+        this.pdfExporting = false;
+      }
+    },
+    async exportCrewPdf(crew) {
+      if (!crew) return;
+      this.pdfExporting = true;
+      try {
+        const story = (crew.story_background || "").trim();
+        const contentHtml = story
+          ? this.renderMd(story)
+          : "<p><em>Diese Crew hat noch keine Story-Background hinterlegt.</em></p>";
+        const fname = "crew-" + this._slugifyForFilename(crew.name) + ".pdf";
+        const subtitle = crew.district ? `Fraktion · ${crew.district}` : "Fraktion";
+        await this._renderHtmlToPdf({
+          title: crew.name,
+          subtitle: subtitle,
+          contentHtml: contentHtml,
+          filename: fname,
+        });
+      } catch (e) {
+        alert("PDF-Export fehlgeschlagen: " + (e.message || e));
+      } finally {
+        this.pdfExporting = false;
       }
     },
   };
