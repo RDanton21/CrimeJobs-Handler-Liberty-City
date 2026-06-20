@@ -1199,6 +1199,45 @@ function archivePage() {
 }
 
 // ---- Story Page ----
+// ────────────────────────────────────────────────────────────────────
+// Globaler PDF-Export-Helper
+// Erstellt einen Container ad-hoc, fuegt ihn am DOM-Body an (sichtbar
+// fuer html2canvas, aber unsichtbar fuer den User via opacity:0 + z-index:-9999)
+// und rendert ihn als A4-PDF.
+// ────────────────────────────────────────────────────────────────────
+async function pdfFromHtml({ title, subtitle, contentHtml, filename }) {
+  if (typeof window.html2pdf !== "function") {
+    alert("PDF-Library nicht geladen (html2pdf). Bitte Seite neu laden.");
+    return;
+  }
+  const area = document.createElement("div");
+  area.className = "pdf-render-area";
+  const safeTitle = (title || "").replace(/</g, "&lt;");
+  const safeSubtitle = (subtitle || "").replace(/</g, "&lt;");
+  area.innerHTML = `
+    <h1>${safeTitle}</h1>
+    ${safeSubtitle ? `<div class="pdf-subtitle">${safeSubtitle}</div>` : ""}
+    ${contentHtml || "<p><em>Kein Inhalt.</em></p>"}
+  `;
+  document.body.appendChild(area);
+  // Browser muss Layout/Reflow durchfuehren damit html2canvas die Hoehe kennt
+  await new Promise(r => requestAnimationFrame(() => r()));
+  try {
+    const opts = {
+      margin:      [12, 12, 14, 12],
+      filename:    filename,
+      image:       { type: "jpeg", quality: 0.95 },
+      html2canvas: { scale: 2, backgroundColor: "#ffffff", logging: false },
+      jsPDF:       { unit: "mm", format: "a4", orientation: "portrait" },
+      pagebreak:   { mode: ["css", "legacy"] },
+    };
+    await window.html2pdf().set(opts).from(area).save();
+  } finally {
+    if (area.parentNode) area.parentNode.removeChild(area);
+  }
+}
+
+
 function storyPage() {
   return {
     files: [],
@@ -1283,38 +1322,18 @@ function storyPage() {
     },
     async exportFilePdf() {
       if (!this.activeFile) return;
-      if (typeof window.html2pdf !== "function") {
-        alert("PDF-Library nicht geladen (html2pdf). Seite neu laden bitte.");
-        return;
-      }
-      const area = document.getElementById("pdf-render-area");
-      if (!area) {
-        alert("PDF-Render-Bereich fehlt im DOM.");
-        return;
-      }
       this.pdfExporting = true;
       try {
         const title = this.activeFileLabel();
-        const subtitle = `Story · docs/${this.activeFile}`;
-        const contentHtml = this.renderMd(this.content || "");
-        area.innerHTML = `
-          <h1>${(title || "").replace(/</g, "&lt;")}</h1>
-          <div class="pdf-subtitle">${subtitle.replace(/</g, "&lt;")}</div>
-          ${contentHtml}
-        `;
-        const opts = {
-          margin:       [12, 12, 14, 12],
-          filename:     "story-" + this._slugifyForFilename(title) + ".pdf",
-          image:        { type: "jpeg", quality: 0.95 },
-          html2canvas:  { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-          jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak:    { mode: ["css", "legacy"] },
-        };
-        await window.html2pdf().set(opts).from(area).save();
+        await pdfFromHtml({
+          title: title,
+          subtitle: `Story · docs/${this.activeFile}`,
+          contentHtml: this.renderMd(this.content || ""),
+          filename: "story-" + this._slugifyForFilename(title) + ".pdf",
+        });
       } catch (e) {
         alert("PDF-Export fehlgeschlagen: " + (e.message || e));
       } finally {
-        area.innerHTML = "";
         this.pdfExporting = false;
       }
     },
@@ -1857,48 +1876,15 @@ function lorePage() {
         .replace(/^-+|-+$/g, "")
         .slice(0, 80) || "lore";
     },
-    async _renderHtmlToPdf({ title, subtitle, contentHtml, filename }) {
-      if (typeof window.html2pdf !== "function") {
-        alert("PDF-Library nicht geladen (html2pdf). Seite neu laden bitte.");
-        return;
-      }
-      const area = document.getElementById("pdf-render-area");
-      if (!area) {
-        alert("PDF-Render-Bereich fehlt im DOM.");
-        return;
-      }
-      const safeTitle = (title || "").replace(/</g, "&lt;");
-      const safeSubtitle = (subtitle || "").replace(/</g, "&lt;");
-      area.innerHTML = `
-        <h1>${safeTitle}</h1>
-        ${safeSubtitle ? `<div class="pdf-subtitle">${safeSubtitle}</div>` : ""}
-        ${contentHtml}
-      `;
-      const opts = {
-        margin:       [12, 12, 14, 12],   // mm
-        filename:     filename,
-        image:        { type: "jpeg", quality: 0.95 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-        jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak:    { mode: ["css", "legacy"] },
-      };
-      try {
-        await window.html2pdf().set(opts).from(area).save();
-      } finally {
-        area.innerHTML = "";   // wieder leeren damit nichts hängen bleibt
-      }
-    },
     async exportDistrictPdf(district) {
       if (!district) return;
       this.pdfExporting = true;
       try {
-        const contentHtml = this.renderMd(district.content_md);
-        const fname = "stadtteil-" + this._slugifyForFilename(district.name) + ".pdf";
-        await this._renderHtmlToPdf({
+        await pdfFromHtml({
           title: district.name,
           subtitle: "Stadtteil-Lore · Liberty City",
-          contentHtml: contentHtml,
-          filename: fname,
+          contentHtml: this.renderMd(district.content_md),
+          filename: "stadtteil-" + this._slugifyForFilename(district.name) + ".pdf",
         });
       } catch (e) {
         alert("PDF-Export fehlgeschlagen: " + (e.message || e));
@@ -1914,13 +1900,11 @@ function lorePage() {
         const contentHtml = story
           ? this.renderMd(story)
           : "<p><em>Diese Crew hat noch keine Story-Background hinterlegt.</em></p>";
-        const fname = "crew-" + this._slugifyForFilename(crew.name) + ".pdf";
-        const subtitle = crew.district ? `Fraktion · ${crew.district}` : "Fraktion";
-        await this._renderHtmlToPdf({
+        await pdfFromHtml({
           title: crew.name,
-          subtitle: subtitle,
+          subtitle: crew.district ? `Fraktion · ${crew.district}` : "Fraktion",
           contentHtml: contentHtml,
-          filename: fname,
+          filename: "crew-" + this._slugifyForFilename(crew.name) + ".pdf",
         });
       } catch (e) {
         alert("PDF-Export fehlgeschlagen: " + (e.message || e));

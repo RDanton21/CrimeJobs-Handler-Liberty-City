@@ -101,11 +101,17 @@ input[type="color"] {
 
 /* ─────────────────────────────────────────────
    Off-screen PDF-Render-Container
+   html2canvas (intern von html2pdf) braucht das Element IM Viewport
+   damit es Inhalte rendert — daher absolute statt fixed, sichtbar via
+   Position/Z-Index aber durch opacity:0 unsichtbar fuer den User.
    ─────────────────────────────────────────────*/
 .pdf-render-area {
-  position: fixed;
-  left: -10000px;
+  position: absolute;
   top: 0;
+  left: 0;
+  z-index: -9999;
+  opacity: 0;
+  pointer-events: none;
   width: 720px;
   padding: 50px 60px;
   background: #ffffff;
