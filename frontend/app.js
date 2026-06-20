@@ -1204,55 +1204,115 @@ function archivePage() {
 // und rendert ihn als A4-PDF.
 // ────────────────────────────────────────────────────────────────────
 async function pdfFromHtml({ title, subtitle, contentHtml, filename }) {
-  if (typeof window.html2pdf !== "function") {
-    alert("PDF-Library nicht geladen (html2pdf). Bitte Seite neu laden.");
+  // Browser-Print-Dialog statt html2pdf — robust, native, kein Cache-/Canvas-Stress.
+  // Oeffnet ein neues Tab mit dem formatierten Inhalt, ruft automatisch
+  // window.print() auf; der User waehlt im OS-Dialog "Als PDF speichern".
+  const safeTitle = (title || "").replace(/[<>&]/g, c =>
+    ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c])
+  );
+  const safeSubtitle = (subtitle || "").replace(/[<>&]/g, c =>
+    ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c])
+  );
+  const safeFilename = (filename || "dokument").replace(/\.pdf$/i, "");
+
+  const html = `<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>${safeFilename}</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 22mm 16mm; }
+  * { box-sizing: border-box; }
+  html, body { background: #ffffff; }
+  body {
+    font-family: Georgia, 'Cambria', 'Times New Roman', serif;
+    color: #18181b;
+    line-height: 1.7;
+    font-size: 12pt;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 10mm 0;
+  }
+  h1 {
+    font-size: 24pt;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    border-bottom: 2px solid #b91c1c;
+    padding-bottom: 0.6rem;
+    page-break-after: avoid;
+  }
+  .pdf-subtitle {
+    color: #71717a;
+    font-size: 11pt;
+    font-style: italic;
+    margin-bottom: 2rem;
+  }
+  h2 { font-size: 18pt; font-weight: 700; margin: 1.6rem 0 0.7rem 0; page-break-after: avoid; }
+  h3 { font-size: 14pt; font-weight: 600; margin: 1.3rem 0 0.5rem 0; color: #27272a; page-break-after: avoid; }
+  h4 { font-size: 12pt; font-weight: 600; margin: 1rem 0 0.4rem 0; page-break-after: avoid; }
+  p { margin: 0 0 0.85rem 0; orphans: 3; widows: 3; }
+  blockquote {
+    border-left: 3px solid #b91c1c;
+    padding: 0.3rem 1rem;
+    margin: 1rem 0;
+    color: #52525b;
+    font-style: italic;
+    page-break-inside: avoid;
+  }
+  ul, ol { margin: 0 0 0.85rem 1.75rem; }
+  li { margin-bottom: 0.35rem; }
+  strong { font-weight: 700; }
+  em { font-style: italic; }
+  hr { border: none; border-top: 1px solid #d4d4d8; margin: 1.5rem 0; }
+  table { border-collapse: collapse; margin: 1rem 0; width: 100%; font-size: 11pt; page-break-inside: avoid; }
+  th, td { border: 1px solid #d4d4d8; padding: 0.4rem 0.7rem; text-align: left; }
+  th { background: #f4f4f5; font-weight: 700; }
+  code { background: #f4f4f5; padding: 0.1rem 0.3rem; border-radius: 0.2rem; font-size: 0.9em; font-family: 'Consolas','Monaco',monospace; }
+  a { color: #b91c1c; text-decoration: underline; }
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none; }
+  }
+  .hint {
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    color: #78350f;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: system-ui, sans-serif;
+    font-size: 11pt;
+    margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="hint no-print">
+  Im Drucker-Dialog <strong>„Als PDF speichern"</strong> waehlen.
+  Dateiname: <code>${safeFilename}.pdf</code>
+</div>
+<h1>${safeTitle}</h1>
+${safeSubtitle ? `<div class="pdf-subtitle">${safeSubtitle}</div>` : ""}
+${contentHtml || "<p><em>Kein Inhalt.</em></p>"}
+<script>
+  // Kurze Verzoegerung damit Fonts geladen sind, dann Drucker-Dialog oeffnen.
+  window.addEventListener("load", function() {
+    setTimeout(function() { window.print(); }, 250);
+  });
+  window.addEventListener("afterprint", function() {
+    setTimeout(function() { window.close(); }, 200);
+  });
+<\/script>
+</body>
+</html>`;
+
+  const w = window.open("", "_blank", "width=900,height=1000,resizable=yes,scrollbars=yes");
+  if (!w) {
+    alert("Pop-up-Blocker verhindert PDF-Export. Bitte Pop-ups fuer diese Seite erlauben (Browser-Adresszeile).");
     return;
   }
-  // Wrapper: 1x1 px, overflow:hidden — verschluckt den eigentlichen
-  // Render-Container visuell, laesst ihn aber voll im DOM existieren.
-  const wrapper = document.createElement("div");
-  wrapper.setAttribute("aria-hidden", "true");
-  wrapper.style.cssText =
-    "position:fixed;top:0;left:0;width:1px;height:1px;overflow:hidden;" +
-    "pointer-events:none;z-index:0;";
-
-  const area = document.createElement("div");
-  area.className = "pdf-render-area";
-  const safeTitle = (title || "").replace(/</g, "&lt;");
-  const safeSubtitle = (subtitle || "").replace(/</g, "&lt;");
-  area.innerHTML = `
-    <h1>${safeTitle}</h1>
-    ${safeSubtitle ? `<div class="pdf-subtitle">${safeSubtitle}</div>` : ""}
-    ${contentHtml || "<p><em>Kein Inhalt.</em></p>"}
-  `;
-  wrapper.appendChild(area);
-  document.body.appendChild(wrapper);
-
-  // 2 RAF-Ticks fuer sicheren Layout-Reflow (sonst kann html2canvas
-  // die Hoehe als 0 messen).
-  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-  try {
-    const opts = {
-      margin:      [12, 12, 14, 12],
-      filename:    filename,
-      image:       { type: "jpeg", quality: 0.95 },
-      html2canvas: {
-        scale: 2,
-        backgroundColor: "#ffffff",
-        logging: false,
-        // Element ist im wrapper visuell unsichtbar — windowWidth/Height
-        // helfen html2canvas die wahre Groesse zu sehen.
-        windowWidth: 720,
-        windowHeight: Math.max(area.scrollHeight, 1000),
-      },
-      jsPDF:       { unit: "mm", format: "a4", orientation: "portrait" },
-      pagebreak:   { mode: ["css", "legacy"] },
-    };
-    await window.html2pdf().set(opts).from(area).save();
-  } finally {
-    if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-  }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
 }
 
 
