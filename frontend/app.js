@@ -1524,6 +1524,15 @@ function lorePage() {
     crews: [],
     selectedCrewId: null,
     crewSearch: "",
+    // Edit-Mode State
+    editingDistrictSlug: null,
+    districtDraft: "",
+    districtSaving: false,
+    districtError: "",
+    editingCrewId: null,
+    crewDraft: "",
+    crewSaving: false,
+    crewError: "",
 
     async init() {
       // marked-Optionen sicher setzen (Lib via CDN in lore.html geladen)
@@ -1687,6 +1696,89 @@ function lorePage() {
         }
       } catch (e) {
         alert("Kopieren fehlgeschlagen: " + e.message);
+      }
+    },
+
+    // ───── Edit: Stadtteil-Markdown ─────
+    selectedDistrictObj() {
+      return this.districts.find(d => d.slug === this.selectedDistrict) || null;
+    },
+    startEditDistrict() {
+      const d = this.selectedDistrictObj();
+      if (!d) return;
+      this.editingDistrictSlug = d.slug;
+      this.districtDraft = d.content_md || "";
+      this.districtError = "";
+    },
+    cancelEditDistrict() {
+      this.editingDistrictSlug = null;
+      this.districtDraft = "";
+      this.districtError = "";
+    },
+    async saveDistrict() {
+      if (!this.editingDistrictSlug) return;
+      this.districtSaving = true;
+      this.districtError = "";
+      try {
+        const updated = await api.patch(`/api/lore/districts/${this.editingDistrictSlug}`,
+                                        { content_md: this.districtDraft });
+        const idx = this.districts.findIndex(d => d.slug === updated.slug);
+        if (idx >= 0) {
+          this.districts[idx] = {
+            ...this.districts[idx],
+            content_md: updated.content_md,
+            has_override: true,
+          };
+        }
+        this.editingDistrictSlug = null;
+        this.districtDraft = "";
+      } catch (e) {
+        this.districtError = "Speichern fehlgeschlagen: " + (e.message || e);
+      } finally {
+        this.districtSaving = false;
+      }
+    },
+    async resetDistrict(slug) {
+      if (!confirm("Override löschen und Original-Text aus DISTRICTS.md wiederherstellen?")) return;
+      try {
+        await api.del(`/api/lore/districts/${slug}/override`);
+        const r = await api.get("/api/lore/districts");
+        this.districts = r.districts || [];
+      } catch (e) {
+        alert("Reset fehlgeschlagen: " + (e.message || e));
+      }
+    },
+
+    // ───── Edit: Crew-Story ─────
+    startEditCrew() {
+      const c = this.selectedCrew();
+      if (!c) return;
+      this.editingCrewId = c.id;
+      this.crewDraft = c.story_background || "";
+      this.crewError = "";
+    },
+    cancelEditCrew() {
+      this.editingCrewId = null;
+      this.crewDraft = "";
+      this.crewError = "";
+    },
+    async saveCrew() {
+      if (!this.editingCrewId) return;
+      this.crewSaving = true;
+      this.crewError = "";
+      try {
+        const updated = await api.patch(`/api/crews/${this.editingCrewId}`,
+                                        { story_background: this.crewDraft });
+        const idx = this.crews.findIndex(c => c.id === updated.id);
+        if (idx >= 0) {
+          this.crews[idx] = { ...this.crews[idx], story_background: updated.story_background };
+        }
+        this.editingCrewId = null;
+        this.crewDraft = "";
+      } catch (e) {
+        this.crewError = "Speichern fehlgeschlagen: " + (e.message || e);
+      } finally {
+        this.crewSaving = false;
       }
     },
   };

@@ -41,5 +41,8 @@ logs/
 # Automatische Backups (vom Story-Editor & Konsistenz-Check vor Save)
 *.bak
 
+# User-Overrides fuer Lore-Stadtteile (lokal editiert, nicht im Repo)
+docs/districts_overrides/
+
 # Claude Code Worktrees + Plans (lokale Arbeitskopien, gehoeren nicht ins Repo)
 .claude/
