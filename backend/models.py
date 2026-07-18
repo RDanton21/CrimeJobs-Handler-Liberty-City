@@ -120,6 +120,27 @@ class Mission(Base):
     crew: Mapped["Crew"] = relationship(back_populates="missions")
 
 
+class PersonnelSlot(Base):
+    """Spieler-NPC-Slot pro Mission — strukturiert aus dem Personal-Brief
+    geparst (per KI oder manuell). Wird vom externen Jobs-Dashboard ueber
+    die Public-API (X-API-Key) gelesen; Spieler tragen sich dort ein."""
+    __tablename__ = "personnel_slots"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    mission_id: Mapped[int] = mapped_column(
+        ForeignKey("missions.id", ondelete="CASCADE"), index=True
+    )
+    npc_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    name: Mapped[str] = mapped_column(String(120), default="")
+    function: Mapped[str] = mapped_column(Text, default="")
+    location: Mapped[str] = mapped_column(String(255), default="")
+    costume: Mapped[str] = mapped_column(String(255), default="")
+    required_count: Mapped[int] = mapped_column(Integer, default=1)
+    slot_window: Mapped[str] = mapped_column(String(80), default="")
+    notes: Mapped[str] = mapped_column(Text, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
 class Settings(Base):
     __tablename__ = "settings"
 

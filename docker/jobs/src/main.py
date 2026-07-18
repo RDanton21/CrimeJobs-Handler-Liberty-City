@@ -1,0 +1,556 @@
+# -*- coding: utf-8 -*-
+"""SEKTOR Personal-Boerse — FastAPI-App.
+
+Spieler loggen sich mit Discord ein (nur Guild-Mitglieder mit REQUIRED_ROLE_ID),
+sehen das 10-Tage-Event-Board mit allen Crime-Auftraegen die Personal-Slots haben
+und tragen sich selbst in Slots ein/aus.
+
+Datenquellen:
+- Crime-Backend Public-API (X-API-Key) -> Missions + Crews, 15s-Cache
+- eigene jobs.db (SQLite async)        -> Player + Slot-Belegungen
+"""
+import asyncio
+import secrets
+import time
+from contextlib import asynccontextmanager
+from datetime import date, datetime, timedelta
+from pathlib import Path
+
+import httpx
+from fastapi import Body, Depends, FastAPI, HTTPException, Request, Response
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
+from sqlalchemy import delete, func, select
+from sqlalchemy.exc import IntegrityError
+
+from . import config, discord_oauth
+from .db import SessionLocal, init_db
+from .models import Player, SlotAssignment
+
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+
+SESSION_COOKIE = "jobs_session"
+SESSION_MAX_AGE = 7 * 24 * 3600  # 7 Tage
+STATE_COOKIE = "jobs_oauth_state"
+STATE_MAX_AGE = 300  # 5 Minuten fuer den OAuth-Roundtrip
+
+_session_serializer = URLSafeTimedSerializer(config.SESSION_SECRET, salt="jobs-session")
+_state_serializer = URLSafeTimedSerializer(config.SESSION_SECRET, salt="jobs-oauth-state")
+
+# Deutsche Wochentags-Kuerzel (Montag=0)
+WEEKDAYS_DE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    await init_db()
+    yield
+
+
+app = FastAPI(title="SEKTOR Personal-Boerse", lifespan=lifespan)
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    """Basis-Security-Header fuer alle Responses (oeffentlich erreichbares
+    Dashboard hinter Traefik). CSP ist wegen Tailwind-CDN + Alpine (eval)
+    aktuell nicht sinnvoll setzbar — siehe README, Abschnitt Sicherheit."""
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "same-origin")
+    return response
+
+
+# ---------------------------------------------------------------------------
+# Session-Helpers
+# ---------------------------------------------------------------------------
+
+def _read_session(request: Request) -> dict | None:
+    """Signiertes Session-Cookie lesen; None wenn fehlt/abgelaufen/manipuliert."""
+    raw = request.cookies.get(SESSION_COOKIE)
+    if not raw:
+        return None
+    try:
+        data = _session_serializer.loads(raw, max_age=SESSION_MAX_AGE)
+    except (BadSignature, SignatureExpired):
+        return None
+    if not isinstance(data, dict) or not data.get("discord_user_id"):
+        return None
+    return data
+
+
+def require_session(request: Request) -> dict:
+    """Dependency: 401 ohne gueltige Session."""
+    session = _read_session(request)
+    if session is None:
+        raise HTTPException(status_code=401, detail="nicht eingeloggt")
+    return session
+
+
+def _set_session_cookie(response: Response, payload: dict) -> None:
+    response.set_cookie(
+        SESSION_COOKIE,
+        _session_serializer.dumps(payload),
+        max_age=SESSION_MAX_AGE,
+        httponly=True,
+        secure=config.COOKIE_SECURE,
+        samesite="lax",
+    )
+
+
+def _error_page(title: str, message: str, status: int) -> HTMLResponse:
+    """Kleine deutsche Fehlerseite im Dashboard-Look (dunkel, roter Akzent)."""
+    html = f"""<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title} — SEKTOR Personal-Börse</title>
+  <style>
+    body {{ margin: 0; min-height: 100vh; display: flex; align-items: center;
+           justify-content: center; background: #09090b; color: #f4f4f5;
+           font-family: system-ui, -apple-system, sans-serif; }}
+    .card {{ background: #18181b; border: 1px solid #b91c1c; border-radius: 12px;
+            padding: 2rem; max-width: 26rem; margin: 1rem; text-align: center; }}
+    h1 {{ font-size: 1.25rem; margin: 0 0 .75rem; }}
+    p {{ color: #a1a1aa; font-size: .9rem; line-height: 1.5; margin: 0 0 1.5rem; }}
+    a {{ display: inline-block; padding: .6rem 1.4rem; border-radius: 8px;
+        background: #b91c1c; color: #fff; text-decoration: none; font-weight: 600;
+        font-size: .9rem; }}
+    a:hover {{ background: #dc2626; }}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>{title}</h1>
+    <p>{message}</p>
+    <a href="/">Zurück zur Startseite</a>
+  </div>
+</body>
+</html>"""
+    return HTMLResponse(html, status_code=status)
+
+
+# ---------------------------------------------------------------------------
+# Crime-Backend-Anbindung (mit 15s-In-Memory-Cache)
+# ---------------------------------------------------------------------------
+
+CACHE_TTL = 15.0
+_crime_cache: dict = {"ts": 0.0, "missions": None, "crews": None}
+_cache_lock = asyncio.Lock()
+
+
+async def _fetch_crime_data() -> tuple[list, list]:
+    """Missions + Crews vom Crime-Backend holen; Antworten 15s cachen."""
+    if _crime_cache["missions"] is not None and time.monotonic() - _crime_cache["ts"] < CACHE_TTL:
+        return _crime_cache["missions"], _crime_cache["crews"]
+    async with _cache_lock:
+        # Double-Check: waehrend des Wartens kann ein anderer Request gefuellt haben
+        if _crime_cache["missions"] is not None and time.monotonic() - _crime_cache["ts"] < CACHE_TTL:
+            return _crime_cache["missions"], _crime_cache["crews"]
+        headers = {"X-API-Key": config.CRIME_API_KEY}
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                r_missions = await client.get(
+                    f"{config.CRIME_BACKEND_URL}/api/public/active-missions", headers=headers
+                )
+                r_crews = await client.get(
+                    f"{config.CRIME_BACKEND_URL}/api/public/crews", headers=headers
+                )
+        except httpx.HTTPError:
+            raise HTTPException(status_code=502, detail="Crime-Backend nicht erreichbar")
+        if r_missions.status_code != 200 or r_crews.status_code != 200:
+            raise HTTPException(
+                status_code=502,
+                detail=(
+                    "Crime-Backend antwortet mit Fehler "
+                    f"(HTTP {r_missions.status_code}/{r_crews.status_code})"
+                ),
+            )
+        try:
+            missions = r_missions.json().get("missions", [])
+            crews = r_crews.json().get("crews", [])
+        except ValueError:
+            # z.B. HTML-Fehlerseite eines Proxys mit Status 200 -> sauberer 502
+            raise HTTPException(
+                status_code=502, detail="Crime-Backend liefert ungültige Antwort"
+            )
+        _crime_cache.update({"ts": time.monotonic(), "missions": missions, "crews": crews})
+        return missions, crews
+
+
+# ---------------------------------------------------------------------------
+# Board-Aufbau
+# ---------------------------------------------------------------------------
+
+def _event_days() -> list[date]:
+    """Alle Kalendertage des Event-Fensters (Europe/Berlin), inklusiv."""
+    days: list[date] = []
+    d = config.EVENT_START.date()
+    while d <= config.EVENT_END.date():
+        days.append(d)
+        d += timedelta(days=1)
+    return days
+
+
+def _mission_day(mission: dict) -> date | None:
+    """Berlin-Kalendertag einer Mission: scheduled_send_at > sent_at > deadline_at."""
+    ts = (
+        mission.get("scheduled_send_at")
+        or mission.get("sent_at")
+        or mission.get("deadline_at")
+    )
+    if not ts:
+        return None
+    try:
+        dt = datetime.fromisoformat(ts)
+    except (TypeError, ValueError):
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=config.UTC_TZ)  # Backend liefert naive UTC
+    return dt.astimezone(config.BERLIN_TZ).date()
+
+
+def _enrich_mission(mission: dict, assignments_by_slot: dict, me: dict) -> dict:
+    """Mission-Kopie mit Belegungsdaten pro Slot anreichern (Cache nie mutieren!)."""
+    enriched = dict(mission)
+    slots_out = []
+    for slot in mission.get("slots", []):
+        s = dict(slot)
+        assigned = assignments_by_slot.get(slot.get("id"), [])
+        s["assigned"] = [
+            {"player_discord_id": a.player_discord_id, "username": a.username}
+            for a in assigned
+        ]
+        s["assigned_count"] = len(assigned)
+        required = slot.get("required_count") or 1
+        s["free"] = max(required - len(assigned), 0)
+        s["mine"] = any(a.player_discord_id == me["discord_user_id"] for a in assigned)
+        slots_out.append(s)
+    enriched["slots"] = slots_out
+    return enriched
+
+
+def _mission_sort_key(mission: dict) -> str:
+    return (
+        mission.get("scheduled_send_at")
+        or mission.get("sent_at")
+        or mission.get("deadline_at")
+        or ""
+    )
+
+
+# ---------------------------------------------------------------------------
+# Routen: Seite + Auth
+# ---------------------------------------------------------------------------
+
+@app.get("/")
+async def index():
+    return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/static/bg.jpg")
+async def static_bg():
+    """Kino-Hintergrundbild. Bewusst Einzeldatei-Endpoint statt generischem
+    StaticFiles-Mount (Security-Review: nur explizit freigegebene Dateien)."""
+    return FileResponse(
+        STATIC_DIR / "bg.jpg",
+        media_type="image/jpeg",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
+
+
+@app.get("/auth/login")
+async def auth_login():
+    """CSRF-State erzeugen, in signiertem Kurzzeit-Cookie ablegen, zu Discord."""
+    state = secrets.token_urlsafe(32)
+    response = RedirectResponse(discord_oauth.authorize_url(state))
+    response.set_cookie(
+        STATE_COOKIE,
+        _state_serializer.dumps(state),
+        max_age=STATE_MAX_AGE,
+        httponly=True,
+        secure=config.COOKIE_SECURE,
+        samesite="lax",
+    )
+    return response
+
+
+@app.get("/auth/callback")
+async def auth_callback(request: Request, code: str = "", state: str = "", error: str = ""):
+    if error:
+        return _error_page(
+            "Anmeldung abgebrochen",
+            "Die Discord-Anmeldung wurde abgebrochen. Du kannst es jederzeit erneut versuchen.",
+            400,
+        )
+
+    # CSRF-State pruefen
+    raw_state = request.cookies.get(STATE_COOKIE)
+    expected = None
+    if raw_state:
+        try:
+            expected = _state_serializer.loads(raw_state, max_age=STATE_MAX_AGE)
+        except (BadSignature, SignatureExpired):
+            expected = None
+    if not state or expected != state:
+        return _error_page(
+            "Sicherheitsprüfung fehlgeschlagen",
+            "Der Anmeldevorgang ist abgelaufen oder ungültig. Bitte starte den Login neu.",
+            403,
+        )
+
+    if not code:
+        return _error_page(
+            "Anmeldung fehlgeschlagen",
+            "Discord hat keinen Anmelde-Code geliefert. Bitte versuche es erneut.",
+            400,
+        )
+
+    # Code tauschen, User + Guild-Member holen
+    try:
+        token = await discord_oauth.exchange_code(code)
+        access_token = token.get("access_token", "")
+        user = await discord_oauth.fetch_user(access_token)
+    except discord_oauth.DiscordOAuthError:
+        return _error_page(
+            "Discord-Fehler",
+            "Discord ist gerade nicht erreichbar oder hat die Anmeldung abgelehnt. "
+            "Bitte versuche es in ein paar Minuten erneut.",
+            502,
+        )
+
+    try:
+        member = await discord_oauth.fetch_member(access_token, config.DISCORD_GUILD_ID)
+    except discord_oauth.DiscordOAuthError as exc:
+        if exc.status == 404:
+            # Nicht auf dem SEKTOR-Server -> gleiche Meldung wie fehlende Rolle
+            return _error_page(
+                "Kein Zugang",
+                "Dir fehlt die Berechtigung — melde dich bei der Projektleitung.",
+                403,
+            )
+        return _error_page(
+            "Discord-Fehler",
+            "Deine Server-Mitgliedschaft konnte nicht geprüft werden. "
+            "Bitte versuche es in ein paar Minuten erneut.",
+            502,
+        )
+
+    if config.REQUIRED_ROLE_ID not in (member.get("roles") or []):
+        return _error_page(
+            "Kein Zugang",
+            "Dir fehlt die Berechtigung — melde dich bei der Projektleitung.",
+            403,
+        )
+
+    # Player upserten
+    user_id = str(user.get("id", ""))
+    username = discord_oauth.display_name(user, member)
+    avatar = discord_oauth.avatar_url(user)
+
+    # Admin-Status: Admin-Rolle auf dem Server ODER explizit gelistete User-ID.
+    # Wird (wie der Rollen-Check) nur beim Login ermittelt — gilt fuer die Session.
+    is_admin = (
+        config.ADMIN_ROLE_ID in (member.get("roles") or [])
+        or user_id in config.ADMIN_USER_IDS
+    )
+    async with SessionLocal() as session:
+        player = await session.get(Player, user_id)
+        if player is None:
+            player = Player(discord_user_id=user_id)
+            session.add(player)
+        player.username = username
+        player.avatar = avatar
+        player.last_login = datetime.utcnow()
+        await session.commit()
+
+    response = RedirectResponse("/")
+    _set_session_cookie(
+        response,
+        {
+            "discord_user_id": user_id,
+            "username": username,
+            "avatar": avatar,
+            "is_admin": is_admin,
+        },
+    )
+    response.delete_cookie(STATE_COOKIE)
+    return response
+
+
+@app.get("/auth/logout")
+async def auth_logout():
+    response = RedirectResponse("/")
+    response.delete_cookie(SESSION_COOKIE)
+    return response
+
+
+# ---------------------------------------------------------------------------
+# Routen: API
+# ---------------------------------------------------------------------------
+
+@app.get("/api/me")
+async def api_me(me: dict = Depends(require_session)):
+    return {
+        "discord_user_id": me["discord_user_id"],
+        "username": me.get("username", ""),
+        "avatar": me.get("avatar", ""),
+        "is_admin": bool(me.get("is_admin")),
+    }
+
+
+@app.get("/api/board")
+async def api_board(me: dict = Depends(require_session)):
+    """Event-Board: alle 10 Event-Tage (auch leere) + Pseudo-Tag 'Ausserhalb Event'."""
+    missions, crews = await _fetch_crime_data()
+
+    # Alle Belegungen laden und nach Slot gruppieren
+    async with SessionLocal() as session:
+        result = await session.execute(
+            select(SlotAssignment).order_by(SlotAssignment.assigned_at)
+        )
+        assignments = result.scalars().all()
+    assignments_by_slot: dict[int, list[SlotAssignment]] = {}
+    for a in assignments:
+        assignments_by_slot.setdefault(a.slot_id, []).append(a)
+
+    # Missions auf Berlin-Kalendertage verteilen
+    event_days = _event_days()
+    buckets: dict[str, list[dict]] = {d.isoformat(): [] for d in event_days}
+    other: list[dict] = []
+    for mission in sorted(missions, key=_mission_sort_key):
+        enriched = _enrich_mission(mission, assignments_by_slot, me)
+        day = _mission_day(mission)
+        key = day.isoformat() if day else None
+        if key is not None and key in buckets:
+            buckets[key].append(enriched)
+        else:
+            other.append(enriched)
+
+    days_out = [
+        {
+            "date": d.isoformat(),
+            "label": f"{WEEKDAYS_DE[d.weekday()]} {d.strftime('%d.%m.')}",
+            "missions": buckets[d.isoformat()],
+        }
+        for d in event_days
+    ]
+    if other:
+        # Nichts verschwindet: Missions ausserhalb des Fensters als Pseudo-Tag
+        days_out.append({"date": "other", "label": "Außerhalb Event", "missions": other})
+
+    return {
+        "event": {
+            "start": config.EVENT_START.isoformat(),
+            "end": config.EVENT_END.isoformat(),
+        },
+        "days": days_out,
+        "crews": crews,
+        # is_admin normalisieren: Sessions von vor dem Admin-Feature haben den
+        # Key nicht — das UI soll trotzdem immer einen Bool sehen
+        "me": {**me, "is_admin": bool(me.get("is_admin"))},
+    }
+
+
+@app.post("/api/slots/{slot_id}/assign", status_code=201)
+async def assign_slot(
+    slot_id: int,
+    payload: dict = Body(...),
+    me: dict = Depends(require_session),
+):
+    """Selbst in einen Slot eintragen — Kapazitaet + Unique in einer Transaktion."""
+    mission_id = payload.get("mission_id")
+    if not isinstance(mission_id, int):
+        raise HTTPException(status_code=422, detail="mission_id fehlt oder ist ungültig")
+
+    # Slot gegen frische Board-Daten validieren (Cache ok)
+    missions, _ = await _fetch_crime_data()
+    slot = None
+    for mission in missions:
+        if mission.get("id") != mission_id:
+            continue
+        for s in mission.get("slots", []):
+            if s.get("id") == slot_id:
+                slot = s
+                break
+    if slot is None:
+        raise HTTPException(
+            status_code=404, detail="Slot nicht gefunden oder Auftrag nicht mehr aktiv"
+        )
+    required = slot.get("required_count") or 1
+
+    try:
+        async with SessionLocal() as session:
+            async with session.begin():
+                # Race-sicher: ERST einfuegen (flush nimmt den SQLite-Write-Lock),
+                # DANN zaehlen — parallele Eintragungen warten auf den Lock und
+                # sehen beim eigenen Count die fremde Row bereits. Bei
+                # Ueberbelegung rollt die Exception die Transaktion zurueck.
+                session.add(
+                    SlotAssignment(
+                        slot_id=slot_id,
+                        mission_id=mission_id,
+                        player_discord_id=me["discord_user_id"],
+                        username=me.get("username", ""),
+                    )
+                )
+                await session.flush()
+                count = await session.scalar(
+                    select(func.count())
+                    .select_from(SlotAssignment)
+                    .where(SlotAssignment.slot_id == slot_id)
+                )
+                if (count or 0) > required:
+                    raise HTTPException(
+                        status_code=409, detail="Slot ist bereits voll belegt"
+                    )
+    except IntegrityError:
+        raise HTTPException(
+            status_code=409, detail="Du bist in diesem Slot bereits eingetragen"
+        )
+
+    return {"detail": "Eingetragen"}
+
+
+@app.delete("/api/slots/{slot_id}/assign", status_code=204)
+async def unassign_slot(slot_id: int, me: dict = Depends(require_session)):
+    """Eigenes Assignment loeschen."""
+    async with SessionLocal() as session:
+        result = await session.execute(
+            delete(SlotAssignment).where(
+                SlotAssignment.slot_id == slot_id,
+                SlotAssignment.player_discord_id == me["discord_user_id"],
+            )
+        )
+        await session.commit()
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Kein Eintrag gefunden")
+    return Response(status_code=204)
+
+
+@app.delete("/api/admin/assignments/{slot_id}/{player_discord_id}", status_code=204)
+async def admin_unassign(
+    slot_id: int,
+    player_discord_id: str,
+    me: dict = Depends(require_session),
+):
+    """Admin-Kick: Eintragung eines beliebigen Spielers aus einem Slot entfernen.
+
+    Autorisierung: is_admin aus der signierten Session (beim Login ermittelt,
+    Admin-Rolle oder gelistete User-ID) — reicht hier als Nachweis.
+    """
+    if not me.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Nur für Admins")
+    async with SessionLocal() as session:
+        result = await session.execute(
+            delete(SlotAssignment).where(
+                SlotAssignment.slot_id == slot_id,
+                SlotAssignment.player_discord_id == player_discord_id,
+            )
+        )
+        await session.commit()
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Kein Eintrag gefunden")
+    return Response(status_code=204)

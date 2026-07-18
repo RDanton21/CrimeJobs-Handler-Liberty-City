@@ -233,3 +233,102 @@ class SettingsUpdate(BaseModel):
     ranking_top3_title: str | None = None
     ranking_top3_intro: str | None = None
     personnel_admin_channel_id: str | None = None
+    # Jobs-Dashboard: Ankuendigungs-Ping bei neuen/erhoehten Spieler-Slots
+    jobs_announce_channel_id: str | None = None
+    jobs_ping_role_id: str | None = None
+    jobs_dashboard_url: str | None = None
+
+
+# ==================================================================
+# KI-Enrichment fuer neue oder unvollstaendige Crews
+# ==================================================================
+
+
+class CrewEnrichRequest(BaseModel):
+    """KI-Enrichment: nimmt Basis-Infos (Name, Stadtteil, optional Hint)
+    und laesst die KI Story + Business + Farbe + Rivalitaeten vorschlagen."""
+    hint: str = ""
+    provider: str | None = None
+    model: str | None = None
+
+
+class CrewEnrichRelationSuggestion(BaseModel):
+    crew_id: int
+    crew_name: str = ""
+    relation_type: str = "rival"
+    notes: str = ""
+
+
+class CrewEnrichPreviewResponse(BaseModel):
+    ok: bool = True
+    ai_provider: str = ""
+    ai_model: str = ""
+    story_background: str = ""
+    crime_business: str = ""
+    color_hex: str = "#b91c1c"
+    rivalries: list[CrewEnrichRelationSuggestion] = []
+    allies: list[CrewEnrichRelationSuggestion] = []
+    raw: str = ""
+
+
+class CrewEnrichApplyRequest(BaseModel):
+    story_background: str | None = None
+    crime_business: str | None = None
+    color_hex: str | None = None
+    apply_rivalries: list[CrewEnrichRelationSuggestion] = []
+    apply_allies: list[CrewEnrichRelationSuggestion] = []
+
+
+# ==================================================================
+# Personal-Slots: Spieler-NPC-Slots pro Mission (fuer Jobs-Dashboard)
+# ==================================================================
+
+
+class PersonnelSlotIn(BaseModel):
+    """Ein Spieler-NPC-Slot, wie er im Editor angelegt oder von der KI
+    aus dem Personal-Brief geparst wird.
+
+    id: nur beim Speichern relevant — vorhandene ID = bestehende Row wird
+    aktualisiert (Slot behaelt seine ID, Spieler-Eintragungen im
+    Jobs-Dashboard bleiben erhalten). None/fehlt = neue Row."""
+    id: int | None = None
+    npc_number: int | None = None
+    name: str = ""
+    function: str = ""
+    location: str = ""
+    costume: str = ""
+    required_count: int = 1
+    slot_window: str = ""
+    notes: str = ""
+
+
+class PersonnelSlotOut(PersonnelSlotIn):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+
+
+class SlotsParseSuggestion(BaseModel):
+    """KI-Parse-Ergebnis des Personal-Briefs — nur Vorschau, nichts gespeichert.
+    raw enthaelt die Roh-Antwort der KI, falls das JSON nicht parsbar war."""
+    slot_window: str = ""
+    slots: list[PersonnelSlotIn] = []
+    raw: str = ""
+
+
+class SlotsSaveRequest(BaseModel):
+    """Ersetzt ALLE Slots einer Mission. slot_window wird auf jede Row
+    geschrieben (Fallback: slot_window des einzelnen Slots).
+    announce=True: bei neuen/erhoehten Plaetzen Discord-Ankuendigung posten
+    (sofern jobs_announce_channel_id in den Settings gesetzt ist)."""
+    slot_window: str = ""
+    slots: list[PersonnelSlotIn]
+    announce: bool = True
+
+
+class SlotsSaveResponse(BaseModel):
+    """Antwort des Slot-Speicherns: neue Slot-Rows + Ergebnis des optionalen
+    Discord-Ankuendigungs-Pings. announce_error blockiert das Speichern NIE —
+    rein informativ fuers Frontend."""
+    slots: list[PersonnelSlotOut]
+    announce_sent: bool = False
+    announce_error: str | None = None

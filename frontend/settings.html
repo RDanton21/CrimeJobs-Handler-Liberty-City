@@ -325,6 +325,49 @@
       </div>
     </section>
 
+    <!-- Jobs-Dashboard: Ankündigungs-Ping bei Personal-Änderungen -->
+    <section class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+      <h2 class="text-lg font-semibold mb-1">📢 Jobs-Dashboard — Ankündigungs-Ping</h2>
+      <p class="text-xs text-zinc-400 mb-3">
+        Wenn beim Speichern der 🧩 Spieler-Slots erstmals Plätze angelegt werden
+        oder die Gesamt-Kapazität steigt, postet der Bot eine Ankündigung in
+        diesen Channel und pingt die Spieler-Rolle. Channel-ID leer lassen =
+        Ping komplett deaktiviert. Pro Speichern per Checkbox im Slot-Editor
+        unterdrückbar.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+        <div>
+          <label class="block text-xs text-zinc-400 mb-1">Discord-Channel-ID (leer = aus)</label>
+          <input x-model="jobsAnnounceForm.jobs_announce_channel_id"
+                 type="text" placeholder="1515654327459381479"
+                 class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs text-zinc-400 mb-1">Spieler-Rollen-ID (Ping)</label>
+          <input x-model="jobsAnnounceForm.jobs_ping_role_id"
+                 type="text" placeholder="1528099740649127977"
+                 class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs text-zinc-400 mb-1">Jobs-Dashboard-URL</label>
+          <input x-model="jobsAnnounceForm.jobs_dashboard_url"
+                 type="text" placeholder="https://jobs.bots.sektorrp.eu"
+                 class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button @click="saveJobsAnnounce()"
+                :disabled="jobsAnnounceSaving"
+                class="px-4 py-1.5 bg-green-700 hover:bg-green-600 disabled:opacity-50 rounded text-sm font-medium">
+          <span x-show="!jobsAnnounceSaving">💾 Speichern</span>
+          <span x-show="jobsAnnounceSaving">Speichere…</span>
+        </button>
+        <span x-show="jobsAnnounceMsg" x-text="jobsAnnounceMsg"
+              class="text-xs"
+              :class="jobsAnnounceMsgError ? 'text-red-400' : 'text-green-400'"></span>
+      </div>
+    </section>
+
     <section class="mt-6 bg-zinc-900 border border-zinc-800 rounded-lg p-5">
       <h2 class="text-lg font-semibold mb-1">💬 Reaktions-Antworten (nach 👍 / 👎 / ❌)</h2>
       <p class="text-xs text-zinc-400 mb-3">
@@ -396,6 +439,6 @@
     </section>
   </div>
 
-  <script src="/static/app.js?v=personnel6"></script>
+  <script src="/static/app.js?v=jobsping1"></script>
 </body>
 </html>

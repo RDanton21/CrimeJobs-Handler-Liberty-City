@@ -812,11 +812,52 @@ async def http_post_text(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "message_id": str(msg.id)})
 
 
+async def http_post_announce(request: web.Request) -> web.Response:
+    """POST /post_announce  body: {channel_id: str, content: str}
+    Ankündigung mit Rollen-Ping (z.B. Personal-Änderungen fürs
+    Jobs-Dashboard). Wie /post_text, aber mit
+    allowed_mentions=AllowedMentions(roles=True), damit ein <@&ROLE_ID>
+    im content die Rolle tatsächlich pingt."""
+    data = await request.json()
+    try:
+        channel_id = int(data["channel_id"])
+    except (KeyError, ValueError, TypeError):
+        return web.json_response({"error": "channel_id ungueltig"}, status=400)
+    content = (data.get("content") or "").strip()
+    if not content:
+        return web.json_response({"error": "content leer"}, status=400)
+    if len(content) > 1990:
+        return web.json_response({"error": f"content zu lang ({len(content)} > 1990)"}, status=400)
+
+    try:
+        channel = client.get_channel(channel_id) or await client.fetch_channel(channel_id)
+    except discord.NotFound:
+        return web.json_response({"error": "channel not found"}, status=404)
+    except discord.Forbidden:
+        return web.json_response({"error": "forbidden - bot has no access to channel"}, status=403)
+    except Exception as exc:
+        return web.json_response({"error": f"channel: {exc}"}, status=500)
+
+    try:
+        msg = await channel.send(
+            content=content,
+            allowed_mentions=discord.AllowedMentions(roles=True),
+        )
+    except discord.Forbidden:
+        return web.json_response({"error": "forbidden - cannot send to channel"}, status=403)
+    except Exception as exc:
+        log.exception("post_announce failed")
+        return web.json_response({"error": str(exc)}, status=500)
+
+    return web.json_response({"ok": True, "message_id": str(msg.id)})
+
+
 def build_http_app() -> web.Application:
     app = web.Application()
     app.add_routes([
         web.post("/send", http_send_mission),
         web.post("/post_text", http_post_text),
+        web.post("/post_announce", http_post_announce),
         web.post("/delete_message", http_delete_message),
         web.post("/delete_in_range", http_delete_in_range),
         web.post("/read_channel", http_read_channel),

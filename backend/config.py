@@ -41,6 +41,11 @@ class Settings(BaseSettings):
     # Override für DB-Pfad (Container nutzt /app/data/crime.db).
     db_path: str = ""
 
+    # API-Key fuer die Public-API (/api/public/*) des Jobs-Dashboards.
+    # Leer = Public-API deaktiviert (503). In Docker via Env, auf dem
+    # Dedicated (NSSM) via .env setzbar.
+    jobs_api_key: str = ""
+
 
 settings = Settings()
 

@@ -68,6 +68,7 @@ services:
       BOT_API_URL: "http://crime-bot:8001"
       DB_PATH: "/app/data/crime.db"
       IMAGE_DIR: "/app/data/images"
+      JOBS_API_KEY: "${JOBS_API_KEY}"
       TZ: Europe/Berlin
     volumes:
       - crime_data:/app/data
@@ -249,6 +250,45 @@ services:
     networks:
       - sekt6r-net
 
+  # ---------------------------------------------------------------------------
+  # jobs-dashboard - SEKTOR Personal-Boerse (Discord-Login + Slot-Eintragung)
+  # Route: https://jobs.bots.sektorrp.eu/
+  # Holt Auftraege+Slots vom crime-backend (Public-API, X-API-Key=JOBS_API_KEY)
+  # ---------------------------------------------------------------------------
+  jobs-dashboard:
+    build:
+      context: ./jobs
+      dockerfile: Dockerfile
+    container_name: sekt6r-jobs
+    restart: unless-stopped
+    environment:
+      DISCORD_CLIENT_ID: "${JOBS_DISCORD_CLIENT_ID}"
+      DISCORD_CLIENT_SECRET: "${JOBS_DISCORD_CLIENT_SECRET}"
+      DISCORD_REDIRECT_URI: "${JOBS_DISCORD_REDIRECT_URI:-https://jobs.bots.sektorrp.eu/auth/callback}"
+      DISCORD_GUILD_ID: "${CRIME_DISCORD_GUILD_ID}"
+      REQUIRED_ROLE_ID: "${JOBS_REQUIRED_ROLE_ID:-1528099740649127977}"
+      ADMIN_ROLE_ID: "${JOBS_ADMIN_ROLE_ID:-1431562679545364582}"
+      ADMIN_USER_IDS: "${JOBS_ADMIN_USER_IDS:-584086760284487697}"
+      SESSION_SECRET: "${JOBS_SESSION_SECRET}"
+      CRIME_BACKEND_URL: "${JOBS_CRIME_BACKEND_URL:-http://sekt6r-crime-backend:8000}"
+      CRIME_API_KEY: "${JOBS_API_KEY}"
+      EVENT_START: "${JOBS_EVENT_START:-2026-08-07T18:00}"
+      EVENT_END: "${JOBS_EVENT_END:-2026-08-16T23:50}"
+      TZ: Europe/Berlin
+    volumes:
+      - jobs_data:/app/data
+    networks:
+      - sekt6r-net
+      - proxy
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "proxy"
+      traefik.http.routers.sekt6r-jobs.entrypoints: "websecure"
+      traefik.http.routers.sekt6r-jobs.rule: "Host(`jobs.bots.sektorrp.eu`)"
+      traefik.http.routers.sekt6r-jobs.tls: "true"
+      traefik.http.routers.sekt6r-jobs.tls.certresolver: "letsencrypt"
+      traefik.http.services.sekt6r-jobs.loadbalancer.server.port: "8080"
+
 
 # =============================================================================
 # Volumes
@@ -264,6 +304,7 @@ volumes:
   ticket_logs:
   countdown_data:
   countdown_logs:
+  jobs_data:
 
 
 # =============================================================================

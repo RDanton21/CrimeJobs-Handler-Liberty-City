@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SEKTOR RP — Personal-Börse</title>
+  <!-- CDN-Versionen fest gepinnt (Supply-Chain): kein Floating-Tag wie 3.x.x.
+       Ausnahme vom Pinning: Google Fonts (Oswald) — dort ist die css2-API der
+       vorgesehene Weg, Font-Dateien selbst sind versioniert ausgeliefert.
+       TODO (optional): Assets vendoren/selbst hosten, dann waere auch eine
+       strikte CSP moeglich (Tailwind-Play-CDN + Alpine brauchen eval/inline). -->
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.14.9/dist/cdn.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    [x-cloak] { display: none !important; }
+
+    /* ---------------------------------------------------------------------
+       Kino-Look: Filmstill (Lagerhalle) als fixer Hintergrund.
+       Fallback-Flaeche #141719, falls bg.jpg nicht laedt.
+       ::before = Bild (fix, cover) | ::after = Abdunklung + Vignette
+       (fixe Ebenen statt background-attachment:fixed — das ruckelt auf iOS)
+       --------------------------------------------------------------------- */
+    body { background-color: #141719; }
+    body::before {
+      content: "";
+      position: fixed; inset: 0; z-index: -2;
+      background: url('/static/bg.jpg') center center / cover no-repeat;
+    }
+    body::after {
+      content: "";
+      position: fixed; inset: 0; z-index: -1;
+      background:
+        radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(0,0,0,0.72) 100%),
+        linear-gradient(180deg, rgba(10,11,12,0.72) 0%, rgba(10,11,12,0.85) 100%);
+    }
+
+    /* Condensed-Uppercase fuer Titel, Header, Tabs, Buttons */
+    .headline {
+      font-family: 'Oswald', 'Arial Narrow', sans-serif-condensed, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    /* Karten: dunkles Glas ueber dem Filmstill */
+    .card-cine {
+      background: rgba(20, 23, 25, 0.78);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+  </style>
+</head>
+<body class="text-zinc-100 min-h-screen">
+  <div x-data="jobsBoard()" x-init="init()">
+
+    <!-- Ladezustand -->
+    <template x-if="loading">
+      <div class="min-h-screen flex items-center justify-center">
+        <p class="headline text-zinc-400 text-sm tracking-[.3em] animate-pulse">Lade Personal-Börse…</p>
+      </div>
+    </template>
+
+    <!-- Nicht eingeloggt: Login als Filmposter (Bild full-bleed, Titel mittig) -->
+    <template x-if="!loading && !me">
+      <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full text-center">
+          <h1 class="headline text-5xl sm:text-6xl font-semibold tracking-[.16em] text-zinc-50
+                     [text-shadow:0_4px_28px_rgba(0,0,0,0.95),0_1px_4px_rgba(0,0,0,0.9)]">
+            Personal-Börse
+          </h1>
+          <p class="headline text-xs sm:text-sm font-medium tracking-[.45em] text-[#b98a4a] mt-3
+                    [text-shadow:0_2px_10px_rgba(0,0,0,0.9)]">
+            Sektor RP — Liberty City
+          </p>
+          <div class="card-cine rounded-xl p-6 sm:p-8 mt-8 max-w-lg mx-auto shadow-2xl">
+            <p class="text-zinc-300 text-sm leading-relaxed mb-6">
+              Die Crime-Crews von Liberty City suchen Personal. Sieh dir die offenen
+              Slots der Event-Aufträge an und trage dich direkt ein — Zugang nur für
+              freigeschaltete Mitglieder des SEKTOR-Discords.
+            </p>
+            <a href="/auth/login"
+               class="headline block w-full py-3 rounded-lg bg-[#b91c1c] hover:bg-[#d42525]
+                      border border-white/15 font-semibold tracking-[.18em] text-white
+                      shadow-lg shadow-black/50 transition-colors">
+              Mit Discord anmelden
+            </a>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Eingeloggt: Event-Board -->
+    <template x-if="!loading && me">
+      <div class="max-w-screen-xl mx-auto p-4 sm:p-6">
+
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div>
+            <h1 class="headline text-xl sm:text-2xl font-semibold tracking-[.14em]
+                       [text-shadow:0_2px_12px_rgba(0,0,0,0.85)]">
+              Sektor RP — Personal-Börse
+            </h1>
+            <p class="text-xs text-zinc-400" x-show="board" x-text="eventLabel()"></p>
+          </div>
+          <div class="flex items-center gap-3 flex-wrap">
+            <span class="headline px-2.5 py-1 rounded-full bg-[#b98a4a]/15 border border-[#b98a4a]/50
+                         text-[#d9ae6e] text-xs font-medium tracking-wider"
+                  x-text="'Meine Slots: ' + myCount()"></span>
+            <div class="flex items-center gap-2">
+              <img :src="me.avatar" alt="" class="h-8 w-8 rounded-full border border-[#3d4a4d]" />
+              <span class="text-sm font-medium hidden sm:inline" x-text="me.username"></span>
+            </div>
+            <a href="/auth/logout" class="text-xs text-zinc-400 hover:text-zinc-100 underline">Logout</a>
+          </div>
+        </header>
+
+        <!-- Tag-Tabs: schmale Uppercase-Chips, aktiv = Blutrot (mobil scrollbar) -->
+        <div class="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-1 px-1" x-show="board">
+          <template x-for="d in (board ? board.days : [])" :key="d.date">
+            <button @click="activeDay = d.date"
+                    :class="activeDay === d.date
+                      ? 'bg-[#b91c1c] border-[#b91c1c] text-white shadow-lg shadow-red-950/40'
+                      : 'bg-[#17191b]/80 border-[#3d4a4d] text-zinc-300 hover:border-zinc-400 hover:text-zinc-100'"
+                    class="headline px-3 py-1.5 rounded border text-xs font-medium tracking-wider
+                           whitespace-nowrap flex-shrink-0 transition-colors">
+              <span x-text="d.label"></span>
+              <span x-show="d.missions.length > 0" class="ml-1 opacity-70"
+                    x-text="'(' + d.missions.length + ')'"></span>
+            </button>
+          </template>
+        </div>
+
+        <!-- Missions des aktiven Tags -->
+        <template x-if="currentDay()">
+          <div class="space-y-4">
+            <template x-if="currentDay().missions.length === 0">
+              <p class="text-zinc-400 text-sm text-center py-12 [text-shadow:0_1px_6px_rgba(0,0,0,0.8)]">
+                Keine Aufträge mit Personal-Bedarf an diesem Tag.
+              </p>
+            </template>
+
+            <template x-for="m in currentDay().missions" :key="m.id">
+              <div class="card-cine rounded-lg overflow-hidden flex">
+                <!-- Farbbalken in Crew-Farbe -->
+                <div class="w-1.5 flex-shrink-0"
+                     :style="'background-color:' + ((m.crew && m.crew.color_hex) || '#b91c1c')"></div>
+
+                <div class="flex-1 p-4 min-w-0">
+                  <!-- Kopf: Crew, Stadtteil, Status, Zeitfenster -->
+                  <div class="flex items-start justify-between gap-2 flex-wrap">
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="inline-block h-2 w-2 rounded-full flex-shrink-0"
+                              :class="m.sent_at ? 'bg-[#b91c1c] animate-pulse' : 'bg-[#b98a4a]'"
+                              :title="m.sent_at ? 'live' : 'geplant'"></span>
+                        <h2 class="headline font-semibold tracking-wider"
+                            x-text="m.crew ? m.crew.name : 'Unbekannte Crew'"></h2>
+                        <span class="text-xs text-zinc-400" x-text="m.crew ? m.crew.district : ''"></span>
+                        <span class="headline text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded border"
+                              :class="m.sent_at
+                                ? 'border-[#b91c1c]/60 bg-[#b91c1c]/15 text-red-400'
+                                : 'border-[#b98a4a]/50 bg-[#b98a4a]/10 text-[#d9ae6e]'"
+                              x-text="m.sent_at ? 'live' : 'geplant'"></span>
+                      </div>
+                      <p class="text-xs text-[#d9ae6e] mt-0.5" x-show="m.slot_window"
+                         x-text="'Zeitfenster: ' + m.slot_window"></p>
+                    </div>
+                    <button @click="expanded[m.id] = !expanded[m.id]"
+                            x-show="m.content_excerpt"
+                            class="text-xs text-zinc-400 hover:text-zinc-200 underline flex-shrink-0">
+                      <span x-text="expanded[m.id] ? 'Auftrag ausblenden' : 'Auftrag anzeigen'"></span>
+                    </button>
+                  </div>
+
+                  <!-- Auftrags-Auszug (einklappbar) -->
+                  <p x-show="expanded[m.id]" x-cloak
+                     class="text-sm text-zinc-300 mt-2 whitespace-pre-line border-l-2 border-[#3d4a4d] pl-3"
+                     x-text="m.content_excerpt"></p>
+                  <p x-show="m.personnel_brief" class="text-xs text-zinc-400 italic mt-2"
+                     x-text="m.personnel_brief"></p>
+
+                  <!-- Slot-Zeilen -->
+                  <div class="mt-3 space-y-2">
+                    <template x-for="s in m.slots" :key="s.id">
+                      <div class="bg-[#17191b]/85 border rounded p-3"
+                           :class="s.mine ? 'border-[#b91c1c]/70' : 'border-[#3d4a4d]/60'">
+                        <div class="flex items-start justify-between gap-3 flex-wrap">
+                          <div class="min-w-0">
+                            <p class="font-semibold text-sm">
+                              <span x-text="s.name || ('NPC #' + (s.npc_number || '?'))"></span>
+                              <span class="text-zinc-400 font-normal" x-show="s.function"
+                                    x-text="' — ' + s.function"></span>
+                            </p>
+                            <p class="text-xs text-zinc-400 mt-0.5 space-x-2">
+                              <span x-show="s.location" x-text="'Ort: ' + s.location"></span>
+                              <span x-show="s.costume" x-text="'Kostüm: ' + s.costume"></span>
+                              <span x-show="s.slot_window" class="text-[#d9ae6e]"
+                                    x-text="'Zeit: ' + s.slot_window"></span>
+                            </p>
+                            <p x-show="s.notes" class="text-xs text-zinc-500 mt-0.5" x-text="s.notes"></p>
+                            <p x-show="s.assigned.length > 0" class="text-xs text-zinc-400 mt-1">
+                              Eingetragen:
+                              <template x-for="a in s.assigned" :key="a.player_discord_id">
+                                <span class="inline-flex items-center gap-1 bg-[#262b2e] border border-[#3d4a4d]/60
+                                             rounded px-1.5 py-0.5 mr-1 mt-1 text-zinc-300">
+                                  <span x-text="a.username"></span>
+                                  <!-- Admin-Kick: nur Kosmetik fuers UI — der Server prueft selbst -->
+                                  <button x-show="me.is_admin" @click="adminKick(s, a)"
+                                          title="Spieler austragen (Admin)"
+                                          class="text-red-400 hover:text-red-200 font-bold leading-none px-0.5">✕</button>
+                                </span>
+                              </template>
+                            </p>
+                          </div>
+                          <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
+                            <span class="headline text-xs font-medium tracking-wider px-2 py-0.5 rounded-full border"
+                                  :class="s.free === 0
+                                    ? 'border-[#b98a4a]/60 text-[#d9ae6e]'
+                                    : 'border-[#3d4a4d] text-zinc-300'"
+                                  x-text="s.assigned_count + '/' + s.required_count + ' belegt'"></span>
+                            <template x-if="s.mine">
+                              <button @click="unassign(s)" :disabled="busySlots[s.id]"
+                                      class="headline px-3 py-1.5 rounded border border-[#b91c1c] text-red-400
+                                             hover:bg-[#b91c1c]/15 text-xs font-medium tracking-wider
+                                             disabled:opacity-50 transition-colors">
+                                Austragen
+                              </button>
+                            </template>
+                            <template x-if="!s.mine && s.free > 0">
+                              <button @click="assign(s, m)" :disabled="busySlots[s.id]"
+                                      class="headline px-3 py-1.5 rounded bg-[#b91c1c] hover:bg-[#d42525]
+                                             border border-white/10 text-white text-xs font-medium tracking-wider
+                                             disabled:opacity-50 transition-colors">
+                                Eintragen
+                              </button>
+                            </template>
+                            <template x-if="!s.mine && s.free === 0">
+                              <button disabled
+                                      class="headline px-3 py-1.5 rounded bg-[#262b2e] text-zinc-500
+                                             text-xs font-medium tracking-wider cursor-not-allowed">
+                                Voll
+                              </button>
+                            </template>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <!-- Toast (Erfolg/Fehler) -->
+    <div x-show="toast" x-cloak
+         class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm font-medium
+                shadow-lg shadow-black/60 z-50 max-w-[90vw] text-center border"
+         :class="toastError
+           ? 'bg-[#b91c1c] border-red-400/40 text-white'
+           : 'bg-[#262b2e] border-[#3d4a4d] text-zinc-100'"
+         x-text="toast"></div>
+  </div>
+
+  <script>
+    function jobsBoard() {
+      return {
+        loading: true,
+        me: null,
+        board: null,
+        activeDay: null,
+        expanded: {},   // mission_id -> Auftrags-Text aufgeklappt
+        busySlots: {},  // slot_id -> Request laeuft
+        toast: '',
+        toastError: false,
+        _toastTimer: null,
+
+        async init() {
+          try {
+            const r = await fetch('/api/me');
+            if (r.ok) {
+              this.me = await r.json();
+              await this.loadBoard(true);
+            }
+          } catch (e) { /* nicht eingeloggt / Server weg -> Login-Card */ }
+          this.loading = false;
+
+          // Auto-Refresh alle 30s, aber nur wenn der Tab sichtbar ist
+          setInterval(() => {
+            if (this.me && document.visibilityState === 'visible') this.loadBoard(false);
+          }, 30000);
+          document.addEventListener('visibilitychange', () => {
+            if (this.me && document.visibilityState === 'visible') this.loadBoard(false);
+          });
+        },
+
+        async loadBoard(pickDay) {
+          try {
+            const r = await fetch('/api/board');
+            if (r.status === 401) { this.me = null; this.board = null; return; }
+            if (!r.ok) {
+              const j = await r.json().catch(() => ({}));
+              this.showToast(j.detail || 'Board konnte nicht geladen werden', true);
+              return;
+            }
+            this.board = await r.json();
+            if (pickDay || !this.activeDay) this.pickDefaultDay();
+          } catch (e) {
+            this.showToast('Verbindung zum Server fehlgeschlagen', true);
+          }
+        },
+
+        pickDefaultDay() {
+          if (!this.board || !this.board.days.length) return;
+          const now = new Date();
+          const today = now.getFullYear() + '-'
+            + String(now.getMonth() + 1).padStart(2, '0') + '-'
+            + String(now.getDate()).padStart(2, '0');
+          const hit = this.board.days.find(d => d.date === today);
+          this.activeDay = hit ? hit.date : this.board.days[0].date;
+        },
+
+        currentDay() {
+          if (!this.board) return null;
+          return this.board.days.find(d => d.date === this.activeDay) || null;
+        },
+
+        myCount() {
+          if (!this.board) return 0;
+          let n = 0;
+          for (const d of this.board.days)
+            for (const m of d.missions)
+              for (const s of m.slots)
+                if (s.mine) n++;
+          return n;
+        },
+
+        eventLabel() {
+          if (!this.board || !this.board.event) return '';
+          const f = (iso) => {
+            const d = new Date(iso);
+            return String(d.getDate()).padStart(2, '0') + '.'
+              + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
+          };
+          return 'Event: ' + f(this.board.event.start) + ' – ' + f(this.board.event.end);
+        },
+
+        async assign(slot, mission) {
+          if (this.busySlots[slot.id]) return;
+          this.busySlots[slot.id] = true;
+          try {
+            const r = await fetch('/api/slots/' + slot.id + '/assign', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ mission_id: mission.id }),
+            });
+            if (r.status === 201) {
+              this.showToast('Eingetragen: ' + (slot.name || 'Slot'), false);
+            } else {
+              const j = await r.json().catch(() => ({}));
+              this.showToast(j.detail || 'Eintragen fehlgeschlagen', true);
+            }
+          } catch (e) {
+            this.showToast('Verbindung zum Server fehlgeschlagen', true);
+          }
+          this.busySlots[slot.id] = false;
+          await this.loadBoard(false);
+        },
+
+        async unassign(slot) {
+          if (this.busySlots[slot.id]) return;
+          this.busySlots[slot.id] = true;
+          try {
+            const r = await fetch('/api/slots/' + slot.id + '/assign', { method: 'DELETE' });
+            if (r.status === 204) {
+              this.showToast('Ausgetragen: ' + (slot.name || 'Slot'), false);
+            } else {
+              const j = await r.json().catch(() => ({}));
+              this.showToast(j.detail || 'Austragen fehlgeschlagen', true);
+            }
+          } catch (e) {
+            this.showToast('Verbindung zum Server fehlgeschlagen', true);
+          }
+          this.busySlots[slot.id] = false;
+          await this.loadBoard(false);
+        },
+
+        // Admin-Kick: fremdes Assignment entfernen (Server prueft is_admin)
+        async adminKick(slot, player) {
+          if (!confirm('„' + player.username + '“ wirklich aus diesem Slot austragen?')) return;
+          try {
+            const r = await fetch(
+              '/api/admin/assignments/' + slot.id + '/' + player.player_discord_id,
+              { method: 'DELETE' }
+            );
+            if (r.status === 204) {
+              this.showToast('Ausgetragen (Admin): ' + player.username, false);
+            } else {
+              const j = await r.json().catch(() => ({}));
+              this.showToast(j.detail || 'Austragen fehlgeschlagen', true);
+            }
+          } catch (e) {
+            this.showToast('Verbindung zum Server fehlgeschlagen', true);
+          }
+          await this.loadBoard(false);
+        },
+
+        showToast(msg, isError) {
+          this.toast = msg;
+          this.toastError = !!isError;
+          clearTimeout(this._toastTimer);
+          this._toastTimer = setTimeout(() => { this.toast = ''; }, 4000);
+        },
+      };
+    }
+  </script>
+</body>
+</html>

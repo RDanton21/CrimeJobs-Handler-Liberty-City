@@ -41,6 +41,11 @@ KEYS = {
     # Admin-Channel für Personal-Bedarf-Posts (Spielleitung sieht hier
     # pro Mission Crew + Slot + NPC-Plan)
     "personnel_admin_channel_id",
+    # Jobs-Dashboard: Ankündigungs-Ping bei neuen/erhöhten Spieler-Slots
+    # (leer = Ping deaktiviert)
+    "jobs_announce_channel_id",
+    "jobs_ping_role_id",
+    "jobs_dashboard_url",
 }
 
 

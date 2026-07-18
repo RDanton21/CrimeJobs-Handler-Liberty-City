@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link rel="stylesheet" href="/static/style.css" />
+  <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="bg-zinc-950 text-zinc-100 min-h-screen">
   <div x-data="crewPage()" x-init="init()" class="max-w-screen-2xl mx-auto p-6">
@@ -55,9 +56,106 @@
           <label class="block text-xs text-zinc-400 mb-1">Hintergrund-Story</label>
           <textarea x-model="crew.story_background" rows="8"
                     class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2"></textarea>
-          <div class="mt-3 flex gap-2">
+          <div class="mt-3 flex gap-2 flex-wrap">
             <button @click="saveCrew()" class="px-4 py-2 bg-green-600 hover:bg-green-500 rounded">Speichern</button>
             <button @click="deleteCrew()" class="px-4 py-2 bg-red-700 hover:bg-red-600 rounded">Löschen</button>
+            <button @click="openEnrich()"
+                    class="px-3 py-2 bg-purple-700 hover:bg-purple-600 rounded text-sm"
+                    title="KI schlägt Story, Business, Farbe und Rivalitäten vor">
+              🪄 KI-Enrich
+            </button>
+          </div>
+        </div>
+
+        <!-- KI-Enrich Panel (Variante B) -->
+        <div x-show="showEnrich" class="bg-zinc-900 border border-purple-800 rounded-lg p-5">
+          <h2 class="text-lg font-semibold mb-2">🪄 KI-Enrich</h2>
+          <p class="text-xs text-zinc-400 mb-3">Die KI schlägt Story, Business, Farbe und Rivalitäten vor. Du entscheidest, was übernommen wird.</p>
+          <div x-show="enrichPhase === 'input'" class="space-y-2">
+            <label class="block text-xs text-zinc-400 mb-1">Kurz-Hinweis (optional)</label>
+            <textarea x-model="enrichHint" rows="2"
+                      placeholder="z.B. junge aggressive Crew, im Drogenhandel aktiv"
+                      class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm"></textarea>
+            <div class="flex gap-2 pt-1">
+              <button @click="generateEnrich()" :disabled="enrichBusy"
+                      class="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 rounded text-sm font-medium">
+                <span x-show="!enrichBusy">🪄 Generieren</span>
+                <span x-show="enrichBusy">Generiere…</span>
+              </button>
+              <button @click="cancelEnrich()" class="px-3 py-2 bg-zinc-700 hover:bg-zinc-600 rounded text-sm">Abbrechen</button>
+            </div>
+          </div>
+          <div x-show="enrichPhase === 'preview'" class="space-y-3">
+            <div class="bg-zinc-950 border border-zinc-800 rounded p-3">
+              <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                <input type="checkbox" x-model="enrichAccept.color" class="scale-125">
+                <span class="font-semibold text-sm">Farbe</span>
+              </label>
+              <input x-model="enrichPreview.color_hex" type="color"
+                     class="bg-zinc-950 border border-zinc-800 rounded h-10 w-24" />
+            </div>
+            <div class="bg-zinc-950 border border-zinc-800 rounded p-3">
+              <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                <input type="checkbox" x-model="enrichAccept.story" class="scale-125">
+                <span class="font-semibold text-sm">Story (überschreibt aktuelle)</span>
+              </label>
+              <textarea x-model="enrichPreview.story_background" rows="6"
+                        class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs"></textarea>
+            </div>
+            <div class="bg-zinc-950 border border-zinc-800 rounded p-3">
+              <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                <input type="checkbox" x-model="enrichAccept.business" class="scale-125">
+                <span class="font-semibold text-sm">Business</span>
+              </label>
+              <textarea x-model="enrichPreview.crime_business" rows="3"
+                        class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs"></textarea>
+            </div>
+            <div x-show="enrichPreview.rivalries.length" class="bg-zinc-950 border border-red-900 rounded p-3">
+              <p class="text-sm font-semibold mb-2">⚔ Rivalitäten</p>
+              <template x-for="(rel, idx) in enrichPreview.rivalries" :key="idx">
+                <label class="flex items-start gap-2 mb-2 cursor-pointer">
+                  <input type="checkbox" :value="rel.crew_id" x-model="enrichAccept.rivalries" class="mt-1">
+                  <span class="text-xs">
+                    <strong x-text="rel.crew_name"></strong>
+                    <span class="text-zinc-500 ml-1" x-text="`(${rel.relation_type})`"></span><br>
+                    <span class="text-zinc-400" x-text="rel.notes || '—'"></span>
+                  </span>
+                </label>
+              </template>
+            </div>
+            <div x-show="enrichPreview.allies.length" class="bg-zinc-950 border border-green-900 rounded p-3">
+              <p class="text-sm font-semibold mb-2">🤝 Verbündete</p>
+              <template x-for="(rel, idx) in enrichPreview.allies" :key="idx">
+                <label class="flex items-start gap-2 mb-2 cursor-pointer">
+                  <input type="checkbox" :value="rel.crew_id" x-model="enrichAccept.allies" class="mt-1">
+                  <span class="text-xs">
+                    <strong x-text="rel.crew_name"></strong>
+                    <span class="text-zinc-500 ml-1" x-text="`(${rel.relation_type})`"></span><br>
+                    <span class="text-zinc-400" x-text="rel.notes || '—'"></span>
+                  </span>
+                </label>
+              </template>
+            </div>
+            <p x-show="enrichMessage" x-text="enrichMessage"
+               :class="enrichIsError ? 'text-red-400' : 'text-green-400'" class="text-xs"></p>
+            <div class="flex gap-2 pt-1 flex-wrap">
+              <button @click="applyEnrich()" :disabled="enrichBusy"
+                      class="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 rounded text-sm font-medium">
+                <span x-show="!enrichBusy">✓ Übernehmen</span>
+                <span x-show="enrichBusy">Übernehme…</span>
+              </button>
+              <button @click="generateEnrich()" :disabled="enrichBusy"
+                      class="px-3 py-2 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-40 rounded text-sm">↺ Neu</button>
+              <button @click="cancelEnrich()" class="px-3 py-2 bg-zinc-700 hover:bg-zinc-600 rounded text-sm">Verwerfen</button>
+            </div>
+          </div>
+          <div x-show="enrichPhase === 'error'" class="space-y-2">
+            <p class="text-red-400 text-sm">KI-Antwort konnte nicht geparst werden. Roh:</p>
+            <pre class="bg-zinc-950 border border-zinc-800 rounded p-2 text-xs overflow-auto max-h-64" x-text="enrichRawError"></pre>
+            <div class="flex gap-2">
+              <button @click="generateEnrich()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded text-sm">↺ Neu versuchen</button>
+              <button @click="cancelEnrich()" class="px-3 py-2 bg-zinc-700 hover:bg-zinc-600 rounded text-sm">Schließen</button>
+            </div>
           </div>
         </div>
 
@@ -379,6 +477,11 @@
                     📅 geplant <span x-text="m.scheduled_send_at ? relativeTime(m.scheduled_send_at) : ''"></span>
                   </span>
                   <span x-show="m.archived_at" class="px-2 py-0.5 rounded bg-zinc-700 text-zinc-300">📦 archiviert</span>
+                  <span x-show="(slotCounts[m.id] || 0) > 0"
+                        class="px-2 py-0.5 rounded bg-indigo-900 text-indigo-200"
+                        title="Spieler-Slots für das Jobs-Dashboard">
+                    🧩 <span x-text="`${slotCounts[m.id] || 0} Slots`"></span>
+                  </span>
                 </div>
                 <div class="flex gap-1">
                   <button x-show="!m.archived_at && m.status === 'pending'"
@@ -481,6 +584,12 @@
                           title="Embed wurde gepostet. Beim Archivieren wird er entfernt.">
                       ✓ Im Admin-Channel
                     </span>
+                    <button x-show="(m.personnel_brief || '').trim()"
+                            @click="openSlots(m)"
+                            title="Spieler-Slots für das Jobs-Dashboard verwalten (KI-Parse + Editor)"
+                            class="text-xs px-2 py-1 rounded bg-indigo-800 hover:bg-indigo-700">
+                      🧩 Slots
+                    </button>
                     <button x-show="personnelEditingId !== m.id"
                             @click="startEditPersonnelCrew(m)"
                             class="text-xs px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700">
@@ -572,8 +681,119 @@
         </div>
       </section>
     </div>
+
+    <!-- 🧩 Spieler-Slots Modal (Jobs-Dashboard) -->
+    <div x-show="slotsEditor.open" x-cloak
+         class="fixed inset-0 bg-black/70 z-50 flex items-start justify-center overflow-y-auto p-6"
+         @click.self="closeSlots()">
+      <div class="bg-zinc-900 border border-indigo-800 rounded-lg p-6 max-w-5xl w-full my-8">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xl font-bold">🧩 Spieler-Slots — Mission #<span x-text="slotsEditor.missionId"></span></h2>
+          <button @click="closeSlots()" class="text-zinc-400 hover:text-zinc-100 text-xl">✕</button>
+        </div>
+        <p class="text-xs text-zinc-400 mb-3">
+          Strukturierte Spieler-NPC-Slots für das Jobs-Dashboard. „🪄 Aus Personal-Brief parsen"
+          füllt die Tabelle per KI — danach prüfen, anpassen, speichern. Speichern ersetzt alle
+          bisherigen Slots dieser Mission.
+        </p>
+        <div x-show="slotsEditor.loading" class="text-sm text-zinc-400 mb-3">Lade Slots…</div>
+        <div x-show="!slotsEditor.loading" class="space-y-3">
+          <div>
+            <label class="block text-xs text-zinc-400 mb-1">Slot-Fenster (gilt für alle Zeilen, z.B. 22:30-01:00)</label>
+            <input x-model="slotsEditor.slot_window" placeholder="z.B. 22:30-01:00"
+                   class="w-48 bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-separate" style="border-spacing: 0 4px;">
+              <thead>
+                <tr class="text-xs text-zinc-400 text-left">
+                  <th class="px-1 py-1 w-16">#</th>
+                  <th class="px-1 py-1">Name</th>
+                  <th class="px-1 py-1">Funktion</th>
+                  <th class="px-1 py-1">Location</th>
+                  <th class="px-1 py-1">Kostüm</th>
+                  <th class="px-1 py-1 w-20">Anzahl</th>
+                  <th class="px-1 py-1 w-8"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="(row, i) in slotsEditor.rows" :key="i">
+                  <tr>
+                    <td class="px-1 py-1">
+                      <input type="number" min="1" x-model="row.npc_number" placeholder="#"
+                             class="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1" />
+                    </td>
+                    <td class="px-1 py-1">
+                      <input x-model="row.name" placeholder="z.B. Hafenmeister"
+                             class="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1" />
+                    </td>
+                    <td class="px-1 py-1">
+                      <input x-model="row.function" placeholder="Funktion im RP"
+                             class="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1" />
+                    </td>
+                    <td class="px-1 py-1">
+                      <input x-model="row.location" placeholder="Ort"
+                             class="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1" />
+                    </td>
+                    <td class="px-1 py-1">
+                      <input x-model="row.costume" placeholder="Kleidung/Outfit"
+                             class="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1" />
+                    </td>
+                    <td class="px-1 py-1">
+                      <input type="number" min="1" x-model="row.required_count"
+                             class="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1" />
+                    </td>
+                    <td class="px-1 py-1 text-center">
+                      <button @click="removeSlotRow(i)" title="Zeile löschen"
+                              class="text-red-400 hover:text-red-300">×</button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+            <p x-show="slotsEditor.rows.length === 0" class="text-xs text-zinc-500 italic mt-1">
+              Noch keine Zeilen — „+ Zeile" klicken oder per KI aus dem Personal-Brief parsen.
+            </p>
+          </div>
+          <button @click="addSlotRow()"
+                  class="text-xs px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded">+ Zeile</button>
+          <p x-show="slotsEditor.error" x-text="slotsEditor.error"
+             class="text-xs text-red-400 whitespace-pre-wrap max-h-40 overflow-auto"></p>
+          <div class="pt-1">
+            <label class="flex items-center gap-2 text-sm text-zinc-300 cursor-pointer select-none">
+              <input type="checkbox" x-model="slotsEditor.announce" class="accent-indigo-500" />
+              📢 Änderung im Discord ankündigen
+            </label>
+            <p class="text-[11px] text-zinc-500 ml-6">
+              pingt die Spieler-Rolle — nur bei neuen/erhöhten Plätzen
+            </p>
+          </div>
+          <div class="flex gap-2 pt-1 flex-wrap">
+            <button @click="parseSlots()" :disabled="slotsEditor.parsing || slotsEditor.saving"
+                    class="px-4 py-2 bg-purple-700 hover:bg-purple-600 disabled:opacity-40 rounded text-sm font-medium">
+              <span x-show="!slotsEditor.parsing">🪄 Aus Personal-Brief parsen (KI)</span>
+              <span x-show="slotsEditor.parsing">KI parst…</span>
+            </button>
+            <button @click="saveSlots()" :disabled="slotsEditor.saving || slotsEditor.parsing"
+                    class="px-4 py-2 bg-green-600 hover:bg-green-500 disabled:opacity-40 rounded text-sm font-medium">
+              <span x-show="!slotsEditor.saving">💾 Speichern</span>
+              <span x-show="slotsEditor.saving">Speichere…</span>
+            </button>
+            <button @click="closeSlots()"
+                    class="px-3 py-2 bg-zinc-700 hover:bg-zinc-600 rounded text-sm">Abbrechen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast (Slots-Speichern → Discord-Ankündigung) -->
+    <div x-show="slotsToast" x-transition
+         class="fixed bottom-4 left-4 border text-white px-4 py-3 rounded-lg shadow-lg max-w-sm z-50"
+         :class="slotsToastError ? 'bg-amber-700 border-amber-500' : 'bg-indigo-700 border-indigo-500'">
+      <div class="text-sm font-medium" x-text="slotsToast"></div>
+    </div>
   </div>
 
-  <script src="/static/app.js?v=rewrite9"></script>
+  <script src="/static/app.js?v=slots3"></script>
 </body>
 </html>

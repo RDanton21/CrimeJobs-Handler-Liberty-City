@@ -15,6 +15,8 @@ from .routes_lore import router as lore_router
 from .routes_missions import router as missions_router
 from .routes_reaction import router as reaction_router
 from .routes_settings import router as settings_router
+from .routes_slots import public_router as public_slots_router
+from .routes_slots import router as slots_router
 from .routes_story import router as story_router
 from .routes_system_prompts import router as system_prompts_router
 from .routes_top3_titles import router as top3_titles_router
@@ -42,6 +44,8 @@ app.include_router(lore_router)
 app.include_router(story_router)
 app.include_router(top3_titles_router)
 app.include_router(dashboard_router)
+app.include_router(slots_router)
+app.include_router(public_slots_router)
 
 
 @app.get("/api/health")

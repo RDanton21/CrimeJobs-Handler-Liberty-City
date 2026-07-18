@@ -436,3 +436,169 @@ def build_rewrite_prompt(ctx: MissionContext, raw_input: str) -> str:
     )
 
     return "\n".join(parts)
+
+
+# ==================================================================
+# KI-Enrichment fuer neue oder unvollstaendige Crews
+# ==================================================================
+
+# Farb-Schema pro Stadtteil (vom Lore-Repo abgeleitet)
+DISTRICT_COLORS = {
+    "Algonquin": "#b91c1c",       # rot
+    "Bohan": "#e5e7eb",           # weiss/hell
+    "Broker": "#c026d3",          # magenta-pink
+    "Colony Island": "#2563eb",   # blau
+    "Dukes": "#06b6d4",           # cyan-tuerkis
+}
+
+
+def build_crew_enrichment_prompt(
+    crew_name: str,
+    district: str,
+    hint: str,
+    existing_crews_in_district: list[dict],
+    all_crews_summary: list[dict],
+) -> tuple[str, str]:
+    """Baut den System+User-Prompt fuer die KI-Anreicherung einer neuen oder
+    unvollstaendigen Crew. Die KI liefert JSON zurueck mit Story, Business,
+    Farbe, Rivalitaets- und Verbuendeten-Vorschlaegen."""
+    sys = (
+        "Du bist Lore-Autor fuer ein GTA-V-Liberty-City-Roleplay-Event. Deine "
+        "Aufgabe: fuer eine neue oder unvollstaendige Crime-Crew einen "
+        "kompletten Lore-Vorschlag generieren, der dramaturgisch in die "
+        "bestehende Stadt passt.\n\n"
+        "Ausgabe-Format: AUSSCHLIESSLICH ein gueltiges JSON-Objekt mit den "
+        "Feldern:\n"
+        '  {\n'
+        '    "story_background": "...",\n'
+        '    "crime_business": "...",\n'
+        '    "color_hex": "#XXXXXX",\n'
+        '    "rivalries": [\n'
+        '      {"crew_id": 123, "relation_type": "rival", "notes": "..."},\n'
+        '      ...\n'
+        '    ],\n'
+        '    "allies": [\n'
+        '      {"crew_id": 456, "relation_type": "allied", "notes": "..."},\n'
+        '      ...\n'
+        '    ]\n'
+        '  }\n\n'
+        "KEIN Markdown-Codeblock, KEINE erklaerenden Saetze davor oder danach. "
+        "Reines JSON.\n\n"
+        "Konventionen:\n"
+        "- story_background: 4-6 Absaetze, atmosphaerisch, im Noir-Stil der "
+        "bestehenden Crew-Stories. Enthaelt einen Eroeffnungs-Mythos, das "
+        "Credo als Zitat, Struktur/Hierarchie, Territorium/Reviere und einen "
+        "Hinweis auf typische Aktivitaeten (aber NICHT das interne Business).\n"
+        "- crime_business: 1-2 Saetze, KLARTEXT, was die Crew konkret macht "
+        "(Drogenhandel Kokain am Hafen / Schutzgeld auf Restaurants in "
+        "Algonquin / Hehlerei ueber Pawn Shops / etc.). Wird intern fuer die "
+        "KI-Auftrags-Ausrichtung genutzt.\n"
+        "- color_hex: passende Farbe. Wenn Stadtteil bekannt, aus dem "
+        "Stadtteil-Schema variieren (leichter Farbwechsel innerhalb der "
+        "Familie). Format #RRGGBB.\n"
+        "- rivalries/allies: **Nur Crews vorschlagen, deren id in der Liste "
+        "existing_crews_in_district oder all_crews_summary vorkommt.** Keine "
+        "erfundenen IDs. relation_type ist einer von: rival, hostile, allied, "
+        "business, neutral. notes: 1 Satz, warum diese Beziehung besteht.\n"
+        "- Empfehlung: 2-3 Rivalen (rival oder hostile) + 1-2 Verbuendete "
+        "(allied oder business).\n\n"
+        "Sprache: Deutsch. Ton: literarisch-noir, kein Slang, keine Klischees."
+    )
+
+    parts: list[str] = []
+    parts.append(f"## Neue Crew\n**Name:** {crew_name}")
+    if district:
+        parts.append(f"**Stadtteil:** {district}")
+        if district in DISTRICT_COLORS:
+            parts.append(f"**Stadtteil-Basisfarbe:** {DISTRICT_COLORS[district]}")
+    if hint and hint.strip():
+        parts.append(f"**Hinweis vom Spielleiter:** {hint.strip()}")
+
+    if existing_crews_in_district:
+        rel_lines = [
+            f"\n## Andere Crews im Stadtteil {district} (fuer Rivalitaeten "
+            "priorisieren)"
+        ]
+        for c in existing_crews_in_district:
+            summary = c.get("story_background", "")[:280] or "(keine Story)"
+            biz = c.get("crime_business", "")[:180] or "(kein Business hinterlegt)"
+            rel_lines.append(
+                f"- **id={c['id']}** — {c['name']}: {summary}\n"
+                f"  Business: {biz}"
+            )
+        parts.append("\n".join(rel_lines))
+
+    if all_crews_summary:
+        other_lines = ["\n## Alle Crews Liberty Citys (fuer optionale Ueberkreuz-Beziehungen)"]
+        for c in all_crews_summary:
+            other_lines.append(f"- id={c['id']} — {c['name']} ({c.get('district', '?')})")
+        parts.append("\n".join(other_lines))
+
+    parts.append(
+        "\n## Aufgabe\n"
+        "Generiere JETZT das vollstaendige JSON-Objekt fuer diese neue Crew. "
+        "Achte darauf, dass Story, Business und Rivalitaeten zueinander passen "
+        "— eine Strassencrew hat andere Rivalen als eine internationale Mafia. "
+        "Nutze die bestehenden Crews als dramaturgischen Kontext."
+    )
+
+    return sys, "\n".join(parts)
+
+
+# ==================================================================
+# Personal-Slot-Parser: Freitext-Personal-Brief -> strukturierte Slots
+# (fuer das externe Jobs-Dashboard, Spieler-Eintragung)
+# ==================================================================
+
+PERSONNEL_SLOT_PARSE_SYSTEM_PROMPT = (
+    "Du bist ein praeziser Daten-Parser fuer ein GTA-V-Roleplay-Adminpanel. "
+    "Du wandelst deutsche Freitext-Personal-Briefs in striktes JSON um. "
+    "Du gibst AUSSCHLIESSLICH gueltiges JSON aus — kein Markdown, keine "
+    "Code-Fences, keine Erklaerungen, kein Text davor oder danach."
+)
+
+
+def build_personnel_slot_parse_prompt(personnel_brief: str) -> str:
+    """Baut den User-Prompt, der einen deutschen Freitext-Personal-Brief in
+    striktes JSON parst (Slot-Fenster + Spieler-NPC-Slots). Wird zusammen mit
+    PERSONNEL_SLOT_PARSE_SYSTEM_PROMPT an den Provider gegeben.
+
+    Beispiel-Eingabeformat im Brief:
+      1x #1 Hafenmeister -> Funktion: ... -> Location: ... -> Kostuem: ...
+      Slot: 22:30-01:00
+      Team-Auslastung: ...
+    """
+    return (
+        "## Personal-Brief (Freitext, deutsch)\n"
+        f"{personnel_brief.strip()}\n\n"
+        "## Aufgabe\n"
+        "Parse den obigen Personal-Brief in EXAKT dieses JSON-Format:\n"
+        '{"slot_window": "22:30-01:00", "slots": [\n'
+        '  {"npc_number": 1, "name": "Hafenmeister", "function": "...", '
+        '"location": "...", "costume": "...", "required_count": 1}\n'
+        "]}\n\n"
+        "## Regeln\n"
+        "- Gib NUR das JSON-Objekt aus. KEINE Markdown-Fences (```), keine "
+        "Erklaerungen, kein Text davor oder danach.\n"
+        "- slot_window: das Zeitfenster aus Zeilen wie 'Slot: 22:30-01:00' "
+        "(nur den Zeitbereich, z.B. '22:30-01:00'). Wenn kein Zeitfenster im "
+        "Brief steht: leerer String \"\".\n"
+        "- Jeder Spieler-NPC im Brief wird EIN Eintrag in slots. Typisches "
+        "Zeilenformat: '1x #1 Hafenmeister -> Funktion: ... -> Location: ... "
+        "-> Kostuem: ...'.\n"
+        "- npc_number: die Nummer hinter '#' (z.B. '#1' -> 1). Wenn keine "
+        "Nummer vorhanden: null.\n"
+        "- name: die Rollen-Bezeichnung des NPCs (z.B. 'Hafenmeister').\n"
+        "- function: der Text hinter 'Funktion:' (was der NPC im RP tut). "
+        "Kompakt uebernehmen, nicht ausschmuecken.\n"
+        "- location: der Text hinter 'Location:' (wo der NPC steht/agiert).\n"
+        "- costume: der Text hinter 'Kostuem:'/'Kostüm:' (Kleidung/Outfit).\n"
+        "- required_count: aus Prefixen wie '2x'/'3x' ableiten (z.B. "
+        "'2x Wachmann' -> required_count 2). Ohne Prefix oder bei '1x': 1.\n"
+        "- Der Mittler/Fixer selbst ist KEIN Slot — er wird vom Team gestellt. "
+        "Nur die Quest-NPCs aufnehmen, die von Spielern besetzt werden.\n"
+        "- Zeilen wie 'Team-Auslastung: ...' sind reine Info und erzeugen "
+        "KEINE Slots.\n"
+        "- Wenn der Brief keine Spieler-NPCs benoetigt: \"slots\": [].\n"
+        "- Fehlende Angaben als leeren String \"\" ausgeben, nichts erfinden."
+    )

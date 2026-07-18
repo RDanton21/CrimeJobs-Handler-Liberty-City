@@ -43,6 +43,12 @@ async def get_settings(session: AsyncSession = Depends(get_session)):
         "ranking_top3_crime_only": db_vals.get("ranking_top3_crime_only", "true"),
         "ranking_top3_title": db_vals.get("ranking_top3_title", "🥇 Die Spitze von Liberty City"),
         "ranking_top3_intro": db_vals.get("ranking_top3_intro", ""),
+        # Personal-Bedarf Admin-Channel (Dashboard-Widget "📤 Posten")
+        "personnel_admin_channel_id": db_vals.get("personnel_admin_channel_id", ""),
+        # Jobs-Dashboard: Ankündigungs-Ping bei neuen/erhöhten Spieler-Slots
+        "jobs_announce_channel_id": db_vals.get("jobs_announce_channel_id", ""),
+        "jobs_ping_role_id": db_vals.get("jobs_ping_role_id", "1528099740649127977"),
+        "jobs_dashboard_url": db_vals.get("jobs_dashboard_url", "https://jobs.bots.sektorrp.eu"),
     }
 
 
@@ -74,6 +80,9 @@ async def update_settings(
         "ranking_top3_title": "ranking_top3_title",
         "ranking_top3_intro": "ranking_top3_intro",
         "personnel_admin_channel_id": "personnel_admin_channel_id",
+        "jobs_announce_channel_id": "jobs_announce_channel_id",
+        "jobs_ping_role_id": "jobs_ping_role_id",
+        "jobs_dashboard_url": "jobs_dashboard_url",
     }
     for field, val in data.items():
         if val is None:

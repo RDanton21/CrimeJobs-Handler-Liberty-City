@@ -98,6 +98,17 @@ function dashboard() {
     DISTRICTS,
     showNew: false,
     draft: { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
+    // KI-Wizard (Variante A)
+    showWizard: false,
+    wizardPhase: "input",
+    wizardBusy: false,
+    wizardInput: { name: "", district: "", hint: "" },
+    wizardPreview: { story_background: "", crime_business: "", color_hex: "#b91c1c", rivalries: [], allies: [] },
+    wizardAccept: { story: true, business: true, color: true, rivalries: [], allies: [] },
+    wizardCrewId: null,
+    wizardRawError: "",
+    wizardMessage: "",
+    wizardIsError: false,
     notifications: {},
     seenAt: JSON.parse(localStorage.getItem("crewSeenAt") || "{}"),
     archivingAll: false,
@@ -411,6 +422,100 @@ function dashboard() {
         this.showNew = false;
       } catch (e) { alert(e.message); }
     },
+
+    // ==== KI-Wizard (Variante A) ====
+    openWizard() {
+      this.wizardPhase = "input"; this.wizardBusy = false;
+      this.wizardInput = { name: "", district: "", hint: "" };
+      this.wizardPreview = { story_background: "", crime_business: "", color_hex: "#b91c1c", rivalries: [], allies: [] };
+      this.wizardAccept = { story: true, business: true, color: true, rivalries: [], allies: [] };
+      this.wizardCrewId = null; this.wizardRawError = ""; this.wizardMessage = ""; this.wizardIsError = false;
+      this.showWizard = true;
+    },
+    cancelWizard() {
+      if (this.wizardCrewId) { api.del(`/api/crews/${this.wizardCrewId}`).catch(() => {}); this.wizardCrewId = null; }
+      this.showWizard = false; this.wizardPhase = "input"; this.wizardBusy = false;
+    },
+    async generateWizard() {
+      this.wizardMessage = ""; this.wizardIsError = false;
+      const name = (this.wizardInput.name || "").trim();
+      const district = (this.wizardInput.district || "").trim();
+      if (!name) { this.wizardMessage = "Name fehlt."; this.wizardIsError = true; return; }
+      if (!district) { this.wizardMessage = "Stadtteil fehlt."; this.wizardIsError = true; return; }
+      this.wizardBusy = true;
+      try {
+        if (!this.wizardCrewId) {
+          const draftMin = { name, district, story_background: "", crime_business: "", color_hex: "#b91c1c", discord_channel_id: "", info_channel_id: "", crime_business_channel_id: "" };
+          const c = await api.post("/api/crews", draftMin);
+          this.wizardCrewId = c.id;
+        }
+        const res = await api.post(`/api/crews/${this.wizardCrewId}/enrich/preview`, { hint: this.wizardInput.hint || "" });
+        if (!res.ok) { this.wizardPhase = "error"; this.wizardRawError = res.raw || "Keine Roh-Ausgabe."; return; }
+        this.wizardPreview = {
+          story_background: res.story_background || "",
+          crime_business: res.crime_business || "",
+          color_hex: res.color_hex || "#b91c1c",
+          rivalries: res.rivalries || [],
+          allies: res.allies || [],
+        };
+        this.wizardAccept = {
+          story: !!res.story_background,
+          business: !!res.crime_business,
+          color: true,
+          rivalries: (res.rivalries || []).map(r => r.crew_id),
+          allies: (res.allies || []).map(r => r.crew_id),
+        };
+        this.wizardPhase = "preview";
+      } catch (e) {
+        this.wizardMessage = "Fehler: " + (e.message || e); this.wizardIsError = true;
+      } finally { this.wizardBusy = false; }
+    },
+    async regenerateWizard() {
+      if (!this.wizardCrewId) return;
+      this.wizardMessage = ""; this.wizardBusy = true;
+      try {
+        const res = await api.post(`/api/crews/${this.wizardCrewId}/enrich/preview`, { hint: this.wizardInput.hint || "" });
+        if (!res.ok) { this.wizardPhase = "error"; this.wizardRawError = res.raw || ""; return; }
+        this.wizardPreview = {
+          story_background: res.story_background || "",
+          crime_business: res.crime_business || "",
+          color_hex: res.color_hex || "#b91c1c",
+          rivalries: res.rivalries || [],
+          allies: res.allies || [],
+        };
+        this.wizardAccept = {
+          story: !!res.story_background,
+          business: !!res.crime_business,
+          color: true,
+          rivalries: (res.rivalries || []).map(r => r.crew_id),
+          allies: (res.allies || []).map(r => r.crew_id),
+        };
+        this.wizardMessage = "✓ Neu generiert."; this.wizardIsError = false;
+      } catch (e) {
+        this.wizardMessage = "Fehler: " + (e.message || e); this.wizardIsError = true;
+      } finally { this.wizardBusy = false; }
+    },
+    async applyWizard() {
+      if (!this.wizardCrewId) return;
+      this.wizardBusy = true;
+      try {
+        const body = {
+          apply_rivalries: this.wizardPreview.rivalries.filter(r => this.wizardAccept.rivalries.includes(r.crew_id)),
+          apply_allies:    this.wizardPreview.allies.filter(r => this.wizardAccept.allies.includes(r.crew_id)),
+        };
+        if (this.wizardAccept.story)    body.story_background = this.wizardPreview.story_background;
+        if (this.wizardAccept.business) body.crime_business   = this.wizardPreview.crime_business;
+        if (this.wizardAccept.color)    body.color_hex        = this.wizardPreview.color_hex;
+        await api.post(`/api/crews/${this.wizardCrewId}/enrich/apply`, body);
+        this.wizardMessage = "✓ Crew angelegt und angereichert.";
+        this.wizardIsError = false;
+        this.showWizard = false; this.wizardCrewId = null;
+        await this.loadCrews();
+      } catch (e) {
+        this.wizardMessage = "Fehler beim Uebernehmen: " + (e.message || e); this.wizardIsError = true;
+      } finally { this.wizardBusy = false; }
+    },
+
     statusLabel: statusLabelMap,
     statusClass: statusClassMap,
     cardBorder: cardBorderClass,
@@ -607,6 +712,16 @@ function crewPage() {
     suggestionsLastStatus: "",  // 'approved' | 'rejected' | 'cancelled' | 'pending' | ''
     suggestionsMessage: "",
     suggestionsIsError: false,
+    // KI-Enrich (Variante B)
+    showEnrich: false,
+    enrichPhase: "input",
+    enrichBusy: false,
+    enrichHint: "",
+    enrichPreview: { story_background: "", crime_business: "", color_hex: "#b91c1c", rivalries: [], allies: [] },
+    enrichAccept: { story: true, business: true, color: true, rivalries: [], allies: [] },
+    enrichRawError: "",
+    enrichMessage: "",
+    enrichIsError: false,
     // Personal-Brief — pro Mission auf dieser Crew-Seite
     personnelEditingId: null,        // welche Mission gerade editiert wird
     personnelDraftCrew: "",          // Edit-Buffer
@@ -615,6 +730,11 @@ function crewPage() {
     personnelPostingId: null,        // Mission die gerade gepostet wird
     personnelTemplatesCrew: [],       // Quick-Pick Vorlagen (einmal geladen)
     personnelChannelConfigured: false, // gibt's eine Admin-Channel-ID in Settings?
+    // 🧩 Spieler-Slots (Jobs-Dashboard) — Badge-Counts + Editor-Modal
+    slotCounts: {},                   // mission_id -> Anzahl Slot-Zeilen (fuers Badge)
+    slotsEditor: { open: false, missionId: null, loading: false, parsing: false, saving: false, error: "", slot_window: "", rows: [], announce: true },
+    slotsToast: "",                   // Feedback nach Speichern (Discord-Ankündigung)
+    slotsToastError: false,
 
     get otherCrews() {
       return this.allCrews.filter(c => c.id !== this.crewId);
@@ -637,11 +757,129 @@ function crewPage() {
         const s = await api.get("/api/settings");
         this.personnelChannelConfigured = !!(s.personnel_admin_channel_id || "").trim();
       } catch (e) { this.personnelChannelConfigured = false; }
+      // Slot-Counts fuers 🧩-Badge (ein Call fuer alle Missions, kein N+1)
+      this.loadSlotCounts().catch(() => {});
       // Auto-Refresh alle 5 Sek (fuer Discord-Reaktions-Updates + Boss-Texte)
       setInterval(() => {
         this.loadMissions().catch(() => {});
         this.loadBossInfo().catch(() => {});
+        this.loadSlotCounts().catch(() => {});
       }, 5000);
+    },
+    // ---- 🧩 Spieler-Slots (Jobs-Dashboard) ----
+    async loadSlotCounts() {
+      // Ein Aggregat-Call fuer alle Missions dieser Crew — Badge "🧩 N Slots"
+      try {
+        const r = await api.get(`/api/slots/counts?crew_id=${this.crewId}`);
+        this.slotCounts = r.counts || {};
+      } catch (e) { /* silent — Badge ist nur Komfort */ }
+    },
+    _slotRowFrom(s) {
+      return {
+        // id nur bei bestehenden Rows — sie sorgt dafuer, dass der Slot beim
+        // Speichern seine ID behaelt und Spieler-Eintragungen im
+        // Jobs-Dashboard nicht verwaisen. KI-Parse liefert keine id.
+        id: s.id || null,
+        npc_number: (s.npc_number === null || s.npc_number === undefined) ? "" : s.npc_number,
+        name: s.name || "",
+        function: s.function || "",
+        location: s.location || "",
+        costume: s.costume || "",
+        required_count: s.required_count || 1,
+        notes: s.notes || "",
+      };
+    },
+    async openSlots(m) {
+      this.slotsEditor = { open: true, missionId: m.id, loading: true, parsing: false, saving: false, error: "", slot_window: "", rows: [], announce: true };
+      try {
+        const rows = await api.get(`/api/missions/${m.id}/slots`);
+        this.slotsEditor.rows = (rows || []).map(s => this._slotRowFrom(s));
+        const withWindow = (rows || []).find(s => (s.slot_window || "").trim());
+        this.slotsEditor.slot_window = withWindow ? withWindow.slot_window : "";
+      } catch (e) {
+        this.slotsEditor.error = "Fehler beim Laden: " + (e.message || e);
+      } finally {
+        this.slotsEditor.loading = false;
+      }
+    },
+    async parseSlots() {
+      const ed = this.slotsEditor;
+      if (!ed.missionId || ed.parsing || ed.saving) return;
+      const hasSaved = ed.rows.some(r => r.id);
+      const warn = hasSaved
+        ? "KI-Parse ersetzt ALLE Zeilen durch neue.\n\nAchtung: Beim anschließenden Speichern werden die bisherigen Slots gelöscht und neu angelegt — bereits eingetragene Spieler verlieren dabei ihren Platz.\n\nFortfahren?"
+        : "KI-Parse ersetzt die aktuellen Zeilen im Editor. Fortfahren?";
+      if (ed.rows.length && !confirm(warn)) return;
+      ed.error = "";
+      ed.parsing = true;
+      try {
+        const res = await api.post(`/api/missions/${ed.missionId}/parse-slots`);
+        if ((!res.slots || res.slots.length === 0) && res.raw) {
+          ed.error = "KI-Antwort konnte nicht geparst werden. Roh-Antwort:\n" + res.raw;
+          return;
+        }
+        ed.slot_window = res.slot_window || ed.slot_window || "";
+        ed.rows = (res.slots || []).map(s => this._slotRowFrom(s));
+        if (ed.rows.length === 0) {
+          ed.error = "KI hat keine Spieler-NPCs im Personal-Brief gefunden.";
+        }
+      } catch (e) {
+        ed.error = "Fehler beim Parsen: " + (e.message || e);
+      } finally {
+        ed.parsing = false;
+      }
+    },
+    addSlotRow() {
+      this.slotsEditor.rows.push({ id: null, npc_number: "", name: "", function: "", location: "", costume: "", required_count: 1, notes: "" });
+    },
+    removeSlotRow(i) {
+      this.slotsEditor.rows.splice(i, 1);
+    },
+    async saveSlots() {
+      const ed = this.slotsEditor;
+      if (!ed.missionId || ed.saving || ed.parsing) return;
+      ed.error = "";
+      ed.saving = true;
+      try {
+        const body = {
+          slot_window: (ed.slot_window || "").trim(),
+          announce: !!ed.announce,
+          slots: ed.rows.map(r => {
+            const n = parseInt(r.npc_number, 10);
+            return {
+              id: r.id || null,
+              npc_number: isNaN(n) ? null : n,
+              name: r.name || "",
+              function: r.function || "",
+              location: r.location || "",
+              costume: r.costume || "",
+              required_count: Math.max(1, parseInt(r.required_count, 10) || 1),
+              slot_window: "",
+              notes: r.notes || "",
+            };
+          }),
+        };
+        const res = await api.put(`/api/missions/${ed.missionId}/slots`, body);
+        await this.loadSlotCounts();
+        this.closeSlots();
+        // Feedback zur Discord-Ankündigung (nicht-blockierend)
+        if (res && res.announce_sent) {
+          this.slotsToast = "📢 Ankündigung im Discord gepostet — Spieler-Rolle gepingt.";
+          this.slotsToastError = false;
+          setTimeout(() => { this.slotsToast = ""; }, 5000);
+        } else if (res && res.announce_error) {
+          this.slotsToast = "Slots gespeichert — Discord-Ankündigung fehlgeschlagen: " + res.announce_error;
+          this.slotsToastError = true;
+          setTimeout(() => { this.slotsToast = ""; }, 8000);
+        }
+      } catch (e) {
+        ed.error = "Fehler beim Speichern: " + (e.message || e);
+      } finally {
+        ed.saving = false;
+      }
+    },
+    closeSlots() {
+      this.slotsEditor = { open: false, missionId: null, loading: false, parsing: false, saving: false, error: "", slot_window: "", rows: [], announce: true };
     },
     // ---- Personal-Brief auf der Crew-Seite ----
     startEditPersonnelCrew(m) {
@@ -779,6 +1017,62 @@ function crewPage() {
       if (!confirm("Gang wirklich löschen?")) return;
       try { await api.del(`/api/crews/${this.crewId}`); location.href = "/"; }
       catch (e) { alert(e.message); }
+    },
+
+    // ==== KI-Enrich (Variante B) ====
+    openEnrich() {
+      this.enrichPhase = "input"; this.enrichBusy = false; this.enrichHint = "";
+      this.enrichPreview = { story_background: "", crime_business: "", color_hex: this.crew.color_hex || "#b91c1c", rivalries: [], allies: [] };
+      this.enrichAccept = { story: true, business: true, color: true, rivalries: [], allies: [] };
+      this.enrichRawError = ""; this.enrichMessage = ""; this.enrichIsError = false;
+      this.showEnrich = true;
+    },
+    cancelEnrich() {
+      this.showEnrich = false; this.enrichPhase = "input"; this.enrichBusy = false; this.enrichMessage = "";
+    },
+    async generateEnrich() {
+      this.enrichMessage = ""; this.enrichIsError = false; this.enrichBusy = true;
+      try {
+        const res = await api.post(`/api/crews/${this.crewId}/enrich/preview`, { hint: this.enrichHint || "" });
+        if (!res.ok) { this.enrichPhase = "error"; this.enrichRawError = res.raw || "Keine Roh-Ausgabe."; return; }
+        this.enrichPreview = {
+          story_background: res.story_background || "",
+          crime_business: res.crime_business || "",
+          color_hex: res.color_hex || this.crew.color_hex || "#b91c1c",
+          rivalries: res.rivalries || [],
+          allies: res.allies || [],
+        };
+        this.enrichAccept = {
+          story: !this.crew.story_background && !!res.story_background,
+          business: !this.crew.crime_business && !!res.crime_business,
+          color: true,
+          rivalries: (res.rivalries || []).map(r => r.crew_id),
+          allies: (res.allies || []).map(r => r.crew_id),
+        };
+        this.enrichPhase = "preview";
+      } catch (e) {
+        this.enrichMessage = "Fehler: " + (e.message || e); this.enrichIsError = true;
+      } finally { this.enrichBusy = false; }
+    },
+    async applyEnrich() {
+      this.enrichBusy = true;
+      try {
+        const body = {
+          apply_rivalries: this.enrichPreview.rivalries.filter(r => this.enrichAccept.rivalries.includes(r.crew_id)),
+          apply_allies:    this.enrichPreview.allies.filter(r => this.enrichAccept.allies.includes(r.crew_id)),
+        };
+        if (this.enrichAccept.story)    body.story_background = this.enrichPreview.story_background;
+        if (this.enrichAccept.business) body.crime_business   = this.enrichPreview.crime_business;
+        if (this.enrichAccept.color)    body.color_hex        = this.enrichPreview.color_hex;
+        const res = await api.post(`/api/crews/${this.crewId}/enrich/apply`, body);
+        this.enrichMessage = `✓ ${res.changed_fields.length} Felder aktualisiert, ${res.added_relations} neue + ${res.updated_relations} aktualisierte Beziehungen.`;
+        this.enrichIsError = false;
+        await this.loadCrew();
+        await this.loadRelations();
+        setTimeout(() => { this.showEnrich = false; this.enrichPhase = "input"; }, 3000);
+      } catch (e) {
+        this.enrichMessage = "Fehler beim Uebernehmen: " + (e.message || e); this.enrichIsError = true;
+      } finally { this.enrichBusy = false; }
     },
 
     async adjustBonus(delta) {
@@ -1484,6 +1778,15 @@ function settingsPage() {
     personnelChannelSaving: false,
     personnelChannelMsg: "",
     personnelChannelMsgError: false,
+    // Jobs-Dashboard: Ankündigungs-Ping bei neuen/erhöhten Spieler-Slots
+    jobsAnnounceForm: {
+      jobs_announce_channel_id: "",
+      jobs_ping_role_id: "1528099740649127977",
+      jobs_dashboard_url: "https://jobs.bots.sektorrp.eu",
+    },
+    jobsAnnounceSaving: false,
+    jobsAnnounceMsg: "",
+    jobsAnnounceMsgError: false,
     async init() {
       this.state = await api.get("/api/settings");
       this.form.default_provider = this.state.default_provider;
@@ -1512,6 +1815,12 @@ function settingsPage() {
       if (!this.top3Form.ranking_top3_title) this.top3Form.ranking_top3_title = "🥇 Die Spitze von Liberty City";
       // Personnel-Channel-Form befüllen
       this.personnelChannelForm.personnel_admin_channel_id = this.state.personnel_admin_channel_id || "";
+      // Jobs-Announce-Form befüllen. Defaults liefert das Backend-GET selbst
+      // (?? statt ||: bewusst geleerte Rolle/URL — "kein Mention" — darf beim
+      // nächsten Besuch nicht wieder mit dem Default überschrieben werden)
+      this.jobsAnnounceForm.jobs_announce_channel_id = this.state.jobs_announce_channel_id || "";
+      this.jobsAnnounceForm.jobs_ping_role_id = this.state.jobs_ping_role_id ?? "1528099740649127977";
+      this.jobsAnnounceForm.jobs_dashboard_url = this.state.jobs_dashboard_url ?? "https://jobs.bots.sektorrp.eu";
       await this.loadTop3Titles();
       await this.loadExpiryMessages();
       await this.loadReactionMessages();
@@ -1607,6 +1916,28 @@ function settingsPage() {
         this.personnelChannelMsgError = true;
       } finally {
         this.personnelChannelSaving = false;
+      }
+    },
+    async saveJobsAnnounce() {
+      this.jobsAnnounceSaving = true;
+      this.jobsAnnounceMsg = "";
+      this.jobsAnnounceMsgError = false;
+      try {
+        const payload = {
+          jobs_announce_channel_id: String(this.jobsAnnounceForm.jobs_announce_channel_id || "").trim(),
+          jobs_ping_role_id: String(this.jobsAnnounceForm.jobs_ping_role_id || "").trim(),
+          jobs_dashboard_url: String(this.jobsAnnounceForm.jobs_dashboard_url || "").trim(),
+        };
+        await api.patch("/api/settings", payload);
+        this.jobsAnnounceMsg = payload.jobs_announce_channel_id
+          ? "Gespeichert. Slot-Speichern mit gestiegener Kapazität pingt jetzt die Spieler-Rolle."
+          : "Gespeichert (Channel leer — Ankündigungs-Ping ist deaktiviert).";
+        setTimeout(() => { this.jobsAnnounceMsg = ""; }, 4000);
+      } catch (e) {
+        this.jobsAnnounceMsg = "Fehler: " + (e.message || e);
+        this.jobsAnnounceMsgError = true;
+      } finally {
+        this.jobsAnnounceSaving = false;
       }
     },
 
