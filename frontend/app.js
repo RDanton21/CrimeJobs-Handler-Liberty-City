@@ -97,6 +97,17 @@ function dashboard() {
     DISTRICTS,
     showNew: false,
     draft: { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c" },
+    // KI-Wizard fuer neue Crews (Variante A)
+    showWizard: false,
+    wizardPhase: "input",   // 'input' | 'preview' | 'error'
+    wizardBusy: false,
+    wizardInput: { name: "", district: "", hint: "" },
+    wizardPreview: { story_background: "", crime_business: "", color_hex: "#b91c1c", rivalries: [], allies: [] },
+    wizardAccept: { story: true, business: true, color: true, rivalries: [], allies: [] },
+    wizardCrewId: null,   // ID der (bereits angelegten) Crew, an die das Enrich gehen soll
+    wizardRawError: "",
+    wizardMessage: "",
+    wizardIsError: false,
     notifications: {},
     seenAt: JSON.parse(localStorage.getItem("crewSeenAt") || "{}"),
     archivingAll: false,
@@ -386,6 +397,138 @@ function dashboard() {
         this.showNew = false;
       } catch (e) { alert(e.message); }
     },
+
+    // ==== KI-Wizard (Variante A) ====
+    openWizard() {
+      this.wizardPhase = "input";
+      this.wizardBusy = false;
+      this.wizardInput = { name: "", district: "", hint: "" };
+      this.wizardPreview = { story_background: "", crime_business: "", color_hex: "#b91c1c", rivalries: [], allies: [] };
+      this.wizardAccept = { story: true, business: true, color: true, rivalries: [], allies: [] };
+      this.wizardCrewId = null;
+      this.wizardRawError = "";
+      this.wizardMessage = "";
+      this.wizardIsError = false;
+      this.showWizard = true;
+    },
+
+    cancelWizard() {
+      // Falls die Crew schon angelegt wurde und der User verwirft: Crew wieder loeschen
+      if (this.wizardCrewId) {
+        api.del(`/api/crews/${this.wizardCrewId}`).catch(() => {});
+        this.wizardCrewId = null;
+      }
+      this.showWizard = false;
+      this.wizardPhase = "input";
+      this.wizardBusy = false;
+    },
+
+    async generateWizard() {
+      this.wizardMessage = "";
+      this.wizardIsError = false;
+      const name = (this.wizardInput.name || "").trim();
+      const district = (this.wizardInput.district || "").trim();
+      if (!name) { this.wizardMessage = "Name fehlt."; this.wizardIsError = true; return; }
+      if (!district) { this.wizardMessage = "Stadtteil fehlt."; this.wizardIsError = true; return; }
+      this.wizardBusy = true;
+      try {
+        // 1. Crew mit minimalen Feldern anlegen (falls noch nicht)
+        if (!this.wizardCrewId) {
+          const draftMin = { name, district, story_background: "", crime_business: "", color_hex: "#b91c1c", discord_channel_id: "", info_channel_id: "", crime_business_channel_id: "" };
+          const c = await api.post("/api/crews", draftMin);
+          this.wizardCrewId = c.id;
+        }
+        // 2. Preview via KI
+        const res = await api.post(`/api/crews/${this.wizardCrewId}/enrich/preview`, { hint: this.wizardInput.hint || "" });
+        if (!res.ok) {
+          this.wizardPhase = "error";
+          this.wizardRawError = res.raw || "Keine Roh-Ausgabe.";
+          return;
+        }
+        this.wizardPreview = {
+          story_background: res.story_background || "",
+          crime_business: res.crime_business || "",
+          color_hex: res.color_hex || "#b91c1c",
+          rivalries: res.rivalries || [],
+          allies: res.allies || [],
+        };
+        // Standard: alle Vorschlaege akzeptieren
+        this.wizardAccept = {
+          story: !!res.story_background,
+          business: !!res.crime_business,
+          color: true,
+          rivalries: (res.rivalries || []).map(r => r.crew_id),
+          allies: (res.allies || []).map(r => r.crew_id),
+        };
+        this.wizardPhase = "preview";
+      } catch (e) {
+        this.wizardMessage = "Fehler: " + (e.message || e);
+        this.wizardIsError = true;
+      } finally {
+        this.wizardBusy = false;
+      }
+    },
+
+    async regenerateWizard() {
+      if (!this.wizardCrewId) return;
+      this.wizardMessage = "";
+      this.wizardBusy = true;
+      try {
+        const res = await api.post(`/api/crews/${this.wizardCrewId}/enrich/preview`, { hint: this.wizardInput.hint || "" });
+        if (!res.ok) {
+          this.wizardPhase = "error";
+          this.wizardRawError = res.raw || "";
+          return;
+        }
+        this.wizardPreview = {
+          story_background: res.story_background || "",
+          crime_business: res.crime_business || "",
+          color_hex: res.color_hex || "#b91c1c",
+          rivalries: res.rivalries || [],
+          allies: res.allies || [],
+        };
+        this.wizardAccept = {
+          story: !!res.story_background,
+          business: !!res.crime_business,
+          color: true,
+          rivalries: (res.rivalries || []).map(r => r.crew_id),
+          allies: (res.allies || []).map(r => r.crew_id),
+        };
+        this.wizardMessage = "✓ Neu generiert.";
+        this.wizardIsError = false;
+      } catch (e) {
+        this.wizardMessage = "Fehler: " + (e.message || e);
+        this.wizardIsError = true;
+      } finally {
+        this.wizardBusy = false;
+      }
+    },
+
+    async applyWizard() {
+      if (!this.wizardCrewId) return;
+      this.wizardBusy = true;
+      try {
+        const body = {
+          apply_rivalries: this.wizardPreview.rivalries.filter(r => this.wizardAccept.rivalries.includes(r.crew_id)),
+          apply_allies:    this.wizardPreview.allies.filter(r => this.wizardAccept.allies.includes(r.crew_id)),
+        };
+        if (this.wizardAccept.story)    body.story_background = this.wizardPreview.story_background;
+        if (this.wizardAccept.business) body.crime_business   = this.wizardPreview.crime_business;
+        if (this.wizardAccept.color)    body.color_hex        = this.wizardPreview.color_hex;
+        await api.post(`/api/crews/${this.wizardCrewId}/enrich/apply`, body);
+        this.wizardMessage = "✓ Crew angelegt und angereichert.";
+        this.wizardIsError = false;
+        this.showWizard = false;
+        this.wizardCrewId = null;
+        await this.loadCrews();
+      } catch (e) {
+        this.wizardMessage = "Fehler beim Uebernehmen: " + (e.message || e);
+        this.wizardIsError = true;
+      } finally {
+        this.wizardBusy = false;
+      }
+    },
+
     statusLabel: statusLabelMap,
     statusClass: statusClassMap,
     cardBorder: cardBorderClass,
@@ -427,6 +570,16 @@ function crewPage() {
     suggestionsLastStatus: "",  // 'approved' | 'rejected' | 'cancelled' | 'pending' | ''
     suggestionsMessage: "",
     suggestionsIsError: false,
+    // KI-Enrich fuer existierende Crew (Variante B)
+    showEnrich: false,
+    enrichPhase: "input",   // 'input' | 'preview' | 'error'
+    enrichBusy: false,
+    enrichHint: "",
+    enrichPreview: { story_background: "", crime_business: "", color_hex: "#b91c1c", rivalries: [], allies: [] },
+    enrichAccept: { story: true, business: true, color: true, rivalries: [], allies: [] },
+    enrichRawError: "",
+    enrichMessage: "",
+    enrichIsError: false,
 
     get otherCrews() {
       return this.allCrews.filter(c => c.id !== this.crewId);
@@ -513,6 +666,87 @@ function crewPage() {
       if (!confirm("Gang wirklich löschen?")) return;
       try { await api.del(`/api/crews/${this.crewId}`); location.href = "/"; }
       catch (e) { alert(e.message); }
+    },
+
+    // ==== KI-Enrich (Variante B) ====
+    openEnrich() {
+      this.enrichPhase = "input";
+      this.enrichBusy = false;
+      this.enrichHint = "";
+      this.enrichPreview = { story_background: "", crime_business: "", color_hex: this.crew.color_hex || "#b91c1c", rivalries: [], allies: [] };
+      this.enrichAccept = { story: true, business: true, color: true, rivalries: [], allies: [] };
+      this.enrichRawError = "";
+      this.enrichMessage = "";
+      this.enrichIsError = false;
+      this.showEnrich = true;
+    },
+
+    cancelEnrich() {
+      this.showEnrich = false;
+      this.enrichPhase = "input";
+      this.enrichBusy = false;
+      this.enrichMessage = "";
+    },
+
+    async generateEnrich() {
+      this.enrichMessage = "";
+      this.enrichIsError = false;
+      this.enrichBusy = true;
+      try {
+        const res = await api.post(`/api/crews/${this.crewId}/enrich/preview`, { hint: this.enrichHint || "" });
+        if (!res.ok) {
+          this.enrichPhase = "error";
+          this.enrichRawError = res.raw || "Keine Roh-Ausgabe.";
+          return;
+        }
+        this.enrichPreview = {
+          story_background: res.story_background || "",
+          crime_business: res.crime_business || "",
+          color_hex: res.color_hex || this.crew.color_hex || "#b91c1c",
+          rivalries: res.rivalries || [],
+          allies: res.allies || [],
+        };
+        // Standard: story/business nur akzeptieren wenn aktuelle Crew leer ist
+        this.enrichAccept = {
+          story: !this.crew.story_background && !!res.story_background,
+          business: !this.crew.crime_business && !!res.crime_business,
+          color: true,
+          rivalries: (res.rivalries || []).map(r => r.crew_id),
+          allies: (res.allies || []).map(r => r.crew_id),
+        };
+        this.enrichPhase = "preview";
+      } catch (e) {
+        this.enrichMessage = "Fehler: " + (e.message || e);
+        this.enrichIsError = true;
+      } finally {
+        this.enrichBusy = false;
+      }
+    },
+
+    async applyEnrich() {
+      this.enrichBusy = true;
+      try {
+        const body = {
+          apply_rivalries: this.enrichPreview.rivalries.filter(r => this.enrichAccept.rivalries.includes(r.crew_id)),
+          apply_allies:    this.enrichPreview.allies.filter(r => this.enrichAccept.allies.includes(r.crew_id)),
+        };
+        if (this.enrichAccept.story)    body.story_background = this.enrichPreview.story_background;
+        if (this.enrichAccept.business) body.crime_business   = this.enrichPreview.crime_business;
+        if (this.enrichAccept.color)    body.color_hex        = this.enrichPreview.color_hex;
+        const res = await api.post(`/api/crews/${this.crewId}/enrich/apply`, body);
+        this.enrichMessage = `✓ ${res.changed_fields.length} Felder aktualisiert, ${res.added_relations} neue + ${res.updated_relations} aktualisierte Beziehungen.`;
+        this.enrichIsError = false;
+        // Crew + Beziehungen neu laden
+        await this.loadCrew();
+        await this.loadRelations();
+        // Panel offen lassen, damit User Feedback sieht — nach 3 Sek zu
+        setTimeout(() => { this.showEnrich = false; this.enrichPhase = "input"; }, 3000);
+      } catch (e) {
+        this.enrichMessage = "Fehler beim Uebernehmen: " + (e.message || e);
+        this.enrichIsError = true;
+      } finally {
+        this.enrichBusy = false;
+      }
     },
 
     // Schritt 1 — KI-Vorschau generieren. Wenn regenerate=true, ueberschreibt

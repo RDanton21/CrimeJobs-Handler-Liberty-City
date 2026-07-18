@@ -25,12 +25,172 @@
           <span x-show="!archivingAll">📦 Alle archivieren</span>
           <span x-show="archivingAll">Archiviere…</span>
         </button>
+        <button @click="openWizard()"
+                class="px-3 py-1.5 rounded bg-purple-600 hover:bg-purple-500 font-medium"
+                title="KI generiert Story, Business, Rivalitäten für eine neue Crew">
+          🪄 KI-Wizard
+        </button>
         <button @click="showNew = !showNew"
                 class="px-3 py-1.5 rounded bg-red-600 hover:bg-red-500 font-medium">
           + Neue Gang
         </button>
       </nav>
     </header>
+
+    <!-- KI-Wizard Modal -->
+    <div x-show="showWizard" x-cloak
+         class="fixed inset-0 bg-black/70 z-50 flex items-start justify-center overflow-y-auto p-6"
+         @click.self="cancelWizard()">
+      <div class="bg-zinc-900 border border-purple-800 rounded-lg p-6 max-w-3xl w-full my-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold">🪄 KI-Wizard — Neue Gang</h2>
+          <button @click="cancelWizard()" class="text-zinc-400 hover:text-zinc-100 text-xl">✕</button>
+        </div>
+
+        <!-- Phase 1: Eingabe -->
+        <div x-show="wizardPhase === 'input'" class="space-y-3">
+          <p class="text-sm text-zinc-400 mb-2">Gib Name + Stadtteil + optional einen kurzen Hinweis an. Die KI schlägt Story, Business, Farbe und Rivalitäten vor.</p>
+          <div>
+            <label class="block text-xs text-zinc-400 mb-1">Gang-Name *</label>
+            <input x-model="wizardInput.name" placeholder="z.B. Ocean Bay Kartell"
+                   class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2" />
+          </div>
+          <div>
+            <label class="block text-xs text-zinc-400 mb-1">Stadtteil *</label>
+            <select x-model="wizardInput.district"
+                    class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2">
+              <option value="">— Stadtteil wählen —</option>
+              <template x-for="d in DISTRICTS" :key="d">
+                <option :value="d" x-text="d"></option>
+              </template>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-zinc-400 mb-1">Kurz-Hinweis (optional)</label>
+            <textarea x-model="wizardInput.hint" rows="2"
+                      placeholder="z.B. junge aggressive Straßencrew, im Drogenhandel aktiv"
+                      class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm"></textarea>
+          </div>
+          <p x-show="wizardMessage" x-text="wizardMessage"
+             :class="wizardIsError ? 'text-red-400' : 'text-green-400'"
+             class="text-xs mt-2"></p>
+          <div class="flex gap-2 pt-2">
+            <button @click="generateWizard()"
+                    :disabled="wizardBusy || !wizardInput.name.trim() || !wizardInput.district"
+                    class="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed rounded font-medium">
+              <span x-show="!wizardBusy">🪄 Generieren</span>
+              <span x-show="wizardBusy">Generiere…</span>
+            </button>
+            <button @click="cancelWizard()"
+                    class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded">Abbrechen</button>
+          </div>
+        </div>
+
+        <!-- Phase 2: Preview -->
+        <div x-show="wizardPhase === 'preview'" class="space-y-4">
+          <p class="text-sm text-zinc-400">Wähle aus, welche KI-Vorschläge du übernehmen willst. Du kannst alle Felder noch editieren.</p>
+
+          <!-- Farbe -->
+          <div class="bg-zinc-950 border border-zinc-800 rounded p-3">
+            <label class="flex items-center gap-2 mb-2 cursor-pointer">
+              <input type="checkbox" x-model="wizardAccept.color" class="scale-125">
+              <span class="font-semibold">Farbe übernehmen</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <input x-model="wizardPreview.color_hex" type="color"
+                     class="bg-zinc-950 border border-zinc-800 rounded h-10 w-24" />
+              <span class="text-sm text-zinc-400" x-text="wizardPreview.color_hex"></span>
+            </div>
+          </div>
+
+          <!-- Story -->
+          <div class="bg-zinc-950 border border-zinc-800 rounded p-3">
+            <label class="flex items-center gap-2 mb-2 cursor-pointer">
+              <input type="checkbox" x-model="wizardAccept.story" class="scale-125">
+              <span class="font-semibold">Hintergrund-Story übernehmen</span>
+            </label>
+            <textarea x-model="wizardPreview.story_background" rows="8"
+                      class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm leading-relaxed"></textarea>
+          </div>
+
+          <!-- Business -->
+          <div class="bg-zinc-950 border border-zinc-800 rounded p-3">
+            <label class="flex items-center gap-2 mb-2 cursor-pointer">
+              <input type="checkbox" x-model="wizardAccept.business" class="scale-125">
+              <span class="font-semibold">Crime-Business übernehmen (intern)</span>
+            </label>
+            <textarea x-model="wizardPreview.crime_business" rows="3"
+                      class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm"></textarea>
+          </div>
+
+          <!-- Rivalitäten -->
+          <div x-show="wizardPreview.rivalries.length" class="bg-zinc-950 border border-red-900 rounded p-3">
+            <p class="font-semibold mb-2">⚔ Rivalitäten (KI-Vorschlag)</p>
+            <template x-for="(rel, idx) in wizardPreview.rivalries" :key="idx">
+              <label class="flex items-start gap-2 mb-2 cursor-pointer">
+                <input type="checkbox" :value="rel.crew_id" x-model="wizardAccept.rivalries" class="mt-1 scale-125">
+                <span class="text-sm">
+                  <strong x-text="rel.crew_name"></strong>
+                  <span class="text-xs text-zinc-500 ml-1" x-text="`(${rel.relation_type})`"></span>
+                  <br>
+                  <span class="text-zinc-400 text-xs" x-text="rel.notes || '— keine Notiz —'"></span>
+                </span>
+              </label>
+            </template>
+          </div>
+
+          <!-- Verbündete -->
+          <div x-show="wizardPreview.allies.length" class="bg-zinc-950 border border-green-900 rounded p-3">
+            <p class="font-semibold mb-2">🤝 Verbündete / Geschäftspartner (KI-Vorschlag)</p>
+            <template x-for="(rel, idx) in wizardPreview.allies" :key="idx">
+              <label class="flex items-start gap-2 mb-2 cursor-pointer">
+                <input type="checkbox" :value="rel.crew_id" x-model="wizardAccept.allies" class="mt-1 scale-125">
+                <span class="text-sm">
+                  <strong x-text="rel.crew_name"></strong>
+                  <span class="text-xs text-zinc-500 ml-1" x-text="`(${rel.relation_type})`"></span>
+                  <br>
+                  <span class="text-zinc-400 text-xs" x-text="rel.notes || '— keine Notiz —'"></span>
+                </span>
+              </label>
+            </template>
+          </div>
+
+          <p x-show="wizardMessage" x-text="wizardMessage"
+             :class="wizardIsError ? 'text-red-400' : 'text-green-400'"
+             class="text-xs mt-2"></p>
+
+          <div class="flex gap-2 pt-2">
+            <button @click="applyWizard()"
+                    :disabled="wizardBusy"
+                    class="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 rounded font-medium">
+              <span x-show="!wizardBusy">✓ Übernehmen und Crew anlegen</span>
+              <span x-show="wizardBusy">Übernehme…</span>
+            </button>
+            <button @click="regenerateWizard()"
+                    :disabled="wizardBusy"
+                    class="px-3 py-2 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-40 rounded"
+                    title="KI-Vorschlag neu generieren">
+              ↺ Neu generieren
+            </button>
+            <button @click="cancelWizard()"
+                    :disabled="wizardBusy"
+                    class="px-3 py-2 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-40 rounded">
+              Verwerfen
+            </button>
+          </div>
+        </div>
+
+        <!-- Phase 3: Fehler-Fallback -->
+        <div x-show="wizardPhase === 'error'" class="space-y-3">
+          <p class="text-red-400">KI-Antwort konnte nicht geparst werden. Roh-Ausgabe:</p>
+          <pre class="bg-zinc-950 border border-zinc-800 rounded p-3 text-xs overflow-auto max-h-96" x-text="wizardRawError"></pre>
+          <div class="flex gap-2">
+            <button @click="regenerateWizard()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded">↺ Neu versuchen</button>
+            <button @click="cancelWizard()" class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 rounded">Abbrechen</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <section class="mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
       <div class="flex items-end gap-3 mb-4 flex-wrap">

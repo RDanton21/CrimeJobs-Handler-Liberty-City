@@ -22,6 +22,127 @@ Sprache: Deutsch."""
 SYSTEM_PROMPT = DEFAULT_SYSTEM_PROMPT
 
 
+# ==================================================================
+# KI-Enrichment fuer neue oder leere Crews
+# ==================================================================
+
+# Farb-Schema pro Stadtteil (vom Lore-Repo abgeleitet)
+DISTRICT_COLORS = {
+    "Algonquin": "#b91c1c",       # rot
+    "Bohan": "#e5e7eb",           # weiss/hell
+    "Broker": "#c026d3",          # magenta-pink
+    "Colony Island": "#2563eb",   # blau
+    "Dukes": "#06b6d4",           # cyan-tuerkis
+}
+
+
+def build_crew_enrichment_prompt(
+    crew_name: str,
+    district: str,
+    hint: str,
+    existing_crews_in_district: list[dict],
+    all_crews_summary: list[dict],
+) -> tuple[str, str]:
+    """Baut den System+User-Prompt fuer die KI-Anreicherung einer neuen oder
+    unvollstaendigen Crew. Die KI liefert JSON mit Story, Business, Farbe,
+    Rivalitaets- und Verbuendeten-Vorschlaegen zurueck.
+
+    Args:
+        crew_name: Name der Crew
+        district: Stadtteil (Algonquin/Bohan/Broker/Colony Island/Dukes/'')
+        hint: optionale 1-Zeilen-Beschreibung des Users
+        existing_crews_in_district: [{id, name, story_background, crime_business}]
+            — alle bestehenden Crews im selben Stadtteil (fuer Rivalitaeten)
+        all_crews_summary: [{id, name, district}] — alle Crews in der DB
+            (fuer stadtteilübergreifende Vorschlaege)
+
+    Returns:
+        (system_prompt, user_prompt)
+    """
+    sys = (
+        "Du bist Lore-Autor fuer ein GTA-V-Liberty-City-Roleplay-Event. Deine "
+        "Aufgabe: fuer eine neue oder unvollstaendige Crime-Crew einen "
+        "kompletten Lore-Vorschlag generieren, der dramaturgisch in die "
+        "bestehende Stadt passt.\n\n"
+        "Ausgabe-Format: AUSSCHLIESSLICH ein gueltiges JSON-Objekt mit den "
+        "Feldern:\n"
+        '  {\n'
+        '    "story_background": "...",\n'
+        '    "crime_business": "...",\n'
+        '    "color_hex": "#XXXXXX",\n'
+        '    "rivalries": [\n'
+        '      {"crew_id": 123, "relation_type": "rival", "notes": "..."},\n'
+        '      ...\n'
+        '    ],\n'
+        '    "allies": [\n'
+        '      {"crew_id": 456, "relation_type": "allied", "notes": "..."},\n'
+        '      ...\n'
+        '    ]\n'
+        '  }\n\n'
+        "KEIN Markdown-Codeblock, KEINE erklaerenden Saetze davor oder danach. "
+        "Reines JSON.\n\n"
+        "Konventionen:\n"
+        "- story_background: 4-6 Absaetze, atmosphaerisch, im Noir-Stil der "
+        "bestehenden Crew-Stories. Enthaelt einen Eroeffnungs-Mythos, das "
+        "Credo als Zitat, Struktur/Hierarchie, Territorium/Reviere und einen "
+        "Hinweis auf typische Aktivitaeten (aber NICHT das interne Business).\n"
+        "- crime_business: 1-2 Saetze, KLARTEXT, was die Crew konkret macht "
+        "(Drogenhandel Kokain am Hafen / Schutzgeld auf Restaurants in "
+        "Algonquin / Hehlerei ueber Pawn Shops / etc.). Wird intern fuer die "
+        "KI-Auftrags-Ausrichtung genutzt.\n"
+        "- color_hex: passende Farbe. Wenn Stadtteil bekannt, aus dem "
+        "Stadtteil-Schema variieren (leichter Farbwechsel innerhalb der "
+        "Familie). Format #RRGGBB.\n"
+        "- rivalries/allies: **Nur Crews vorschlagen, deren id in der Liste "
+        "existing_crews_in_district oder all_crews_summary vorkommt.** Keine "
+        "erfundenen IDs. relation_type ist einer von: rival, hostile, allied, "
+        "business, neutral. notes: 1 Satz, warum diese Beziehung besteht.\n"
+        "- Empfehlung: 2-3 Rivalen (rival oder hostile) + 1-2 Verbuendete "
+        "(allied oder business). Rivalen sinnvollerweise im selben Stadtteil "
+        "oder mit Business-Ueberlappung, Verbuendete oft ueber Business-Deals.\n\n"
+        "Sprache: Deutsch. Ton: literarisch-noir, kein Slang, keine Klischees."
+    )
+
+    parts: list[str] = []
+    parts.append(f"## Neue Crew\n**Name:** {crew_name}")
+    if district:
+        parts.append(f"**Stadtteil:** {district}")
+        if district in DISTRICT_COLORS:
+            parts.append(f"**Stadtteil-Basisfarbe:** {DISTRICT_COLORS[district]}")
+    if hint and hint.strip():
+        parts.append(f"**Hinweis vom Spielleiter:** {hint.strip()}")
+
+    if existing_crews_in_district:
+        rel_lines = [
+            f"\n## Andere Crews im Stadtteil {district} (fuer Rivalitaeten "
+            "priorisieren)"
+        ]
+        for c in existing_crews_in_district:
+            summary = c.get("story_background", "")[:280] or "(keine Story)"
+            biz = c.get("crime_business", "")[:180] or "(kein Business hinterlegt)"
+            rel_lines.append(
+                f"- **id={c['id']}** — {c['name']}: {summary}\n"
+                f"  Business: {biz}"
+            )
+        parts.append("\n".join(rel_lines))
+
+    if all_crews_summary:
+        other_lines = ["\n## Alle Crews Liberty Citys (fuer optionale Ueberkreuz-Beziehungen)"]
+        for c in all_crews_summary:
+            other_lines.append(f"- id={c['id']} — {c['name']} ({c.get('district', '?')})")
+        parts.append("\n".join(other_lines))
+
+    parts.append(
+        "\n## Aufgabe\n"
+        "Generiere JETZT das vollstaendige JSON-Objekt fuer diese neue Crew. "
+        "Achte darauf, dass Story, Business und Rivalitaeten zueinander passen "
+        "— eine Straßencrew hat andere Rivalen als eine internationale Mafia. "
+        "Nutze die bestehenden Crews als dramaturgischen Kontext."
+    )
+
+    return sys, "\n".join(parts)
+
+
 @dataclass
 class MissionContext:
     crew_name: str

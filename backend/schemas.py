@@ -36,6 +36,46 @@ class CrimeBusinessSendRequest(BaseModel):
     model: str | None = None
 
 
+class CrewEnrichRequest(BaseModel):
+    """KI-Enrichment: nimmt Basis-Infos (Name, Stadtteil, optional Hint)
+    und laesst die KI Story + Business + Farbe + Rivalitaeten vorschlagen.
+    Wird sowohl fuer neue Crews (Variante A: Wizard) als auch fuer leere
+    Felder existierender Crews (Variante B: Enrich-Button) genutzt."""
+    hint: str = ""
+    provider: str | None = None
+    model: str | None = None
+
+
+class CrewEnrichRelationSuggestion(BaseModel):
+    crew_id: int
+    crew_name: str = ""  # wird vom Backend gefuellt fuer die UI
+    relation_type: str = "rival"  # rival, hostile, allied, business, neutral
+    notes: str = ""
+
+
+class CrewEnrichPreviewResponse(BaseModel):
+    """Antwort auf Preview-Aufruf. Der User reviewt und bestaetigt via /apply."""
+    ok: bool = True
+    ai_provider: str = ""
+    ai_model: str = ""
+    story_background: str = ""
+    crime_business: str = ""
+    color_hex: str = "#b91c1c"
+    rivalries: list[CrewEnrichRelationSuggestion] = []
+    allies: list[CrewEnrichRelationSuggestion] = []
+    raw: str = ""  # Debug-Ausgabe der KI (falls JSON-Parsing fehlschlaegt)
+
+
+class CrewEnrichApplyRequest(BaseModel):
+    """User hat Preview reviewt und bestaetigt einzelne Felder zur Uebernahme.
+    Alle Felder sind optional — nur die uebergebenen werden angewendet."""
+    story_background: str | None = None
+    crime_business: str | None = None
+    color_hex: str | None = None
+    apply_rivalries: list[CrewEnrichRelationSuggestion] = []
+    apply_allies: list[CrewEnrichRelationSuggestion] = []
+
+
 class CrimeBusinessPostRequest(BaseModel):
     """Postet einen (ggf. editierten) Briefing-Text an den
     crime_business_channel_id der Crew. Kein KI-Aufruf — der Text wurde

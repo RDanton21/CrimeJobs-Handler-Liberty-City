@@ -1,4 +1,5 @@
 import asyncio
+import json
 from datetime import datetime
 
 import httpx
@@ -11,10 +12,17 @@ from .ai import get_provider
 from .auth import require_admin
 from .config import settings
 from .db import get_session
-from .models import Crew, CrewRelation, Mission
-from .prompts import build_crime_business_briefing_prompt
+from .models import Crew, CrewRelation, Mission, RelationType
+from .prompts import (
+    build_crew_enrichment_prompt,
+    build_crime_business_briefing_prompt,
+)
 from .schemas import (
     CrewCreate,
+    CrewEnrichApplyRequest,
+    CrewEnrichPreviewResponse,
+    CrewEnrichRelationSuggestion,
+    CrewEnrichRequest,
     CrewOut,
     CrewRelationBase,
     CrewRelationOut,
@@ -360,4 +368,250 @@ async def post_crime_business(
         "ok": True,
         "char_count": len(content),
         "discord_message_id": bot_result.get("message_id"),
+    }
+
+
+# ==================================================================
+# KI-Enrichment: Story + Business + Farbe + Rivalitaeten fuer neue
+# oder unvollstaendige Crews per KI vorschlagen lassen
+# ==================================================================
+
+
+async def _load_enrich_context(
+    session: AsyncSession, crew: Crew
+) -> tuple[list[dict], list[dict]]:
+    """Laedt Kontext fuer die Enrichment-KI: Crews im selben Stadtteil (fuer
+    Rivalitaets-Vorschlaege priorisieren) + alle anderen Crews (fuer optionale
+    Ueberkreuz-Beziehungen)."""
+    q = await session.execute(select(Crew).order_by(Crew.name))
+    all_crews = q.scalars().all()
+
+    same_district: list[dict] = []
+    all_summary: list[dict] = []
+    for c in all_crews:
+        if c.id == crew.id:
+            continue
+        summary = {
+            "id": c.id,
+            "name": c.name,
+            "district": c.district or "",
+        }
+        all_summary.append(summary)
+        if crew.district and c.district == crew.district:
+            same_district.append(
+                {
+                    "id": c.id,
+                    "name": c.name,
+                    "story_background": c.story_background or "",
+                    "crime_business": c.crime_business or "",
+                }
+            )
+    return same_district, all_summary
+
+
+@router.post("/{crew_id}/enrich/preview", response_model=CrewEnrichPreviewResponse)
+async def enrich_crew_preview(
+    crew_id: int,
+    payload: CrewEnrichRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """KI-Vorschlaege fuer eine bestehende Crew generieren. Gibt Story +
+    Business + Farbe + Rivalitaeten/Verbuendeten-Vorschlaege zurueck. Der User
+    reviewt und ruft dann /apply auf, um die gewuenschten Felder zu uebernehmen.
+
+    Wird sowohl von Variante A (Wizard: Crew wird VOR dem Enrich mit
+    minimalen Feldern angelegt) als auch von Variante B (existierende
+    Crew mit leeren Feldern) genutzt.
+    """
+    crew = await session.get(Crew, crew_id)
+    if not crew:
+        raise HTTPException(404, "Crew nicht gefunden")
+
+    keys = {
+        "anthropic": await settings_get_value(
+            session, "anthropic_api_key", settings.anthropic_api_key
+        ),
+        "openai": await settings_get_value(
+            session, "openai_api_key", settings.openai_api_key
+        ),
+    }
+    models = {
+        "claude": await settings_get_value(
+            session, "default_claude_model", settings.default_claude_model
+        ),
+        "openai": await settings_get_value(
+            session, "default_openai_model", settings.default_openai_model
+        ),
+    }
+    provider_name = payload.provider or await settings_get_value(
+        session, "default_provider", settings.default_ai_provider
+    )
+    provider = await get_provider(provider_name, keys=keys, models=models)
+
+    same_district, all_summary = await _load_enrich_context(session, crew)
+
+    system_prompt, user_prompt = build_crew_enrichment_prompt(
+        crew_name=crew.name,
+        district=crew.district or "",
+        hint=payload.hint,
+        existing_crews_in_district=same_district,
+        all_crews_summary=all_summary,
+    )
+
+    try:
+        text = await provider.generate(
+            user_prompt, model=payload.model, system_prompt=system_prompt
+        )
+    except Exception as exc:
+        raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+
+    raw = (text or "").strip()
+
+    # JSON-Parsing mit Fallback (Markdown-Fence entfernen wenn vorhanden)
+    parsed: dict | None = None
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        start = raw.find("{")
+        end = raw.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            snippet = raw[start : end + 1]
+            try:
+                parsed = json.loads(snippet)
+            except json.JSONDecodeError:
+                parsed = None
+
+    if parsed is None or not isinstance(parsed, dict):
+        return CrewEnrichPreviewResponse(
+            ok=False,
+            ai_provider=provider.name,
+            ai_model=payload.model or "",
+            raw=raw,
+        )
+
+    # Namen aus all_summary in Rivalitaets-Vorschlaege einfuellen (fuer UI)
+    id_to_name = {c["id"]: c["name"] for c in all_summary}
+
+    def normalize_relations(items: list) -> list[CrewEnrichRelationSuggestion]:
+        out: list[CrewEnrichRelationSuggestion] = []
+        if not isinstance(items, list):
+            return out
+        for it in items[:6]:  # max 6 pro Kategorie
+            if not isinstance(it, dict):
+                continue
+            cid = it.get("crew_id")
+            if not isinstance(cid, int) or cid not in id_to_name:
+                continue
+            rt = str(it.get("relation_type", "rival")).strip().lower()
+            if rt not in {"rival", "hostile", "allied", "business", "neutral"}:
+                rt = "rival"
+            out.append(
+                CrewEnrichRelationSuggestion(
+                    crew_id=cid,
+                    crew_name=id_to_name[cid],
+                    relation_type=rt,
+                    notes=str(it.get("notes", "")).strip(),
+                )
+            )
+        return out
+
+    color_hex = str(parsed.get("color_hex", "")).strip()
+    if not (
+        color_hex.startswith("#")
+        and len(color_hex) == 7
+        and all(c in "0123456789abcdefABCDEF" for c in color_hex[1:])
+    ):
+        color_hex = "#b91c1c"
+
+    return CrewEnrichPreviewResponse(
+        ok=True,
+        ai_provider=provider.name,
+        ai_model=payload.model or "",
+        story_background=str(parsed.get("story_background", "")).strip(),
+        crime_business=str(parsed.get("crime_business", "")).strip(),
+        color_hex=color_hex,
+        rivalries=normalize_relations(parsed.get("rivalries", [])),
+        allies=normalize_relations(parsed.get("allies", [])),
+        raw="",  # bei Erfolg nicht mitschicken
+    )
+
+
+@router.post("/{crew_id}/enrich/apply")
+async def enrich_crew_apply(
+    crew_id: int,
+    payload: CrewEnrichApplyRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """User hat Preview reviewt und uebernimmt selektiv Felder + Relationen.
+    Bestehende Werte in nicht uebergebenen Feldern bleiben erhalten.
+    Beziehungen werden hinzugefuegt (bestehende Beziehungen zu denselben
+    Crews werden per Update ueberschrieben).
+    """
+    crew = await session.get(Crew, crew_id)
+    if not crew:
+        raise HTTPException(404, "Crew nicht gefunden")
+
+    changed_fields: list[str] = []
+    if payload.story_background is not None:
+        crew.story_background = payload.story_background
+        changed_fields.append("story_background")
+    if payload.crime_business is not None:
+        crew.crime_business = payload.crime_business
+        changed_fields.append("crime_business")
+    if payload.color_hex is not None:
+        crew.color_hex = payload.color_hex
+        changed_fields.append("color_hex")
+
+    added_rels = 0
+    updated_rels = 0
+    all_rel_suggestions = list(payload.apply_rivalries) + list(payload.apply_allies)
+    for suggestion in all_rel_suggestions:
+        other = await session.get(Crew, suggestion.crew_id)
+        if not other or other.id == crew.id:
+            continue
+
+        # Bestehende Beziehung suchen (in beide Richtungen)
+        existing_q = await session.execute(
+            select(CrewRelation).where(
+                (
+                    (CrewRelation.crew_a_id == crew.id)
+                    & (CrewRelation.crew_b_id == other.id)
+                )
+                | (
+                    (CrewRelation.crew_a_id == other.id)
+                    & (CrewRelation.crew_b_id == crew.id)
+                )
+            )
+        )
+        existing = existing_q.scalar_one_or_none()
+
+        try:
+            rt = RelationType(suggestion.relation_type)
+        except ValueError:
+            rt = RelationType.NEUTRAL
+
+        if existing:
+            existing.relation_type = rt
+            if suggestion.notes:
+                existing.notes = suggestion.notes
+            updated_rels += 1
+        else:
+            new_rel = CrewRelation(
+                crew_a_id=crew.id,
+                crew_b_id=other.id,
+                relation_type=rt,
+                notes=suggestion.notes or "",
+            )
+            session.add(new_rel)
+            added_rels += 1
+
+    await session.commit()
+    await session.refresh(crew)
+
+    return {
+        "ok": True,
+        "crew_id": crew.id,
+        "changed_fields": changed_fields,
+        "added_relations": added_rels,
+        "updated_relations": updated_rels,
     }
