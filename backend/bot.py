@@ -322,9 +322,41 @@ async def _fetch_message(payload: discord.RawReactionActionEvent):
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     if client.user and payload.user_id == client.user.id:
         return
+
+    # Guard: NUR auf Missions-Nachrichten reagieren. Ohne diesen Check
+    # wuerden a) fremde Emojis ueberall abgeraeumt und b) 👍/👎/❌ auf
+    # beliebigen Nachrichten als "Mission nicht mehr pending" gewertet
+    # und die User-Reaktion entfernt.
+    # Zusaetzlich: auf Follow-Up-Nachrichten (reaction_reply / expiry)
+    # duerfen ueberhaupt keine Reaktionen bleiben -> abwischen und return.
+    msg_id_str = str(payload.message_id)
+    async with SessionLocal() as session:
+        result = await session.execute(
+            select(Mission).where(
+                (Mission.discord_message_id == msg_id_str)
+                | (Mission.reaction_reply_message_id == msg_id_str)
+                | (Mission.expiry_message_id == msg_id_str)
+            )
+        )
+        mission_for_msg = result.scalar_one_or_none()
+        if mission_for_msg is None:
+            return
+        # Follow-Up-Nachricht: User-Reaktion sofort entfernen, kein weiterer Flow
+        if mission_for_msg.discord_message_id != msg_id_str:
+            try:
+                message = await _fetch_message(payload)
+                user = await client.fetch_user(payload.user_id)
+                await message.remove_reaction(payload.emoji, user)
+            except discord.Forbidden:
+                log.warning("Manage-Messages Permission fehlt - Follow-Up-Reaktion bleibt sichtbar")
+            except Exception as exc:
+                log.warning("cleanup follow-up reaction failed: %s", exc)
+            return
+
     emoji_str = str(payload.emoji)
 
-    # Fremd-Emoji: User-Reaktion entfernen (braucht Manage-Messages Permission)
+    # Fremd-Emoji auf Missions-Nachricht: User-Reaktion entfernen
+    # (braucht Manage-Messages Permission)
     if emoji_str not in REACT_EMOJIS:
         try:
             message = await _fetch_message(payload)
