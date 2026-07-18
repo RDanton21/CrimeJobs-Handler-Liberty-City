@@ -1,10 +1,10 @@
-# =============================================================================
-# SEKT6R Bot-Stack — Docker Compose (mit bestehender Traefik-Integration)
+﻿# =============================================================================
+# SEKT6R Bot-Stack â€” Docker Compose (mit bestehender Traefik-Integration)
 # =============================================================================
 # Setup: Hostinger KVM 2 + Cloudflare DNS+Proxy + existierender Traefik
 # Domains: bots.sektorrp.eu + crime/liberty/ticket/countdown.bots.sektorrp.eu
 #
-# Traefik (im root_default-Network) routet HTTPS-Traffic automatisch
+# Traefik (im proxy-Network) routet HTTPS-Traffic automatisch
 # an unsere Container anhand der Labels.
 #
 # Start auf VPS:
@@ -16,7 +16,7 @@
 services:
 
   # ---------------------------------------------------------------------------
-  # kommandozentrale — Web-Dashboard zum Steuern aller Bots
+  # kommandozentrale â€” Web-Dashboard zum Steuern aller Bots
   # Route: https://bots.sektorrp.eu/
   # ---------------------------------------------------------------------------
   kommandozentrale:
@@ -33,18 +33,18 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - sekt6r-net
-      - root_default
+      - proxy
     labels:
       traefik.enable: "true"
-      traefik.docker.network: "root_default"
+      traefik.docker.network: "proxy"
       traefik.http.routers.sekt6r-kz.entrypoints: "websecure"
       traefik.http.routers.sekt6r-kz.rule: "Host(`bots.sektorrp.eu`)"
       traefik.http.routers.sekt6r-kz.tls: "true"
-      traefik.http.routers.sekt6r-kz.tls.certresolver: "mytlschallenge"
+      traefik.http.routers.sekt6r-kz.tls.certresolver: "letsencrypt"
       traefik.http.services.sekt6r-kz.loadbalancer.server.port: "8000"
 
   # ---------------------------------------------------------------------------
-  # crime-backend — Il Padrino (Crime Automation FastAPI-Backend)
+  # crime-backend â€” Il Padrino (Crime Automation FastAPI-Backend)
   # Route: https://crime.bots.sektorrp.eu/
   # ---------------------------------------------------------------------------
   crime-backend:
@@ -74,18 +74,18 @@ services:
       - crime_logs:/app/logs
     networks:
       - sekt6r-net
-      - root_default
+      - proxy
     labels:
       traefik.enable: "true"
-      traefik.docker.network: "root_default"
+      traefik.docker.network: "proxy"
       traefik.http.routers.sekt6r-crime.entrypoints: "websecure"
       traefik.http.routers.sekt6r-crime.rule: "Host(`crime-bot.sektorrp.eu`)"
       traefik.http.routers.sekt6r-crime.tls: "true"
-      traefik.http.routers.sekt6r-crime.tls.certresolver: "mytlschallenge"
+      traefik.http.routers.sekt6r-crime.tls.certresolver: "letsencrypt"
       traefik.http.services.sekt6r-crime.loadbalancer.server.port: "8000"
 
   # ---------------------------------------------------------------------------
-  # crime-bot — Il Padrino Discord-Bot (intern, kein Public-Route)
+  # crime-bot â€” Il Padrino Discord-Bot (intern, kein Public-Route)
   # ---------------------------------------------------------------------------
   crime-bot:
     build:
@@ -111,7 +111,7 @@ services:
       - crime-backend
 
   # ---------------------------------------------------------------------------
-  # liberty-relay — Du bist Liberty (Ko-fi + Twitch + Admin-Panel)
+  # liberty-relay â€” Du bist Liberty (Ko-fi + Twitch + Admin-Panel)
   # Route: https://liberty.bots.sektorrp.eu/
   # ---------------------------------------------------------------------------
   liberty-relay:
@@ -124,7 +124,7 @@ services:
       DISCORD_WEBHOOK_URL: "${LIBERTY_DISCORD_WEBHOOK_URL}"
       DISCORD_USERNAME: "${LIBERTY_DISCORD_USERNAME:-Liberty City}"
       DISCORD_AVATAR_URL: "${LIBERTY_DISCORD_AVATAR_URL:-}"
-      LIBERTY_EMOJI: "${LIBERTY_EMOJI:-🗽}"
+      LIBERTY_EMOJI: "${LIBERTY_EMOJI:-ðŸ—½}"
       GOAL_NETTO_EUR: "${LIBERTY_GOAL_NETTO_EUR:-100}"
       PROGRESS_BAR_LENGTH: "${LIBERTY_PROGRESS_BAR_LENGTH:-12}"
       TWITCH_CLIENT_ID: "${LIBERTY_TWITCH_CLIENT_ID}"
@@ -156,18 +156,18 @@ services:
       - liberty_logs:/app/logs
     networks:
       - sekt6r-net
-      - root_default
+      - proxy
     labels:
       traefik.enable: "true"
-      traefik.docker.network: "root_default"
+      traefik.docker.network: "proxy"
       traefik.http.routers.sekt6r-liberty.entrypoints: "websecure"
       traefik.http.routers.sekt6r-liberty.rule: "Host(`liberty-bot.sektorrp.eu`)"
       traefik.http.routers.sekt6r-liberty.tls: "true"
-      traefik.http.routers.sekt6r-liberty.tls.certresolver: "mytlschallenge"
+      traefik.http.routers.sekt6r-liberty.tls.certresolver: "letsencrypt"
       traefik.http.services.sekt6r-liberty.loadbalancer.server.port: "8080"
 
   # ---------------------------------------------------------------------------
-  # whitelist-bot — Discord-Bot, sync zu externer sektorrp.eu Webseiten-DB
+  # whitelist-bot â€” Discord-Bot, sync zu externer sektorrp.eu Webseiten-DB
   # (Discord-only, kein Public-Route)
   # ---------------------------------------------------------------------------
   whitelist-bot:
@@ -189,7 +189,7 @@ services:
       - sekt6r-net
 
   # ---------------------------------------------------------------------------
-  # ticket-bot — RAG-gestützte Ticket-Verwaltung (Discord + Claude + ChromaDB)
+  # ticket-bot â€” RAG-gestÃ¼tzte Ticket-Verwaltung (Discord + Claude + ChromaDB)
   # Route: https://ticket.bots.sektorrp.eu/
   # ---------------------------------------------------------------------------
   ticket-bot:
@@ -227,18 +227,18 @@ services:
       - ticket_logs:/app/logs
     networks:
       - sekt6r-net
-      - root_default
+      - proxy
     labels:
       traefik.enable: "true"
-      traefik.docker.network: "root_default"
+      traefik.docker.network: "proxy"
       traefik.http.routers.sekt6r-ticket.entrypoints: "websecure"
       traefik.http.routers.sekt6r-ticket.rule: "Host(`ticket-bot.sektorrp.eu`)"
       traefik.http.routers.sekt6r-ticket.tls: "true"
-      traefik.http.routers.sekt6r-ticket.tls.certresolver: "mytlschallenge"
+      traefik.http.routers.sekt6r-ticket.tls.certresolver: "letsencrypt"
       traefik.http.services.sekt6r-ticket.loadbalancer.server.port: "5555"
 
   # ---------------------------------------------------------------------------
-  # countdown-bot — Discord + Flask Web-Admin
+  # countdown-bot â€” Discord + Flask Web-Admin
   # Route: https://countdown.bots.sektorrp.eu/
   # ---------------------------------------------------------------------------
   countdown-bot:
@@ -257,14 +257,14 @@ services:
       - countdown_logs:/app/logs
     networks:
       - sekt6r-net
-      - root_default
+      - proxy
     labels:
       traefik.enable: "true"
-      traefik.docker.network: "root_default"
+      traefik.docker.network: "proxy"
       traefik.http.routers.sekt6r-countdown.entrypoints: "websecure"
       traefik.http.routers.sekt6r-countdown.rule: "Host(`countdown-bot.sektorrp.eu`)"
       traefik.http.routers.sekt6r-countdown.tls: "true"
-      traefik.http.routers.sekt6r-countdown.tls.certresolver: "mytlschallenge"
+      traefik.http.routers.sekt6r-countdown.tls.certresolver: "letsencrypt"
       traefik.http.services.sekt6r-countdown.loadbalancer.server.port: "5601"
 
 
@@ -286,14 +286,14 @@ volumes:
 
 # =============================================================================
 # Networks
-# - sekt6r-net: internes Bridge-Network für Container-zu-Container
-# - root_default: EXTERN, existiert schon (Traefik+andere Services nutzen es)
+# - sekt6r-net: internes Bridge-Network fÃ¼r Container-zu-Container
+# - proxy: EXTERN, existiert schon (Traefik+andere Services nutzen es)
 # =============================================================================
 networks:
   sekt6r-net:
     driver: bridge
     name: sekt6r-net
 
-  root_default:
+  proxy:
     external: true
-    name: root_default
+    name: proxy
