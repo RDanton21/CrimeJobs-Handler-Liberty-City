@@ -56,11 +56,26 @@ BOT_SERVICES = {
         "ui_url": None,
         "kind": "discord",
     },
-    "liberty-relay": {
-        "container": "sekt6r-liberty",
-        "label": "Du bist Liberty",
-        "icon": "🗽",
-        "ui_url": "https://liberty.bots.sektorrp.eu/admin/",
+    # ------------------------------------------------------------------
+    # ACHTUNG — liberty-relay ist hier bewusst AUSGEBLENDET (18.07.2026).
+    # Liberty laeuft nativ auf dem Dedicated (NSSM-Service LibertyCityRelay).
+    # Wird der Docker-Container zusaetzlich gestartet, laufen zwei Instanzen
+    # parallel: doppeltes Tebex-Polling, doppelte Ko-Fi-Verarbeitung und
+    # doppelte Discord-Posts. Erst den Dedicated-Service stoppen, dann hier
+    # wieder einkommentieren.
+    # ------------------------------------------------------------------
+    # "liberty-relay": {
+    #     "container": "sekt6r-liberty",
+    #     "label": "Du bist Liberty",
+    #     "icon": "🗽",
+    #     "ui_url": "https://liberty.bots.sektorrp.eu/admin/",
+    #     "kind": "web",
+    # },
+    "jobs-dashboard": {
+        "container": "sekt6r-jobs",
+        "label": "Personal-Boerse",
+        "icon": "📋",
+        "ui_url": "https://jobs.bots.sektorrp.eu",
         "kind": "web",
     },
     "whitelist-bot": {
