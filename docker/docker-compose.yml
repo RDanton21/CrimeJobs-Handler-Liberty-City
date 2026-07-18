@@ -227,15 +227,6 @@ services:
       - ticket_logs:/app/logs
     networks:
       - sekt6r-net
-      - proxy
-    labels:
-      traefik.enable: "true"
-      traefik.docker.network: "proxy"
-      traefik.http.routers.sekt6r-ticket.entrypoints: "websecure"
-      traefik.http.routers.sekt6r-ticket.rule: "Host(`ticket-bot.sektorrp.eu`)"
-      traefik.http.routers.sekt6r-ticket.tls: "true"
-      traefik.http.routers.sekt6r-ticket.tls.certresolver: "letsencrypt"
-      traefik.http.services.sekt6r-ticket.loadbalancer.server.port: "5555"
 
   # ---------------------------------------------------------------------------
   # countdown-bot â€” Discord + Flask Web-Admin
@@ -257,15 +248,6 @@ services:
       - countdown_logs:/app/logs
     networks:
       - sekt6r-net
-      - proxy
-    labels:
-      traefik.enable: "true"
-      traefik.docker.network: "proxy"
-      traefik.http.routers.sekt6r-countdown.entrypoints: "websecure"
-      traefik.http.routers.sekt6r-countdown.rule: "Host(`countdown-bot.sektorrp.eu`)"
-      traefik.http.routers.sekt6r-countdown.tls: "true"
-      traefik.http.routers.sekt6r-countdown.tls.certresolver: "letsencrypt"
-      traefik.http.services.sekt6r-countdown.loadbalancer.server.port: "5601"
 
 
 # =============================================================================
