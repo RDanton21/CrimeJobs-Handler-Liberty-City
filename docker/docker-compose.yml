@@ -79,7 +79,7 @@ services:
       traefik.enable: "true"
       traefik.docker.network: "proxy"
       traefik.http.routers.sekt6r-crime.entrypoints: "websecure"
-      traefik.http.routers.sekt6r-crime.rule: "Host(`crime-bot.sektorrp.eu`)"
+      traefik.http.routers.sekt6r-crime.rule: "Host(`crime.bots.sektorrp.eu`)"
       traefik.http.routers.sekt6r-crime.tls: "true"
       traefik.http.routers.sekt6r-crime.tls.certresolver: "letsencrypt"
       traefik.http.services.sekt6r-crime.loadbalancer.server.port: "8000"
