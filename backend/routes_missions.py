@@ -479,6 +479,10 @@ async def create_manual_mission(
     # wie Adresse/GPS), bekommt sonst aber ungewollt einen KI-Personal-
     # Embed im Admin-Channel. Wer Personal will, generiert es im Widget
     # ueber den 'KI-Vorschlag'-Button nachtraeglich.
+    # Ziel-Channel: wenn crew.info_channel_id gesetzt ist -> Zusatzinfo-Channel
+    # (Boss-Feedback), sonst der Haupt-Auftrag-Channel. So landen Adressen /
+    # GPS nicht als vermeintlich neuer Auftrag im quests-Kanal.
+    target_channel = crew.info_channel_id or crew.discord_channel_id
     mission = Mission(
         crew_id=crew.id,
         ai_provider="manual",
@@ -486,7 +490,7 @@ async def create_manual_mission(
         prompt_used="",
         content_generated=text,
         content_final=text,
-        discord_channel_id=crew.discord_channel_id,
+        discord_channel_id=target_channel,
         status=MissionStatus.DRAFT,
         deadline_at=deadline_at,
         scheduled_send_at=_normalize_naive_utc(payload.scheduled_send_at),

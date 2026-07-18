@@ -527,11 +527,21 @@ async def _post_mission_to_discord(session, mission: Mission) -> tuple[bool, str
         log.exception("send failed")
         return False, str(exc)
 
-    for emoji in REACT_EMOJIS:
-        try:
-            await msg.add_reaction(emoji)
-        except Exception:
-            log.warning("reaction failed for %s", emoji)
+    # Skip Reactions wenn die Mission NICHT im Haupt-Auftrag-Channel der Crew
+    # landet (z.B. Zusatzinfos gehen in crew.info_channel_id). Vote-Emojis
+    # gehoeren nur zur Haupt-Quest.
+    skip_reactions = False
+    crew = await session.get(Crew, mission.crew_id)
+    if crew and crew.discord_channel_id and \
+       str(mission.discord_channel_id) != str(crew.discord_channel_id):
+        skip_reactions = True
+
+    if not skip_reactions:
+        for emoji in REACT_EMOJIS:
+            try:
+                await msg.add_reaction(emoji)
+            except Exception:
+                log.warning("reaction failed for %s", emoji)
 
     mission.discord_message_id = str(msg.id)
     mission.status = MissionStatus.PENDING
