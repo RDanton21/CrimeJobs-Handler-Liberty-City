@@ -1275,8 +1275,22 @@ class TwitchRelay:
         self.twitch = await Twitch(TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET)
 
         scopes = [AuthScope.CHANNEL_READ_SUBSCRIPTIONS, AuthScope.BITS_READ]
-        helper = UserAuthenticationStorageHelper(self.twitch, scopes)
-        await helper.bind()
+        _token_path = os.environ.get("LIBERTY_USER_TOKEN_FILE", "/app/data/user_token.json")
+        _token_data = _load_json(_token_path, None)
+        if _token_data and _token_data.get("token") and _token_data.get("refresh"):
+            logging.info("Twitch User-Token aus %s geladen (non-interactive)", _token_path)
+            try:
+                await self.twitch.set_user_authentication(
+                    _token_data["token"], scopes, _token_data["refresh"]
+                )
+            except Exception as e:
+                logging.error("set_user_authentication fehlgeschlagen: %s — versuche interaktiven Fallback", e)
+                helper = UserAuthenticationStorageHelper(self.twitch, scopes)
+                await helper.bind()
+        else:
+            logging.warning("Kein user_token.json bei %s — versuche interaktiven OAuth (nur mit Browser)", _token_path)
+            helper = UserAuthenticationStorageHelper(self.twitch, scopes)
+            await helper.bind()
 
         user = await first(self.twitch.get_users(user_ids=[str(TWITCH_BROADCASTER_ID)]))
         if not user:
