@@ -78,6 +78,13 @@ BOT_SERVICES = {
         "ui_url": "https://jobs.bots.sektorrp.eu",
         "kind": "web",
     },
+    "dbadmin": {
+        "container": "sekt6r-dbadmin",
+        "label": "Datenbank (Read-Only)",
+        "icon": "🗄️",
+        "ui_url": "https://db.bots.sektorrp.eu",
+        "kind": "web",
+    },
     "whitelist-bot": {
         "container": "sekt6r-whitelist",
         "label": "Whitelist-Sync",

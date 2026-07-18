@@ -289,6 +289,39 @@ services:
       traefik.http.routers.sekt6r-jobs.tls.certresolver: "letsencrypt"
       traefik.http.services.sekt6r-jobs.loadbalancer.server.port: "8080"
 
+  # ---------------------------------------------------------------------------
+  # dbadmin - sqlite-web fuer crime.db (READ-ONLY, das SQLite-"phpMyAdmin")
+  # Route: https://db.bots.sektorrp.eu/  (zusaetzlich per Basic-Auth geschuetzt)
+  #
+  # Zwei Schutzschichten:
+  #   1. Traefik-Middleware sekt6r-dbauth (Basic-Auth, Hash in DBADMIN_AUTH)
+  #   2. sqlite_web --read-only: keine Schreibzugriffe ueber das UI
+  # Volume bewusst schreibbar (SQLite braucht WAL/SHM auch beim Lesen).
+  # ---------------------------------------------------------------------------
+  dbadmin:
+    build:
+      context: ./dbadmin
+      dockerfile: Dockerfile
+    container_name: sekt6r-dbadmin
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Berlin
+    volumes:
+      - crime_data:/data
+    networks:
+      - sekt6r-net
+      - proxy
+    labels:
+      traefik.enable: "true"
+      traefik.docker.network: "proxy"
+      traefik.http.routers.sekt6r-dbadmin.entrypoints: "websecure"
+      traefik.http.routers.sekt6r-dbadmin.rule: "Host(`db.bots.sektorrp.eu`)"
+      traefik.http.routers.sekt6r-dbadmin.tls: "true"
+      traefik.http.routers.sekt6r-dbadmin.tls.certresolver: "letsencrypt"
+      traefik.http.routers.sekt6r-dbadmin.middlewares: "sekt6r-dbauth"
+      traefik.http.middlewares.sekt6r-dbauth.basicauth.users: "${DBADMIN_AUTH}"
+      traefik.http.services.sekt6r-dbadmin.loadbalancer.server.port: "8080"
+
 
 # =============================================================================
 # Volumes
