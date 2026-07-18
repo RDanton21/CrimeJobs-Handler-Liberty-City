@@ -161,7 +161,7 @@ services:
       traefik.enable: "true"
       traefik.docker.network: "proxy"
       traefik.http.routers.sekt6r-liberty.entrypoints: "websecure"
-      traefik.http.routers.sekt6r-liberty.rule: "Host(`liberty-bot.sektorrp.eu`)"
+      traefik.http.routers.sekt6r-liberty.rule: "Host(`liberty.bots.sektorrp.eu`)"
       traefik.http.routers.sekt6r-liberty.tls: "true"
       traefik.http.routers.sekt6r-liberty.tls.certresolver: "letsencrypt"
       traefik.http.services.sekt6r-liberty.loadbalancer.server.port: "8080"
