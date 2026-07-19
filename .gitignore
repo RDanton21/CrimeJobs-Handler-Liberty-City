@@ -46,3 +46,10 @@ docs/districts_overrides/
 
 # Claude Code Worktrees + Plans (lokale Arbeitskopien, gehoeren nicht ins Repo)
 .claude/
+
+# Backups — koennen Secrets bzw. komplette Datenbanken enthalten
+.env.bak*
+*.env.bak*
+*.env.bak.*
+data/*.db.*
+data/*.db-backup*
