@@ -15,7 +15,11 @@
 # =============================================================================
 FROM python:3.13-slim
 
-RUN pip install --no-cache-dir sqlite-web==0.6.4
+# peewee MUSS auf 3.x bleiben: sqlite-web 0.6.4 nutzt playhouse.reflection,
+# das mit peewee 4.x bricht ("BareField.__init__() got an unexpected keyword
+# argument 'max_length'"). Ohne den Pin zieht pip peewee 4.x und der
+# Container startet in einer Restart-Schleife.
+RUN pip install --no-cache-dir "peewee>=3.17,<4" sqlite-web==0.6.4
 
 WORKDIR /data
 
