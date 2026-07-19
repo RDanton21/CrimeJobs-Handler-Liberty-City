@@ -14,7 +14,11 @@ SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def init_db() -> None:
-    """Tabellen beim Startup anlegen (create_all ist idempotent)."""
+    """Tabellen beim Startup anlegen (create_all ist idempotent).
+
+    create_all legt nur fehlende TABELLEN an — neue SPALTEN in bereits
+    existierenden Tabellen muessen von Hand nachgezogen werden.
+    """
     parent = os.path.dirname(config.JOBS_DB_PATH)
     if parent:
         os.makedirs(parent, exist_ok=True)
@@ -22,3 +26,12 @@ async def init_db() -> None:
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await _add_column_if_missing(conn, "players", "last_seen", "DATETIME")
+
+
+async def _add_column_if_missing(conn, table: str, column: str, sql_type: str) -> None:
+    res = await conn.exec_driver_sql(f"PRAGMA table_info({table})")
+    if column not in [row[1] for row in res.fetchall()]:
+        await conn.exec_driver_sql(
+            f"ALTER TABLE {table} ADD COLUMN {column} {sql_type}"
+        )

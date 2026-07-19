@@ -23,6 +23,8 @@ class Player(Base):
     username: Mapped[str] = mapped_column(String, default="")
     avatar: Mapped[str] = mapped_column(String, default="")
     last_login: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    # Letzter Board-Aufruf — daraus leitet sich "gerade aktiv" ab
+    last_seen: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class SlotAssignment(Base):

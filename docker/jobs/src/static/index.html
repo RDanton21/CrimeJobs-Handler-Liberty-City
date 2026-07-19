@@ -468,6 +468,37 @@
       </div>
     </div>
 
+    <!-- "Gerade aktiv": feste Leiste rechts, erst ab breiten Fenstern.
+         Auf schmalen Geräten würde sie den Inhalt verdecken. -->
+    <aside x-show="me && board && board.online && board.online.length"
+           x-cloak
+           class="hidden xl:block fixed top-24 right-6 w-52 z-30">
+      <div class="card-cine rounded-lg border border-[#3d4a4d] p-3">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="inline-block h-2 w-2 rounded-full bg-[#15803d] animate-pulse"></span>
+          <span class="headline text-[10px] tracking-widest uppercase text-zinc-400">
+            Gerade aktiv
+          </span>
+          <span class="text-[10px] text-zinc-500 ml-auto"
+                x-text="board.online.length"></span>
+        </div>
+        <div class="space-y-1.5 max-h-[60vh] overflow-y-auto">
+          <template x-for="p in board.online" :key="p.discord_user_id">
+            <div class="flex items-center gap-2">
+              <img :src="p.avatar" alt=""
+                   class="h-5 w-5 rounded-full border border-[#3d4a4d] flex-shrink-0" />
+              <span class="text-xs truncate"
+                    :class="p.is_me ? 'text-[#d9ae6e] font-medium' : 'text-zinc-300'"
+                    x-text="p.username + (p.is_me ? ' (du)' : '')"></span>
+            </div>
+          </template>
+        </div>
+        <p class="text-[10px] text-zinc-600 mt-2 leading-snug">
+          Wer die Börse in den letzten 5 Minuten offen hatte
+        </p>
+      </div>
+    </aside>
+
     <!-- Admin-Auswertung: wer hat wie viele Einsätze gemacht -->
     <div x-show="statsOpen" x-cloak
          @keydown.escape.window="statsOpen = false"

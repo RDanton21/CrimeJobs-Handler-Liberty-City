@@ -20,7 +20,7 @@ import httpx
 from fastapi import Body, Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
-from sqlalchemy import delete, exists, func, select
+from sqlalchemy import delete, exists, func, select, update
 from sqlalchemy.exc import IntegrityError
 
 from . import config, discord_oauth
@@ -44,6 +44,11 @@ _state_serializer = URLSafeTimedSerializer(config.SESSION_SECRET, salt="jobs-oau
 
 # Deutsche Wochentags-Kuerzel (Montag=0)
 WEEKDAYS_DE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
+
+#: Wie lange jemand nach dem letzten Board-Aufruf als "gerade aktiv" gilt.
+#: Das Board laedt alle 30 Sekunden nach, 5 Minuten decken also auch eine
+#: kurze Unterbrechung ab, ohne dass jemand faelschlich als online gilt.
+ONLINE_WINDOW = timedelta(minutes=5)
 
 
 @asynccontextmanager
@@ -468,6 +473,30 @@ async def api_board(me: dict = Depends(require_session)):
         dismissed = set(
             (await session.execute(select(DismissedMission.mission_id))).scalars().all()
         )
+        # Eigene Aktivitaet festhalten (fuer die "gerade aktiv"-Liste)
+        jetzt = datetime.utcnow()
+        await session.execute(
+            update(Player)
+            .where(Player.discord_user_id == me["discord_user_id"])
+            .values(last_seen=jetzt)
+        )
+        # Wer war in den letzten Minuten da?
+        aktiv_ab = jetzt - ONLINE_WINDOW
+        res_online = await session.execute(
+            select(Player.discord_user_id, Player.username, Player.avatar, Player.last_seen)
+            .where(Player.last_seen.isnot(None), Player.last_seen >= aktiv_ab)
+            .order_by(Player.last_seen.desc())
+        )
+        online = [
+            {
+                "discord_user_id": row[0],
+                "username": row[1] or "?",
+                "avatar": row[2] or "",
+                "is_me": row[0] == me["discord_user_id"],
+            }
+            for row in res_online.all()
+        ]
+        await session.commit()
     assignments_by_slot: dict[int, list[SlotAssignment]] = {}
     for a in assignments:
         assignments_by_slot.setdefault(a.slot_id, []).append(a)
@@ -532,6 +561,7 @@ async def api_board(me: dict = Depends(require_session)):
         },
         "days": days_out,
         "crews": crews,
+        "online": online,
         # is_admin normalisieren: Sessions von vor dem Admin-Feature haben den
         # Key nicht — das UI soll trotzdem immer einen Bool sehen
         "me": {**me, "is_admin": bool(me.get("is_admin"))},
