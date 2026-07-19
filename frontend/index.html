@@ -126,7 +126,7 @@
                 <input type="checkbox" :value="rel.crew_id" x-model="wizardAccept.rivalries" class="mt-1 scale-125">
                 <span class="text-sm">
                   <strong x-text="rel.crew_name"></strong>
-                  <span class="text-xs text-zinc-500 ml-1" x-text="`(${rel.relation_type})`"></span><br>
+                  <span class="text-xs text-zinc-500 ml-1" x-text="`(${relationLabel(rel.relation_type)})`"></span><br>
                   <span class="text-zinc-400 text-xs" x-text="rel.notes || '—'"></span>
                 </span>
               </label>
@@ -139,7 +139,7 @@
                 <input type="checkbox" :value="rel.crew_id" x-model="wizardAccept.allies" class="mt-1 scale-125">
                 <span class="text-sm">
                   <strong x-text="rel.crew_name"></strong>
-                  <span class="text-xs text-zinc-500 ml-1" x-text="`(${rel.relation_type})`"></span><br>
+                  <span class="text-xs text-zinc-500 ml-1" x-text="`(${relationLabel(rel.relation_type)})`"></span><br>
                   <span class="text-zinc-400 text-xs" x-text="rel.notes || '—'"></span>
                 </span>
               </label>
@@ -467,6 +467,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=personnel6"></script>
+  <script src="/static/app.js?v=rel1"></script>
 </body>
 </html>

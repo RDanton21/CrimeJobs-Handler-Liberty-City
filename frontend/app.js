@@ -57,6 +57,17 @@ function cardBorderClass(s) {
   })[s] || "border-zinc-800";
 }
 
+// Beziehungstypen: DB-Wert -> deutsche Anzeige (gleiche Begriffe wie im Dropdown)
+function relationLabel(t) {
+  return ({
+    allied: "verbündet",
+    rival: "rivalisierend",
+    hostile: "feindlich",
+    business: "geschäftlich",
+    neutral: "neutral",
+  })[t] || t;
+}
+
 const DISTRICTS = ["Algonquin", "Bohan", "Broker", "Colony Island", "Dukes"];
 
 function _coerceUtc(iso) {
