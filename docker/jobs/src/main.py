@@ -502,16 +502,23 @@ async def assign_slot(
     # Slot gegen frische Board-Daten validieren (Cache ok)
     missions, _ = await _fetch_crime_data()
     slot = None
+    found_mission = None
     for mission in missions:
         if mission.get("id") != mission_id:
             continue
         for s in mission.get("slots", []):
             if s.get("id") == slot_id:
                 slot = s
+                found_mission = mission
                 break
     if slot is None:
         raise HTTPException(
             status_code=404, detail="Slot nicht gefunden oder Auftrag nicht mehr aktiv"
+        )
+    # Abgeschlossene Auftraege sind zu — auch wenn das UI den Button noch zeigt
+    if found_mission and found_mission.get("archived_at"):
+        raise HTTPException(
+            status_code=409, detail="Dieser Auftrag ist bereits abgeschlossen"
         )
     required = slot.get("required_count") or 1
 
@@ -548,9 +555,23 @@ async def assign_slot(
     return {"detail": "Eingetragen"}
 
 
+async def _mission_archived_for_slot(slot_id: int) -> bool:
+    """Gehoert der Slot zu einem bereits abgeschlossenen Auftrag?"""
+    missions, _ = await _fetch_crime_data()
+    for mission in missions:
+        for s in mission.get("slots", []):
+            if s.get("id") == slot_id:
+                return bool(mission.get("archived_at"))
+    return False
+
+
 @app.delete("/api/slots/{slot_id}/assign", status_code=204)
 async def unassign_slot(slot_id: int, me: dict = Depends(require_session)):
     """Eigenes Assignment loeschen."""
+    if await _mission_archived_for_slot(slot_id):
+        raise HTTPException(
+            status_code=409, detail="Dieser Auftrag ist bereits abgeschlossen"
+        )
     async with SessionLocal() as session:
         result = await session.execute(
             delete(SlotAssignment).where(

@@ -272,7 +272,15 @@
                                  busySlots[s.id] ist anfangs undefined, und Alpine
                                  setzt daraus faelschlich disabled -> Button tot.
                                  Deshalb ueberall !! davor. -->
-                            <template x-if="s.mine">
+                            <!-- Abgeschlossener Auftrag: nichts mehr aenderbar -->
+                            <template x-if="m.archived_at">
+                              <span class="headline px-3 py-1.5 rounded border border-[#15803d]/60
+                                           bg-[#15803d]/15 text-green-300/80 text-xs font-medium
+                                           tracking-wider cursor-default">
+                                Abgeschlossen
+                              </span>
+                            </template>
+                            <template x-if="!m.archived_at && s.mine">
                               <button @click="unassign(s)" :disabled="!!busySlots[s.id]"
                                       class="headline px-3 py-1.5 rounded border border-[#b91c1c] text-red-400
                                              hover:bg-[#b91c1c]/15 text-xs font-medium tracking-wider
@@ -281,7 +289,7 @@
                               </button>
                             </template>
                             <!-- Frei = gruen und klickbar -->
-                            <template x-if="!s.mine && s.free > 0">
+                            <template x-if="!m.archived_at && !s.mine && s.free > 0">
                               <button @click="assign(s, m)" :disabled="!!busySlots[s.id]"
                                       class="headline px-3 py-1.5 rounded bg-[#15803d] hover:bg-[#1a9c4b]
                                              border border-white/10 text-white text-xs font-medium tracking-wider
@@ -290,7 +298,7 @@
                               </button>
                             </template>
                             <!-- Voll = rot und gesperrt, bis jemand wieder frei macht -->
-                            <template x-if="!s.mine && s.free === 0">
+                            <template x-if="!m.archived_at && !s.mine && s.free === 0">
                               <button disabled
                                       class="headline px-3 py-1.5 rounded bg-[#b91c1c]/80 text-white/80
                                              border border-[#b91c1c] text-xs font-medium tracking-wider
@@ -415,7 +423,14 @@
                   <p class="text-[10px] text-[#b98a4a]/80 mt-1.5">Zum Auftrag springen →</p>
                 </div>
                 <div class="flex-shrink-0 self-center">
-                  <button @click.stop="unassign(entry.slot)" :disabled="!!busySlots[entry.slot.id]"
+                  <!-- Abgeschlossene Auftraege sind zu — nur noch Anzeige -->
+                  <span x-show="entry.mission.archived_at" x-cloak
+                        class="headline px-3 py-1.5 rounded border border-[#15803d]/60
+                               bg-[#15803d]/15 text-green-300/80 text-xs font-medium tracking-wider">
+                    Abgeschlossen
+                  </span>
+                  <button x-show="!entry.mission.archived_at"
+                          @click.stop="unassign(entry.slot)" :disabled="!!busySlots[entry.slot.id]"
                           class="headline px-3 py-1.5 rounded border border-[#b91c1c] text-red-400
                                  hover:bg-[#b91c1c]/15 text-xs font-medium tracking-wider
                                  disabled:opacity-50 transition-colors">
