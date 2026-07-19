@@ -18,6 +18,11 @@ from .db import Base
 
 class MissionStatus(str, Enum):
     PENDING = "pending"
+    # Zusatzinfo/Boss-Feedback: im info_channel gepostet, braucht keine
+    # Reaktion. Bewusst kein PENDING, sonst wuerde der Deadline-Watcher sie
+    # nach Fristablauf als "fehlgeschlagen" markieren und die Crew-Karte
+    # haette dauerhaft "wartet auf Reaktion" angezeigt.
+    INFO = "info"
     APPROVED = "approved"
     REJECTED = "rejected"
     CANCELLED = "cancelled"

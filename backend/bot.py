@@ -544,7 +544,10 @@ async def _post_mission_to_discord(session, mission: Mission) -> tuple[bool, str
                 log.warning("reaction failed for %s", emoji)
 
     mission.discord_message_id = str(msg.id)
-    mission.status = MissionStatus.PENDING
+    # skip_reactions bedeutet: nicht im Auftrags-Channel gelandet, also eine
+    # Zusatzinfo. Die wartet auf nichts und darf auch nicht in die Deadline-
+    # Ueberwachung laufen.
+    mission.status = MissionStatus.INFO if skip_reactions else MissionStatus.PENDING
     mission.sent_at = datetime.utcnow()
     mission.scheduled_send_at = None
     # Auto-Post den personnel_brief im Admin-Channel (falls konfiguriert)

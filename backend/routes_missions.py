@@ -635,6 +635,8 @@ RANKING_POINTS = {
     MissionStatus.CANCELLED: 0,
     MissionStatus.PENDING: 0,
     MissionStatus.DRAFT: 0,
+    # Zusatzinfos sind keine Auftraege — weder Punkte noch Zaehlung
+    MissionStatus.INFO: 0,
 }
 
 

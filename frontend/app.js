@@ -36,6 +36,7 @@ function statusLabelMap(s) {
     approved: "👍 Erledigt",
     rejected: "👎 Fehlgeschlagen",
     cancelled: "❌ nicht ausführbar",
+    info: "📎 Zusatzinfo",
   })[s] || s;
 }
 
@@ -46,6 +47,7 @@ function statusClassMap(s) {
     approved: "bg-green-700 text-green-100",
     rejected: "bg-red-800 text-red-100",
     cancelled: "bg-zinc-600 text-zinc-200",
+    info: "bg-sky-900 text-sky-200",
   })[s] || "bg-zinc-700";
 }
 
@@ -608,6 +610,7 @@ function dashboard() {
         approved: { label: "👍 fertig", cls: "bg-green-800 text-green-100" },
         rejected: { label: "👎 fertig", cls: "bg-red-800 text-red-100" },
         cancelled: { label: "❌", cls: "bg-zinc-700 text-zinc-300" },
+        info: { label: "📎 Info", cls: "bg-sky-900 text-sky-200" },
       };
       return map[status] || { label: status, cls: "bg-zinc-700 text-zinc-200" };
     },

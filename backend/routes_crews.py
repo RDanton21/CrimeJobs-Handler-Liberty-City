@@ -12,7 +12,7 @@ from .ai import get_provider
 from .auth import require_admin
 from .config import settings
 from .db import get_session
-from .models import Crew, CrewRelation, Mission, RelationType
+from .models import Crew, CrewRelation, Mission, MissionStatus, RelationType
 from .prompts import (
     build_crew_enrichment_prompt,
     build_crime_business_briefing_prompt,
@@ -37,12 +37,32 @@ router = APIRouter(prefix="/api/crews", tags=["crews"], dependencies=[Depends(re
 
 
 async def _attach_last_mission(session: AsyncSession, crew: Crew) -> Crew:
-    res = await session.execute(
+    """Status des letzten ECHTEN Auftrags an die Crew haengen.
+
+    Zusatzinfos (Status INFO, im Boss-Feedback-Channel) sind ausgenommen —
+    sie brauchen keine Reaktion und wuerden die Crew-Karte sonst dauerhaft
+    auf 'wartet auf Reaktion' stehen lassen. Aeltere Zusatzinfos, die noch
+    als 'pending' in der DB liegen, werden ueber den Channel-Vergleich
+    zusaetzlich ausgefiltert.
+    """
+    stmt = (
         select(Mission)
-        .where(Mission.crew_id == crew.id, Mission.archived_at.is_(None))
+        .where(
+            Mission.crew_id == crew.id,
+            Mission.archived_at.is_(None),
+            Mission.status != MissionStatus.INFO,
+        )
         .order_by(Mission.created_at.desc())
         .limit(1)
     )
+    if crew.info_channel_id:
+        stmt = stmt.where(
+            ~(
+                (Mission.ai_provider == "manual")
+                & (Mission.discord_channel_id == crew.info_channel_id)
+            )
+        )
+    res = await session.execute(stmt)
     last = res.scalar_one_or_none()
     if last:
         crew.last_mission_status = last.status
