@@ -442,16 +442,19 @@ async def api_board(me: dict = Depends(require_session)):
         else:
             other.append(enriched)
 
-    days_out = [
-        {
+    days_out = []
+    for d, period_idx, period_label in event_days:
+        iso_year, iso_week, _ = d.isocalendar()
+        days_out.append({
             "date": d.isoformat(),
             "label": f"{WEEKDAYS_DE[d.weekday()]} {d.strftime('%d.%m.')}",
             "period": period_idx,
             "period_label": period_label,
+            # Kalenderwoche: das Frontend bricht pro Woche in eine eigene Zeile um
+            "week": f"{iso_year}-W{iso_week:02d}",
+            "week_label": f"KW {iso_week}",
             "missions": buckets[d.isoformat()],
-        }
-        for d, period_idx, period_label in event_days
-    ]
+        })
     if other:
         # Nichts verschwindet: Missions ausserhalb des Fensters als Pseudo-Tag
         days_out.append({
@@ -459,6 +462,8 @@ async def api_board(me: dict = Depends(require_session)):
             "label": "Außerhalb Event",
             "period": -1,
             "period_label": "",
+            "week": "other",
+            "week_label": "",
             "missions": other,
         })
 
