@@ -109,9 +109,12 @@
           </h1>
           <p class="text-xs text-zinc-400 mt-1" x-show="board" x-text="eventLabel()"></p>
           <div class="flex items-center justify-center gap-3 mt-3 flex-wrap">
-            <span class="headline px-2.5 py-1 rounded-full bg-[#b98a4a]/15 border border-[#b98a4a]/50
-                         text-[#d9ae6e] text-xs font-medium tracking-wider"
-                  x-text="'Meine Slots: ' + myCount()"></span>
+            <button @click="myOpen = true"
+                    title="Zeigt, wo du eingetragen bist"
+                    class="headline px-2.5 py-1 rounded-full bg-[#b98a4a]/15 border border-[#b98a4a]/50
+                           text-[#d9ae6e] text-xs font-medium tracking-wider
+                           hover:bg-[#b98a4a]/30 hover:border-[#b98a4a] transition-colors"
+                    x-text="'Meine Slots: ' + myCount()"></button>
             <div class="flex items-center gap-2">
               <img :src="me.avatar" alt="" class="h-7 w-7 rounded-full border border-[#3d4a4d]" />
               <span class="text-sm font-medium" x-text="me.username"></span>
@@ -293,6 +296,71 @@
       </div>
     </template>
 
+    <!-- "Meine Slots": Overlay mit allen eigenen Eintragungen -->
+    <div x-show="myOpen" x-cloak
+         @keydown.escape.window="myOpen = false"
+         class="fixed inset-0 z-40 flex items-start justify-center p-4 sm:p-8 overflow-y-auto
+                bg-black/70 backdrop-blur-sm">
+      <div @click.outside="myOpen = false"
+           class="card-cine rounded-xl w-full max-w-2xl shadow-2xl border border-[#3d4a4d]">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-[#3d4a4d]/70">
+          <h2 class="headline text-sm font-semibold tracking-[.16em] text-[#d9ae6e]">
+            Meine Eintragungen
+          </h2>
+          <button @click="myOpen = false"
+                  class="text-zinc-400 hover:text-zinc-100 text-lg leading-none px-1">✕</button>
+        </div>
+
+        <div class="p-5">
+          <template x-if="mySlots().length === 0">
+            <p class="text-sm text-zinc-400 text-center py-6">
+              Du bist aktuell nirgends eingetragen.<br>
+              <span class="text-xs">Such dir oben einen Tag aus und trag dich in einen freien Platz ein.</span>
+            </p>
+          </template>
+
+          <div class="space-y-3">
+            <template x-for="entry in mySlots()" :key="entry.slot.id">
+              <div class="bg-[#17191b]/85 border border-[#3d4a4d]/60 rounded p-3 flex gap-3">
+                <div class="w-1 rounded-full flex-shrink-0"
+                     :style="'background:' + (entry.mission.crew?.color_hex || '#b91c1c')"></div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-baseline gap-2 flex-wrap">
+                    <span class="headline text-xs font-semibold tracking-wider"
+                          x-text="entry.mission.crew ? entry.mission.crew.name : 'Crew'"></span>
+                    <span class="text-[11px] text-[#d9ae6e]" x-text="entry.dayLabel"></span>
+                    <span class="text-[11px] text-zinc-400" x-show="entry.slot.slot_window"
+                          x-text="entry.slot.slot_window"></span>
+                  </div>
+                  <p class="text-sm font-medium mt-0.5">
+                    <span x-text="entry.slot.name || ('NPC #' + (entry.slot.npc_number || '?'))"></span>
+                    <span class="text-zinc-400 font-normal" x-show="entry.slot.function"
+                          x-text="' — ' + entry.slot.function"></span>
+                  </p>
+                  <p class="text-xs text-zinc-400 mt-0.5" x-show="entry.slot.location"
+                     x-text="'Ort: ' + entry.slot.location"></p>
+                  <p class="text-xs text-zinc-400" x-show="entry.slot.costume"
+                     x-text="'Kostüm: ' + entry.slot.costume"></p>
+                </div>
+                <div class="flex-shrink-0 self-center">
+                  <button @click="unassign(entry.slot)" :disabled="!!busySlots[entry.slot.id]"
+                          class="headline px-3 py-1.5 rounded border border-[#b91c1c] text-red-400
+                                 hover:bg-[#b91c1c]/15 text-xs font-medium tracking-wider
+                                 disabled:opacity-50 transition-colors">
+                    Austragen
+                  </button>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <p class="text-[11px] text-zinc-500 mt-4 text-center" x-show="mySlots().length > 0">
+            Wenn du doch nicht kannst, trag dich bitte aus — dann wird der Platz wieder frei.
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast (Erfolg/Fehler) -->
     <div x-show="toast" x-cloak
          class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm font-medium
@@ -313,6 +381,7 @@
         expanded: {},   // mission_id -> Auftrags-Text aufgeklappt
         briefOpen: {},  // mission_id -> Regie-Details (Personal-Brief) aufgeklappt
         busySlots: {},  // slot_id -> Request laeuft
+        myOpen: false,  // Overlay "Meine Eintragungen"
         toast: '',
         toastError: false,
         _toastTimer: null,
@@ -442,6 +511,24 @@
               for (const s of m.slots)
                 if (s.mine) n++;
           return n;
+        },
+
+        // Alle eigenen Eintragungen fuers "Meine Slots"-Overlay — chronologisch,
+        // mit Tag und Auftrag als Kontext. Keine zusaetzliche Abfrage noetig:
+        // die Daten stecken bereits im geladenen Board.
+        mySlots() {
+          if (!this.board) return [];
+          const out = [];
+          for (const d of this.board.days) {
+            for (const m of d.missions) {
+              for (const s of m.slots) {
+                if (s.mine) {
+                  out.push({ slot: s, mission: m, dayLabel: d.label, date: d.date });
+                }
+              }
+            }
+          }
+          return out;
         },
 
         eventLabel() {
