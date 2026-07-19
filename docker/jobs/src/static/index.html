@@ -23,7 +23,12 @@
        ::before = Bild (fix, cover) | ::after = Abdunklung + Vignette
        (fixe Ebenen statt background-attachment:fixed — das ruckelt auf iOS)
        --------------------------------------------------------------------- */
+    /* Nie horizontal scrollen — lieber umbrechen als einen Scrollbalken zeigen */
+    html, body { max-width: 100%; overflow-x: hidden; }
     body { background-color: #141719; }
+    /* Lange Ortsangaben/URLs ohne Leerzeichen sprengen sonst die Karten.
+       Bewusst NICHT global auf span/div — das wuerde die Tag-Chips zerreissen. */
+    p, .brief, .brief * { overflow-wrap: anywhere; }
     body::before {
       content: "";
       position: fixed; inset: 0; z-index: -2;
@@ -94,43 +99,38 @@
 
     <!-- Eingeloggt: Event-Board -->
     <template x-if="!loading && me">
-      <div class="max-w-screen-xl mx-auto p-4 sm:p-6">
+      <div class="max-w-3xl mx-auto px-4 py-5 sm:py-8">
 
-        <!-- Header -->
-        <header class="flex items-center justify-between mb-5 flex-wrap gap-3">
-          <div>
-            <h1 class="headline text-xl sm:text-2xl font-semibold tracking-[.14em]
-                       [text-shadow:0_2px_12px_rgba(0,0,0,0.85)]">
-              Sektor RP — Personal-Börse
-            </h1>
-            <p class="text-xs text-zinc-400" x-show="board" x-text="eventLabel()"></p>
-          </div>
-          <div class="flex items-center gap-3 flex-wrap">
+        <!-- Header: alles mittig, Nutzerzeile darunter -->
+        <header class="text-center mb-6">
+          <h1 class="headline text-2xl sm:text-3xl font-semibold tracking-[.16em]
+                     [text-shadow:0_2px_12px_rgba(0,0,0,0.85)]">
+            Sektor RP — Personal-Börse
+          </h1>
+          <p class="text-xs text-zinc-400 mt-1" x-show="board" x-text="eventLabel()"></p>
+          <div class="flex items-center justify-center gap-3 mt-3 flex-wrap">
             <span class="headline px-2.5 py-1 rounded-full bg-[#b98a4a]/15 border border-[#b98a4a]/50
                          text-[#d9ae6e] text-xs font-medium tracking-wider"
                   x-text="'Meine Slots: ' + myCount()"></span>
             <div class="flex items-center gap-2">
-              <img :src="me.avatar" alt="" class="h-8 w-8 rounded-full border border-[#3d4a4d]" />
-              <span class="text-sm font-medium hidden sm:inline" x-text="me.username"></span>
+              <img :src="me.avatar" alt="" class="h-7 w-7 rounded-full border border-[#3d4a4d]" />
+              <span class="text-sm font-medium" x-text="me.username"></span>
             </div>
             <a href="/auth/logout" class="text-xs text-zinc-400 hover:text-zinc-100 underline">Logout</a>
           </div>
         </header>
 
-        <!-- Tag-Tabs: eine Zeile pro Kalenderwoche, kein horizontales Scrollen.
+        <!-- Tag-Tabs: eine Zeile pro Kalenderwoche, mittig, kein Scrollen.
              Vor der ersten Woche eines Zeitraums steht dessen Name. -->
-        <div class="mb-4 space-y-1.5" x-show="board">
+        <div class="mb-6 space-y-1.5" x-show="board">
           <template x-for="(row, ri) in dayRows()" :key="row.week">
             <div>
               <!-- Zeitraum-Ueberschrift: nur bei der ersten Woche des Zeitraums -->
               <div x-show="row.period_label && (ri === 0 || dayRows()[ri-1].period !== row.period)"
-                   class="headline text-[10px] tracking-widest uppercase text-[#b98a4a]
-                          mt-3 first:mt-0 mb-1"
+                   class="headline text-[11px] tracking-[.2em] uppercase text-[#b98a4a]
+                          text-center mt-5 first:mt-0 mb-2"
                    x-text="row.period_label"></div>
-              <div class="flex flex-wrap items-center gap-1.5">
-                <span x-show="row.week_label"
-                      class="headline text-[10px] tracking-wider text-zinc-500 w-11 flex-shrink-0"
-                      x-text="row.week_label"></span>
+              <div class="flex flex-wrap justify-center gap-1.5">
                 <template x-for="d in row.days" :key="d.date">
                   <button @click="activeDay = d.date"
                           :class="activeDay === d.date
@@ -212,8 +212,10 @@
                     <template x-for="s in m.slots" :key="s.id">
                       <div class="bg-[#17191b]/85 border rounded p-3"
                            :class="s.mine ? 'border-[#b91c1c]/70' : 'border-[#3d4a4d]/60'">
-                        <div class="flex items-start justify-between gap-3 flex-wrap">
-                          <div class="min-w-0">
+                        <!-- Kein flex-wrap: Zaehler + Button bleiben immer rechts,
+                             der Textblock bricht stattdessen um (min-w-0) -->
+                        <div class="flex items-start justify-between gap-3">
+                          <div class="min-w-0 flex-1">
                             <p class="font-semibold text-sm">
                               <span x-text="s.name || ('NPC #' + (s.npc_number || '?'))"></span>
                               <span class="text-zinc-400 font-normal" x-show="s.function"

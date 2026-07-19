@@ -57,12 +57,12 @@ def _parse_event_dt(value: str | None, fallback: str) -> datetime:
 # Mehrere Zeitraeume moeglich. Format von EVENT_PERIODS:
 #   "<start>~<ende>[:<Label>],<start>~<ende>[:<Label>]"
 # Beispiel:
-#   2026-07-19T00:00~2026-07-26T23:59:Testphase,2026-08-07T18:00~2026-08-16T23:50:Das Probespiel
+#   2026-07-19T00:00~2026-07-26T23:59:Testphase,2026-08-07T18:00~2026-08-16T23:50:Liberty erwacht...
 # Ohne EVENT_PERIODS greifen die Defaults unten; EVENT_START/EVENT_END werden
 # weiterhin unterstuetzt und ueberschreiben dann den ersten Zeitraum.
 _DEFAULT_PERIODS = (
     "2026-07-19T00:00~2026-07-26T23:59:Testphase,"
-    "2026-08-07T18:00~2026-08-16T23:50:Das Probespiel"
+    "2026-08-07T18:00~2026-08-16T23:50:Liberty erwacht..."
 )
 
 
