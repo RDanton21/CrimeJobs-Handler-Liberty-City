@@ -56,7 +56,7 @@ Format des Briefings (Markdown, deutsch, prägnant):
   → Kostüm: <Trigger>
 
 **Slot:** <ungefähre Dauer + Zeitfenster>
-**Team-Auslastung:** <Mittler + N NPC-Spieler in Rotation>
+**Team-Auslastung:** <Mittler + N Questgeber in Rotation>
 
 Regeln:
 - Maximal 4 NPC-Rollen pro Mission, sonst wird's unspielbar
@@ -69,7 +69,7 @@ Regeln:
 - AKTIONS-ZEITFENSTER für Slot: zwischen 17:00 und 02:00 (Server-Zeiten).
   Im Feld „Slot" IMMER Uhrzeiten aus diesem Fenster nennen, z.B. „22:00–23:30",
   „ab 19:00", „00:30–01:45". NIE Uhrzeiten wie „04:00", „08:00", „14:00".
-- Zahlen IMMER als Ziffern, nie ausgeschrieben („2 NPC-Spieler" statt „zwei").
+- Zahlen IMMER als Ziffern, nie ausgeschrieben („2 Questgeber" statt „zwei").
 """
 
 
@@ -153,7 +153,7 @@ TEMPLATES: list[dict] = [
   → Funktion: erscheint als Drohbacking, wenn Widerständler hart wird
 
 **Slot:** 60–90 Min, fließend zwischen 17:00 und 02:00 verteilt (1 Server-Abend)
-**Team-Auslastung:** Miguel + 1 NPC-Spieler in Rotation (Widerständler + LCPD)\
+**Team-Auslastung:** Miguel + 1 Questgeber in Rotation (Widerständler + LCPD)\
 """
     },
     {
@@ -177,7 +177,7 @@ TEMPLATES: list[dict] = [
   → Funktion: könnte sehen, wäre Risiko-Vektor (für RP-Drama)
 
 **Slot:** 45–60 Min pro Lieferung, gestaffelt über 2 Server-Abende (jeweils 17:00–02:00)
-**Team-Auslastung:** Fixer + 2 NPC-Spieler in Rotation
+**Team-Auslastung:** Fixer + 2 Questgeber in Rotation
 **Hinweis:** Bei 21 Gangs × 3 Lieferungen nur 30 % Live-RP, Rest schriftlich + Gang-Eigen-NPCs\
 """
     },
@@ -214,7 +214,7 @@ CREW_RELATIONS.md. Akteure sind ausschließlich Spieler-Gangs.
   → Location: streift sichtbar durch Revier-Konflikte
 
 **Slot:** Übergaben in der ersten Server-Hälfte (17:00–21:00), Abschluss bis 02:00 des Folgetags
-**Team-Auslastung:** Miguel + 1 NPC-Spieler für Schicht-Übergaben\
+**Team-Auslastung:** Miguel + 1 Questgeber für Schicht-Übergaben\
 """
     },
     {
