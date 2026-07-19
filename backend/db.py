@@ -61,6 +61,12 @@ async def init_db() -> None:
             conn, "missions", "personnel_discord_message_id",
             "VARCHAR(40) NOT NULL DEFAULT ''"
         )
+        # Ankuendigung der Personal-Boerse im Jobs-Announce-Channel:
+        # ID merken, damit sie beim Archivieren mitgeloescht werden kann
+        await _migrate_add_column_if_missing(
+            conn, "missions", "jobs_announce_message_id",
+            "VARCHAR(40) NOT NULL DEFAULT ''"
+        )
 
 
 async def _migrate_add_column_if_missing(conn, table: str, column: str, sql_type: str) -> None:

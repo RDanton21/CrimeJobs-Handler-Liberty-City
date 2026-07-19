@@ -10,7 +10,10 @@ Auth ueber Header X-API-Key == Env-Var JOBS_API_KEY.
 import json
 import logging
 import os
+import re
 import secrets
+from calendar import monthrange
+from datetime import date, datetime, time as dtime, timedelta, timezone
 
 import httpx
 from fastapi import APIRouter, Depends, Header, HTTPException
@@ -142,22 +145,95 @@ async def list_slots(mission_id: int, session: AsyncSession = Depends(get_sessio
     return res.scalars().all()
 
 
+async def _delete_announce_message(session: AsyncSession, message_id: str) -> None:
+    """Loescht eine Ankuendigung im Jobs-Announce-Channel. Fehler werden nur
+    geloggt — eine verwaiste Nachricht darf keinen Aufruf scheitern lassen."""
+    if not message_id:
+        return
+    channel_id = (
+        await settings_get_value(session, "jobs_announce_channel_id", "")
+    ).strip()
+    if not channel_id:
+        return
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as cli:
+            await cli.post(
+                f"{settings.bot_api_url}/delete_message",
+                json={"channel_id": channel_id, "message_id": message_id},
+            )
+    except Exception as exc:
+        log.warning("Announce-Message %s nicht loeschbar: %s", message_id, exc)
+
+
+def _last_sunday(year: int, month: int) -> date:
+    """Letzter Sonntag eines Monats (fuer die EU-Sommerzeit-Regel)."""
+    d = date(year, month, monthrange(year, month)[1])
+    return d - timedelta(days=(d.weekday() - 6) % 7)
+
+
+def _berlin_offset(naive_local: datetime) -> timedelta:
+    """UTC-Offset von Europe/Berlin fuer eine naive lokale Zeit.
+
+    Bevorzugt zoneinfo; auf dem Dedicated (Windows ohne tzdata) faellt es
+    auf die EU-Regel zurueck: Sommerzeit vom letzten Sonntag im Maerz 02:00
+    bis zum letzten Sonntag im Oktober 03:00.
+    """
+    try:
+        from zoneinfo import ZoneInfo
+
+        off = naive_local.replace(tzinfo=ZoneInfo("Europe/Berlin")).utcoffset()
+        if off is not None:
+            return off
+    except Exception:
+        pass
+    y = naive_local.year
+    start = datetime.combine(_last_sunday(y, 3), dtime(2, 0))
+    end = datetime.combine(_last_sunday(y, 10), dtime(3, 0))
+    return timedelta(hours=2) if start <= naive_local < end else timedelta(hours=1)
+
+
+def _slot_start_unix(mission: Mission, slot_window: str) -> int | None:
+    """Unix-Timestamp fuer den Beginn des Einsatzes.
+
+    Das Datum stammt aus dem Missions-Slot (geplanter/erfolgter Versand),
+    die Uhrzeit aus dem Zeitfenster-Text ("21:30-23:00" -> 21:30). Beides
+    wird als Europe/Berlin interpretiert (RP-Zeit) und nach UTC gerechnet.
+    Liegt keine brauchbare Uhrzeit vor: None (dann ohne Countdown posten).
+    """
+    m = re.search(r"(\d{1,2})[:.](\d{2})", slot_window or "")
+    if not m:
+        return None
+    hour, minute = int(m.group(1)), int(m.group(2))
+    if hour > 23 or minute > 59:
+        return None
+
+    base_utc = mission.scheduled_send_at or mission.sent_at or datetime.utcnow()
+    # Bezugstag in Berliner Zeit bestimmen (Versand um 23:30 UTC = naechster Tag lokal)
+    base_local = base_utc + _berlin_offset(base_utc)
+    start_local = base_local.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    # Nacht-Fenster: Start deutlich vor dem Versand -> gilt der Folgetag
+    if (base_local - start_local) > timedelta(hours=6):
+        start_local += timedelta(days=1)
+    start_utc = start_local - _berlin_offset(start_local)
+    return int(start_utc.replace(tzinfo=timezone.utc).timestamp())
+
+
 async def _announce_slot_change(
     session: AsyncSession,
     mission: Mission,
     old_total: int,
     new_total: int,
     slot_window: str,
-) -> tuple[bool, str | None]:
+) -> tuple[bool, str | None, str]:
     """Postet den Ankündigungs-Ping via Bot-HTTP-API (/post_announce).
     Nur aufrufen wenn die Kapazität gestiegen ist. Returns
-    (announce_sent, announce_error) — wirft NIE, damit das Slot-Speichern
-    nicht am Discord-Ping scheitern kann."""
+    (announce_sent, announce_error, message_id) — wirft NIE, damit das
+    Slot-Speichern nicht am Discord-Ping scheitern kann."""
     channel_id = (
         await settings_get_value(session, "jobs_announce_channel_id", "")
     ).strip()
     if not channel_id:
-        return False, None  # Ping deaktiviert (kein Channel konfiguriert)
+        return False, None, ""  # Ping deaktiviert (kein Channel konfiguriert)
 
     role_id = (
         await settings_get_value(session, "jobs_ping_role_id", "1528099740649127977")
@@ -172,23 +248,31 @@ async def _announce_slot_change(
     crew_name = crew.name if crew else f"Crew #{mission.crew_id}"
     mention = f"<@&{role_id}> " if role_id else ""
 
+    # Beginn als Discord-Timestamp: <t:X:F> = "Fr., 7. Aug. 2026 21:30",
+    # <t:X:R> = Countdown ("in 3 Stunden"). Discord rendert beides in der
+    # lokalen Zeitzone des jeweiligen Spielers.
+    start_unix = _slot_start_unix(mission, slot_window)
+    if start_unix:
+        when_line = f"🕘 **Beginn:** <t:{start_unix}:F> (<t:{start_unix}:R>)"
+    elif slot_window:
+        when_line = f"🕘 **Zeitfenster:** {slot_window}"
+    else:
+        when_line = ""
+
     if old_total == 0:
         # Erstmal-Fall: Mission bekommt zum ersten Mal Spieler-Slots
-        line2 = f"{new_total} offene Plätze"
-        if slot_window:
-            line2 += f" · {slot_window}"
-        content = (
-            f"{mention}📋 **Neuer Auftrag mit Personal-Bedarf — {crew_name}**\n"
-            f"{line2}\n"
-            f"👉 {dashboard_url}"
-        )
+        head = f"📋 **Neuer Auftrag mit Personal-Bedarf — {crew_name}**"
+        info = f"{new_total} offene Plätze"
     else:
         # Erhöhungs-Fall: Gesamt-Kapazität ist gestiegen
-        content = (
-            f"{mention}📋 **Personal-Update — {crew_name}**\n"
-            f"Jetzt {new_total} statt {old_total} Plätze\n"
-            f"👉 {dashboard_url}"
-        )
+        head = f"📋 **Personal-Update — {crew_name}**"
+        info = f"Jetzt {new_total} statt {old_total} Plätze"
+
+    lines = [f"{mention}{head}", info]
+    if when_line:
+        lines.append(when_line)
+    lines.append(f"👉 {dashboard_url}")
+    content = "\n".join(lines)
 
     try:
         async with httpx.AsyncClient(timeout=15.0) as cli:
@@ -197,10 +281,14 @@ async def _announce_slot_change(
                 json={"channel_id": channel_id, "content": content},
             )
     except Exception as exc:
-        return False, f"Bot nicht erreichbar: {exc}"
+        return False, f"Bot nicht erreichbar: {exc}", ""
     if r.status_code >= 400:
-        return False, f"Bot {r.status_code}: {r.text[:200]}"
-    return True, None
+        return False, f"Bot {r.status_code}: {r.text[:200]}", ""
+    try:
+        msg_id = str((r.json() or {}).get("message_id") or "")
+    except Exception:
+        msg_id = ""
+    return True, None, msg_id
 
 
 @router.put("/api/missions/{mission_id}/slots", response_model=SlotsSaveResponse)
@@ -285,9 +373,17 @@ async def save_slots(
             announce_window = window or next(
                 (row.slot_window for row in new_rows if row.slot_window), ""
             )
-            announce_sent, announce_error = await _announce_slot_change(
+            announce_sent, announce_error, announce_msg_id = await _announce_slot_change(
                 session, mission, old_total, new_total, announce_window
             )
+            if announce_msg_id:
+                # Vorherige Ankuendigung derselben Mission entfernen, damit im
+                # Channel immer nur der aktuelle Stand steht
+                old_msg_id = (mission.jobs_announce_message_id or "").strip()
+                if old_msg_id and old_msg_id != announce_msg_id:
+                    await _delete_announce_message(session, old_msg_id)
+                mission.jobs_announce_message_id = announce_msg_id
+                await session.commit()
         except Exception as exc:
             announce_error = str(exc)
         if announce_error:

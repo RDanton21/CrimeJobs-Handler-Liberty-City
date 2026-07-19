@@ -49,7 +49,7 @@ Format des Briefings (Markdown, deutsch, prägnant):
 
 **Mittler:** <Mittler-Name> (passend zum Ton des Auftrags)
 
-**Quest-NPCs:**
+**Sektor Questgeber**
 - N× #<Nr> <Archetype>
   → Funktion: <was die Rolle im Auftrag tut>
   → Location: <Ort/Stadtteil, passend zur Gang>
@@ -138,7 +138,7 @@ TEMPLATES: list[dict] = [
         "content": """\
 **Mittler:** Miguel (formell, kalt — „die Stimme")
 
-**Quest-NPCs:**
+**Sektor Questgeber**
 - 3–5× Tribut-Pflichtige aus den **13 Zivil-Firmen**
   → Funktion: zahlen Schutzgeld, sind feste RP-Spieler
   → Location: deren jeweilige Firmen-Standorte
@@ -162,7 +162,7 @@ TEMPLATES: list[dict] = [
         "content": """\
 **Mittler:** Der Fixer (pragmatisch, schnoddrig)
 
-**Quest-NPCs (3 Lieferungen):**
+**Sektor Questgeber (3 Lieferungen)**
 - 1× #11 Lieferant ODER #4 Bankleiter ODER #10 Anwalt als Empfänger
   → Funktion: nimmt Lieferung still entgegen
   → Location: variiert pro Lieferung
@@ -187,7 +187,7 @@ TEMPLATES: list[dict] = [
         "content": """\
 **Mittler:** Der Skrupellose (brutal-direkt, privat)
 
-**Quest-NPCs:** KEINE — Ziel ist eine andere Spieler-Gang.
+**Sektor Questgeber** KEINE — Ziel ist eine andere Spieler-Gang.
 Das ist ein reiner Gang-vs-Gang-Auftrag, das Personal-Setup besteht
 aus dem Mittler allein.
 
@@ -205,7 +205,7 @@ aus dem Mittler allein.
         "content": """\
 **Mittler:** Miguel + Gang-Mittler (Rotation)
 
-**Quest-NPCs:** KEINE — Spieler vs. Spieler.
+**Sektor Questgeber** KEINE — Spieler vs. Spieler.
 Jede Gang bekommt privat ihre zugewiesene Rivalen-Gang aus
 CREW_RELATIONS.md. Akteure sind ausschließlich Spieler-Gangs.
 
@@ -223,7 +223,7 @@ CREW_RELATIONS.md. Akteure sind ausschließlich Spieler-Gangs.
         "content": """\
 **Mittler:** Big Boss DIREKT (Voice-Over) + Gang-Mittler für Coup-Übergabe
 
-**Quest-NPCs:** abhängig vom zugewiesenen Coup-Typ:
+**Sektor Questgeber** abhängig vom zugewiesenen Coup-Typ:
 
 - **Bank-Heist:** #4 Kassierer + #4 Bankleiter + #15 Geisel + #2/#3 LCPD-Reaktion
 - **Polit-Mord:** #9 Politiker + #12 Bodyguard + #8 Reporter
@@ -245,7 +245,7 @@ CREW_RELATIONS.md. Akteure sind ausschließlich Spieler-Gangs.
         "content": """\
 **Mittler:**
 
-**Quest-NPCs:**
+**Sektor Questgeber**
 - 1× #<Nr> <Archetype>
   → Funktion:
   → Location:

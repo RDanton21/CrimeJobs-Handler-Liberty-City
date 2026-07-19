@@ -116,6 +116,9 @@ class Mission(Base):
     personnel_updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     # ID der letzten Discord-Message im Admin-Channel (für Replace-Previous-Pattern)
     personnel_discord_message_id: Mapped[str] = mapped_column(String(40), default="")
+    # ID der Ankündigung im Jobs-Announce-Channel (Personal-Börse) — wird beim
+    # Archivieren gelöscht, damit der Channel nicht mit toten Aufrufen zuläuft.
+    jobs_announce_message_id: Mapped[str] = mapped_column(String(40), default="")
 
     crew: Mapped["Crew"] = relationship(back_populates="missions")
 

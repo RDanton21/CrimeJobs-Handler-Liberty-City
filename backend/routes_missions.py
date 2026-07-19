@@ -1498,6 +1498,26 @@ async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_s
                 pass  # Bot offline -> Message bleibt orphan im Channel
         m.personnel_discord_message_id = ""
 
+    # Ankündigung der Personal-Börse im Jobs-Announce-Channel löschen —
+    # ein archivierter Auftrag soll dort keine offenen Plätze mehr bewerben
+    if m.jobs_announce_message_id:
+        jobs_channel = (
+            await settings_get(session, "jobs_announce_channel_id", "")
+        ).strip()
+        if jobs_channel:
+            try:
+                async with httpx.AsyncClient(timeout=15.0) as cli:
+                    await cli.post(
+                        f"{settings.bot_api_url}/delete_message",
+                        json={
+                            "channel_id": jobs_channel,
+                            "message_id": m.jobs_announce_message_id,
+                        },
+                    )
+            except Exception:
+                pass  # Bot offline -> Message bleibt orphan im Channel
+        m.jobs_announce_message_id = ""
+
     m.archived_at = datetime.utcnow()
     await session.commit()
     await session.refresh(m)
