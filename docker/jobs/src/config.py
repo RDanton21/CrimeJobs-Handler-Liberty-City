@@ -5,6 +5,7 @@ Alle Werte kommen aus Env-Vars (Container-intern via docker-compose gesetzt).
 Defaults nur dort, wo der Kontrakt sie definiert.
 """
 import os
+import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -53,5 +54,58 @@ def _parse_event_dt(value: str | None, fallback: str) -> datetime:
 
 
 # --- Event-Fenster (Europe/Berlin) ---
-EVENT_START = _parse_event_dt(os.getenv("EVENT_START"), "2026-08-07T18:00")
-EVENT_END = _parse_event_dt(os.getenv("EVENT_END"), "2026-08-16T23:50")
+# Mehrere Zeitraeume moeglich. Format von EVENT_PERIODS:
+#   "<start>~<ende>[:<Label>],<start>~<ende>[:<Label>]"
+# Beispiel:
+#   2026-07-19T00:00~2026-07-26T23:59:Testphase,2026-08-07T18:00~2026-08-16T23:50:Das Probespiel
+# Ohne EVENT_PERIODS greifen die Defaults unten; EVENT_START/EVENT_END werden
+# weiterhin unterstuetzt und ueberschreiben dann den ersten Zeitraum.
+_DEFAULT_PERIODS = (
+    "2026-07-19T00:00~2026-07-26T23:59:Testphase,"
+    "2026-08-07T18:00~2026-08-16T23:50:Das Probespiel"
+)
+
+
+def _parse_periods(raw: str) -> list[dict]:
+    """'start~ende[:Label],...' -> [{'start': dt, 'end': dt, 'label': str}]."""
+    out: list[dict] = []
+    for chunk in (raw or "").split(","):
+        chunk = chunk.strip()
+        if not chunk or "~" not in chunk:
+            continue
+        start_raw, rest = chunk.split("~", 1)
+        # Label ist optional und steht nach dem Datum — der ISO-Teil enthaelt
+        # selbst Doppelpunkte (T18:00), daher von rechts nach dem Datum trennen.
+        m = re.match(r"\s*(\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2})?)?)\s*(?::\s*(.*))?$", rest)
+        if not m:
+            continue
+        end_raw, label = m.group(1), (m.group(2) or "").strip()
+        try:
+            start = _parse_event_dt(start_raw.strip(), start_raw.strip())
+            end = _parse_event_dt(end_raw.strip(), end_raw.strip())
+        except ValueError:
+            continue
+        if end < start:
+            continue
+        out.append({"start": start, "end": end, "label": label})
+    out.sort(key=lambda p: p["start"])
+    return out
+
+
+EVENT_PERIODS = _parse_periods(os.getenv("EVENT_PERIODS") or _DEFAULT_PERIODS)
+if not EVENT_PERIODS:  # Fallback, falls die Konfiguration unbrauchbar ist
+    EVENT_PERIODS = _parse_periods(_DEFAULT_PERIODS)
+
+# Explizite EVENT_START/EVENT_END uebersteuern den ersten Zeitraum (Alt-Setup).
+# Leere Werte ignorieren — docker-compose setzt die Variablen immer, ggf. leer.
+if (os.getenv("EVENT_START") or "").strip() or (os.getenv("EVENT_END") or "").strip():
+    EVENT_PERIODS[0] = {
+        "start": _parse_event_dt(os.getenv("EVENT_START"), "2026-08-07T18:00"),
+        "end": _parse_event_dt(os.getenv("EVENT_END"), "2026-08-16T23:50"),
+        "label": EVENT_PERIODS[0].get("label", ""),
+    }
+    EVENT_PERIODS.sort(key=lambda p: p["start"])
+
+# Gesamtspanne — weiterhin fuer die /api/board-Response und Alt-Code
+EVENT_START = EVENT_PERIODS[0]["start"]
+EVENT_END = EVENT_PERIODS[-1]["end"]

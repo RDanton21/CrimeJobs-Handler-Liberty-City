@@ -117,19 +117,29 @@
           </div>
         </header>
 
-        <!-- Tag-Tabs: schmale Uppercase-Chips, aktiv = Blutrot (mobil scrollbar) -->
-        <div class="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-1 px-1" x-show="board">
-          <template x-for="d in (board ? board.days : [])" :key="d.date">
-            <button @click="activeDay = d.date"
-                    :class="activeDay === d.date
-                      ? 'bg-[#b91c1c] border-[#b91c1c] text-white shadow-lg shadow-red-950/40'
-                      : 'bg-[#17191b]/80 border-[#3d4a4d] text-zinc-300 hover:border-zinc-400 hover:text-zinc-100'"
-                    class="headline px-3 py-1.5 rounded border text-xs font-medium tracking-wider
-                           whitespace-nowrap flex-shrink-0 transition-colors">
-              <span x-text="d.label"></span>
-              <span x-show="d.missions.length > 0" class="ml-1 opacity-70"
-                    x-text="'(' + d.missions.length + ')'"></span>
-            </button>
+        <!-- Tag-Tabs: schmale Uppercase-Chips, aktiv = Blutrot (mobil scrollbar).
+             Zwischen zwei Event-Zeitraeumen steht ein Trenner mit Label. -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 mb-4 -mx-1 px-1" x-show="board">
+          <template x-for="(d, i) in (board ? board.days : [])" :key="d.date">
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <!-- Perioden-Trenner: nur wenn sich der Zeitraum gegenueber dem Vortag aendert -->
+              <div x-show="i > 0 && board.days[i-1].period !== d.period"
+                   class="flex items-center gap-2 pl-1 pr-2 border-l border-[#3d4a4d]/70">
+                <span x-show="d.period_label" class="headline text-[10px] tracking-widest
+                             uppercase text-[#b98a4a] whitespace-nowrap"
+                      x-text="d.period_label"></span>
+              </div>
+              <button @click="activeDay = d.date"
+                      :class="activeDay === d.date
+                        ? 'bg-[#b91c1c] border-[#b91c1c] text-white shadow-lg shadow-red-950/40'
+                        : 'bg-[#17191b]/80 border-[#3d4a4d] text-zinc-300 hover:border-zinc-400 hover:text-zinc-100'"
+                      class="headline px-3 py-1.5 rounded border text-xs font-medium tracking-wider
+                             whitespace-nowrap transition-colors">
+                <span x-text="d.label"></span>
+                <span x-show="d.missions.length > 0" class="ml-1 opacity-70"
+                      x-text="'(' + d.missions.length + ')'"></span>
+              </button>
+            </div>
           </template>
         </div>
 

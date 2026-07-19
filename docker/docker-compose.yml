@@ -272,8 +272,11 @@ services:
       SESSION_SECRET: "${JOBS_SESSION_SECRET}"
       CRIME_BACKEND_URL: "${JOBS_CRIME_BACKEND_URL:-http://sekt6r-crime-backend:8000}"
       CRIME_API_KEY: "${JOBS_API_KEY}"
-      EVENT_START: "${JOBS_EVENT_START:-2026-08-07T18:00}"
-      EVENT_END: "${JOBS_EVENT_END:-2026-08-16T23:50}"
+      # Mehrere Event-Zeitraeume: "start~ende:Label" kommagetrennt
+      EVENT_PERIODS: "${JOBS_EVENT_PERIODS:-2026-07-19T00:00~2026-07-26T23:59:Testphase,2026-08-07T18:00~2026-08-16T23:50:Das Probespiel}"
+      # Alt-Variablen: nur setzen, wenn der erste Zeitraum uebersteuert werden soll
+      EVENT_START: "${JOBS_EVENT_START:-}"
+      EVENT_END: "${JOBS_EVENT_END:-}"
       TZ: Europe/Berlin
     volumes:
       - jobs_data:/app/data

@@ -184,13 +184,25 @@ async def _fetch_crime_data() -> tuple[list, list]:
 # Board-Aufbau
 # ---------------------------------------------------------------------------
 
-def _event_days() -> list[date]:
-    """Alle Kalendertage des Event-Fensters (Europe/Berlin), inklusiv."""
-    days: list[date] = []
-    d = config.EVENT_START.date()
-    while d <= config.EVENT_END.date():
-        days.append(d)
-        d += timedelta(days=1)
+def _event_days() -> list[tuple[date, int, str]]:
+    """Alle Kalendertage aller Event-Zeitraeume (Europe/Berlin), inklusiv.
+
+    Rueckgabe je Tag: (datum, perioden_index, perioden_label). Der Index
+    erlaubt dem Frontend, zwischen zwei Zeitraeumen einen Trenner zu setzen.
+    Ueberlappende Zeitraeume erzeugen keine Doppel-Tage.
+    """
+    days: list[tuple[date, int, str]] = []
+    seen: set[date] = set()
+    for idx, period in enumerate(config.EVENT_PERIODS):
+        label = period.get("label", "")
+        d = period["start"].date()
+        last = period["end"].date()
+        while d <= last:
+            if d not in seen:
+                seen.add(d)
+                days.append((d, idx, label))
+            d += timedelta(days=1)
+    days.sort(key=lambda item: item[0])
     return days
 
 
@@ -403,7 +415,8 @@ async def api_me(me: dict = Depends(require_session)):
 
 @app.get("/api/board")
 async def api_board(me: dict = Depends(require_session)):
-    """Event-Board: alle 10 Event-Tage (auch leere) + Pseudo-Tag 'Ausserhalb Event'."""
+    """Event-Board: alle Tage aller Event-Zeitraeume (auch leere) +
+    Pseudo-Tag 'Ausserhalb Event' fuer alles, was in keinen Zeitraum faellt."""
     missions, crews = await _fetch_crime_data()
 
     # Alle Belegungen laden und nach Slot gruppieren
@@ -418,7 +431,7 @@ async def api_board(me: dict = Depends(require_session)):
 
     # Missions auf Berlin-Kalendertage verteilen
     event_days = _event_days()
-    buckets: dict[str, list[dict]] = {d.isoformat(): [] for d in event_days}
+    buckets: dict[str, list[dict]] = {d.isoformat(): [] for d, _, _ in event_days}
     other: list[dict] = []
     for mission in sorted(missions, key=_mission_sort_key):
         enriched = _enrich_mission(mission, assignments_by_slot, me)
@@ -433,18 +446,34 @@ async def api_board(me: dict = Depends(require_session)):
         {
             "date": d.isoformat(),
             "label": f"{WEEKDAYS_DE[d.weekday()]} {d.strftime('%d.%m.')}",
+            "period": period_idx,
+            "period_label": period_label,
             "missions": buckets[d.isoformat()],
         }
-        for d in event_days
+        for d, period_idx, period_label in event_days
     ]
     if other:
         # Nichts verschwindet: Missions ausserhalb des Fensters als Pseudo-Tag
-        days_out.append({"date": "other", "label": "Außerhalb Event", "missions": other})
+        days_out.append({
+            "date": "other",
+            "label": "Außerhalb Event",
+            "period": -1,
+            "period_label": "",
+            "missions": other,
+        })
 
     return {
         "event": {
             "start": config.EVENT_START.isoformat(),
             "end": config.EVENT_END.isoformat(),
+            "periods": [
+                {
+                    "start": p["start"].isoformat(),
+                    "end": p["end"].isoformat(),
+                    "label": p.get("label", ""),
+                }
+                for p in config.EVENT_PERIODS
+            ],
         },
         "days": days_out,
         "crews": crews,
