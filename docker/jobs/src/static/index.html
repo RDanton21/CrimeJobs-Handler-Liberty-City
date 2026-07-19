@@ -161,7 +161,10 @@
             </template>
 
             <template x-for="m in currentDay().missions" :key="m.id">
-              <div class="card-cine rounded-lg overflow-hidden flex">
+              <!-- id = Sprungziel aus dem "Meine Slots"-Overlay -->
+              <div class="card-cine rounded-lg overflow-hidden flex transition-shadow duration-500"
+                   :id="'mission-' + m.id"
+                   :class="jumpedTo === m.id ? 'ring-2 ring-[#b98a4a] shadow-lg shadow-[#b98a4a]/20' : ''">
                 <!-- Farbbalken in Crew-Farbe -->
                 <div class="w-1.5 flex-shrink-0"
                      :style="'background-color:' + ((m.crew && m.crew.color_hex) || '#b91c1c')"></div>
@@ -182,6 +185,18 @@
                                 ? 'border-[#b91c1c]/60 bg-[#b91c1c]/15 text-red-400'
                                 : 'border-[#b98a4a]/50 bg-[#b98a4a]/10 text-[#d9ae6e]'"
                               x-text="m.sent_at ? 'live' : 'geplant'"></span>
+                        <!-- Einsatzfenster laeuft gerade -->
+                        <span x-show="isRunning(m)" x-cloak
+                              class="headline text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded
+                                     border border-[#15803d] bg-[#15803d]/20 text-green-400 animate-pulse">
+                          Läuft gerade
+                        </span>
+                        <!-- Vom Admin archiviert -> verschwindet 1 Std spaeter -->
+                        <span x-show="m.archived_at" x-cloak
+                              class="headline text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded
+                                     border border-[#15803d] bg-[#15803d]/25 text-green-300">
+                          Erledigt
+                        </span>
                       </div>
                       <p class="text-xs text-[#d9ae6e] mt-0.5" x-show="m.slot_window"
                          x-text="'Zeitfenster: ' + m.slot_window"></p>
@@ -321,29 +336,86 @@
 
           <div class="space-y-3">
             <template x-for="entry in mySlots()" :key="entry.slot.id">
-              <div class="bg-[#17191b]/85 border border-[#3d4a4d]/60 rounded p-3 flex gap-3">
+              <!-- Klick auf die Karte springt zum Auftrag im Kalender.
+                   Der Austragen-Button stoppt das Durchreichen (.stop). -->
+              <div @click="jumpToMission(entry)"
+                   title="Zum Auftrag im Kalender springen"
+                   class="bg-[#17191b]/85 border border-[#3d4a4d]/60 rounded p-3 flex gap-3
+                          cursor-pointer hover:border-[#b98a4a]/70 hover:bg-[#1c2023] transition-colors">
                 <div class="w-1 rounded-full flex-shrink-0"
                      :style="'background:' + (entry.mission.crew?.color_hex || '#b91c1c')"></div>
                 <div class="min-w-0 flex-1">
-                  <div class="flex items-baseline gap-2 flex-wrap">
+                  <!-- Kopfzeile: Crew, Status, Tag, Uhrzeit -->
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full flex-shrink-0"
+                          :class="entry.mission.sent_at ? 'bg-[#b91c1c]' : 'bg-[#b98a4a]'"
+                          :title="entry.mission.sent_at ? 'live' : 'geplant'"></span>
                     <span class="headline text-xs font-semibold tracking-wider"
                           x-text="entry.mission.crew ? entry.mission.crew.name : 'Crew'"></span>
-                    <span class="text-[11px] text-[#d9ae6e]" x-text="entry.dayLabel"></span>
-                    <span class="text-[11px] text-zinc-400" x-show="entry.slot.slot_window"
+                    <span class="text-[11px] text-zinc-500"
+                          x-show="entry.mission.crew && entry.mission.crew.district"
+                          x-text="entry.mission.crew.district"></span>
+                    <span class="text-[11px] text-[#d9ae6e] font-medium" x-text="entry.dayLabel"></span>
+                    <span class="text-[11px] text-[#d9ae6e]" x-show="entry.slot.slot_window"
                           x-text="entry.slot.slot_window"></span>
+                    <span x-show="isRunning(entry.mission)" x-cloak
+                          class="headline text-[9px] font-medium tracking-wider px-1.5 py-0.5 rounded
+                                 border border-[#15803d] bg-[#15803d]/20 text-green-400 animate-pulse">
+                      Läuft gerade
+                    </span>
+                    <span x-show="entry.mission.archived_at" x-cloak
+                          class="headline text-[9px] font-medium tracking-wider px-1.5 py-0.5 rounded
+                                 border border-[#15803d] bg-[#15803d]/25 text-green-300">
+                      Erledigt
+                    </span>
                   </div>
-                  <p class="text-sm font-medium mt-0.5">
+
+                  <!-- Rolle + Aufgabe -->
+                  <p class="text-sm font-medium mt-1">
                     <span x-text="entry.slot.name || ('NPC #' + (entry.slot.npc_number || '?'))"></span>
                     <span class="text-zinc-400 font-normal" x-show="entry.slot.function"
                           x-text="' — ' + entry.slot.function"></span>
                   </p>
-                  <p class="text-xs text-zinc-400 mt-0.5" x-show="entry.slot.location"
-                     x-text="'Ort: ' + entry.slot.location"></p>
-                  <p class="text-xs text-zinc-400" x-show="entry.slot.costume"
-                     x-text="'Kostüm: ' + entry.slot.costume"></p>
+
+                  <!-- Treffpunkt / Outfit / Hinweise -->
+                  <p class="text-xs text-zinc-400 mt-1" x-show="entry.slot.location">
+                    <span class="text-zinc-500">Treffpunkt:</span>
+                    <span x-text="entry.slot.location"></span>
+                  </p>
+                  <p class="text-xs text-zinc-400" x-show="entry.slot.costume">
+                    <span class="text-zinc-500">Kostüm:</span>
+                    <span x-text="entry.slot.costume"></span>
+                  </p>
+                  <p class="text-xs text-zinc-400" x-show="entry.slot.notes">
+                    <span class="text-zinc-500">Hinweis:</span>
+                    <span x-text="entry.slot.notes"></span>
+                  </p>
+
+                  <!-- Besetzung + Mitspieler -->
+                  <p class="text-xs mt-1.5">
+                    <span class="text-zinc-500">Besetzung:</span>
+                    <span :class="entry.slot.free === 0 ? 'text-[#d9ae6e]' : 'text-zinc-300'"
+                          x-text="entry.slot.assigned_count + '/' + entry.slot.required_count"></span>
+                    <template x-if="entry.others && entry.others.length">
+                      <span class="text-zinc-400">
+                        · mit <span x-text="entry.others.join(', ')"></span>
+                      </span>
+                    </template>
+                    <template x-if="entry.slot.free > 0">
+                      <span class="text-zinc-500"
+                            x-text="'· noch ' + entry.slot.free + ' frei'"></span>
+                    </template>
+                  </p>
+
+                  <!-- Worum es im Auftrag geht -->
+                  <p class="text-xs text-zinc-400 mt-1.5 border-l-2 border-[#3d4a4d] pl-2"
+                     x-show="entry.mission.content || entry.mission.content_excerpt"
+                     x-text="shorten(entry.mission.content || entry.mission.content_excerpt, 180)"></p>
+
+                  <p class="text-[10px] text-[#b98a4a]/80 mt-1.5">Zum Auftrag springen →</p>
                 </div>
                 <div class="flex-shrink-0 self-center">
-                  <button @click="unassign(entry.slot)" :disabled="!!busySlots[entry.slot.id]"
+                  <button @click.stop="unassign(entry.slot)" :disabled="!!busySlots[entry.slot.id]"
                           class="headline px-3 py-1.5 rounded border border-[#b91c1c] text-red-400
                                  hover:bg-[#b91c1c]/15 text-xs font-medium tracking-wider
                                  disabled:opacity-50 transition-colors">
@@ -382,6 +454,8 @@
         briefOpen: {},  // mission_id -> Regie-Details (Personal-Brief) aufgeklappt
         busySlots: {},  // slot_id -> Request laeuft
         myOpen: false,  // Overlay "Meine Eintragungen"
+        jumpedTo: null, // mission_id kurz hervorheben nach dem Sprung
+        now: Math.floor(Date.now() / 1000),  // tickt, damit "Läuft gerade" umspringt
         toast: '',
         toastError: false,
         _toastTimer: null,
@@ -468,8 +542,14 @@
             if (this.me && document.visibilityState === 'visible') this.loadBoard(false);
           }, 30000);
           document.addEventListener('visibilitychange', () => {
-            if (this.me && document.visibilityState === 'visible') this.loadBoard(false);
+            if (this.me && document.visibilityState === 'visible') {
+              this.now = Math.floor(Date.now() / 1000);
+              this.loadBoard(false);
+            }
           });
+          // Uhr fuer "Läuft gerade" — unabhaengig vom Board-Refresh, damit das
+          // Label auch ohne neue Daten zur richtigen Minute umspringt
+          setInterval(() => { this.now = Math.floor(Date.now() / 1000); }, 15000);
         },
 
         async loadBoard(pickDay) {
@@ -518,17 +598,57 @@
         // die Daten stecken bereits im geladenen Board.
         mySlots() {
           if (!this.board) return [];
+          const meId = this.me && this.me.discord_user_id;
           const out = [];
           for (const d of this.board.days) {
             for (const m of d.missions) {
               for (const s of m.slots) {
                 if (s.mine) {
-                  out.push({ slot: s, mission: m, dayLabel: d.label, date: d.date });
+                  // Mitspieler im selben Slot (ohne mich)
+                  const others = (s.assigned || [])
+                    .filter(a => a.player_discord_id !== meId)
+                    .map(a => a.username);
+                  out.push({ slot: s, mission: m, dayLabel: d.label, date: d.date, others });
                 }
               }
             }
           }
           return out;
+        },
+
+        // Laeuft das Einsatzfenster gerade? Nutzt this.now, damit Alpine das
+        // Label beim Ticken neu bewertet. Archivierte Auftraege laufen nicht mehr.
+        isRunning(mission) {
+          if (!mission || mission.archived_at) return false;
+          const start = mission.window_start;
+          const end = mission.window_end;
+          if (!start || !end) return false;
+          return this.now >= start && this.now <= end;
+        },
+
+        // Text auf N Zeichen kuerzen, ohne mitten im Wort zu schneiden
+        shorten(text, max) {
+          const t = (text || '').replace(/\s+/g, ' ').trim();
+          if (t.length <= max) return t;
+          const cut = t.slice(0, max);
+          const lastSpace = cut.lastIndexOf(' ');
+          return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut) + ' …';
+        },
+
+        // Aus dem Overlay zum Auftrag im Kalender springen: Overlay zu,
+        // richtigen Tag waehlen, Auftragstext aufklappen, hinscrollen und
+        // kurz hervorheben.
+        jumpToMission(entry) {
+          this.myOpen = false;
+          this.activeDay = entry.date;
+          this.expanded[entry.mission.id] = true;
+          this.$nextTick(() => {
+            const el = document.getElementById('mission-' + entry.mission.id);
+            if (!el) return;
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            this.jumpedTo = entry.mission.id;
+            setTimeout(() => { this.jumpedTo = null; }, 2500);
+          });
         },
 
         eventLabel() {

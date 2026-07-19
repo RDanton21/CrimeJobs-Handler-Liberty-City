@@ -192,6 +192,33 @@ def _berlin_offset(naive_local: datetime) -> timedelta:
     return timedelta(hours=2) if start <= naive_local < end else timedelta(hours=1)
 
 
+def _slot_window_unix(mission: Mission, slot_window: str) -> tuple[int | None, int | None]:
+    """(start, ende) des Einsatzfensters als Unix-Zeit.
+
+    Aus "23:00-01:00" wird Start 23:00 und Ende 01:00 des Folgetags — ein
+    Ende, das vor dem Start liegt, gilt also als ueber Mitternacht. Ohne
+    zweite Uhrzeit endet das Fenster 2 Stunden nach dem Start (Annahme, damit
+    das Board "laeuft gerade" ueberhaupt beenden kann).
+    """
+    start = _slot_start_unix(mission, slot_window)
+    if start is None:
+        return None, None
+    times = re.findall(r"(\d{1,2})[:.](\d{2})", slot_window or "")
+    if len(times) >= 2:
+        h, m = int(times[1][0]), int(times[1][1])
+        if h <= 23 and m <= 59:
+            start_dt = datetime.fromtimestamp(start, timezone.utc).replace(tzinfo=None)
+            start_local = start_dt + _berlin_offset(start_dt)
+            end_local = start_local.replace(hour=h, minute=m, second=0, microsecond=0)
+            # Ende rechnerisch vor dem Start -> das Fenster geht ueber Mitternacht
+            if end_local <= start_local:
+                end_local += timedelta(days=1)
+            end_dt = end_local - _berlin_offset(end_local)
+            return start, int(end_dt.replace(tzinfo=timezone.utc).timestamp())
+    # Ohne zweite Uhrzeit: 2 Stunden annehmen, damit das Fenster endlich ist
+    return start, start + int(timedelta(hours=2).total_seconds())
+
+
 def _slot_start_unix(mission: Mission, slot_window: str) -> int | None:
     """Unix-Timestamp fuer den Beginn des Einsatzes.
 
@@ -458,14 +485,26 @@ def _iso(dt) -> str | None:
     return dt.isoformat() if dt else None
 
 
+#: Wie lange ein archivierter Auftrag noch auf dem Board bleibt — er wird
+#: dort als "Erledigt" markiert und verschwindet danach von selbst.
+ARCHIVED_GRACE = timedelta(hours=1)
+
+
 @public_router.get("/active-missions")
 async def public_active_missions(session: AsyncSession = Depends(get_session)):
-    """Alle nicht-archivierten Missions, die >= 1 Personal-Slot haben —
-    inkl. Crew-Infos und Slot-Liste. Datetimes sind naive UTC als ISO."""
+    """Missions mit >= 1 Personal-Slot — inkl. Crew-Infos und Slot-Liste.
+
+    Archivierte Auftraege werden nicht sofort ausgeblendet, sondern bleiben
+    noch ARCHIVED_GRACE lang sichtbar (Board zeigt sie als "Erledigt").
+    Datetimes sind naive UTC als ISO.
+    """
+    cutoff = datetime.utcnow() - ARCHIVED_GRACE
     res = await session.execute(
         select(Mission)
         .join(PersonnelSlot, PersonnelSlot.mission_id == Mission.id)
-        .where(Mission.archived_at.is_(None))
+        .where(
+            (Mission.archived_at.is_(None)) | (Mission.archived_at > cutoff)
+        )
         .options(selectinload(Mission.crew))
         .distinct()
         .order_by(Mission.id)
@@ -490,12 +529,18 @@ async def public_active_missions(session: AsyncSession = Depends(get_session)):
         content = m.content_final or m.content_generated or ""
         # Mission-weites Slot-Fenster: erstes nicht-leeres slot_window der Slots
         slot_window = next((s.slot_window for s in slots if s.slot_window), "")
+        # Einsatzfenster als Unix-Zeit, damit das Board "laeuft gerade"
+        # zuverlaessig erkennt (Zeitzonen-frei vergleichbar).
+        win_start, win_end = _slot_window_unix(m, slot_window)
         out.append({
             "id": m.id,
             "status": m.status.value,
             "sent_at": _iso(m.sent_at),
             "scheduled_send_at": _iso(m.scheduled_send_at),
             "deadline_at": _iso(m.deadline_at),
+            "archived_at": _iso(m.archived_at),
+            "window_start": win_start,
+            "window_end": win_end,
             "crew": {
                 "id": m.crew.id,
                 "name": m.crew.name,
