@@ -185,7 +185,7 @@
                     </div>
                     <div class="flex items-center gap-3 flex-shrink-0">
                       <button @click="expanded[m.id] = !expanded[m.id]"
-                              x-show="m.content_excerpt"
+                              x-show="m.content || m.content_excerpt"
                               class="text-xs text-zinc-400 hover:text-zinc-200 underline">
                         <span x-text="expanded[m.id] ? 'Auftrag ausblenden' : 'Auftrag anzeigen'"></span>
                       </button>
@@ -197,10 +197,12 @@
                     </div>
                   </div>
 
-                  <!-- Auftrags-Auszug (einklappbar) -->
+                  <!-- Auftragstext, vollstaendig (einklappbar).
+                       content = ganzer Text; content_excerpt nur als Rueckfall,
+                       falls das Backend noch die alte Kurzform liefert. -->
                   <p x-show="expanded[m.id]" x-cloak
                      class="text-sm text-zinc-300 mt-2 whitespace-pre-line border-l-2 border-[#3d4a4d] pl-3"
-                     x-text="m.content_excerpt"></p>
+                     x-text="m.content || m.content_excerpt"></p>
 
                   <!-- Regie-Details: formatierter Personal-Brief (einklappbar) -->
                   <div x-show="briefOpen[m.id]" x-cloak

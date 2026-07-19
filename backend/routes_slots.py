@@ -503,6 +503,10 @@ async def public_active_missions(session: AsyncSession = Depends(get_session)):
                 "color_hex": m.crew.color_hex or "",
             },
             "slot_window": slot_window,
+            # content = kompletter Auftragstext (das Board zeigt ihn aufgeklappt
+            # vollstaendig). content_excerpt bleibt als Kurzform erhalten, damit
+            # aeltere Dashboard-Versionen weiter funktionieren.
+            "content": content,
             "content_excerpt": content[:300],
             "personnel_brief": m.personnel_brief or "",
             "slots": [
