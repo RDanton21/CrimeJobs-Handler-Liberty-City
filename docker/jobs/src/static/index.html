@@ -121,6 +121,26 @@
             </div>
             <a href="/auth/logout" class="text-xs text-zinc-400 hover:text-zinc-100 underline">Logout</a>
           </div>
+
+          <!-- Admin-Leiste: nur fuer Admins, der Server prueft zusaetzlich -->
+          <div x-show="me.is_admin" x-cloak
+               class="flex items-center justify-center gap-2 mt-3 flex-wrap">
+            <button @click="openStats()"
+                    class="headline px-2.5 py-1 rounded border border-[#3d4a4d] bg-[#17191b]/80
+                           text-zinc-300 text-[11px] font-medium tracking-wider
+                           hover:border-zinc-400 hover:text-zinc-100 transition-colors">
+              Auswertung
+            </button>
+            <button @click="clearCompleted()" :disabled="clearing"
+                    title="Nimmt alle erledigten Aufträge sofort vom Board"
+                    class="headline px-2.5 py-1 rounded border border-[#3d4a4d] bg-[#17191b]/80
+                           text-zinc-300 text-[11px] font-medium tracking-wider
+                           hover:border-zinc-400 hover:text-zinc-100 disabled:opacity-50
+                           transition-colors">
+              <span x-show="!clearing">Erledigte entfernen</span>
+              <span x-show="clearing" x-cloak>Entferne…</span>
+            </button>
+          </div>
         </header>
 
         <!-- Tag-Tabs: eine Zeile pro Kalenderwoche, mittig, kein Scrollen.
@@ -448,6 +468,74 @@
       </div>
     </div>
 
+    <!-- Admin-Auswertung: wer hat wie viele Einsätze gemacht -->
+    <div x-show="statsOpen" x-cloak
+         @keydown.escape.window="statsOpen = false"
+         class="fixed inset-0 z-40 flex items-start justify-center p-4 sm:p-8 overflow-y-auto
+                bg-black/70 backdrop-blur-sm">
+      <div @click.outside="statsOpen = false"
+           class="card-cine rounded-xl w-full max-w-2xl shadow-2xl border border-[#3d4a4d]">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-[#3d4a4d]/70">
+          <h2 class="headline text-sm font-semibold tracking-[.16em] text-[#d9ae6e]">
+            Auswertung — Einsätze pro Spieler
+          </h2>
+          <button @click="statsOpen = false"
+                  class="text-zinc-400 hover:text-zinc-100 text-lg leading-none px-1">✕</button>
+        </div>
+
+        <div class="p-5">
+          <p x-show="statsLoading" class="text-sm text-zinc-400 text-center py-6">Lade…</p>
+          <p x-show="!statsLoading && stats && stats.players.length === 0"
+             class="text-sm text-zinc-400 text-center py-6">
+            Noch keine Einsätze erfasst.<br>
+            <span class="text-xs">Sobald du einen Auftrag im Dashboard archivierst,
+            werden die Eintragungen hier gezählt.</span>
+          </p>
+
+          <template x-if="!statsLoading && stats && stats.players.length > 0">
+            <div>
+              <div class="flex gap-4 mb-3 text-xs text-zinc-400">
+                <span>Spieler: <span class="text-zinc-200" x-text="stats.total_players"></span></span>
+                <span>Einsätze gesamt: <span class="text-zinc-200" x-text="stats.total_completed"></span></span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="text-left text-[11px] text-zinc-500 border-b border-[#3d4a4d]/60">
+                      <th class="py-1.5 pr-2 font-medium">#</th>
+                      <th class="py-1.5 pr-2 font-medium">Spieler</th>
+                      <th class="py-1.5 px-2 font-medium text-right">Aufträge</th>
+                      <th class="py-1.5 px-2 font-medium text-right">Rollen</th>
+                      <th class="py-1.5 px-2 font-medium text-right">offen</th>
+                      <th class="py-1.5 pl-2 font-medium">zuletzt</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="(p, i) in stats.players" :key="p.player_discord_id">
+                      <tr class="border-b border-[#3d4a4d]/25">
+                        <td class="py-1.5 pr-2 text-zinc-500" x-text="i + 1"></td>
+                        <td class="py-1.5 pr-2 font-medium" x-text="p.username"></td>
+                        <td class="py-1.5 px-2 text-right text-green-400" x-text="p.missions_done"></td>
+                        <td class="py-1.5 px-2 text-right text-zinc-300" x-text="p.slots_done"></td>
+                        <td class="py-1.5 px-2 text-right"
+                            :class="p.open > 0 ? 'text-[#d9ae6e]' : 'text-zinc-600'"
+                            x-text="p.open"></td>
+                        <td class="py-1.5 pl-2 text-xs text-zinc-500" x-text="dateShort(p.last_done)"></td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+              <p class="text-[11px] text-zinc-500 mt-3">
+                „Aufträge" = abgeschlossene Einsätze, „Rollen" = einzelne Plätze darin,
+                „offen" = aktuelle Eintragungen in noch laufenden Aufträgen.
+              </p>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast (Erfolg/Fehler) -->
     <div x-show="toast" x-cloak
          class="fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg text-sm font-medium
@@ -471,6 +559,10 @@
         myOpen: false,  // Overlay "Meine Eintragungen"
         jumpedTo: null, // mission_id kurz hervorheben nach dem Sprung
         now: Math.floor(Date.now() / 1000),  // tickt, damit "Läuft gerade" umspringt
+        statsOpen: false,     // Admin-Auswertung
+        statsLoading: false,
+        stats: null,
+        clearing: false,      // "Erledigte entfernen" laeuft
         toast: '',
         toastError: false,
         _toastTimer: null,
@@ -629,6 +721,55 @@
             }
           }
           return out;
+        },
+
+        // ---- Admin-Funktionen (Server prueft die Berechtigung erneut) ----
+        async openStats() {
+          this.statsOpen = true;
+          this.statsLoading = true;
+          try {
+            const r = await fetch('/api/admin/stats');
+            if (r.ok) {
+              this.stats = await r.json();
+            } else {
+              const j = await r.json().catch(() => ({}));
+              this.showToast(j.detail || 'Auswertung nicht verfügbar', true);
+              this.statsOpen = false;
+            }
+          } catch (e) {
+            this.showToast('Verbindung zum Server fehlgeschlagen', true);
+            this.statsOpen = false;
+          }
+          this.statsLoading = false;
+        },
+
+        async clearCompleted() {
+          if (this.clearing) return;
+          if (!confirm('Alle erledigten Aufträge vom Board entfernen?\n\n'
+                     + 'Die Aufträge selbst bleiben im Crime-Dashboard bestehen, '
+                     + 'und die Auswertung behält alle Einsätze.')) return;
+          this.clearing = true;
+          try {
+            const r = await fetch('/api/admin/clear-completed', { method: 'POST' });
+            const j = await r.json().catch(() => ({}));
+            if (r.ok) {
+              this.showToast(j.detail || 'Erledigte Aufträge entfernt', false);
+              await this.loadBoard(false);
+            } else {
+              this.showToast(j.detail || 'Entfernen fehlgeschlagen', true);
+            }
+          } catch (e) {
+            this.showToast('Verbindung zum Server fehlgeschlagen', true);
+          }
+          this.clearing = false;
+        },
+
+        // ISO-Datum kurz darstellen (fuer die Auswertungstabelle)
+        dateShort(iso) {
+          if (!iso) return '—';
+          const d = new Date(iso + (iso.endsWith('Z') ? '' : 'Z'));
+          if (isNaN(d)) return '—';
+          return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
         },
 
         // Laeuft das Einsatzfenster gerade? Nutzt this.now, damit Alpine das

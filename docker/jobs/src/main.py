@@ -20,12 +20,17 @@ import httpx
 from fastapi import Body, Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, exists, func, select
 from sqlalchemy.exc import IntegrityError
 
 from . import config, discord_oauth
 from .db import SessionLocal, init_db
-from .models import Player, SlotAssignment
+from .models import (
+    CompletedParticipation,
+    DismissedMission,
+    Player,
+    SlotAssignment,
+)
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -413,6 +418,41 @@ async def api_me(me: dict = Depends(require_session)):
     }
 
 
+async def _record_completed(missions: list[dict], assignments_by_slot: dict) -> None:
+    """Eintragungen archivierter Auftraege in die Historie uebernehmen.
+
+    Laeuft bei jedem Board-Aufruf und ist idempotent (UNIQUE auf
+    slot_id+player). Ohne diesen Schritt waere die Statistik leer, sobald
+    ein Auftrag vom Board verschwindet.
+    """
+    neu: list[CompletedParticipation] = []
+    for mission in missions:
+        if not mission.get("archived_at"):
+            continue
+        crew_name = (mission.get("crew") or {}).get("name", "")
+        for slot in mission.get("slots", []):
+            for a in assignments_by_slot.get(slot.get("id"), []):
+                neu.append(CompletedParticipation(
+                    slot_id=a.slot_id,
+                    mission_id=a.mission_id,
+                    player_discord_id=a.player_discord_id,
+                    username=a.username,
+                    crew_name=crew_name,
+                    slot_name=slot.get("name") or "",
+                ))
+    if not neu:
+        return
+    async with SessionLocal() as session:
+        for row in neu:
+            # Einzeln, damit ein bereits vorhandener Eintrag die anderen
+            # nicht mit zurueckrollt
+            try:
+                async with session.begin():
+                    session.add(row)
+            except IntegrityError:
+                pass
+
+
 @app.get("/api/board")
 async def api_board(me: dict = Depends(require_session)):
     """Event-Board: alle Tage aller Event-Zeitraeume (auch leere) +
@@ -425,9 +465,19 @@ async def api_board(me: dict = Depends(require_session)):
             select(SlotAssignment).order_by(SlotAssignment.assigned_at)
         )
         assignments = result.scalars().all()
+        dismissed = set(
+            (await session.execute(select(DismissedMission.mission_id))).scalars().all()
+        )
     assignments_by_slot: dict[int, list[SlotAssignment]] = {}
     for a in assignments:
         assignments_by_slot.setdefault(a.slot_id, []).append(a)
+
+    # Erledigte Einsaetze festschreiben, bevor der Auftrag vom Board faellt
+    await _record_completed(missions, assignments_by_slot)
+
+    # Vom Admin ausgeblendete Auftraege gar nicht erst anzeigen
+    if dismissed:
+        missions = [m for m in missions if m.get("id") not in dismissed]
 
     # Missions auf Berlin-Kalendertage verteilen
     event_days = _event_days()
@@ -609,3 +659,112 @@ async def admin_unassign(
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="Kein Eintrag gefunden")
     return Response(status_code=204)
+
+
+def _require_admin(me: dict) -> None:
+    if not me.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Nur für Admins")
+
+
+@app.post("/api/admin/clear-completed")
+async def admin_clear_completed(me: dict = Depends(require_session)):
+    """Alle erledigten Auftraege sofort vom Board nehmen.
+
+    Die Auftraege selbst bleiben im Crime-Dashboard unberuehrt — hier wird
+    nur vermerkt, dass sie auf der Boerse nicht mehr erscheinen sollen. Die
+    Teilnahme-Historie fuer die Statistik bleibt ebenfalls erhalten.
+    """
+    _require_admin(me)
+    missions, _ = await _fetch_crime_data()
+
+    # Vor dem Ausblenden die Teilnahmen sichern
+    async with SessionLocal() as session:
+        result = await session.execute(select(SlotAssignment))
+        assignments_by_slot: dict[int, list[SlotAssignment]] = {}
+        for a in result.scalars().all():
+            assignments_by_slot.setdefault(a.slot_id, []).append(a)
+    await _record_completed(missions, assignments_by_slot)
+
+    erledigt = [m for m in missions if m.get("archived_at")]
+    if not erledigt:
+        return {"removed": 0, "detail": "Keine erledigten Aufträge vorhanden"}
+
+    entfernt = 0
+    async with SessionLocal() as session:
+        for m in erledigt:
+            try:
+                async with session.begin():
+                    session.add(DismissedMission(
+                        mission_id=m["id"],
+                        dismissed_by=me.get("username", ""),
+                    ))
+                entfernt += 1
+            except IntegrityError:
+                pass  # war schon ausgeblendet
+    return {"removed": entfernt, "detail": f"{entfernt} erledigte Aufträge entfernt"}
+
+
+@app.get("/api/admin/stats")
+async def admin_stats(me: dict = Depends(require_session)):
+    """Auswertung: wer hat wie viele Auftraege mitgemacht (nur fuer Admins)."""
+    _require_admin(me)
+    async with SessionLocal() as session:
+        res = await session.execute(
+            select(
+                CompletedParticipation.player_discord_id,
+                func.max(CompletedParticipation.username),
+                func.count(func.distinct(CompletedParticipation.mission_id)),
+                func.count(CompletedParticipation.id),
+                func.max(CompletedParticipation.completed_at),
+            ).group_by(CompletedParticipation.player_discord_id)
+        )
+        fertig = {
+            row[0]: {
+                "player_discord_id": row[0],
+                "username": row[1] or "?",
+                "missions_done": row[2],
+                "slots_done": row[3],
+                "last_done": row[4].isoformat() if row[4] else None,
+            }
+            for row in res.all()
+        }
+        # Aktuell offene Eintragungen — also solche, die noch NICHT als
+        # erledigt festgeschrieben sind. Ohne diesen Ausschluss wuerden
+        # abgeschlossene Einsaetze doppelt (als "offen") mitgezaehlt.
+        noch_offen = ~exists().where(
+            CompletedParticipation.slot_id == SlotAssignment.slot_id,
+            CompletedParticipation.player_discord_id == SlotAssignment.player_discord_id,
+        )
+        res2 = await session.execute(
+            select(
+                SlotAssignment.player_discord_id,
+                func.max(SlotAssignment.username),
+                func.count(SlotAssignment.id),
+            )
+            .where(noch_offen)
+            .group_by(SlotAssignment.player_discord_id)
+        )
+        offen = {row[0]: {"username": row[1] or "?", "open": row[2]} for row in res2.all()}
+
+    spieler: dict[str, dict] = {}
+    for pid, data in fertig.items():
+        spieler[pid] = {**data, "open": 0}
+    for pid, data in offen.items():
+        if pid in spieler:
+            spieler[pid]["open"] = data["open"]
+        else:
+            spieler[pid] = {
+                "player_discord_id": pid, "username": data["username"],
+                "missions_done": 0, "slots_done": 0, "last_done": None,
+                "open": data["open"],
+            }
+
+    liste = sorted(
+        spieler.values(),
+        key=lambda p: (-p["missions_done"], -p["open"], p["username"].lower()),
+    )
+    return {
+        "players": liste,
+        "total_players": len(liste),
+        "total_completed": sum(p["slots_done"] for p in liste),
+    }
