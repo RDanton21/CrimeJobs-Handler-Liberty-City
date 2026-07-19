@@ -250,26 +250,33 @@
                                     ? 'border-[#b98a4a]/60 text-[#d9ae6e]'
                                     : 'border-[#3d4a4d] text-zinc-300'"
                                   x-text="s.assigned_count + '/' + s.required_count + ' belegt'"></span>
+                            <!-- WICHTIG: :disabled braucht einen echten Boolean.
+                                 busySlots[s.id] ist anfangs undefined, und Alpine
+                                 setzt daraus faelschlich disabled -> Button tot.
+                                 Deshalb ueberall !! davor. -->
                             <template x-if="s.mine">
-                              <button @click="unassign(s)" :disabled="busySlots[s.id]"
+                              <button @click="unassign(s)" :disabled="!!busySlots[s.id]"
                                       class="headline px-3 py-1.5 rounded border border-[#b91c1c] text-red-400
                                              hover:bg-[#b91c1c]/15 text-xs font-medium tracking-wider
                                              disabled:opacity-50 transition-colors">
                                 Austragen
                               </button>
                             </template>
+                            <!-- Frei = gruen und klickbar -->
                             <template x-if="!s.mine && s.free > 0">
-                              <button @click="assign(s, m)" :disabled="busySlots[s.id]"
-                                      class="headline px-3 py-1.5 rounded bg-[#b91c1c] hover:bg-[#d42525]
+                              <button @click="assign(s, m)" :disabled="!!busySlots[s.id]"
+                                      class="headline px-3 py-1.5 rounded bg-[#15803d] hover:bg-[#1a9c4b]
                                              border border-white/10 text-white text-xs font-medium tracking-wider
                                              disabled:opacity-50 transition-colors">
                                 Eintragen
                               </button>
                             </template>
+                            <!-- Voll = rot und gesperrt, bis jemand wieder frei macht -->
                             <template x-if="!s.mine && s.free === 0">
                               <button disabled
-                                      class="headline px-3 py-1.5 rounded bg-[#262b2e] text-zinc-500
-                                             text-xs font-medium tracking-wider cursor-not-allowed">
+                                      class="headline px-3 py-1.5 rounded bg-[#b91c1c]/80 text-white/80
+                                             border border-[#b91c1c] text-xs font-medium tracking-wider
+                                             cursor-not-allowed">
                                 Voll
                               </button>
                             </template>
