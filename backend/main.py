@@ -53,6 +53,25 @@ async def health():
     return {"ok": True}
 
 
+@app.middleware("http")
+async def _revalidate_static(request, call_next):
+    """Statische Assets immer revalidieren lassen.
+
+    Ohne Cache-Control cacht der Browser /static/app.js heuristisch und
+    liefert nach einem Deploy weiter die alte Datei — die neue index.html
+    traf dann auf altes JS, wodurch Handler ins Leere liefen. Die manuellen
+    ?v=-Strings in den HTML-Dateien wurden dabei regelmaessig vergessen.
+
+    'no-cache' heisst nicht 'nicht cachen', sondern 'vor Benutzung nachfragen':
+    StaticFiles liefert ETag + Last-Modified, die Rueckfrage endet also in
+    aller Regel bei einem billigen 304.
+    """
+    response = await call_next(request)
+    if request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 # Frontend static
 app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 app.mount("/images", StaticFiles(directory=str(Path(settings.image_dir))), name="images")
