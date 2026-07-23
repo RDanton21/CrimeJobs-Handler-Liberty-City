@@ -2841,7 +2841,7 @@ function relationsSurvey() {
     "",
     "Was ihr ihm schickt, sind **Wünsche**. Wo zwei Gruppierungen sich widersprechen, entscheidet er. Nicht ihr. Wer damit ein Problem hat, bringt es jetzt vor. Später ist es keins mehr.",
     "",
-    "-# Ich richte es nur aus. Was danach kommt, ist nicht mehr meine Sache.",
+    "*Ich richte es nur aus. Was danach kommt, ist nicht mehr meine Sache.*",
   ].join("\n");
 
   return {

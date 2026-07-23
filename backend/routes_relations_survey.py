@@ -61,14 +61,28 @@ class SurveySendRequest(BaseModel):
 
 
 def _deadline_line(ts: int) -> str:
-    """Frist als Discord-Zeitstempel.
+    """Frist als abgesetzter Block mit Discord-Zeitstempel.
 
     <t:UNIX:F> schreibt Wochentag, Datum und Uhrzeit in der Zeitzone des
     jeweiligen Lesers, <t:UNIX:R> laeuft als Countdown live mit ("in 2 Tagen").
     Damit steht in jedem Client die richtige Zeit, ohne dass wir uns auf eine
     Zeitzone festlegen — und niemand rechnet sich die Frist schoen.
+
+    Die Trennlinien sind Zeichen, keine Markdown-Regel: Discord rendert
+    weder --- noch ***  als horizontale Linie. Die Ueberschrift (##) macht
+    den Countdown gross genug, dass er beim Scrollen nicht untergeht.
+
+    WICHTIG: Der Zeitstempel darf NICHT in Code-Formatierung stehen — in
+    Code-Bloecken und Backticks bleibt <t:...> als roher Text stehen,
+    statt zu Datum und Countdown zu werden.
     """
-    return f"\n\nFrist: <t:{ts}:F> — noch <t:{ts}:R>."
+    linie = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    return (
+        f"\n\n{linie}"
+        f"\n## ⏳ FRIST — noch <t:{ts}:R>"
+        f"\n### <t:{ts}:F>"
+        f"\n{linie}"
+    )
 
 
 def _deadline_ts(payload: SurveySendRequest) -> int | None:
