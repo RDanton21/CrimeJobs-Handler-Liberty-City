@@ -673,6 +673,11 @@ async def mission_ranking(
     if crime_only:
         crews = [c for c in crews if c.name not in firm_names]
 
+    # Inaktiv gesetzte Gangs tauchen im Ranking nicht auf (unabhaengig von
+    # crime_only) — ihre Missions bleiben in der DB und zaehlen wieder mit,
+    # sobald die Gang reaktiviert wird.
+    crews = [c for c in crews if c.is_active]
+
     crew_ids = [c.id for c in crews]
     if not crew_ids:
         return {
@@ -1062,7 +1067,14 @@ async def mission_stats(
 
     q = select(Mission.status, func.count(Mission.id)).group_by(Mission.status)
     if crew_id is not None:
+        # Explizit gewaehlte Gang: immer zaehlen, auch wenn sie inaktiv ist
         q = q.where(Mission.crew_id == crew_id)
+    else:
+        # Aggregat: Missions inaktiver Gangs ausblenden. Als Subquery statt
+        # JOIN, damit der district-Filter unten weiter joinen kann.
+        q = q.where(
+            Mission.crew_id.in_(select(Crew.id).where(Crew.is_active.is_(True)))
+        )
     if district:
         q = q.join(Crew, Crew.id == Mission.crew_id).where(Crew.district == district)
     if effective_since is not None:

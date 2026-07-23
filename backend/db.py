@@ -50,6 +50,10 @@ async def init_db() -> None:
         await _migrate_add_column_if_missing(
             conn, "crews", "bonus_points", "INTEGER NOT NULL DEFAULT 0"
         )
+        # Aktiv-Flag: bestehende Gangs bleiben durch DEFAULT 1 aktiv
+        await _migrate_add_column_if_missing(
+            conn, "crews", "is_active", "INTEGER NOT NULL DEFAULT 1"
+        )
         # Personal-Briefing pro Mission (Admin-intern, Dashboard-Widget)
         await _migrate_add_column_if_missing(
             conn, "missions", "personnel_brief", "TEXT NOT NULL DEFAULT ''"

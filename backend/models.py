@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import (
+    Boolean,
     DateTime,
     Enum as SAEnum,
     ForeignKey,
@@ -50,6 +51,11 @@ class Crew(Base):
     district: Mapped[str] = mapped_column(String(40), default="")
     color_hex: Mapped[str] = mapped_column(String(7), default="#b91c1c")
     bonus_points: Mapped[int] = mapped_column(Integer, default=0)
+    #: Inaktive Gangs werden im Dashboard ausgegraut ans Ende der Stadtteil-
+    #: Gruppe sortiert (per Toggle ganz ausblendbar) und sind aus Massen-
+    #: Auftrag, Ranking und Reaktions-Statistik ausgenommen. Stammdaten,
+    #: Aufträge und Historie bleiben unangetastet — jederzeit umkehrbar.
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     missions: Mapped[list["Mission"]] = relationship(

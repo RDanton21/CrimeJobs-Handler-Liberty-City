@@ -378,6 +378,15 @@
     <section class="mb-4 flex items-center justify-between flex-wrap gap-3">
       <h2 class="text-xl font-semibold">Gangs</h2>
       <div class="flex items-center gap-2">
+        <button x-show="inactiveCount > 0" @click="toggleShowInactive()"
+                :title="showInactive ? 'Inaktive Gangs ausblenden' : 'Inaktive Gangs einblenden'"
+                class="px-3 py-2 rounded text-sm border whitespace-nowrap"
+                :class="showInactive
+                  ? 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700'
+                  : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'">
+          <span x-text="showInactive ? '👁 Inaktive' : '🚫 Inaktive'"></span>
+          <span class="text-xs opacity-70" x-text="`(${inactiveCount})`"></span>
+        </button>
         <input type="text" x-model="searchQuery"
                placeholder="🔍 Gang-Name suchen…"
                class="bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-sm w-full md:w-72 focus:border-red-600 focus:outline-none" />
@@ -419,15 +428,29 @@
         <h3 class="text-lg font-semibold text-zinc-300 mb-3 border-b border-zinc-800 pb-1 flex items-baseline gap-2">
           <span x-text="group.district"></span>
           <span class="text-xs text-zinc-500" x-text="`(${group.crews.length})`"></span>
+          <span x-show="group.activeCount < group.crews.length"
+                class="text-xs text-zinc-600"
+                x-text="`· ${group.crews.length - group.activeCount} inaktiv`"></span>
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <template x-for="c in group.crews" :key="c.id">
             <a :href="`/crew/${c.id}`" @click="markCrewSeen(c)"
                class="block bg-zinc-900 border-2 rounded-lg p-5 transition hover:bg-zinc-800/60"
-               :class="[cardBorder(c.last_mission_status), hasUnread(c) ? 'animate-pulse ring-2 ring-amber-400' : '']">
+               :class="[cardBorder(c.last_mission_status),
+                        hasUnread(c) ? 'animate-pulse ring-2 ring-amber-400' : '',
+                        c.is_active === false ? 'opacity-40 grayscale hover:opacity-90' : '']">
               <div class="flex items-center gap-3 mb-3">
-                <div class="w-3 h-3 rounded-full" :style="`background:${c.color_hex}`"></div>
-                <h3 class="text-lg font-semibold" x-text="c.name"></h3>
+                <div class="w-3 h-3 rounded-full shrink-0" :style="`background:${c.color_hex}`"></div>
+                <h3 class="text-lg font-semibold truncate" x-text="c.name"></h3>
+                <span x-show="c.is_active === false"
+                      class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 shrink-0">inaktiv</span>
+                <button @click.prevent.stop="toggleCrewActive(c)"
+                        :disabled="togglingActive[c.id]"
+                        :title="c.is_active === false
+                          ? 'Gang wieder aktivieren'
+                          : 'Gang auf inaktiv setzen (kein Massen-Auftrag, kein Ranking)'"
+                        class="ml-auto shrink-0 text-zinc-600 hover:text-zinc-200 text-sm px-1 disabled:opacity-50"
+                        x-text="c.is_active === false ? '↺' : '⏻'"></button>
               </div>
               <p class="text-sm text-zinc-400 line-clamp-3" x-text="c.story_background || 'Keine Story.'"></p>
               <div class="mt-3 flex items-center justify-between gap-2">

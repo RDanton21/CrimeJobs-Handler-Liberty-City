@@ -107,6 +107,10 @@ function dashboard() {
     statsFilter: { crew_id: "", range: "all" },
     districtFilter: "",
     statusFilter: "",
+    // Inaktive Gangs: standardmaessig ausgegraut am Ende jeder Stadtteil-
+    // Gruppe. Toggle blendet sie komplett aus (Merkzustand pro Browser).
+    showInactive: localStorage.getItem("showInactiveCrews") !== "0",
+    togglingActive: {},
     resettingStats: false,
     DISTRICTS,
     showNew: false,
@@ -166,13 +170,18 @@ function dashboard() {
         const ids = this.bulkSelectedCrews.map(s => parseInt(s, 10));
         list = this.crews.filter(c => ids.includes(c.id));
       }
-      // Nur Crews mit Discord-Channel — Firmen ohne Channel werden uebersprungen
-      return list.filter(c => (c.discord_channel_id || "").trim());
+      // Nur Crews mit Discord-Channel — Firmen ohne Channel werden uebersprungen.
+      // Inaktive Gangs bekommen grundsaetzlich keinen Massen-Auftrag.
+      return list.filter(
+        c => (c.discord_channel_id || "").trim() && c.is_active !== false
+      );
     },
 
     // Crews mit gesetzter Channel-ID — fuer manual-Auswahl-Liste
     get sendableCrews() {
-      return this.crews.filter(c => (c.discord_channel_id || "").trim());
+      return this.crews.filter(
+        c => (c.discord_channel_id || "").trim() && c.is_active !== false
+      );
     },
 
     // Anzahl Crews, die wegen fehlender Channel-ID aus dem aktuellen Scope
@@ -184,6 +193,8 @@ function dashboard() {
         list = this.bulkDistrict ? this.crews.filter(c => c.district === this.bulkDistrict) : [];
       }
       else return 0;
+      // Inaktive vorab raus — der Zaehler meint nur "fehlende Channel-ID"
+      list = list.filter(c => c.is_active !== false);
       return list.filter(c => !(c.discord_channel_id || "").trim()).length;
     },
     _bulkDeadlineMinutes() {
@@ -291,6 +302,7 @@ function dashboard() {
 
     get filteredCrews() {
       let list = this.crews;
+      if (!this.showInactive) list = list.filter(c => c.is_active !== false);
       if (this.districtFilter) list = list.filter(c => c.district === this.districtFilter);
       if (this.statusFilter) list = list.filter(c => c.last_mission_status === this.statusFilter);
       if (this.searchQuery && this.searchQuery.trim()) {
@@ -315,10 +327,38 @@ function dashboard() {
       });
       return sortedKeys.map(district => ({
         district,
-        crews: groups[district].sort((a, b) =>
-          (a.name || "").localeCompare(b.name || "", "de")
-        ),
+        // Inaktive Gangs ans Ende der Gruppe, sonst alphabetisch
+        crews: groups[district].sort((a, b) => {
+          const aOff = a.is_active === false, bOff = b.is_active === false;
+          if (aOff !== bOff) return aOff ? 1 : -1;
+          return (a.name || "").localeCompare(b.name || "", "de");
+        }),
+        activeCount: groups[district].filter(c => c.is_active !== false).length,
       }));
+    },
+    get inactiveCount() {
+      return this.crews.filter(c => c.is_active === false).length;
+    },
+    toggleShowInactive() {
+      this.showInactive = !this.showInactive;
+      localStorage.setItem("showInactiveCrews", this.showInactive ? "1" : "0");
+    },
+    async toggleCrewActive(c) {
+      // Optimistisch umschalten, bei Fehler zuruecksetzen — die Karte soll
+      // ohne Reload sofort reagieren.
+      const next = c.is_active === false;
+      this.togglingActive[c.id] = true;
+      const before = c.is_active;
+      c.is_active = next;
+      try {
+        await api.patch(`/api/crews/${c.id}`, { is_active: next });
+        this.loadStats();
+      } catch (e) {
+        c.is_active = before;
+        alert("Konnte Status nicht ändern: " + (e.message || e));
+      } finally {
+        this.togglingActive[c.id] = false;
+      }
     },
     toggleStatusFilter(s) {
       this.statusFilter = (this.statusFilter === s) ? "" : s;

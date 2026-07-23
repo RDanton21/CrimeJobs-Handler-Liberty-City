@@ -15,6 +15,7 @@ class CrewBase(BaseModel):
     district: str = ""
     color_hex: str = "#b91c1c"
     bonus_points: int = 0
+    is_active: bool = True
 
 
 class CrewCreate(CrewBase):
@@ -31,6 +32,7 @@ class CrewUpdate(BaseModel):
     district: str | None = None
     color_hex: str | None = None
     bonus_points: int | None = None  # absolute Setzung — für Reset auf 0
+    is_active: bool | None = None
 
 
 class BonusAdjustRequest(BaseModel):
