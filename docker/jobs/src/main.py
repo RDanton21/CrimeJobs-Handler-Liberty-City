@@ -283,6 +283,32 @@ async def static_bg():
     )
 
 
+# Favicon/App-Icons: SEKTOR-Logo. Wie bg.jpg bewusst einzeln freigegeben,
+# kein StaticFiles-Mount. Lange Cache-Zeit — die Dateien aendern sich selten.
+_ICON_CACHE = {"Cache-Control": "public, max-age=604800"}
+
+
+@app.get("/favicon.ico")
+async def favicon():
+    return FileResponse(
+        STATIC_DIR / "favicon.ico", media_type="image/x-icon", headers=_ICON_CACHE
+    )
+
+
+@app.get("/static/favicon-32.png")
+async def favicon_png():
+    return FileResponse(
+        STATIC_DIR / "favicon-32.png", media_type="image/png", headers=_ICON_CACHE
+    )
+
+
+@app.get("/static/apple-touch-icon.png")
+async def apple_touch_icon():
+    return FileResponse(
+        STATIC_DIR / "apple-touch-icon.png", media_type="image/png", headers=_ICON_CACHE
+    )
+
+
 @app.get("/auth/login")
 async def auth_login():
     """CSRF-State erzeugen, in signiertem Kurzzeit-Cookie ablegen, zu Discord."""
