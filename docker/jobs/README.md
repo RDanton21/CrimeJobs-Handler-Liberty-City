@@ -77,23 +77,30 @@ Crime-Backend (Il Padrino, Public-API mit JOBS_API_KEY)
 | `COOKIE_SECURE`         | nein    | `1`                                | `0` für lokalen Test ohne HTTPS                          |
 | `DISCORD_BOT_TOKEN`     | nein    | —                                  | Bot-Token für Erinnerungs-/Nachrück-DMs (leer = aus)     |
 | `REMINDER_LEAD_MINUTES` | nein    | `30`                               | Vorlauf der Erinnerungs-DM vor `window_start`            |
+| `ROLE_RECHECK_MINUTES`  | nein    | `10`                               | Rollen-Recheck-Intervall (0 = aus, braucht Bot-Token)    |
 | `PUBLIC_URL`            | nein    | `https://jobs.bots.sektorrp.eu`    | Basis-URL der Börse für Links in DMs                     |
 
 ## Sicherheit
 
-- **Rollen-Check nur beim Login**: Die Discord-Rolle (`REQUIRED_ROLE_ID`) wird
-  ausschließlich im OAuth-Callback geprüft. Der User-Access-Token wird danach
-  **bewusst nicht gespeichert** — ein erneuter Rollen-Check während der Session
-  ist damit technisch nicht möglich. Konsequenz: Wird einem Spieler die Rolle
-  entzogen, bleibt seine bestehende Session bis zu **7 Tage** (Cookie-Max-Age)
-  gültig. Akzeptiertes Risiko für ein Event-Board; wer alle Sessions sofort
-  invalidieren will, rotiert `JOBS_SESSION_SECRET` und startet den Container
-  neu (loggt **alle** Spieler aus).
+- **Rollen-Check beim Login + periodischer Recheck**: Die Discord-Rolle
+  (`REQUIRED_ROLE_ID`) wird im OAuth-Callback geprüft; der User-Access-Token
+  wird danach **bewusst nicht gespeichert**. Ist `DISCORD_BOT_TOKEN` gesetzt,
+  prüft `require_session` zusätzlich alle `ROLE_RECHECK_MINUTES` (Default 10)
+  die Rollen per Bot-Token neu (`GET /guilds/{gid}/members/{uid}`): Rolle
+  entzogen oder Server verlassen → 401, Admin-Rolle entzogen → `is_admin`
+  fällt sofort. Discord-Ausfälle sperren niemanden aus (60s-Backoff, letzter
+  bekannter Stand gilt). Ohne Bot-Token bleibt das alte Verhalten: Session
+  bis zu **7 Tage** gültig; Not-Aus = `JOBS_SESSION_SECRET` rotieren und
+  Container neu starten (loggt **alle** Spieler aus).
 - **Session-Cookie**: signiert (itsdangerous, `SESSION_SECRET`), `HttpOnly`,
   `Secure` (Default), `SameSite=Lax` (schützt die POST/DELETE-Endpoints vor
   CSRF), Verifikation mit `max_age`. Inhalt nur `discord_user_id`, `username`,
-  `avatar`, `is_admin` — keine Tokens, keine Secrets. `is_admin` wird (wie der
-  Rollen-Check) nur beim Login ermittelt und gilt für die Session-Laufzeit.
+  `avatar`, `is_admin` — keine Tokens, keine Secrets. `is_admin` aus dem
+  Cookie wird beim Recheck durch den aktuellen Discord-Stand ersetzt.
+- **Admin-Audit-Log**: Kick, Anwesenheits-Bewertung und „Erledigte entfernt"
+  landen mit Admin, Ziel, Slot und Zeitstempel in der Tabelle `admin_actions`
+  (Einsicht: `GET /api/admin/audit` bzw. „Admin-Protokoll" in der Auswertung).
+  Einträge werden nie gelöscht.
 - **Statische Dateien**: bewusst nur Einzeldatei-Endpoints (`/`, `/static/bg.jpg`
   mit `Cache-Control: public, max-age=86400`) statt eines generischen
   StaticFiles-Mounts.
