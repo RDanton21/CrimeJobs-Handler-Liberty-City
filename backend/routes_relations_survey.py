@@ -79,7 +79,7 @@ def _deadline_line(ts: int) -> str:
     linie = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     return (
         f"\n\n{linie}"
-        f"\n## ⏳ FRIST — noch <t:{ts}:R>"
+        f"\n## ⏳ FRIST — <t:{ts}:R>"
         f"\n### <t:{ts}:F>"
         f"\n{linie}"
     )
