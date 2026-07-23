@@ -616,6 +616,24 @@
               </p>
             </div>
           </template>
+
+          <!-- Admin-Protokoll: wer hat wann gekickt / bewertet / aufgeraeumt -->
+          <template x-if="!statsLoading && audit && audit.actions.length > 0">
+            <div class="mt-6 border-t border-[#3d4a4d]/50 pt-4">
+              <h3 class="headline text-xs font-semibold tracking-[.16em] text-zinc-400 mb-2">
+                Admin-Protokoll
+              </h3>
+              <div class="space-y-1 max-h-56 overflow-y-auto pr-1">
+                <template x-for="a in audit.actions" :key="a.created_at + a.action + (a.slot_id || '')">
+                  <p class="text-[11px] text-zinc-400 leading-snug">
+                    <span class="text-zinc-600" x-text="dateTimeShort(a.created_at)"></span>
+                    <span class="text-zinc-300 font-medium" x-text="a.admin_username"></span>
+                    <span x-text="auditLabel(a)"></span>
+                  </p>
+                </template>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -646,6 +664,7 @@
         statsOpen: false,     // Admin-Auswertung
         statsLoading: false,
         stats: null,
+        audit: null,          // Admin-Protokoll (mit der Auswertung geladen)
         clearing: false,      // "Erledigte entfernen" laeuft
         toast: '',
         toastError: false,
@@ -812,9 +831,13 @@
           this.statsOpen = true;
           this.statsLoading = true;
           try {
-            const r = await fetch('/api/admin/stats');
+            const [r, rAudit] = await Promise.all([
+              fetch('/api/admin/stats'),
+              fetch('/api/admin/audit'),
+            ]);
             if (r.ok) {
               this.stats = await r.json();
+              this.audit = rAudit.ok ? await rAudit.json() : null;
             } else {
               const j = await r.json().catch(() => ({}));
               this.showToast(j.detail || 'Auswertung nicht verfügbar', true);
@@ -825,6 +848,26 @@
             this.statsOpen = false;
           }
           this.statsLoading = false;
+        },
+
+        // Protokoll-Zeile lesbar machen
+        auditLabel(a) {
+          const wer = a.target_username ? '„' + a.target_username + '“' : '';
+          const slot = a.slot_id ? ' (Slot ' + a.slot_id + ')' : '';
+          if (a.action === 'kick') return 'hat ' + wer + ' ausgetragen' + slot;
+          if (a.action === 'attendance')
+            return 'hat ' + wer + ' als „' + a.details + '“ markiert' + slot;
+          if (a.action === 'clear_completed') return 'hat aufgeräumt: ' + a.details;
+          return a.action + (a.details ? ': ' + a.details : '');
+        },
+
+        // ISO-Zeit kurz: "23.07. 21:15"
+        dateTimeShort(iso) {
+          if (!iso) return '';
+          const d = new Date(iso + (iso.endsWith('Z') ? '' : 'Z'));
+          if (isNaN(d)) return '';
+          return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+            + ' ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
         },
 
         async clearCompleted() {

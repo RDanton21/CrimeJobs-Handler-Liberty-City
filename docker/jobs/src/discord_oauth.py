@@ -92,6 +92,25 @@ async def fetch_member(access_token: str, guild_id: str) -> dict:
     return await _get_json(f"/users/@me/guilds/{guild_id}/member", access_token)
 
 
+async def fetch_member_bot(guild_id: str, user_id: str) -> dict:
+    """Guild-Member per BOT-Token holen (Rollen-Recheck waehrend der Session,
+    ohne User-Access-Token zu speichern). 404 heisst: nicht (mehr) auf dem
+    Server — DiscordOAuthError.status transportiert das zum Caller."""
+    try:
+        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+            resp = await client.get(
+                f"{DISCORD_API_BASE}/guilds/{guild_id}/members/{user_id}",
+                headers={"Authorization": f"Bot {config.DISCORD_BOT_TOKEN}"},
+            )
+    except httpx.HTTPError as exc:
+        raise DiscordOAuthError(f"Discord nicht erreichbar: {exc}") from exc
+    if resp.status_code != 200:
+        raise DiscordOAuthError(
+            f"Member-Lookup fehlgeschlagen (HTTP {resp.status_code})", resp.status_code
+        )
+    return resp.json()
+
+
 def avatar_url(user: dict) -> str:
     """CDN-Avatar-URL bauen (Fallback auf Discord-Default-Avatar)."""
     user_id = user.get("id", "")

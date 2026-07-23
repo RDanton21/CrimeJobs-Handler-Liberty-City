@@ -53,6 +53,15 @@ except ValueError:
 # Basis-URL der Boerse fuer den Link in der DM
 PUBLIC_URL = os.getenv("PUBLIC_URL", "https://jobs.bots.sektorrp.eu").rstrip("/")
 
+# --- Rollen-Recheck waehrend der Session (braucht DISCORD_BOT_TOKEN) ---
+# Alle N Minuten wird die Discord-Rolle eines aktiven Spielers per Bot-Token
+# neu geprueft; entzogene Rollen/Admin-Rechte greifen damit nach spaetestens
+# N Minuten statt erst nach Cookie-Ablauf (7 Tage). 0 = aus.
+try:
+    ROLE_RECHECK_MINUTES = max(0, int(os.getenv("ROLE_RECHECK_MINUTES", "10")))
+except ValueError:
+    ROLE_RECHECK_MINUTES = 10
+
 
 def _parse_event_dt(value: str | None, fallback: str) -> datetime:
     """ISO-String -> aware datetime in Europe/Berlin. Bei Muell greift der Fallback."""

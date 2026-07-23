@@ -275,6 +275,8 @@ services:
       # Erinnerungs-DMs via Il-Padrino-Bot-Token (leer = Feature aus)
       DISCORD_BOT_TOKEN: "${CRIME_DISCORD_BOT_TOKEN:-}"
       REMINDER_LEAD_MINUTES: "${JOBS_REMINDER_LEAD_MINUTES:-30}"
+      # Rollen-Recheck waehrend der Session (0 = aus, braucht Bot-Token)
+      ROLE_RECHECK_MINUTES: "${JOBS_ROLE_RECHECK_MINUTES:-10}"
       # Mehrere Event-Zeitraeume: "start~ende:Label" kommagetrennt
       EVENT_PERIODS: "${JOBS_EVENT_PERIODS:-2026-07-19T00:00~2026-07-26T23:59:Testphase,2026-08-07T18:00~2026-08-16T23:50:Liberty erwacht...}"
       # Alt-Variablen: nur setzen, wenn der erste Zeitraum uebersteuert werden soll

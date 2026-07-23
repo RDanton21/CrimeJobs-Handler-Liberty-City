@@ -25,6 +25,11 @@ class Player(Base):
     last_login: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     # Letzter Board-Aufruf — daraus leitet sich "gerade aktiv" ab
     last_seen: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    # Rollen-Recheck per Bot-Token: 1/0 = Rolle bzw. Admin ja/nein,
+    # None = noch nie geprueft. role_checked_at steuert das TTL.
+    role_ok: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    admin_ok: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    role_checked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class SlotAssignment(Base):
@@ -67,6 +72,26 @@ class CompletedParticipation(Base):
     completed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     # Anwesenheit aus dem Live-Assignment uebernommen (None/1/0), s. SlotAssignment.
     attended: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+
+class AdminAction(Base):
+    """Audit-Log fuer Admin-Eingriffe (Kick, Anwesenheit, Erledigte entfernt).
+
+    Beantwortet spaeter "wer hat wann was gemacht" — Eintraege werden nie
+    geloescht."""
+    __tablename__ = "admin_actions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    admin_discord_id: Mapped[str] = mapped_column(String, index=True)
+    admin_username: Mapped[str] = mapped_column(String, default="")
+    #: kick | attendance | clear_completed
+    action: Mapped[str] = mapped_column(String, index=True)
+    slot_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    mission_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    target_discord_id: Mapped[str] = mapped_column(String, default="")
+    target_username: Mapped[str] = mapped_column(String, default="")
+    details: Mapped[str] = mapped_column(String, default="")
 
 
 class WaitlistEntry(Base):

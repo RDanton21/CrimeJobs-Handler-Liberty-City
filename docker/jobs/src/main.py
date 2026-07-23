@@ -32,6 +32,7 @@ from sqlalchemy.exc import IntegrityError
 from . import config, discord_oauth, reminders
 from .db import SessionLocal, init_db
 from .models import (
+    AdminAction,
     CompletedParticipation,
     DismissedMission,
     Player,
@@ -102,12 +103,86 @@ def _read_session(request: Request) -> dict | None:
     return data
 
 
-def require_session(request: Request) -> dict:
-    """Dependency: 401 ohne gueltige Session."""
+#: Bei Discord-API-Problemen Rechecks kurz aussetzen statt jeden Request
+#: gegen die Wand laufen zu lassen (monotonic-Timestamp).
+_recheck_backoff_until = 0.0
+
+
+async def _recheck_roles(me: dict) -> dict:
+    """Rolle + Admin-Status waehrend der Session periodisch neu pruefen.
+
+    Der Login prueft die Rolle nur einmal; das Cookie lebt 7 Tage. Mit
+    Bot-Token wird hier alle ROLE_RECHECK_MINUTES nachgeprueft (TTL in
+    players.role_checked_at): Rolle weg -> 401, Admin-Rolle weg -> is_admin
+    faellt sofort. Ohne Token oder mit 0 Minuten: Verhalten wie bisher.
+    Discord-Ausfaelle sperren niemanden aus (Backoff, letzter Stand gilt).
+    """
+    global _recheck_backoff_until
+    if not config.DISCORD_BOT_TOKEN or config.ROLE_RECHECK_MINUTES <= 0:
+        return me
+    user_id = me["discord_user_id"]
+    jetzt = datetime.utcnow()
+    ttl = timedelta(minutes=config.ROLE_RECHECK_MINUTES)
+
+    async with SessionLocal() as session:
+        player = await session.get(Player, user_id)
+    if (
+        player is not None
+        and player.role_checked_at is not None
+        and jetzt - player.role_checked_at < ttl
+    ):
+        # Frischer Check vorhanden -> gespeicherte Flags anwenden
+        if player.role_ok == 0:
+            raise HTTPException(
+                status_code=401, detail="Berechtigung entzogen — bitte neu anmelden"
+            )
+        if player.admin_ok is not None:
+            return {**me, "is_admin": bool(player.admin_ok)}
+        return me
+
+    if time.monotonic() < _recheck_backoff_until:
+        return me
+
+    try:
+        member = await discord_oauth.fetch_member_bot(config.DISCORD_GUILD_ID, user_id)
+        roles = member.get("roles") or []
+        role_ok = config.REQUIRED_ROLE_ID in roles
+        admin_ok = config.ADMIN_ROLE_ID in roles or user_id in config.ADMIN_USER_IDS
+    except discord_oauth.DiscordOAuthError as exc:
+        if exc.status == 404:
+            # Hat den Server verlassen / wurde gekickt
+            role_ok, admin_ok = False, False
+        else:
+            _recheck_backoff_until = time.monotonic() + 60
+            return me
+
+    async with SessionLocal() as session:
+        player = await session.get(Player, user_id)
+        if player is None:  # Session aelter als die players-Row (z.B. DB neu)
+            player = Player(
+                discord_user_id=user_id,
+                username=me.get("username", ""),
+                avatar=me.get("avatar", ""),
+            )
+            session.add(player)
+        player.role_ok = 1 if role_ok else 0
+        player.admin_ok = 1 if admin_ok else 0
+        player.role_checked_at = jetzt
+        await session.commit()
+
+    if not role_ok:
+        raise HTTPException(
+            status_code=401, detail="Berechtigung entzogen — bitte neu anmelden"
+        )
+    return {**me, "is_admin": admin_ok}
+
+
+async def require_session(request: Request) -> dict:
+    """Dependency: 401 ohne gueltige Session; Rollen-Recheck wenn faellig."""
     session = _read_session(request)
     if session is None:
         raise HTTPException(status_code=401, detail="nicht eingeloggt")
-    return session
+    return await _recheck_roles(session)
 
 
 def _set_session_cookie(response: Response, payload: dict) -> None:
@@ -438,6 +513,10 @@ async def auth_callback(request: Request, code: str = "", state: str = "", error
         player.username = username
         player.avatar = avatar
         player.last_login = datetime.utcnow()
+        # Login-Check zaehlt als frischer Rollen-Recheck
+        player.role_ok = 1
+        player.admin_ok = 1 if is_admin else 0
+        player.role_checked_at = datetime.utcnow()
         await session.commit()
 
     response = RedirectResponse("/")
@@ -833,6 +912,34 @@ async def unassign_slot(slot_id: int, me: dict = Depends(require_session)):
     return Response(status_code=204)
 
 
+async def _log_admin_action(
+    me: dict,
+    action: str,
+    *,
+    slot_id: int | None = None,
+    mission_id: int | None = None,
+    target_id: str = "",
+    target_name: str = "",
+    details: str = "",
+) -> None:
+    """Admin-Eingriff im Audit-Log festhalten (best effort, blockiert nie)."""
+    try:
+        async with SessionLocal() as session:
+            session.add(AdminAction(
+                admin_discord_id=me["discord_user_id"],
+                admin_username=me.get("username", ""),
+                action=action,
+                slot_id=slot_id,
+                mission_id=mission_id,
+                target_discord_id=target_id,
+                target_username=target_name,
+                details=details,
+            ))
+            await session.commit()
+    except Exception:
+        logging.getLogger("jobs.audit").exception("Audit-Eintrag fehlgeschlagen")
+
+
 @app.delete("/api/admin/assignments/{slot_id}/{player_discord_id}", status_code=204)
 async def admin_unassign(
     slot_id: int,
@@ -842,20 +949,29 @@ async def admin_unassign(
     """Admin-Kick: Eintragung eines beliebigen Spielers aus einem Slot entfernen.
 
     Autorisierung: is_admin aus der signierten Session (beim Login ermittelt,
-    Admin-Rolle oder gelistete User-ID) — reicht hier als Nachweis.
+    per Rollen-Recheck aktuell gehalten) — reicht hier als Nachweis.
     """
     if not me.get("is_admin"):
         raise HTTPException(status_code=403, detail="Nur für Admins")
     async with SessionLocal() as session:
-        result = await session.execute(
-            delete(SlotAssignment).where(
-                SlotAssignment.slot_id == slot_id,
-                SlotAssignment.player_discord_id == player_discord_id,
+        row = (
+            await session.execute(
+                select(SlotAssignment).where(
+                    SlotAssignment.slot_id == slot_id,
+                    SlotAssignment.player_discord_id == player_discord_id,
+                )
             )
-        )
+        ).scalar_one_or_none()
+        if row is None:
+            raise HTTPException(status_code=404, detail="Kein Eintrag gefunden")
+        await session.delete(row)
         await session.commit()
-    if result.rowcount == 0:
-        raise HTTPException(status_code=404, detail="Kein Eintrag gefunden")
+        target_name, mission_id = row.username, row.mission_id
+    await _log_admin_action(
+        me, "kick",
+        slot_id=slot_id, mission_id=mission_id,
+        target_id=player_discord_id, target_name=target_name,
+    )
     # Freigewordenen Platz sofort von der Warteliste fuellen
     await _promote_waitlist(slot_id)
     return Response(status_code=204)
@@ -997,6 +1113,26 @@ async def admin_set_attendance(
 
     if r_live.rowcount == 0 and r_done.rowcount == 0:
         raise HTTPException(status_code=404, detail="Kein Eintrag gefunden")
+
+    # Zielname fuers Audit-Log (Live-Eintrag, sonst Historie)
+    async with SessionLocal() as session:
+        target_name = await session.scalar(
+            select(SlotAssignment.username).where(
+                SlotAssignment.slot_id == slot_id,
+                SlotAssignment.player_discord_id == player_discord_id,
+            )
+        ) or await session.scalar(
+            select(CompletedParticipation.username).where(
+                CompletedParticipation.slot_id == slot_id,
+                CompletedParticipation.player_discord_id == player_discord_id,
+            )
+        ) or ""
+    label = {None: "offen", 1: "erschienen", 0: "No-Show"}[attended]
+    await _log_admin_action(
+        me, "attendance",
+        slot_id=slot_id, target_id=player_discord_id, target_name=target_name,
+        details=label,
+    )
     return {"detail": "Anwesenheit gespeichert", "attended": attended}
 
 
@@ -1035,6 +1171,10 @@ async def admin_clear_completed(me: dict = Depends(require_session)):
                 entfernt += 1
             except IntegrityError:
                 pass  # war schon ausgeblendet
+    if entfernt:
+        await _log_admin_action(
+            me, "clear_completed", details=f"{entfernt} erledigte Aufträge entfernt"
+        )
     return {"removed": entfernt, "detail": f"{entfernt} erledigte Aufträge entfernt"}
 
 
@@ -1109,4 +1249,30 @@ async def admin_stats(me: dict = Depends(require_session)):
         "total_completed": sum(p["slots_done"] for p in liste),
         "total_attended": sum(p["attended"] for p in liste),
         "total_no_show": sum(p["no_show"] for p in liste),
+    }
+
+
+@app.get("/api/admin/audit")
+async def admin_audit(me: dict = Depends(require_session), limit: int = 50):
+    """Letzte Admin-Eingriffe (Kick, Anwesenheit, Erledigte entfernt)."""
+    _require_admin(me)
+    limit = max(1, min(limit, 200))
+    async with SessionLocal() as session:
+        res = await session.execute(
+            select(AdminAction).order_by(AdminAction.id.desc()).limit(limit)
+        )
+        rows = res.scalars().all()
+    return {
+        "actions": [
+            {
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+                "admin_username": r.admin_username or "?",
+                "action": r.action,
+                "slot_id": r.slot_id,
+                "mission_id": r.mission_id,
+                "target_username": r.target_username or "",
+                "details": r.details or "",
+            }
+            for r in rows
+        ]
     }

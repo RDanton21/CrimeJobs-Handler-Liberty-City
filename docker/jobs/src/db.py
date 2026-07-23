@@ -30,6 +30,10 @@ async def init_db() -> None:
         # Anwesenheit (None=offen, 1=erschienen, 0=No-Show) auf beiden Tabellen
         await _add_column_if_missing(conn, "slot_assignments", "attended", "INTEGER")
         await _add_column_if_missing(conn, "completed_participations", "attended", "INTEGER")
+        # Rollen-Recheck per Bot-Token (TTL + letzte Ergebnisse)
+        await _add_column_if_missing(conn, "players", "role_ok", "INTEGER")
+        await _add_column_if_missing(conn, "players", "admin_ok", "INTEGER")
+        await _add_column_if_missing(conn, "players", "role_checked_at", "DATETIME")
 
 
 async def _add_column_if_missing(conn, table: str, column: str, sql_type: str) -> None:
