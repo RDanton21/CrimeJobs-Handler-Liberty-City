@@ -312,10 +312,17 @@ function dashboard() {
       return list;
     },
     get groupedCrews() {
-      // Gruppiert die filteredCrews nach Stadtteil (Algonquin/Bohan/...).
-      // Innerhalb jeder Gruppe alphabetisch nach Name. Crews ohne Stadtteil ans Ende.
+      // Aktive Gangs nach Stadtteil (Algonquin/Bohan/...), innerhalb der Gruppe
+      // alphabetisch. Gangs ohne Stadtteil ans Ende der Stadtteile.
+      // Inaktive Gangs stehen NICHT bei ihrem Stadtteil, sondern gesammelt in
+      // einer eigenen Kategorie ganz unten.
+      const byName = (a, b) => (a.name || "").localeCompare(b.name || "", "de");
+      const list = this.filteredCrews;
+      const inactive = list.filter(c => c.is_active === false);
+
       const groups = {};
-      for (const c of this.filteredCrews) {
+      for (const c of list) {
+        if (c.is_active === false) continue;
         const key = c.district || "— ohne Stadtteil —";
         if (!groups[key]) groups[key] = [];
         groups[key].push(c);
@@ -325,16 +332,20 @@ function dashboard() {
         if (b === "— ohne Stadtteil —") return -1;
         return a.localeCompare(b, "de");
       });
-      return sortedKeys.map(district => ({
+
+      const result = sortedKeys.map(district => ({
         district,
-        // Inaktive Gangs ans Ende der Gruppe, sonst alphabetisch
-        crews: groups[district].sort((a, b) => {
-          const aOff = a.is_active === false, bOff = b.is_active === false;
-          if (aOff !== bOff) return aOff ? 1 : -1;
-          return (a.name || "").localeCompare(b.name || "", "de");
-        }),
-        activeCount: groups[district].filter(c => c.is_active !== false).length,
+        crews: groups[district].sort(byName),
+        isInactiveGroup: false,
       }));
+      if (inactive.length) {
+        result.push({
+          district: "Inaktive Gruppen",
+          crews: inactive.slice().sort(byName),
+          isInactiveGroup: true,
+        });
+      }
+      return result;
     },
     get inactiveCount() {
       return this.crews.filter(c => c.is_active === false).length;
@@ -344,17 +355,22 @@ function dashboard() {
       localStorage.setItem("showInactiveCrews", this.showInactive ? "1" : "0");
     },
     async toggleCrewActive(c) {
-      // Optimistisch umschalten, bei Fehler zuruecksetzen — die Karte soll
-      // ohne Reload sofort reagieren.
-      const next = c.is_active === false;
+      // WICHTIG: ausser dem Busy-Flag steht hier nichts vor dem try. Vorher
+      // wurde die Crew optimistisch umgeschaltet (c.is_active = next) — warf
+      // diese Zuweisung, blieb das Flag auf true haengen, der Button war
+      // dauerhaft disabled und es ging nie ein Request raus.
+      if (this.togglingActive[c.id]) return;
       this.togglingActive[c.id] = true;
-      const before = c.is_active;
-      c.is_active = next;
       try {
-        await api.patch(`/api/crews/${c.id}`, { is_active: next });
-        this.loadStats();
+        const next = c.is_active === false;
+        const updated = await api.patch(`/api/crews/${c.id}`, { is_active: next });
+        // Serverantwort ist massgeblich — den lokalen Stand daraus setzen,
+        // statt ihn vorher zu raten.
+        const i = this.crews.findIndex(x => x.id === c.id);
+        if (i !== -1) this.crews[i] = { ...this.crews[i], ...updated };
+        this.loadStats().catch(() => {});
       } catch (e) {
-        c.is_active = before;
+        console.error("toggleCrewActive fehlgeschlagen:", e);
         alert("Konnte Status nicht ändern: " + (e.message || e));
       } finally {
         this.togglingActive[c.id] = false;

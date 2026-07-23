@@ -425,61 +425,70 @@
 
     <template x-for="group in groupedCrews" :key="group.district">
       <div class="mb-6">
-        <h3 class="text-lg font-semibold text-zinc-300 mb-3 border-b border-zinc-800 pb-1 flex items-baseline gap-2">
+        <h3 class="text-lg font-semibold mb-3 border-b pb-1 flex items-baseline gap-2"
+            :class="group.isInactiveGroup
+              ? 'text-zinc-500 border-zinc-800 mt-10'
+              : 'text-zinc-300 border-zinc-800'">
           <span x-text="group.district"></span>
           <span class="text-xs text-zinc-500" x-text="`(${group.crews.length})`"></span>
-          <span x-show="group.activeCount < group.crews.length"
-                class="text-xs text-zinc-600"
-                x-text="`· ${group.crews.length - group.activeCount} inaktiv`"></span>
+          <span x-show="group.isInactiveGroup" class="text-xs font-normal text-zinc-600">
+            — kein Massen-Auftrag, kein Ranking, nicht in der Statistik
+          </span>
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <template x-for="c in group.crews" :key="c.id">
-            <a :href="`/crew/${c.id}`" @click="markCrewSeen(c)"
-               class="block bg-zinc-900 border-2 rounded-lg p-5 transition hover:bg-zinc-800/60"
-               :class="[cardBorder(c.last_mission_status),
-                        hasUnread(c) ? 'animate-pulse ring-2 ring-amber-400' : '',
-                        c.is_active === false ? 'opacity-40 grayscale hover:opacity-90' : '']">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-3 h-3 rounded-full shrink-0" :style="`background:${c.color_hex}`"></div>
-                <h3 class="text-lg font-semibold truncate" x-text="c.name"></h3>
-                <span x-show="c.is_active === false"
-                      class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 shrink-0">inaktiv</span>
-                <button @click.prevent.stop="toggleCrewActive(c)"
-                        :disabled="togglingActive[c.id]"
-                        :title="c.is_active === false
-                          ? 'Gang wieder aktivieren'
-                          : 'Gang auf inaktiv setzen (kein Massen-Auftrag, kein Ranking)'"
-                        class="ml-auto shrink-0 w-9 h-9 grid place-items-center rounded-lg border text-base
-                               transition active:scale-95 disabled:opacity-40 disabled:cursor-wait"
-                        :class="c.is_active === false
-                          ? 'bg-green-900/40 border-green-700/60 text-green-400 hover:bg-green-700 hover:border-green-500 hover:text-white'
-                          : 'bg-zinc-800/70 border-zinc-700 text-zinc-400 hover:bg-red-800 hover:border-red-600 hover:text-white'">
-                  <!-- Power-Icon als SVG statt Unicode ⏻ (U+23FB) — das Zeichen
-                       fehlt in vielen Schriften und erschien als leeres Kaestchen. -->
-                  <svg x-show="!togglingActive[c.id]" class="w-4 h-4" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="2.2"
-                       stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 3v9" />
-                    <path d="M18.4 7.6a9 9 0 1 1-12.8 0" />
-                  </svg>
-                  <svg x-show="togglingActive[c.id]" class="w-4 h-4 animate-spin" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-                    <path d="M21 12a9 9 0 1 1-6.2-8.6" />
-                  </svg>
-                </button>
-              </div>
-              <p class="text-sm text-zinc-400 line-clamp-3" x-text="c.story_background || 'Keine Story.'"></p>
-              <div class="mt-3 flex items-center justify-between gap-2">
-                <span class="text-xs text-zinc-500 truncate">
-                  Channel: <span x-text="c.discord_channel_id || '—'"></span>
-                </span>
-                <span x-show="c.last_mission_status"
-                      :class="statusClass(c.last_mission_status)"
-                      class="text-xs px-2 py-0.5 rounded font-medium whitespace-nowrap"
-                      :title="c.last_mission_at ? formatDate(c.last_mission_at) : ''"
-                      x-text="statusLabel(c.last_mission_status)"></span>
-              </div>
-            </a>
+            <div class="relative">
+              <a :href="`/crew/${c.id}`" @click="markCrewSeen(c)"
+                 class="block bg-zinc-900 border-2 rounded-lg p-5 transition hover:bg-zinc-800/60"
+                 :class="[cardBorder(c.last_mission_status),
+                          hasUnread(c) ? 'animate-pulse ring-2 ring-amber-400' : '',
+                          c.is_active === false ? 'opacity-70 hover:opacity-100' : '']">
+                <div class="flex items-center gap-3 mb-3 pr-12">
+                  <div class="w-3 h-3 rounded-full shrink-0" :style="`background:${c.color_hex}`"></div>
+                  <h3 class="text-lg font-semibold truncate" x-text="c.name"></h3>
+                  <span x-show="c.is_active === false"
+                        class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 shrink-0">inaktiv</span>
+                </div>
+                <p class="text-sm text-zinc-400 line-clamp-3" x-text="c.story_background || 'Keine Story.'"></p>
+                <div class="mt-3 flex items-center justify-between gap-2">
+                  <span class="text-xs text-zinc-500 truncate">
+                    Channel: <span x-text="c.discord_channel_id || '—'"></span>
+                  </span>
+                  <span x-show="c.last_mission_status"
+                        :class="statusClass(c.last_mission_status)"
+                        class="text-xs px-2 py-0.5 rounded font-medium whitespace-nowrap"
+                        :title="c.last_mission_at ? formatDate(c.last_mission_at) : ''"
+                        x-text="statusLabel(c.last_mission_status)"></span>
+                </div>
+              </a>
+
+              <!-- Bewusst AUSSERHALB des <a>: ein <button> im Link ist ungueltiges
+                   HTML, Browser behandeln den Klick darauf unterschiedlich. Als
+                   Geschwister-Element ueber die Ecke gelegt gibt es kein
+                   Verschachtelungsproblem und kein prevent/stop noetig. -->
+              <!-- Bewusst OHNE :disabled und ohne x-show: das gerenderte
+                   disabled="disabled" liess sich nicht erklaeren und hat den
+                   Button blockiert. Doppelklick-Schutz sitzt jetzt in
+                   toggleCrewActive() selbst, nicht im Markup. -->
+              <button type="button" @click="toggleCrewActive(c)"
+                      :title="c.is_active === false
+                        ? 'Gang wieder aktivieren'
+                        : 'Gang auf inaktiv setzen (kein Massen-Auftrag, kein Ranking)'"
+                      class="absolute top-4 right-4 z-10 w-9 h-9 grid place-items-center rounded-lg border
+                             transition active:scale-95 cursor-pointer"
+                      :class="c.is_active === false
+                        ? 'bg-green-900/60 border-green-700 text-green-400 hover:bg-green-700 hover:border-green-500 hover:text-white'
+                        : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:bg-red-800 hover:border-red-600 hover:text-white'">
+                <!-- Power-Icon als SVG statt Unicode U+23FB — das Zeichen fehlt in
+                     vielen Schriften und erschien als leeres Kaestchen. -->
+                <svg class="w-4 h-4 pointer-events-none" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.2"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 3v9" />
+                  <path d="M18.4 7.6a9 9 0 1 1-12.8 0" />
+                </svg>
+              </button>
+            </div>
           </template>
         </div>
       </div>
