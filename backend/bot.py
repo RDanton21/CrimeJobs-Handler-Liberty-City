@@ -14,7 +14,7 @@ from pathlib import Path
 
 import discord
 from aiohttp import web
-from sqlalchemy import func, select
+from sqlalchemy import select
 
 from .config import settings
 from .db import SessionLocal, init_db
@@ -51,7 +51,6 @@ RELATION_CHOICES: list[tuple[str, str, str]] = [
     ("rivalisierend", "RIVAL", "⚔️"),
     ("feindlich", "HOSTILE", "🔥"),
 ]
-RELATION_LABEL_BY_VALUE = {v: label for label, v, _e in RELATION_CHOICES}
 
 
 def _build_relation_select(from_crew_id: int, to_crew_id: int, to_name: str) -> discord.ui.Select:
@@ -396,7 +395,6 @@ async def on_interaction(interaction: discord.Interaction):
 
     user = interaction.user
     async with SessionLocal() as session:
-        to_crew = await session.get(Crew, to_crew_id)
         existing = (await session.execute(
             select(RelationProposal).where(
                 RelationProposal.from_crew_id == from_crew_id,
@@ -419,18 +417,12 @@ async def on_interaction(interaction: discord.Interaction):
             ))
         await session.commit()
 
-        done = (await session.execute(
-            select(func.count(RelationProposal.id)).where(
-                RelationProposal.from_crew_id == from_crew_id
-            )
-        )).scalar_one()
-
-    label = RELATION_LABEL_BY_VALUE.get(rel.name, rel.name)
-    name = to_crew.name if to_crew else f"#{to_crew_id}"
-    # Ephemer: nur der Klickende sieht die Bestaetigung, der Channel bleibt sauber.
-    await interaction.response.send_message(
-        f"Notiert: **{name}** = **{label}**  ·  {done} erfasst", ephemeral=True
-    )
+    # Stille Quittung: Discord verlangt binnen 3 Sekunden eine Antwort, sonst
+    # zeigt der Client "Interaktion fehlgeschlagen". defer() auf einer
+    # Komponenten-Interaktion bestaetigt ohne sichtbare Nachricht — die
+    # Rueckmeldung uebernimmt das Menue selbst, in dem die getroffene Wahl
+    # danach dauerhaft steht.
+    await interaction.response.defer()
     log.info("Beziehung erfasst: %s -> %s = %s (von %s)", from_crew_id, to_crew_id, rel.name, user)
 
 
