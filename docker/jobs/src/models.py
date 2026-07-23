@@ -69,6 +69,22 @@ class CompletedParticipation(Base):
     attended: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
+class WaitlistEntry(Base):
+    """Warteliste fuer volle Slots — FIFO nach joined_at. Beim Freiwerden
+    eines Platzes rueckt der aelteste Eintrag automatisch nach (inkl. DM)."""
+    __tablename__ = "waitlist_entries"
+    __table_args__ = (
+        UniqueConstraint("slot_id", "player_discord_id", name="uq_wait_slot_player"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    slot_id: Mapped[int] = mapped_column(Integer, index=True)
+    mission_id: Mapped[int] = mapped_column(Integer, index=True)
+    player_discord_id: Mapped[str] = mapped_column(String, index=True)
+    username: Mapped[str] = mapped_column(String, default="")
+    joined_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class SentReminder(Base):
     """Bereits verschickte Erinnerungs-DMs — verhindert Doppel-DMs, auch
     ueber Container-Neustarts hinweg. kind laesst spaeter weitere

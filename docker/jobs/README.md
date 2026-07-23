@@ -2,18 +2,32 @@
 
 Eigenständiger Docker-Service: GTA-RP-Spieler loggen sich mit Discord ein
 (nur SEKTOR-Guild-Mitglieder mit der Freischalt-Rolle), sehen das
-10-Tage-Event-Board (07.08.2026 18:00 – 16.08.2026 23:50, Europe/Berlin)
-mit allen Crime-Aufträgen die Personal-Slots haben, und tragen sich selbst
+Event-Board (Zeiträume via `EVENT_PERIODS`, Europe/Berlin) mit allen
+Crime-Aufträgen die Personal-Slots haben, und tragen sich selbst
 in Slots ein/aus.
 
 - Mehrfachbuchung über **verschiedene** Slots: erlaubt
 - Derselbe Slot pro Spieler: nur 1x (DB-Unique-Constraint)
-- Slot voll (`assignments >= required_count`): keine weitere Buchung
+- Slot voll (`assignments >= required_count`): keine weitere Direkt-Buchung —
+  stattdessen **Warteliste** (s.u.)
 - Alle eingeloggten Spieler sehen, **wer** wo eingetragen ist (gewollt, Koordination)
 - **Admin-Kick**: Admins (Admin-Rolle `ADMIN_ROLE_ID` oder User-ID in
   `ADMIN_USER_IDS`) können jeden Spieler per ✕ am Namen aus einem Slot
   austragen (`DELETE /api/admin/assignments/{slot_id}/{player_discord_id}`,
   serverseitig per Session-`is_admin` geprüft)
+- **Warteliste mit Auto-Nachrücken**: Bei vollem Slot per Button auf die
+  Warteliste (`POST/DELETE /api/slots/{id}/waitlist`, FIFO). Wird ein Platz
+  frei (Austragen oder Admin-Kick), rückt der älteste Eintrag automatisch
+  nach und bekommt eine Discord-DM.
+- **Anwesenheits-Erfassung**: Admins schalten am Namen durch
+  offen → ✓ erschienen → ✗ No-Show (`POST /api/admin/attendance/{slot}/{player}`).
+  Der Status ist für alle sichtbar (grün/rot) und fließt in die Auswertung
+  ein („da" / „No-Show"-Spalten, Sortierung nach tatsächlich Erschienenen).
+- **Erinnerungs-DMs**: Hintergrund-Loop schickt `REMINDER_LEAD_MINUTES`
+  (Default 30) vor `window_start` jedem Eingetragenen eine DM mit allen
+  Einsatz-Details — via Discord-REST-API mit dem Bot-Token (Feature aus,
+  wenn `DISCORD_BOT_TOKEN` leer). Dedupe über Tabelle `sent_reminders`,
+  überlebt Neustarts; geschlossene DMs werden nicht erneut versucht.
 
 ## Architektur
 
@@ -21,7 +35,11 @@ in Slots ein/aus.
 Browser (Alpine.js + Tailwind, mobile-first)
    |
    v
-Jobs-Dashboard (FastAPI, Port 8080, eigene jobs.db: players + slot_assignments)
+Jobs-Dashboard (FastAPI, Port 8080, eigene jobs.db)
+   |  Tabellen: players, slot_assignments, waitlist_entries,
+   |            completed_participations, sent_reminders, dismissed_missions
+   |  Hintergrund: Erinnerungs-Loop (60s) -> Discord-REST-DMs
+   |
    |  GET /api/public/active-missions + /api/public/crews
    |  Header: X-API-Key = CRIME_API_KEY  (15s In-Memory-Cache)
    v
@@ -52,10 +70,14 @@ Crime-Backend (Il Padrino, Public-API mit JOBS_API_KEY)
 | `SESSION_SECRET`        | ja      | —                                  | Zufälliger String (z.B. `openssl rand -hex 32`)          |
 | `CRIME_BACKEND_URL`     | ja      | `http://sekt6r-crime-backend:8000` | Basis-URL des Crime-Backends (Container-Name im Netz)    |
 | `CRIME_API_KEY`         | ja      | —                                  | Gleicher Wert wie `JOBS_API_KEY` im Crime-Backend        |
-| `EVENT_START`           | nein    | `2026-08-07T18:00`                 | Event-Beginn (ISO, Europe/Berlin)                        |
-| `EVENT_END`             | nein    | `2026-08-16T23:50`                 | Event-Ende (ISO, Europe/Berlin)                          |
+| `EVENT_PERIODS`         | nein    | s. `config.py`                     | Event-Zeiträume: `start~ende[:Label]`, kommagetrennt     |
+| `EVENT_START`           | nein    | —                                  | Alt: übersteuert den ersten Zeitraum (ISO, Berlin)       |
+| `EVENT_END`             | nein    | —                                  | Alt: übersteuert den ersten Zeitraum (ISO, Berlin)       |
 | `JOBS_DB_PATH`          | nein    | `/app/data/jobs.db`                | SQLite-Pfad (im Compose als Volume mounten!)             |
 | `COOKIE_SECURE`         | nein    | `1`                                | `0` für lokalen Test ohne HTTPS                          |
+| `DISCORD_BOT_TOKEN`     | nein    | —                                  | Bot-Token für Erinnerungs-/Nachrück-DMs (leer = aus)     |
+| `REMINDER_LEAD_MINUTES` | nein    | `30`                               | Vorlauf der Erinnerungs-DM vor `window_start`            |
+| `PUBLIC_URL`            | nein    | `https://jobs.bots.sektorrp.eu`    | Basis-URL der Börse für Links in DMs                     |
 
 ## Sicherheit
 

@@ -302,6 +302,16 @@
                                 </span>
                               </template>
                             </p>
+                            <!-- Warteliste: Reihenfolge = Nachrueck-Reihenfolge -->
+                            <p x-show="s.waitlist && s.waitlist.length > 0" class="text-xs text-zinc-500 mt-1">
+                              Warteliste:
+                              <template x-for="(w, wi) in s.waitlist" :key="w.player_discord_id">
+                                <span class="text-[#d9ae6e]/80">
+                                  <span x-text="(wi + 1) + '. ' + w.username"></span><span
+                                    x-show="wi < s.waitlist.length - 1">, </span>
+                                </span>
+                              </template>
+                            </p>
                           </div>
                           <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
                             <span class="headline text-xs font-medium tracking-wider px-2 py-0.5 rounded-full border"
@@ -338,13 +348,24 @@
                                 Eintragen
                               </button>
                             </template>
-                            <!-- Voll = rot und gesperrt, bis jemand wieder frei macht -->
-                            <template x-if="!m.archived_at && !s.mine && s.free === 0">
-                              <button disabled
-                                      class="headline px-3 py-1.5 rounded bg-[#b91c1c]/80 text-white/80
-                                             border border-[#b91c1c] text-xs font-medium tracking-wider
-                                             cursor-not-allowed">
-                                Voll
+                            <!-- Voll: Warteliste statt totem Button. Wird ein Platz
+                                 frei, rueckt der Aelteste automatisch nach (+ DM). -->
+                            <template x-if="!m.archived_at && !s.mine && s.free === 0 && !s.on_waitlist">
+                              <button @click="joinWaitlist(s, m)" :disabled="!!busySlots[s.id]"
+                                      title="Slot ist voll — wird ein Platz frei, rückst du automatisch nach (Discord-DM)"
+                                      class="headline px-3 py-1.5 rounded border border-[#b98a4a] text-[#d9ae6e]
+                                             hover:bg-[#b98a4a]/15 text-xs font-medium tracking-wider
+                                             disabled:opacity-50 transition-colors">
+                                Warteliste
+                              </button>
+                            </template>
+                            <template x-if="!m.archived_at && !s.mine && s.on_waitlist">
+                              <button @click="leaveWaitlist(s)" :disabled="!!busySlots[s.id]"
+                                      title="Du stehst auf der Warteliste — klicken zum Austragen"
+                                      class="headline px-3 py-1.5 rounded bg-[#b98a4a]/20 border border-[#b98a4a]
+                                             text-[#d9ae6e] hover:bg-[#b98a4a]/35 text-xs font-medium tracking-wider
+                                             disabled:opacity-50 transition-colors">
+                                Wartend ✕
                               </button>
                             </template>
                           </div>
@@ -909,6 +930,48 @@
             const r = await fetch('/api/slots/' + slot.id + '/assign', { method: 'DELETE' });
             if (r.status === 204) {
               this.showToast('Ausgetragen: ' + (slot.name || 'Slot'), false);
+            } else {
+              const j = await r.json().catch(() => ({}));
+              this.showToast(j.detail || 'Austragen fehlgeschlagen', true);
+            }
+          } catch (e) {
+            this.showToast('Verbindung zum Server fehlgeschlagen', true);
+          }
+          this.busySlots[slot.id] = false;
+          await this.loadBoard(false);
+        },
+
+        // Warteliste: beitreten/verlassen. Nachruecken macht der Server (FIFO + DM).
+        async joinWaitlist(slot, mission) {
+          if (this.busySlots[slot.id]) return;
+          this.busySlots[slot.id] = true;
+          try {
+            const r = await fetch('/api/slots/' + slot.id + '/waitlist', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ mission_id: mission.id }),
+            });
+            if (r.status === 201) {
+              this.showToast('Auf der Warteliste: ' + (slot.name || 'Slot')
+                           + ' — du rückst automatisch nach', false);
+            } else {
+              const j = await r.json().catch(() => ({}));
+              this.showToast(j.detail || 'Warteliste fehlgeschlagen', true);
+            }
+          } catch (e) {
+            this.showToast('Verbindung zum Server fehlgeschlagen', true);
+          }
+          this.busySlots[slot.id] = false;
+          await this.loadBoard(false);
+        },
+
+        async leaveWaitlist(slot) {
+          if (this.busySlots[slot.id]) return;
+          this.busySlots[slot.id] = true;
+          try {
+            const r = await fetch('/api/slots/' + slot.id + '/waitlist', { method: 'DELETE' });
+            if (r.status === 204) {
+              this.showToast('Von der Warteliste ausgetragen', false);
             } else {
               const j = await r.json().catch(() => ({}));
               this.showToast(j.detail || 'Austragen fehlgeschlagen', true);

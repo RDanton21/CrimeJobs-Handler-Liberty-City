@@ -36,6 +36,7 @@ from .models import (
     DismissedMission,
     Player,
     SlotAssignment,
+    WaitlistEntry,
 )
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -245,7 +246,9 @@ def _mission_day(mission: dict) -> date | None:
     return dt.astimezone(config.BERLIN_TZ).date()
 
 
-def _enrich_mission(mission: dict, assignments_by_slot: dict, me: dict) -> dict:
+def _enrich_mission(
+    mission: dict, assignments_by_slot: dict, waitlist_by_slot: dict, me: dict
+) -> dict:
     """Mission-Kopie mit Belegungsdaten pro Slot anreichern (Cache nie mutieren!)."""
     enriched = dict(mission)
     slots_out = []
@@ -264,6 +267,14 @@ def _enrich_mission(mission: dict, assignments_by_slot: dict, me: dict) -> dict:
         required = slot.get("required_count") or 1
         s["free"] = max(required - len(assigned), 0)
         s["mine"] = any(a.player_discord_id == me["discord_user_id"] for a in assigned)
+        waiting = waitlist_by_slot.get(slot.get("id"), [])
+        s["waitlist"] = [
+            {"player_discord_id": w.player_discord_id, "username": w.username}
+            for w in waiting
+        ]
+        s["on_waitlist"] = any(
+            w.player_discord_id == me["discord_user_id"] for w in waiting
+        )
         slots_out.append(s)
     enriched["slots"] = slots_out
     return enriched
@@ -522,6 +533,10 @@ async def api_board(me: dict = Depends(require_session)):
             select(SlotAssignment).order_by(SlotAssignment.assigned_at)
         )
         assignments = result.scalars().all()
+        res_wait = await session.execute(
+            select(WaitlistEntry).order_by(WaitlistEntry.joined_at, WaitlistEntry.id)
+        )
+        waitlist = res_wait.scalars().all()
         dismissed = set(
             (await session.execute(select(DismissedMission.mission_id))).scalars().all()
         )
@@ -552,6 +567,9 @@ async def api_board(me: dict = Depends(require_session)):
     assignments_by_slot: dict[int, list[SlotAssignment]] = {}
     for a in assignments:
         assignments_by_slot.setdefault(a.slot_id, []).append(a)
+    waitlist_by_slot: dict[int, list[WaitlistEntry]] = {}
+    for w in waitlist:
+        waitlist_by_slot.setdefault(w.slot_id, []).append(w)
 
     # Erledigte Einsaetze festschreiben, bevor der Auftrag vom Board faellt
     await _record_completed(missions, assignments_by_slot)
@@ -565,7 +583,7 @@ async def api_board(me: dict = Depends(require_session)):
     buckets: dict[str, list[dict]] = {d.isoformat(): [] for d, _, _ in event_days}
     other: list[dict] = []
     for mission in sorted(missions, key=_mission_sort_key):
-        enriched = _enrich_mission(mission, assignments_by_slot, me)
+        enriched = _enrich_mission(mission, assignments_by_slot, waitlist_by_slot, me)
         day = _mission_day(mission)
         key = day.isoformat() if day else None
         if key is not None and key in buckets:
@@ -684,6 +702,16 @@ async def assign_slot(
             status_code=409, detail="Du bist in diesem Slot bereits eingetragen"
         )
 
+    # Falls der Spieler noch auf der Warteliste dieses Slots stand: aufraeumen
+    async with SessionLocal() as session:
+        await session.execute(
+            delete(WaitlistEntry).where(
+                WaitlistEntry.slot_id == slot_id,
+                WaitlistEntry.player_discord_id == me["discord_user_id"],
+            )
+        )
+        await session.commit()
+
     return {"detail": "Eingetragen"}
 
 
@@ -695,6 +723,92 @@ async def _mission_archived_for_slot(slot_id: int) -> bool:
             if s.get("id") == slot_id:
                 return bool(mission.get("archived_at"))
     return False
+
+
+def _find_slot(missions: list, slot_id: int) -> tuple[dict | None, dict | None]:
+    """(mission, slot) zu einer Slot-ID aus den Board-Daten."""
+    for mission in missions:
+        for s in mission.get("slots", []):
+            if s.get("id") == slot_id:
+                return mission, s
+    return None, None
+
+
+async def _promote_waitlist(slot_id: int) -> None:
+    """Freie Plaetze mit Wartelisten-Eintraegen fuellen (FIFO) + Nachrueck-DM.
+
+    Wird nach jedem Austragen/Kick und nach jedem Wartelisten-Beitritt
+    aufgerufen. Fehler (z.B. Crime-Backend kurz weg) werden geloggt, aber
+    nie zum Aufrufer durchgereicht — das Austragen selbst war ja erfolgreich.
+    """
+    try:
+        missions, _ = await _fetch_crime_data()
+        mission, slot = _find_slot(missions, slot_id)
+        if slot is None or (mission and mission.get("archived_at")):
+            return
+        required = slot.get("required_count") or 1
+
+        promoted: list[tuple[str, str]] = []  # (discord_id, username)
+        async with SessionLocal() as session:
+            while True:
+                entry = None
+                try:
+                    async with session.begin():
+                        count = await session.scalar(
+                            select(func.count())
+                            .select_from(SlotAssignment)
+                            .where(SlotAssignment.slot_id == slot_id)
+                        )
+                        if (count or 0) >= required:
+                            break
+                        entry = (
+                            await session.execute(
+                                select(WaitlistEntry)
+                                .where(WaitlistEntry.slot_id == slot_id)
+                                .order_by(WaitlistEntry.joined_at, WaitlistEntry.id)
+                                .limit(1)
+                            )
+                        ).scalar_one_or_none()
+                        if entry is None:
+                            break
+                        await session.execute(
+                            delete(WaitlistEntry).where(WaitlistEntry.id == entry.id)
+                        )
+                        session.add(
+                            SlotAssignment(
+                                slot_id=slot_id,
+                                mission_id=entry.mission_id,
+                                player_discord_id=entry.player_discord_id,
+                                username=entry.username,
+                            )
+                        )
+                        await session.flush()
+                        promoted.append((entry.player_discord_id, entry.username))
+                except IntegrityError:
+                    # Nachruecker war schon (anders) eingetragen — der Rollback hat
+                    # auch das Wartelisten-Delete zurueckgenommen, also gezielt
+                    # nur den Wartelisten-Eintrag entfernen und weitermachen
+                    if entry is not None:
+                        async with session.begin():
+                            await session.execute(
+                                delete(WaitlistEntry).where(WaitlistEntry.id == entry.id)
+                            )
+                    continue
+
+        for discord_id, username in promoted:
+            logging.getLogger("jobs.waitlist").info(
+                "Nachgerueckt: %s in Slot %d", username, slot_id
+            )
+            # DM best effort im Hintergrund — der Request wartet nicht darauf
+            asyncio.create_task(
+                reminders.send_single_dm(
+                    discord_id, reminders.build_promotion_message(mission, slot)
+                )
+            )
+    except Exception:
+        logging.getLogger("jobs.waitlist").exception(
+            "Nachruecken fuer Slot %d fehlgeschlagen", slot_id
+        )
 
 
 @app.delete("/api/slots/{slot_id}/assign", status_code=204)
@@ -714,6 +828,8 @@ async def unassign_slot(slot_id: int, me: dict = Depends(require_session)):
         await session.commit()
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="Kein Eintrag gefunden")
+    # Freigewordenen Platz sofort von der Warteliste fuellen
+    await _promote_waitlist(slot_id)
     return Response(status_code=204)
 
 
@@ -740,6 +856,89 @@ async def admin_unassign(
         await session.commit()
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="Kein Eintrag gefunden")
+    # Freigewordenen Platz sofort von der Warteliste fuellen
+    await _promote_waitlist(slot_id)
+    return Response(status_code=204)
+
+
+@app.post("/api/slots/{slot_id}/waitlist", status_code=201)
+async def join_waitlist(
+    slot_id: int,
+    payload: dict = Body(...),
+    me: dict = Depends(require_session),
+):
+    """Auf die Warteliste eines vollen Slots setzen (FIFO)."""
+    mission_id = payload.get("mission_id")
+    if not isinstance(mission_id, int):
+        raise HTTPException(status_code=422, detail="mission_id fehlt oder ist ungültig")
+
+    missions, _ = await _fetch_crime_data()
+    mission, slot = _find_slot(missions, slot_id)
+    if slot is None or (mission and mission.get("id") != mission_id):
+        raise HTTPException(
+            status_code=404, detail="Slot nicht gefunden oder Auftrag nicht mehr aktiv"
+        )
+    if mission and mission.get("archived_at"):
+        raise HTTPException(
+            status_code=409, detail="Dieser Auftrag ist bereits abgeschlossen"
+        )
+    required = slot.get("required_count") or 1
+
+    async with SessionLocal() as session:
+        count = await session.scalar(
+            select(func.count())
+            .select_from(SlotAssignment)
+            .where(SlotAssignment.slot_id == slot_id)
+        )
+        if (count or 0) < required:
+            raise HTTPException(
+                status_code=409, detail="Der Slot hat freie Plätze — trag dich direkt ein"
+            )
+        schon_drin = await session.scalar(
+            select(func.count())
+            .select_from(SlotAssignment)
+            .where(
+                SlotAssignment.slot_id == slot_id,
+                SlotAssignment.player_discord_id == me["discord_user_id"],
+            )
+        )
+        if schon_drin:
+            raise HTTPException(
+                status_code=409, detail="Du bist in diesem Slot bereits eingetragen"
+            )
+        try:
+            session.add(
+                WaitlistEntry(
+                    slot_id=slot_id,
+                    mission_id=mission_id,
+                    player_discord_id=me["discord_user_id"],
+                    username=me.get("username", ""),
+                )
+            )
+            await session.commit()
+        except IntegrityError:
+            raise HTTPException(
+                status_code=409, detail="Du stehst bereits auf der Warteliste"
+            )
+
+    # Race abfedern: wurde der Slot inzwischen frei, sofort nachruecken
+    await _promote_waitlist(slot_id)
+    return {"detail": "Auf der Warteliste"}
+
+
+@app.delete("/api/slots/{slot_id}/waitlist", status_code=204)
+async def leave_waitlist(slot_id: int, me: dict = Depends(require_session)):
+    """Eigenen Wartelisten-Eintrag entfernen."""
+    async with SessionLocal() as session:
+        result = await session.execute(
+            delete(WaitlistEntry).where(
+                WaitlistEntry.slot_id == slot_id,
+                WaitlistEntry.player_discord_id == me["discord_user_id"],
+            )
+        )
+        await session.commit()
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Kein Wartelisten-Eintrag gefunden")
     return Response(status_code=204)
 
 

@@ -39,26 +39,12 @@ def _fmt_berlin(unix_ts: int) -> str:
     return dt.strftime("%H:%M")
 
 
-def _build_message(mission: dict, slot: dict, now: float) -> str:
-    """Deutsche Erinnerungs-DM; leere Felder werden weggelassen."""
+def _detail_lines(mission: dict, slot: dict) -> list[str]:
+    """Einsatz-Details fuer DMs; leere Felder werden weggelassen."""
     crew = mission.get("crew") or {}
     crew_name = crew.get("name") or "Unbekannte Crew"
     district = crew.get("district") or ""
-    start = mission.get("window_start")
-
-    if start and now >= start:
-        kopf = "🎬 Dein Einsatz läuft — jetzt zählt's!"
-    elif start:
-        minuten = max(1, round((start - now) / 60))
-        kopf = (
-            f"🎬 Erinnerung: Dein Einsatz startet um {_fmt_berlin(start)} Uhr "
-            f"(in ca. {minuten} Min)."
-        )
-    else:
-        kopf = "🎬 Erinnerung an deinen Einsatz."
-
-    zeilen = [kopf, ""]
-    zeilen.append(f"Crew: {crew_name}" + (f" ({district})" if district else ""))
+    zeilen = [f"Crew: {crew_name}" + (f" ({district})" if district else "")]
     rolle = slot.get("name") or (
         f"NPC #{slot['npc_number']}" if slot.get("npc_number") else ""
     )
@@ -75,10 +61,48 @@ def _build_message(mission: dict, slot: dict, now: float) -> str:
         zeilen.append(f"Kostüm: {slot['costume']}")
     if slot.get("notes"):
         zeilen.append(f"Hinweis: {slot['notes']}")
-    zeilen.append("")
+    return zeilen
+
+
+def _build_message(mission: dict, slot: dict, now: float) -> str:
+    """Deutsche Erinnerungs-DM."""
+    start = mission.get("window_start")
+    if start and now >= start:
+        kopf = "🎬 Dein Einsatz läuft — jetzt zählt's!"
+    elif start:
+        minuten = max(1, round((start - now) / 60))
+        kopf = (
+            f"🎬 Erinnerung: Dein Einsatz startet um {_fmt_berlin(start)} Uhr "
+            f"(in ca. {minuten} Min)."
+        )
+    else:
+        kopf = "🎬 Erinnerung an deinen Einsatz."
+
+    zeilen = [kopf, "", *_detail_lines(mission, slot), ""]
     zeilen.append(f"Alle Details: {config.PUBLIC_URL}")
     zeilen.append("Wenn du nicht kannst: bitte austragen, damit der Platz frei wird.")
     return "\n".join(zeilen)
+
+
+def build_promotion_message(mission: dict, slot: dict) -> str:
+    """DM fuer Nachruecker: von der Warteliste in den Slot uebernommen."""
+    zeilen = [
+        "🎬 Du bist nachgerückt! Ein Platz ist frei geworden — du bist jetzt fest eingetragen.",
+        "",
+        *_detail_lines(mission, slot),
+        "",
+        f"Alle Details: {config.PUBLIC_URL}",
+        "Wenn du doch nicht kannst: bitte austragen, damit der Nächste nachrücken kann.",
+    ]
+    return "\n".join(zeilen)
+
+
+async def send_single_dm(user_id: str, content: str) -> str:
+    """Einzelne DM ausserhalb des Loops (z.B. Warteliste). Rueckgabe wie _send_dm."""
+    if not config.DISCORD_BOT_TOKEN:
+        return "closed"
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        return await _send_dm(client, user_id, content)
 
 
 async def _send_dm(client: httpx.AsyncClient, user_id: str, content: str) -> str:
