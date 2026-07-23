@@ -193,6 +193,34 @@ class Top3TitlePoolMessage(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
+class RelationProposal(Base):
+    """Einschaetzung EINER Gruppierung ueber eine andere — gerichtet.
+
+    Kommt aus der Beziehungs-Erhebung im Discord (Dropdown pro Gegenueber).
+    Bewusst getrennt von CrewRelation: dort steht genau eine Beziehung pro
+    Paar (der ausgehandelte gemeinsame Nenner), hier steht, was jede Seite
+    FUER SICH behauptet. Genau diese Schieflage — A haelt B fuer Partner,
+    B sieht das anders — ist Material fuer Auftraege und ginge verloren,
+    wenn nur das Ergebnis gespeichert wuerde.
+
+    Pro (from, to) genau eine Zeile: waehlt ein Boss neu, wird ueberschrieben.
+    """
+    __tablename__ = "relation_proposals"
+    __table_args__ = (
+        UniqueConstraint("from_crew_id", "to_crew_id", name="uq_proposal_pair"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    from_crew_id: Mapped[int] = mapped_column(ForeignKey("crews.id", ondelete="CASCADE"))
+    to_crew_id: Mapped[int] = mapped_column(ForeignKey("crews.id", ondelete="CASCADE"))
+    relation_type: Mapped[RelationType] = mapped_column(SAEnum(RelationType))
+    #: Wer im Discord geklickt hat — fuer Rueckfragen, wenn eine Angabe strittig ist
+    discord_user_id: Mapped[str] = mapped_column(String(40), default="")
+    discord_user_name: Mapped[str] = mapped_column(String(120), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
 class SystemPrompt(Base):
     """Benannte System-Prompt-Varianten. Genau einer kann aktiv sein
     (is_active=True) — wird beim Generieren genutzt."""

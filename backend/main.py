@@ -15,6 +15,7 @@ from .routes_lore import router as lore_router
 from .routes_missions import router as missions_router
 from .routes_reaction import router as reaction_router
 from .routes_settings import router as settings_router
+from .routes_relations_survey import router as relations_survey_router
 from .routes_slots import public_router as public_slots_router
 from .routes_slots import router as slots_router
 from .routes_story import router as story_router
@@ -46,6 +47,7 @@ app.include_router(top3_titles_router)
 app.include_router(dashboard_router)
 app.include_router(slots_router)
 app.include_router(public_slots_router)
+app.include_router(relations_survey_router)
 
 
 @app.get("/api/health")
@@ -105,6 +107,11 @@ async def lore_page(_user: str = Depends(require_admin)):
 @app.get("/ranking")
 async def ranking_page(_user: str = Depends(require_admin)):
     return FileResponse(str(FRONTEND_DIR / "ranking.html"))
+
+
+@app.get("/beziehungen")
+async def relations_page(_user: str = Depends(require_admin)):
+    return FileResponse(str(FRONTEND_DIR / "relations.html"))
 
 
 @app.get("/story")

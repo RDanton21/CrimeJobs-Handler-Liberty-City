@@ -2825,3 +2825,154 @@ function questGiversPage() {
     },
   };
 }
+
+// ---- Beziehungs-Erhebung ----
+function relationsSurvey() {
+  const DEFAULT_INTRO = [
+    "# DER BOSS SORTIERT LIBERTY CITY NEU",
+    "",
+    "Der Boss will wissen, wo ihr steht. Nicht was ihr erzählt, wenn jemand zuhört — sondern wie ihr es **wirklich** meint.",
+    "",
+    "Ordnet jeder Gruppierung unten eine Bewertung zu. Eure eigene taucht nicht auf.",
+    "",
+    "Wen ihr nicht bewertet, den führt er als **neutral**. Das ist keine Drohung, das ist Buchhaltung.",
+    "",
+    "Zeigt es euren Leuten. Was in eurer Runde gesprochen wird, bleibt dort. Er liest nur die Liste.",
+    "",
+    "Was ihr ihm schickt, sind **Wünsche**. Wo zwei Gruppierungen sich widersprechen, entscheidet er. Nicht ihr. Wer damit ein Problem hat, bringt es jetzt vor. Später ist es keins mehr.",
+    "",
+    "-# Ich richte es nur aus. Was danach kommt, ist nicht mehr meine Sache.",
+  ].join("\n");
+
+  return {
+    loading: false,
+    sending: false,
+    error: "",
+    sendResult: "",
+    sendTarget: "",
+    intro: DEFAULT_INTRO,
+    status: {},
+    matrix: {},
+    filter: "",
+    filters: [
+      { key: "widerspruch", label: "Widerspruch", active: "bg-red-900/60 border-red-700 text-red-200" },
+      { key: "abweichend", label: "Abweichend", active: "bg-amber-900/60 border-amber-700 text-amber-200" },
+      { key: "einig", label: "Einig", active: "bg-green-900/60 border-green-700 text-green-200" },
+      { key: "offen", label: "Offen", active: "bg-zinc-800 border-zinc-600 text-zinc-200" },
+    ],
+
+    async init() { await this.loadAll(); },
+
+    async loadAll() {
+      this.loading = true;
+      this.error = "";
+      try {
+        const [s, m] = await Promise.all([
+          api.get("/api/relations/survey/status"),
+          api.get("/api/relations/survey/matrix"),
+        ]);
+        this.status = s;
+        this.matrix = m;
+      } catch (e) {
+        this.error = "Konnte Daten nicht laden: " + (e.message || e);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    get visiblePairs() {
+      const items = this.matrix.items || [];
+      return this.filter ? items.filter(p => p.status === this.filter) : items;
+    },
+
+    async send() {
+      if (!this.sendTarget) return;
+      const alle = this.sendTarget === "ALL";
+      const wen = alle
+        ? `alle ${(this.status.items || []).filter(i => i.hat_channel).length} Gruppierungen`
+        : ((this.status.items || []).find(i => String(i.crew_id) === this.sendTarget) || {}).name;
+      if (!confirm(`Umfrage an ${wen} senden?`)) return;
+
+      this.sending = true;
+      this.sendResult = "";
+      try {
+        const body = { intro: this.intro };
+        if (!alle) body.crew_ids = [parseInt(this.sendTarget, 10)];
+        const r = await api.post("/api/relations/survey/send", body);
+        const ok = (r.gesendet || []).length;
+        const weg = (r.uebersprungen || []);
+        this.sendResult = `✓ an ${ok} gesendet` +
+          (weg.length ? ` · ${weg.length} übersprungen: ${weg.map(w => `${w.crew} (${w.grund})`).join(", ")}` : "");
+        await this.loadAll();
+      } catch (e) {
+        this.sendResult = "";
+        this.error = "Versand fehlgeschlagen: " + (e.message || e);
+      } finally {
+        this.sending = false;
+      }
+    },
+
+    // --- Löschen. Betrifft ausschliesslich die Roh-Einschätzungen aus der
+    // Erhebung; die gepflegten Beziehungen der Gangs bleiben unangetastet.
+    async _del(url, frage) {
+      if (!confirm(frage)) return;
+      this.error = "";
+      try {
+        const r = await api.del(url);
+        await this.loadAll();
+        this.sendResult = `✓ ${r?.geloescht ?? 0} Einschätzung(en) gelöscht`;
+      } catch (e) {
+        this.error = "Löschen fehlgeschlagen: " + (e.message || e);
+      }
+    },
+    delDirection(p, richtung) {
+      const [von, zu, vonName, zuName] = richtung === "ab"
+        ? [p.a_id, p.b_id, p.a_name, p.b_name]
+        : [p.b_id, p.a_id, p.b_name, p.a_name];
+      return this._del(
+        `/api/relations/survey/proposal?from_crew_id=${von}&to_crew_id=${zu}`,
+        `Einschätzung von ${vonName} über ${zuName} löschen?`
+      );
+    },
+    delPair(p) {
+      return this._del(
+        `/api/relations/survey/pair?a_id=${p.a_id}&b_id=${p.b_id}`,
+        `Beide Richtungen zwischen ${p.a_name} und ${p.b_name} löschen?`
+      );
+    },
+    delCrew(i) {
+      return this._del(
+        `/api/relations/survey/crew/${i.crew_id}`,
+        `Alle ${i.abgegeben} Einschätzungen von ${i.name} löschen?`
+      );
+    },
+    delAll() {
+      return this._del(
+        "/api/relations/survey/reset",
+        `Wirklich ALLE ${this.status.eintraege_gesamt || 0} Einschätzungen löschen?\n\n` +
+        `Die gepflegten Beziehungen der Gangs bleiben erhalten — nur die Antworten aus der Erhebung gehen verloren.`
+      );
+    },
+
+    chip(type) {
+      return ({
+        ALLIED: "bg-green-900/60 text-green-300",
+        BUSINESS: "bg-sky-900/60 text-sky-300",
+        NEUTRAL: "bg-zinc-800 text-zinc-400",
+        RIVAL: "bg-amber-900/60 text-amber-300",
+        HOSTILE: "bg-red-900/60 text-red-300",
+      })[type] || "bg-zinc-900 text-zinc-600";
+    },
+    statusLabel(s) {
+      return ({ einig: "einig", abweichend: "abweichend", widerspruch: "Widerspruch", offen: "offen" })[s] || s;
+    },
+    statusChip(s) {
+      return ({
+        einig: "bg-green-900/60 text-green-300",
+        abweichend: "bg-amber-900/60 text-amber-300",
+        widerspruch: "bg-red-900/60 text-red-200 font-semibold",
+        offen: "bg-zinc-800 text-zinc-500",
+      })[s] || "bg-zinc-800 text-zinc-500";
+    },
+  };
+}

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crime Automation — Beziehungs-Erhebung</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+  <div x-data="relationsSurvey()" x-init="init()" class="max-w-screen-2xl mx-auto p-6">
+
+    <header class="flex items-center justify-between mb-8 flex-wrap gap-3">
+      <div>
+        <a href="/" class="text-sm text-zinc-500 hover:text-zinc-300">← Dashboard</a>
+        <h1 class="text-2xl font-bold mt-1">Beziehungs-Erhebung</h1>
+      </div>
+      <nav class="flex gap-2 text-sm flex-wrap items-center">
+        <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
+        <a href="/lore" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Lore</a>
+        <a href="/ranking" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Ranking</a>
+        <a href="/beziehungen" class="px-3 py-1.5 rounded bg-red-700 text-white">Beziehungen</a>
+        <button @click="loadAll()" :disabled="loading"
+                class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50">
+          <span x-show="!loading">↻ Aktualisieren</span>
+          <span x-show="loading">Lade…</span>
+        </button>
+      </nav>
+    </header>
+
+    <p x-show="error" x-text="error" class="mb-4 p-3 rounded bg-red-950 border border-red-800 text-red-300 text-sm"></p>
+
+    <!-- Fortschritt -->
+    <section class="mb-8">
+      <div class="flex items-baseline justify-between mb-3 flex-wrap gap-2">
+        <h2 class="text-xl font-semibold">Rücklauf</h2>
+        <span class="text-sm text-zinc-500">
+          <span x-text="status.vollstaendig || 0"></span> von <span x-text="status.gruppen || 0"></span> Gruppierungen vollständig
+          · <span x-text="status.eintraege_gesamt || 0"></span> Einschätzungen erfasst
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <template x-for="i in (status.items || [])" :key="i.crew_id">
+          <div class="bg-zinc-900 border rounded-lg p-4"
+               :class="i.abgegeben >= i.soll && i.soll > 0 ? 'border-green-800' : 'border-zinc-800'">
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="font-medium truncate" x-text="i.name"></span>
+              <span class="text-xs whitespace-nowrap"
+                    :class="i.abgegeben >= i.soll && i.soll > 0 ? 'text-green-400' : 'text-zinc-500'"
+                    x-text="`${i.abgegeben} / ${i.soll}`"></span>
+            </div>
+            <div class="h-1.5 bg-zinc-800 rounded overflow-hidden">
+              <div class="h-full transition-all"
+                   :class="i.abgegeben >= i.soll && i.soll > 0 ? 'bg-green-600' : 'bg-amber-600'"
+                   :style="`width:${i.soll ? Math.min(100, i.abgegeben / i.soll * 100) : 0}%`"></div>
+            </div>
+            <p x-show="!i.hat_channel" class="text-xs text-amber-500 mt-2">
+              ⚠ keine Channel-ID — bekommt keine Umfrage
+            </p>
+            <button x-show="i.abgegeben > 0" @click="delCrew(i)"
+                    :title="`Alle Einschätzungen von ${i.name} verwerfen`"
+                    class="mt-2 text-xs text-zinc-600 hover:text-red-400">
+              Antworten dieser Gruppierung löschen
+            </button>
+          </div>
+        </template>
+      </div>
+    </section>
+
+    <!-- Versand -->
+    <section class="mb-8 bg-zinc-900 border border-zinc-800 rounded-lg p-5">
+      <h2 class="text-lg font-semibold mb-1">Umfrage versenden</h2>
+      <p class="text-sm text-zinc-400 mb-4">
+        Jede Gruppierung bekommt Auswahlmenüs für alle anderen aktiven Gruppierungen.
+        Wiederholtes Senden ist unkritisch — bereits abgegebene Antworten bleiben erhalten,
+        eine neue Auswahl überschreibt die alte.
+      </p>
+
+      <label class="block text-xs text-zinc-400 mb-1">Einleitungstext (steht über den Menüs)</label>
+      <textarea x-model="intro" rows="6"
+                class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm mb-3"></textarea>
+
+      <label class="block text-xs text-zinc-400 mb-1">Empfänger</label>
+      <select x-model="sendTarget" class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm mb-3 w-full md:w-96">
+        <option value="">— zum Testen: eine Gruppierung wählen —</option>
+        <option value="ALL">Alle aktiven Gruppierungen</option>
+        <template x-for="i in (status.items || []).filter(x => x.hat_channel)" :key="i.crew_id">
+          <option :value="String(i.crew_id)" x-text="i.name"></option>
+        </template>
+      </select>
+
+      <div class="flex gap-2 items-center flex-wrap">
+        <button @click="send()" :disabled="sending || !sendTarget"
+                class="px-4 py-2 rounded bg-red-600 hover:bg-red-500 disabled:opacity-40 font-medium">
+          <span x-show="!sending">📤 Senden</span>
+          <span x-show="sending">Sende…</span>
+        </button>
+        <span x-show="sendResult" x-text="sendResult" class="text-sm text-zinc-400"></span>
+      </div>
+    </section>
+
+    <!-- Auswertung -->
+    <section>
+      <div class="flex items-baseline justify-between mb-3 flex-wrap gap-3">
+        <div class="flex items-baseline gap-3">
+          <h2 class="text-xl font-semibold">Gegenüberstellung</h2>
+          <button @click="delAll()" :disabled="!(status.eintraege_gesamt > 0)"
+                  title="Sämtliche abgegebenen Einschätzungen verwerfen"
+                  class="text-xs px-2.5 py-1 rounded border border-zinc-800 text-zinc-500 hover:border-red-700 hover:text-red-300 disabled:opacity-30 disabled:hover:border-zinc-800 disabled:hover:text-zinc-500">
+            Alle Einschätzungen löschen
+          </button>
+        </div>
+        <div class="flex gap-2 flex-wrap text-xs">
+          <template x-for="f in filters" :key="f.key">
+            <button @click="filter = (filter === f.key ? '' : f.key)"
+                    class="px-2.5 py-1 rounded border transition"
+                    :class="filter === f.key ? f.active : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200'">
+              <span x-text="f.label"></span>
+              <span class="opacity-70" x-text="`(${matrix.zusammenfassung?.[f.key] ?? 0})`"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto border border-zinc-800 rounded-lg">
+        <table class="w-full text-sm">
+          <thead class="bg-zinc-900 text-zinc-400 text-xs uppercase tracking-wide">
+            <tr>
+              <th class="text-left px-4 py-2">Gruppierung A</th>
+              <th class="text-left px-4 py-2">sieht B als</th>
+              <th class="text-left px-4 py-2">Gruppierung B</th>
+              <th class="text-left px-4 py-2">sieht A als</th>
+              <th class="text-left px-4 py-2">Befund</th>
+              <th class="text-right px-4 py-2">Aktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="p in visiblePairs" :key="`${p.a_id}-${p.b_id}`">
+              <tr class="border-t border-zinc-800/70 hover:bg-zinc-900/50">
+                <td class="px-4 py-2 font-medium" x-text="p.a_name"></td>
+                <td class="px-4 py-2">
+                  <span class="inline-flex items-center gap-1">
+                    <span :class="chip(p.a_zu_b)" class="px-2 py-0.5 rounded text-xs"
+                          x-text="p.a_zu_b_label || '—'"></span>
+                    <button x-show="p.a_zu_b" @click="delDirection(p, 'ab')"
+                            :title="`Einschätzung von ${p.a_name} über ${p.b_name} löschen`"
+                            class="text-zinc-600 hover:text-red-400 text-xs px-1">✕</button>
+                  </span>
+                </td>
+                <td class="px-4 py-2 font-medium" x-text="p.b_name"></td>
+                <td class="px-4 py-2">
+                  <span class="inline-flex items-center gap-1">
+                    <span :class="chip(p.b_zu_a)" class="px-2 py-0.5 rounded text-xs"
+                          x-text="p.b_zu_a_label || '—'"></span>
+                    <button x-show="p.b_zu_a" @click="delDirection(p, 'ba')"
+                            :title="`Einschätzung von ${p.b_name} über ${p.a_name} löschen`"
+                            class="text-zinc-600 hover:text-red-400 text-xs px-1">✕</button>
+                  </span>
+                </td>
+                <td class="px-4 py-2">
+                  <span class="px-2 py-0.5 rounded text-xs" :class="statusChip(p.status)"
+                        x-text="statusLabel(p.status)"></span>
+                </td>
+                <td class="px-4 py-2 text-right">
+                  <button x-show="p.a_zu_b || p.b_zu_a" @click="delPair(p)"
+                          title="Beide Richtungen dieses Paares löschen"
+                          class="text-xs px-2 py-1 rounded border border-zinc-800 text-zinc-500 hover:border-red-700 hover:text-red-300">
+                    Paar löschen
+                  </button>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+        <p x-show="visiblePairs.length === 0" class="text-zinc-500 text-sm p-4">
+          Nichts in dieser Ansicht.
+        </p>
+      </div>
+
+      <p class="text-xs text-zinc-600 mt-3">
+        „Abweichend" heißt: benachbart auf der Skala verbündet → geschäftlich → neutral →
+        rivalisierend → feindlich. „Widerspruch" heißt zwei oder mehr Stufen Abstand —
+        das sind die Fälle, die eine Entscheidung brauchen.
+      </p>
+    </section>
+  </div>
+
+  <script src="/static/app.js?v=20260723"></script>
+</body>
+</html>

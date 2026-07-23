@@ -14,11 +14,19 @@ from pathlib import Path
 
 import discord
 from aiohttp import web
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from .config import settings
 from .db import SessionLocal, init_db
-from .models import Crew, ExpiryMessage, Mission, MissionStatus, ReactionMessage
+from .models import (
+    Crew,
+    ExpiryMessage,
+    Mission,
+    MissionStatus,
+    ReactionMessage,
+    RelationProposal,
+    RelationType,
+)
 
 log = logging.getLogger("crime-bot")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
@@ -28,6 +36,54 @@ THUMB_DOWN = "👎"
 NOT_DOABLE = "❌"
 
 REACT_EMOJIS = [THUMB_UP, THUMB_DOWN, NOT_DOABLE]
+
+# --- Beziehungs-Erhebung (Dropdowns) -----------------------------------------
+#: Discord erlaubt 5 Bedienzeilen je Nachricht, ein Select belegt eine ganze.
+SELECTS_PER_MESSAGE = 5
+#: Praefix der custom_id: relsurvey:<from_crew_id>:<to_crew_id>
+RELSURVEY_PREFIX = "relsurvey"
+#: Reihenfolge bewusst von freundlich nach feindlich — die Skala soll beim
+#: Aufklappen als Skala lesbar sein, nicht als willkuerliche Liste.
+RELATION_CHOICES: list[tuple[str, str, str]] = [
+    ("verbündet", "ALLIED", "🤝"),
+    ("geschäftlich", "BUSINESS", "💼"),
+    ("neutral", "NEUTRAL", "➖"),
+    ("rivalisierend", "RIVAL", "⚔️"),
+    ("feindlich", "HOSTILE", "🔥"),
+]
+RELATION_LABEL_BY_VALUE = {v: label for label, v, _e in RELATION_CHOICES}
+
+
+def _build_relation_select(from_crew_id: int, to_crew_id: int, to_name: str) -> discord.ui.Select:
+    """Ein Auswahlmenue fuer genau ein Gegenueber.
+
+    Der Gruppenname steht in JEDEM Options-Label, nicht nur im placeholder:
+    Discord ersetzt den placeholder, sobald etwas gewaehlt ist. Stuende der
+    Name nur dort, zeigten alle Menues danach bloss noch "geschäftlich" oder
+    "verbündet" — welche Gruppierung gemeint ist, waere nicht mehr erkennbar,
+    und ein Aendern der eigenen Angabe wuerde zum Raten.
+
+    Die Auswertung laeuft ueber on_interaction (rohes Event) statt ueber
+    View-Callbacks. Grund: View-Callbacks funktionieren nach einem
+    Bot-Neustart nur, wenn die View vorher via client.add_view neu
+    registriert wurde — der Bot startet bei jedem Deploy neu, und vergessene
+    Registrierung heisst tote Menues. Das rohe Event kommt immer an.
+    """
+    #: Discord begrenzt Labels auf 100 Zeichen. " — rivalisierend" ist der
+    #: laengste Zusatz; der Name wird notfalls gekuerzt, nie das Wort.
+    max_name = 100 - len(" — rivalisierend")
+    name = to_name if len(to_name) <= max_name else to_name[: max_name - 1] + "…"
+
+    return discord.ui.Select(
+        custom_id=f"{RELSURVEY_PREFIX}:{from_crew_id}:{to_crew_id}",
+        placeholder=f"{name} — Bewertung wählen",
+        min_values=1,
+        max_values=1,
+        options=[
+            discord.SelectOption(label=f"{name} — {label}", value=value, emoji=emoji)
+            for label, value, emoji in RELATION_CHOICES
+        ],
+    )
 
 
 intents = discord.Intents.default()
@@ -311,6 +367,71 @@ async def _expire_mission(mission: Mission, session) -> None:
     mission.reacted_at = datetime.utcnow()
     await session.commit()
     log.info("Mission %s expired (deadline %s)", mission.id, mission.deadline_at)
+
+
+@client.event
+async def on_interaction(interaction: discord.Interaction):
+    """Auswahl aus der Beziehungs-Erhebung entgegennehmen.
+
+    Rohes Interaction-Event statt View-Callback, damit die Menues einen
+    Bot-Neustart ueberleben (siehe _build_relation_select).
+    """
+    if interaction.type is not discord.InteractionType.component:
+        return
+    custom_id = (interaction.data or {}).get("custom_id") or ""
+    if not custom_id.startswith(f"{RELSURVEY_PREFIX}:"):
+        return
+
+    try:
+        _, from_id_str, to_id_str = custom_id.split(":")
+        from_crew_id, to_crew_id = int(from_id_str), int(to_id_str)
+        value = ((interaction.data or {}).get("values") or [None])[0]
+        rel = RelationType[value]
+    except (ValueError, KeyError, TypeError):
+        log.warning("Beziehungs-Auswahl unlesbar: custom_id=%r data=%r", custom_id, interaction.data)
+        await interaction.response.send_message(
+            "Das konnte ich nicht zuordnen. Sag dem Padrino Bescheid.", ephemeral=True
+        )
+        return
+
+    user = interaction.user
+    async with SessionLocal() as session:
+        to_crew = await session.get(Crew, to_crew_id)
+        existing = (await session.execute(
+            select(RelationProposal).where(
+                RelationProposal.from_crew_id == from_crew_id,
+                RelationProposal.to_crew_id == to_crew_id,
+            )
+        )).scalar_one_or_none()
+
+        if existing:
+            existing.relation_type = rel
+            existing.discord_user_id = str(user.id) if user else ""
+            existing.discord_user_name = (user.display_name if user else "") or ""
+            existing.updated_at = datetime.utcnow()
+        else:
+            session.add(RelationProposal(
+                from_crew_id=from_crew_id,
+                to_crew_id=to_crew_id,
+                relation_type=rel,
+                discord_user_id=str(user.id) if user else "",
+                discord_user_name=(user.display_name if user else "") or "",
+            ))
+        await session.commit()
+
+        done = (await session.execute(
+            select(func.count(RelationProposal.id)).where(
+                RelationProposal.from_crew_id == from_crew_id
+            )
+        )).scalar_one()
+
+    label = RELATION_LABEL_BY_VALUE.get(rel.name, rel.name)
+    name = to_crew.name if to_crew else f"#{to_crew_id}"
+    # Ephemer: nur der Klickende sieht die Bestaetigung, der Channel bleibt sauber.
+    await interaction.response.send_message(
+        f"Notiert: **{name}** = **{label}**  ·  {done} erfasst", ephemeral=True
+    )
+    log.info("Beziehung erfasst: %s -> %s = %s (von %s)", from_crew_id, to_crew_id, rel.name, user)
 
 
 async def _fetch_message(payload: discord.RawReactionActionEvent):
@@ -815,6 +936,61 @@ async def http_post_text(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "message_id": str(msg.id)})
 
 
+async def http_post_relation_survey(request: web.Request) -> web.Response:
+    """POST /post_relation_survey
+    body: {channel_id, from_crew_id, intro (optional),
+           targets: [{id, name}, ...]}
+
+    Postet die Beziehungs-Erhebung mit Auswahlmenues. Discord erlaubt max.
+    5 Bedienzeilen pro Nachricht und ein Select belegt eine ganze Zeile —
+    bei mehr als 5 Gegenuebern wird deshalb auf mehrere Nachrichten
+    aufgeteilt.
+    """
+    data = await request.json()
+    try:
+        channel_id = int(data["channel_id"])
+        from_crew_id = int(data["from_crew_id"])
+    except (KeyError, ValueError, TypeError):
+        return web.json_response({"error": "channel_id/from_crew_id ungueltig"}, status=400)
+
+    targets = data.get("targets") or []
+    if not targets:
+        return web.json_response({"error": "targets leer"}, status=400)
+
+    intro = (data.get("intro") or "").strip()
+    if len(intro) > 1990:
+        return web.json_response({"error": f"intro zu lang ({len(intro)} > 1990)"}, status=400)
+
+    try:
+        channel = client.get_channel(channel_id) or await client.fetch_channel(channel_id)
+    except discord.NotFound:
+        return web.json_response({"error": "channel not found"}, status=404)
+    except discord.Forbidden:
+        return web.json_response({"error": "forbidden - bot has no access to channel"}, status=403)
+    except Exception as exc:
+        return web.json_response({"error": f"channel: {exc}"}, status=500)
+
+    message_ids: list[str] = []
+    try:
+        if intro:
+            msg = await channel.send(content=intro)
+            message_ids.append(str(msg.id))
+
+        for start in range(0, len(targets), SELECTS_PER_MESSAGE):
+            chunk = targets[start:start + SELECTS_PER_MESSAGE]
+            view = discord.ui.View(timeout=None)
+            for t in chunk:
+                view.add_item(_build_relation_select(from_crew_id, int(t["id"]), str(t["name"])))
+            msg = await channel.send(view=view)
+            message_ids.append(str(msg.id))
+    except discord.Forbidden:
+        return web.json_response({"error": "forbidden - cannot send to channel"}, status=403)
+    except Exception as exc:
+        return web.json_response({"error": str(exc)}, status=500)
+
+    return web.json_response({"ok": True, "message_ids": message_ids, "targets": len(targets)})
+
+
 async def http_post_announce(request: web.Request) -> web.Response:
     """POST /post_announce  body: {channel_id: str, content: str}
     Ankündigung mit Rollen-Ping (z.B. Personal-Änderungen fürs
@@ -861,6 +1037,7 @@ def build_http_app() -> web.Application:
         web.post("/send", http_send_mission),
         web.post("/post_text", http_post_text),
         web.post("/post_announce", http_post_announce),
+        web.post("/post_relation_survey", http_post_relation_survey),
         web.post("/delete_message", http_delete_message),
         web.post("/delete_in_range", http_delete_in_range),
         web.post("/read_channel", http_read_channel),
