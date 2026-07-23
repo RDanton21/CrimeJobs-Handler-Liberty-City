@@ -13,6 +13,8 @@ werden, bevor daraus ein gemeinsamer Nenner wird.
 """
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
+
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -50,6 +52,32 @@ class SurveySendRequest(BaseModel):
     #: damit sich die Erhebung erst an einer Gruppe testen laesst.
     crew_ids: list[int] | None = None
     intro: str = ""
+    #: Fester Fristzeitpunkt als lokale ISO-Zeit ("2026-07-25T21:21").
+    #: Leer = ohne Frist.
+    deadline_at: str | None = None
+
+
+def _deadline_line(deadline_at: str) -> str:
+    """Frist als Discord-Zeitstempel.
+
+    <t:UNIX:F> schreibt Wochentag, Datum und Uhrzeit in der Zeitzone des
+    jeweiligen Lesers, <t:UNIX:R> laeuft als Countdown live mit ("in 2 Tagen").
+    Damit steht in jedem Client die richtige Zeit, ohne dass wir uns auf eine
+    Zeitzone festlegen — und niemand rechnet sich die Frist schoen.
+
+    Die Eingabe kommt ohne Zeitzone aus dem Browser-Feld und wird als lokale
+    Zeit des Servers gelesen (Container laeuft auf Europe/Berlin).
+    """
+    try:
+        dt = datetime.fromisoformat(deadline_at)
+    except ValueError as exc:
+        raise HTTPException(400, f"Frist nicht lesbar: {deadline_at!r}") from exc
+    if dt.tzinfo is None:
+        dt = dt.astimezone()
+    if dt <= datetime.now(timezone.utc):
+        raise HTTPException(400, "Die Frist liegt in der Vergangenheit")
+    ts = int(dt.timestamp())
+    return f"\n\nFrist: <t:{ts}:F> — noch <t:{ts}:R>."
 
 
 def _type_name(value) -> str:
@@ -79,6 +107,13 @@ async def send_survey(
     else:
         recipients = crews
 
+    intro = payload.intro or ""
+    if (payload.deadline_at or "").strip():
+        intro = (intro + _deadline_line(payload.deadline_at.strip())).strip()
+
+    if len(intro) > 1990:
+        raise HTTPException(400, f"Einleitungstext zu lang ({len(intro)} > 1990 Zeichen)")
+
     sent: list[dict] = []
     skipped: list[dict] = []
 
@@ -95,7 +130,7 @@ async def send_survey(
         body = {
             "channel_id": crew.discord_channel_id,
             "from_crew_id": crew.id,
-            "intro": payload.intro or "",
+            "intro": intro,
             "targets": targets,
         }
         try:

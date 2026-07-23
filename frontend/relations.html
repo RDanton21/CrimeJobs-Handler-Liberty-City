@@ -82,14 +82,31 @@
       <textarea x-model="intro" rows="6"
                 class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm mb-3"></textarea>
 
-      <label class="block text-xs text-zinc-400 mb-1">Empfänger</label>
-      <select x-model="sendTarget" class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm mb-3 w-full md:w-96">
-        <option value="">— zum Testen: eine Gruppierung wählen —</option>
-        <option value="ALL">Alle aktiven Gruppierungen</option>
-        <template x-for="i in (status.items || []).filter(x => x.hat_channel)" :key="i.crew_id">
-          <option :value="String(i.crew_id)" x-text="i.name"></option>
-        </template>
-      </select>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+        <div>
+          <label class="block text-xs text-zinc-400 mb-1">Empfänger</label>
+          <select x-model="sendTarget" class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm w-full">
+            <option value="">— zum Testen: eine Gruppierung wählen —</option>
+            <option value="ALL">Alle aktiven Gruppierungen</option>
+            <template x-for="i in (status.items || []).filter(x => x.hat_channel)" :key="i.crew_id">
+              <option :value="String(i.crew_id)" x-text="i.name"></option>
+            </template>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs text-zinc-400 mb-1">Frist (optional)</label>
+          <div class="flex gap-2">
+            <input type="datetime-local" x-model="deadlineAt"
+                   class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm flex-1" />
+            <button x-show="deadlineAt" @click="deadlineAt = ''"
+                    title="Frist entfernen"
+                    class="px-2 text-zinc-500 hover:text-zinc-200">✕</button>
+          </div>
+          <p class="text-xs mt-1" :class="deadlineAt ? 'text-zinc-400' : 'text-zinc-600'"
+             x-text="deadlinePreview"></p>
+        </div>
+      </div>
 
       <div class="flex gap-2 items-center flex-wrap">
         <button @click="send()" :disabled="sending || !sendTarget"

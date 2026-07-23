@@ -2851,6 +2851,8 @@ function relationsSurvey() {
     sendResult: "",
     sendTarget: "",
     intro: DEFAULT_INTRO,
+    // Vorbelegung für die laufende Erhebung — im Feld jederzeit änderbar.
+    deadlineAt: "2026-07-25T21:21",
     status: {},
     matrix: {},
     filter: "",
@@ -2885,6 +2887,23 @@ function relationsSurvey() {
       return this.filter ? items.filter(p => p.status === this.filter) : items;
     },
 
+    get deadlinePreview() {
+      if (!this.deadlineAt) return "Ohne Frist — im Text steht dann kein Termin.";
+      const d = new Date(this.deadlineAt);
+      if (isNaN(d)) return "Datum unvollständig.";
+      const wann = d.toLocaleString("de-DE", {
+        weekday: "long", day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit",
+      });
+      const diff = d - new Date();
+      if (diff <= 0) return `${wann} — liegt in der Vergangenheit, wird abgelehnt.`;
+      const std = Math.floor(diff / 3600000);
+      const rest = std >= 48
+        ? `${Math.floor(std / 24)} Tage`
+        : (std >= 1 ? `${std} Stunden` : `${Math.max(1, Math.round(diff / 60000))} Minuten`);
+      return `${wann} — noch ${rest}. Discord zeigt jedem Leser seine eigene Zeitzone.`;
+    },
+
     async send() {
       if (!this.sendTarget) return;
       const alle = this.sendTarget === "ALL";
@@ -2896,7 +2915,7 @@ function relationsSurvey() {
       this.sending = true;
       this.sendResult = "";
       try {
-        const body = { intro: this.intro };
+        const body = { intro: this.intro, deadline_at: this.deadlineAt || null };
         if (!alle) body.crew_ids = [parseInt(this.sendTarget, 10)];
         const r = await api.post("/api/relations/survey/send", body);
         const ok = (r.gesendet || []).length;
