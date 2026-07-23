@@ -142,6 +142,17 @@
         </div>
       </div>
 
+      <label class="flex items-start gap-2 mb-3 cursor-pointer select-none">
+        <input type="checkbox" x-model="onlyMissing" class="mt-0.5 scale-110" />
+        <span class="text-sm">
+          Nur fehlende Bewertungen
+          <span class="block text-xs text-zinc-500">
+            Postet je Gruppierung nur die Menüs, zu denen noch keine Antwort vorliegt — für
+            Neuzugänge und als Erinnerung. Wer schon vollständig ist, bekommt nichts.
+          </span>
+        </span>
+      </label>
+
       <div class="flex gap-2 items-center flex-wrap">
         <button @click="send()" :disabled="sending || !sendTarget"
                 class="px-4 py-2 rounded bg-red-600 hover:bg-red-500 disabled:opacity-40 font-medium">

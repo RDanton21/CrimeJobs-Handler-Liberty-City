@@ -2851,6 +2851,7 @@ function relationsSurvey() {
     sendResult: "",
     sendTarget: "",
     intro: DEFAULT_INTRO,
+    onlyMissing: false,
     deadlineMode: "zeitpunkt",
     // Vorbelegung für die laufende Erhebung — im Feld jederzeit änderbar.
     deadlineAt: "2026-07-25T21:21",
@@ -2927,7 +2928,8 @@ function relationsSurvey() {
       const wen = alle
         ? `alle ${(this.status.items || []).filter(i => i.hat_channel).length} Gruppierungen`
         : ((this.status.items || []).find(i => String(i.crew_id) === this.sendTarget) || {}).name;
-      if (!confirm(`Umfrage an ${wen} senden?`)) return;
+      const was = this.onlyMissing ? "Nur die fehlenden Bewertungen" : "Die vollständige Umfrage";
+      if (!confirm(`${was} an ${wen} senden?`)) return;
 
       this.sending = true;
       this.sendResult = "";
@@ -2937,11 +2939,13 @@ function relationsSurvey() {
         const body = this.deadlineMode === "dauer"
           ? { intro: this.intro, deadline_minutes: this.deadlineTotalMinutes || null }
           : { intro: this.intro, deadline_at: this.deadlineAt || null };
+        body.only_missing = this.onlyMissing;
         if (!alle) body.crew_ids = [parseInt(this.sendTarget, 10)];
         const r = await api.post("/api/relations/survey/send", body);
-        const ok = (r.gesendet || []).length;
+        const gesendet = r.gesendet || [];
         const weg = (r.uebersprungen || []);
-        this.sendResult = `✓ an ${ok} gesendet` +
+        const menues = gesendet.reduce((s, g) => s + (g.targets || 0), 0);
+        this.sendResult = `✓ an ${gesendet.length} gesendet (${menues} Menüs)` +
           (weg.length ? ` · ${weg.length} übersprungen: ${weg.map(w => `${w.crew} (${w.grund})`).join(", ")}` : "");
         await this.loadAll();
       } catch (e) {

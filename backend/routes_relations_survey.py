@@ -58,6 +58,10 @@ class SurveySendRequest(BaseModel):
     #: kein deadline_at gesetzt ist. Bewusst serverseitig gerechnet — sonst
     #: haengt die Frist an der womoeglich falsch gestellten Browser-Uhr.
     deadline_minutes: int | None = None
+    #: Nachtrag: nur Menues fuer Gruppierungen posten, zu denen noch keine
+    #: Bewertung vorliegt. Fuer Neuzugaenge (alle anderen bekommen genau ein
+    #: Menue) und als Erinnerung an unvollstaendige Gruppierungen.
+    only_missing: bool = False
 
 
 def _deadline_line(ts: int) -> str:
@@ -144,6 +148,15 @@ async def send_survey(
     if len(intro) > 1990:
         raise HTTPException(400, f"Einleitungstext zu lang ({len(intro)} > 1990 Zeichen)")
 
+    # Vorhandene Antworten einmal laden — bei only_missing brauchen wir sie
+    # fuer jeden Empfaenger, eine Abfrage je Gruppierung waere Verschwendung.
+    bereits: set[tuple[int, int]] = set()
+    if payload.only_missing:
+        bereits = {
+            (p.from_crew_id, p.to_crew_id)
+            for p in (await session.execute(select(RelationProposal))).scalars().all()
+        }
+
     sent: list[dict] = []
     skipped: list[dict] = []
 
@@ -153,6 +166,11 @@ async def send_survey(
             continue
 
         targets = [{"id": t.id, "name": t.name} for t in crews if t.id != crew.id]
+        if payload.only_missing:
+            targets = [t for t in targets if (crew.id, t["id"]) not in bereits]
+            if not targets:
+                skipped.append({"crew": crew.name, "grund": "bereits vollständig"})
+                continue
         if not targets:
             skipped.append({"crew": crew.name, "grund": "keine anderen Gruppierungen"})
             continue
