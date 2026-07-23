@@ -233,13 +233,24 @@ async def health():
 
 @app.get("/api/services")
 async def list_services(_user: str = Depends(require_admin)):
-    """Status aller Bot-Container."""
-    return [get_container_status(name) for name in BOT_SERVICES.keys()]
+    """Status aller Bot-Container.
+
+    get_container_status blockiert je laufendem Container ~2s, weil
+    `docker stats` zwei Samples braucht. Sequenziell im Event-Loop waren das
+    ~11s pro Aufruf — bei 5s Poll-Intervall kam der Loop nie hinterher und
+    jeder andere Request (z.B. POST /start) verhungerte in der Queue.
+    Deshalb: parallel im Threadpool statt seriell im Event-Loop.
+    """
+    return list(
+        await asyncio.gather(
+            *(asyncio.to_thread(get_container_status, name) for name in BOT_SERVICES)
+        )
+    )
 
 
 @app.get("/api/services/{service}/status")
 async def service_status(service: str, _user: str = Depends(require_admin)):
-    return get_container_status(service)
+    return await asyncio.to_thread(get_container_status, service)
 
 
 def _do_restart(container_name: str) -> None:
@@ -314,8 +325,13 @@ async def service_logs(
     if not svc:
         raise HTTPException(404, "Unknown service")
     try:
-        c = docker_client.containers.get(svc["container"])
-        logs = c.logs(tail=tail, timestamps=True).decode("utf-8", errors="replace")
+        # Auch das Log-Abholen gehoert in den Threadpool — sonst steht der
+        # Event-Loop still, waehrend Docker die Zeilen liefert.
+        def _fetch() -> str:
+            c = docker_client.containers.get(svc["container"])
+            return c.logs(tail=tail, timestamps=True).decode("utf-8", errors="replace")
+
+        logs = await asyncio.to_thread(_fetch)
         return {"service": service, "logs": logs}
     except docker.errors.NotFound:
         raise HTTPException(404, f"Container {svc['container']} nicht gefunden")
@@ -324,8 +340,13 @@ async def service_logs(
 
 
 @app.get("/api/system")
-async def system_stats(_user: str = Depends(require_admin)):
-    """VPS-System-Stats: CPU, RAM, Disk, Uptime."""
+def system_stats(_user: str = Depends(require_admin)):
+    """VPS-System-Stats: CPU, RAM, Disk, Uptime.
+
+    Bewusst synchron (`def`): psutil.cpu_percent(interval=0.5) blockiert eine
+    halbe Sekunde. FastAPI fuehrt sync-Endpoints im Threadpool aus, damit
+    haelt das den Event-Loop nicht auf.
+    """
     cpu_pct = psutil.cpu_percent(interval=0.5)
     mem = psutil.virtual_memory()
     disk = psutil.disk_usage("/")
