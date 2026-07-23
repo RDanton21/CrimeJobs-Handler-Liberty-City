@@ -221,6 +221,24 @@ class RelationProposal(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
 
+class SurveyMessage(Base):
+    """Discord-Nachrichten einer Beziehungs-Erhebung — zum spaeteren Aufraeumen.
+
+    Die Auswahlmenues haengen an der Nachricht, nicht an der Erhebung: eine
+    alte Umfrage bleibt bedienbar, solange ihre Nachricht im Channel steht.
+    Wird neu gesendet, koennen Bosse also versehentlich ueber die alte
+    Fassung abstimmen. Damit das Aufraeumen nicht Handarbeit im Discord ist,
+    merken wir uns beim Versand Channel und Message-ID.
+    """
+    __tablename__ = "survey_messages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    crew_id: Mapped[int] = mapped_column(ForeignKey("crews.id", ondelete="CASCADE"))
+    channel_id: Mapped[str] = mapped_column(String(40), nullable=False)
+    message_id: Mapped[str] = mapped_column(String(40), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
 class SystemPrompt(Base):
     """Benannte System-Prompt-Varianten. Genau einer kann aktiv sein
     (is_active=True) — wird beim Generieren genutzt."""

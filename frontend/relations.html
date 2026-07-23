@@ -35,10 +35,17 @@
     <section class="mb-8">
       <div class="flex items-baseline justify-between mb-3 flex-wrap gap-2">
         <h2 class="text-xl font-semibold">Rücklauf</h2>
-        <span class="text-sm text-zinc-500">
-          <span x-text="status.vollstaendig || 0"></span> von <span x-text="status.gruppen || 0"></span> Gruppierungen vollständig
-          · <span x-text="status.eintraege_gesamt || 0"></span> Einschätzungen erfasst
-        </span>
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="text-sm text-zinc-500">
+            <span x-text="status.vollstaendig || 0"></span> von <span x-text="status.gruppen || 0"></span> Gruppierungen vollständig
+            · <span x-text="status.eintraege_gesamt || 0"></span> Einschätzungen erfasst
+          </span>
+          <button x-show="status.nachrichten_gesamt > 0" @click="delAllMessages()"
+                  title="Sämtliche Umfrage-Nachrichten aus allen Channels löschen"
+                  class="text-xs px-2.5 py-1 rounded border border-zinc-800 text-amber-600 hover:border-amber-700 hover:text-amber-400">
+            Alle Umfragen aus Discord entfernen (<span x-text="status.nachrichten_gesamt"></span>)
+          </button>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -59,11 +66,18 @@
             <p x-show="!i.hat_channel" class="text-xs text-amber-500 mt-2">
               ⚠ keine Channel-ID — bekommt keine Umfrage
             </p>
-            <button x-show="i.abgegeben > 0" @click="delCrew(i)"
-                    :title="`Alle Einschätzungen von ${i.name} verwerfen`"
-                    class="mt-2 text-xs text-zinc-600 hover:text-red-400">
-              Antworten dieser Gruppierung löschen
-            </button>
+            <div class="mt-2 flex flex-col gap-1 items-start">
+              <button x-show="i.nachrichten > 0" @click="delMessages(i)"
+                      :title="`Die ${i.nachrichten} Umfrage-Nachrichten aus dem Channel von ${i.name} löschen`"
+                      class="text-xs text-amber-600 hover:text-amber-400">
+                Umfrage im Channel entfernen (<span x-text="i.nachrichten"></span>)
+              </button>
+              <button x-show="i.abgegeben > 0" @click="delCrew(i)"
+                      :title="`Alle Einschätzungen von ${i.name} verwerfen`"
+                      class="text-xs text-zinc-600 hover:text-red-400">
+                Antworten dieser Gruppierung löschen
+              </button>
+            </div>
           </div>
         </template>
       </div>

@@ -2986,6 +2986,35 @@ function relationsSurvey() {
         `Alle ${i.abgegeben} Einschätzungen von ${i.name} löschen?`
       );
     },
+    // Löscht die Nachrichten im Discord, NICHT die abgegebenen Antworten —
+    // die liegen in der Datenbank und überleben das Aufräumen.
+    async _purge(url, frage) {
+      if (!confirm(frage)) return;
+      this.error = "";
+      try {
+        const r = await api.del(url);
+        await this.loadAll();
+        this.sendResult = `✓ ${r?.geloescht ?? 0} Nachricht(en) im Discord gelöscht`
+          + ((r?.fehler || []).length ? ` · ${r.fehler.length} fehlgeschlagen: ${r.fehler.join("; ")}` : "");
+      } catch (e) {
+        this.error = "Aufräumen fehlgeschlagen: " + (e.message || e);
+      }
+    },
+    delMessages(i) {
+      return this._purge(
+        `/api/relations/survey/messages/${i.crew_id}`,
+        `Die ${i.nachrichten} Umfrage-Nachrichten im Channel von ${i.name} löschen?\n\n` +
+        `Die bereits abgegebenen Antworten bleiben erhalten.`
+      );
+    },
+    delAllMessages() {
+      return this._purge(
+        "/api/relations/survey/messages",
+        `Alle ${this.status.nachrichten_gesamt || 0} Umfrage-Nachrichten aus sämtlichen Channels löschen?\n\n` +
+        `Die bereits abgegebenen Antworten bleiben erhalten.`
+      );
+    },
+
     delAll() {
       return this._del(
         "/api/relations/survey/reset",

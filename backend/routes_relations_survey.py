@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .auth import require_admin
 from .config import settings
 from .db import get_session
-from .models import Crew, RelationProposal, RelationType
+from .models import Crew, RelationProposal, RelationType, SurveyMessage
 
 router = APIRouter(
     prefix="/api/relations/survey",
@@ -155,11 +155,66 @@ async def send_survey(
             if r.status_code >= 400:
                 skipped.append({"crew": crew.name, "grund": f"Bot: {r.text[:160]}"})
                 continue
+            # Message-IDs merken, damit die Umfrage spaeter per Knopfdruck
+            # aus dem Channel verschwinden kann.
+            for mid in (r.json().get("message_ids") or []):
+                session.add(SurveyMessage(
+                    crew_id=crew.id,
+                    channel_id=crew.discord_channel_id,
+                    message_id=str(mid),
+                ))
             sent.append({"crew": crew.name, "targets": len(targets)})
         except Exception as exc:
             skipped.append({"crew": crew.name, "grund": f"Bot nicht erreichbar: {exc}"})
 
+    await session.commit()
     return {"ok": True, "gesendet": sent, "uebersprungen": skipped}
+
+
+async def _purge_messages(session: AsyncSession, rows: list[SurveyMessage]) -> dict:
+    """Nachrichten im Discord loeschen und die Merkzettel entfernen.
+
+    Der Bot meldet bereits geloeschte Nachrichten als Erfolg zurueck — ein
+    von Hand geleerter Channel fuehrt hier also nicht zu Fehlern, die
+    Merkzettel verschwinden trotzdem.
+    """
+    geloescht, fehler = 0, []
+    async with httpx.AsyncClient(timeout=20.0) as cli:
+        for row in rows:
+            try:
+                r = await cli.post(
+                    f"{settings.bot_api_url}/delete_message",
+                    json={"channel_id": row.channel_id, "message_id": row.message_id},
+                )
+                if r.status_code >= 400:
+                    fehler.append(f"{row.message_id}: {r.text[:80]}")
+                    continue
+            except Exception as exc:
+                fehler.append(f"{row.message_id}: {exc}")
+                continue
+            await session.delete(row)
+            geloescht += 1
+    await session.commit()
+    return {"ok": True, "geloescht": geloescht, "fehler": fehler}
+
+
+@router.delete("/messages/{crew_id}")
+async def delete_survey_messages(crew_id: int, session: AsyncSession = Depends(get_session)):
+    """Umfrage-Nachrichten EINER Gruppierung aus ihrem Channel entfernen.
+    Die abgegebenen Antworten bleiben — die liegen in der Datenbank."""
+    rows = list((await session.execute(
+        select(SurveyMessage).where(SurveyMessage.crew_id == crew_id)
+    )).scalars().all())
+    if not rows:
+        raise HTTPException(404, "Keine gemerkten Nachrichten für diese Gruppierung")
+    return await _purge_messages(session, rows)
+
+
+@router.delete("/messages")
+async def delete_all_survey_messages(session: AsyncSession = Depends(get_session)):
+    """Umfrage-Nachrichten aller Gruppierungen entfernen."""
+    rows = list((await session.execute(select(SurveyMessage))).scalars().all())
+    return await _purge_messages(session, rows)
 
 
 @router.get("/status")
@@ -174,6 +229,11 @@ async def survey_status(session: AsyncSession = Depends(get_session)):
     for p in rows:
         counts[p.from_crew_id] = counts.get(p.from_crew_id, 0) + 1
 
+    msgs = (await session.execute(select(SurveyMessage))).scalars().all()
+    msg_counts: dict[int, int] = {}
+    for m in msgs:
+        msg_counts[m.crew_id] = msg_counts.get(m.crew_id, 0) + 1
+
     items = [
         {
             "crew_id": c.id,
@@ -182,6 +242,7 @@ async def survey_status(session: AsyncSession = Depends(get_session)):
             "hat_channel": bool((c.discord_channel_id or "").strip()),
             "abgegeben": counts.get(c.id, 0),
             "soll": soll,
+            "nachrichten": msg_counts.get(c.id, 0),
         }
         for c in crews
     ]
@@ -192,6 +253,7 @@ async def survey_status(session: AsyncSession = Depends(get_session)):
         "gruppen": len(crews),
         "vollstaendig": sum(1 for i in items if soll and i["abgegeben"] >= soll),
         "eintraege_gesamt": len(rows),
+        "nachrichten_gesamt": len(msgs),
         "items": items,
         "unbekannte_crews": [p.from_crew_id for p in rows if p.from_crew_id not in by_id],
     }
