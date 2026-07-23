@@ -10,11 +10,17 @@ Datenquellen:
 - eigene jobs.db (SQLite async)        -> Player + Slot-Belegungen
 """
 import asyncio
+import contextlib
+import logging
 import secrets
 import time
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timedelta
 from pathlib import Path
+
+# Root-Logger fuer eigene Module (z.B. jobs.reminders) — uvicorn konfiguriert
+# nur seine eigenen Logger, INFO-Meldungen gingen sonst verloren
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(name)s — %(message)s")
 
 import httpx
 from fastapi import Body, Depends, FastAPI, HTTPException, Request, Response
@@ -23,7 +29,7 @@ from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from sqlalchemy import case, delete, exists, func, select, update
 from sqlalchemy.exc import IntegrityError
 
-from . import config, discord_oauth
+from . import config, discord_oauth, reminders
 from .db import SessionLocal, init_db
 from .models import (
     CompletedParticipation,
@@ -54,7 +60,12 @@ ONLINE_WINDOW = timedelta(minutes=5)
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     await init_db()
+    # Erinnerungs-DMs im Hintergrund (no-op ohne DISCORD_BOT_TOKEN)
+    reminder_task = asyncio.create_task(reminders.reminder_loop(_fetch_crime_data))
     yield
+    reminder_task.cancel()
+    with contextlib.suppress(asyncio.CancelledError):
+        await reminder_task
 
 
 app = FastAPI(title="SEKTOR Personal-Boerse", lifespan=lifespan)

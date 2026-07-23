@@ -69,6 +69,23 @@ class CompletedParticipation(Base):
     attended: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
+class SentReminder(Base):
+    """Bereits verschickte Erinnerungs-DMs — verhindert Doppel-DMs, auch
+    ueber Container-Neustarts hinweg. kind laesst spaeter weitere
+    Erinnerungsarten zu (z.B. 'day_before')."""
+    __tablename__ = "sent_reminders"
+    __table_args__ = (
+        UniqueConstraint("slot_id", "player_discord_id", "kind", name="uq_reminder"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    slot_id: Mapped[int] = mapped_column(Integer, index=True)
+    mission_id: Mapped[int] = mapped_column(Integer, index=True)
+    player_discord_id: Mapped[str] = mapped_column(String, index=True)
+    kind: Mapped[str] = mapped_column(String, default="pre_start")
+    sent_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class DismissedMission(Base):
     """Vom Admin vorzeitig ausgeblendeter Auftrag — er verschwindet sofort
     vom Board, statt die uebliche Stunde stehen zu bleiben."""

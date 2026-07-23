@@ -41,6 +41,18 @@ CRIME_API_KEY = os.getenv("CRIME_API_KEY", "")
 # --- Datenbank ---
 JOBS_DB_PATH = os.getenv("JOBS_DB_PATH", "/app/data/jobs.db")
 
+# --- Discord-Erinnerungen (DM vor dem Einsatzfenster) ---
+# Bot-Token von "Il Padrino" — die DMs kommen also vom bekannten Bot.
+# Leer lassen = Feature komplett aus (kein Loop, keine Discord-Calls).
+DISCORD_BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "")
+# Vorlauf in Minuten vor window_start der Mission
+try:
+    REMINDER_LEAD_MINUTES = max(1, int(os.getenv("REMINDER_LEAD_MINUTES", "30")))
+except ValueError:
+    REMINDER_LEAD_MINUTES = 30
+# Basis-URL der Boerse fuer den Link in der DM
+PUBLIC_URL = os.getenv("PUBLIC_URL", "https://jobs.bots.sektorrp.eu").rstrip("/")
+
 
 def _parse_event_dt(value: str | None, fallback: str) -> datetime:
     """ISO-String -> aware datetime in Europe/Berlin. Bei Muell greift der Fallback."""
