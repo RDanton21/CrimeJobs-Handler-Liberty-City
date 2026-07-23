@@ -2851,8 +2851,11 @@ function relationsSurvey() {
     sendResult: "",
     sendTarget: "",
     intro: DEFAULT_INTRO,
+    deadlineMode: "zeitpunkt",
     // Vorbelegung für die laufende Erhebung — im Feld jederzeit änderbar.
     deadlineAt: "2026-07-25T21:21",
+    deadlineHours: "",
+    deadlineMins: "",
     status: {},
     matrix: {},
     filter: "",
@@ -2887,20 +2890,34 @@ function relationsSurvey() {
       return this.filter ? items.filter(p => p.status === this.filter) : items;
     },
 
+    get deadlineTotalMinutes() {
+      const h = parseInt(this.deadlineHours, 10) || 0;
+      const m = parseInt(this.deadlineMins, 10) || 0;
+      return h * 60 + m;
+    },
+
     get deadlinePreview() {
-      if (!this.deadlineAt) return "Ohne Frist — im Text steht dann kein Termin.";
-      const d = new Date(this.deadlineAt);
-      if (isNaN(d)) return "Datum unvollständig.";
-      const wann = d.toLocaleString("de-DE", {
+      const ohne = "Ohne Frist — im Text steht dann kein Termin.";
+      let ziel;
+      if (this.deadlineMode === "dauer") {
+        if (!this.deadlineTotalMinutes) return ohne;
+        ziel = new Date(Date.now() + this.deadlineTotalMinutes * 60000);
+      } else {
+        if (!this.deadlineAt) return ohne;
+        ziel = new Date(this.deadlineAt);
+        if (isNaN(ziel)) return "Datum unvollständig.";
+      }
+      const wann = ziel.toLocaleString("de-DE", {
         weekday: "long", day: "2-digit", month: "2-digit", year: "numeric",
         hour: "2-digit", minute: "2-digit",
       });
-      const diff = d - new Date();
+      const diff = ziel - new Date();
       if (diff <= 0) return `${wann} — liegt in der Vergangenheit, wird abgelehnt.`;
       const std = Math.floor(diff / 3600000);
       const rest = std >= 48
         ? `${Math.floor(std / 24)} Tage`
-        : (std >= 1 ? `${std} Stunden` : `${Math.max(1, Math.round(diff / 60000))} Minuten`);
+        : (std >= 1 ? `${std} Std. ${Math.round(diff / 60000) % 60} Min.`
+                    : `${Math.max(1, Math.round(diff / 60000))} Minuten`);
       return `${wann} — noch ${rest}. Discord zeigt jedem Leser seine eigene Zeitzone.`;
     },
 
@@ -2915,7 +2932,11 @@ function relationsSurvey() {
       this.sending = true;
       this.sendResult = "";
       try {
-        const body = { intro: this.intro, deadline_at: this.deadlineAt || null };
+        // Bei 'dauer' rechnet der Server ab Eingang — nicht der Browser,
+        // dessen Uhr falsch gehen kann.
+        const body = this.deadlineMode === "dauer"
+          ? { intro: this.intro, deadline_minutes: this.deadlineTotalMinutes || null }
+          : { intro: this.intro, deadline_at: this.deadlineAt || null };
         if (!alle) body.crew_ids = [parseInt(this.sendTarget, 10)];
         const r = await api.post("/api/relations/survey/send", body);
         const ok = (r.gesendet || []).length;

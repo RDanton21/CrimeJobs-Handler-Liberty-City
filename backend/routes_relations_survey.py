@@ -53,31 +53,44 @@ class SurveySendRequest(BaseModel):
     crew_ids: list[int] | None = None
     intro: str = ""
     #: Fester Fristzeitpunkt als lokale ISO-Zeit ("2026-07-25T21:21").
-    #: Leer = ohne Frist.
     deadline_at: str | None = None
+    #: Alternativ: Dauer ab Versand in Minuten. Wird nur ausgewertet, wenn
+    #: kein deadline_at gesetzt ist. Bewusst serverseitig gerechnet — sonst
+    #: haengt die Frist an der womoeglich falsch gestellten Browser-Uhr.
+    deadline_minutes: int | None = None
 
 
-def _deadline_line(deadline_at: str) -> str:
+def _deadline_line(ts: int) -> str:
     """Frist als Discord-Zeitstempel.
 
     <t:UNIX:F> schreibt Wochentag, Datum und Uhrzeit in der Zeitzone des
     jeweiligen Lesers, <t:UNIX:R> laeuft als Countdown live mit ("in 2 Tagen").
     Damit steht in jedem Client die richtige Zeit, ohne dass wir uns auf eine
     Zeitzone festlegen — und niemand rechnet sich die Frist schoen.
-
-    Die Eingabe kommt ohne Zeitzone aus dem Browser-Feld und wird als lokale
-    Zeit des Servers gelesen (Container laeuft auf Europe/Berlin).
     """
-    try:
-        dt = datetime.fromisoformat(deadline_at)
-    except ValueError as exc:
-        raise HTTPException(400, f"Frist nicht lesbar: {deadline_at!r}") from exc
-    if dt.tzinfo is None:
-        dt = dt.astimezone()
-    if dt <= datetime.now(timezone.utc):
-        raise HTTPException(400, "Die Frist liegt in der Vergangenheit")
-    ts = int(dt.timestamp())
     return f"\n\nFrist: <t:{ts}:F> — noch <t:{ts}:R>."
+
+
+def _deadline_ts(payload: SurveySendRequest) -> int | None:
+    """Fristzeitpunkt als Unix-Sekunde — aus festem Datum oder aus Dauer."""
+    fest = (payload.deadline_at or "").strip()
+    if fest:
+        # Die Eingabe kommt ohne Zeitzone aus dem Browser-Feld und wird als
+        # lokale Zeit des Servers gelesen (Container laeuft auf Europe/Berlin).
+        try:
+            dt = datetime.fromisoformat(fest)
+        except ValueError as exc:
+            raise HTTPException(400, f"Frist nicht lesbar: {fest!r}") from exc
+        if dt.tzinfo is None:
+            dt = dt.astimezone()
+        if dt <= datetime.now(timezone.utc):
+            raise HTTPException(400, "Die Frist liegt in der Vergangenheit")
+        return int(dt.timestamp())
+
+    minuten = payload.deadline_minutes or 0
+    if minuten > 0:
+        return int((datetime.now(timezone.utc) + timedelta(minutes=minuten)).timestamp())
+    return None
 
 
 def _type_name(value) -> str:
@@ -108,8 +121,11 @@ async def send_survey(
         recipients = crews
 
     intro = payload.intro or ""
-    if (payload.deadline_at or "").strip():
-        intro = (intro + _deadline_line(payload.deadline_at.strip())).strip()
+    # Einmal vor der Sendeschleife bilden, damit alle Gruppierungen exakt
+    # dieselbe Frist bekommen und nicht je nach Sendereihenfolge auseinanderliegen.
+    ts = _deadline_ts(payload)
+    if ts:
+        intro = (intro + _deadline_line(ts)).strip()
 
     if len(intro) > 1990:
         raise HTTPException(400, f"Einleitungstext zu lang ({len(intro)} > 1990 Zeichen)")

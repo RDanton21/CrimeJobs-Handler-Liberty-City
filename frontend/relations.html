@@ -95,16 +95,36 @@
         </div>
 
         <div>
-          <label class="block text-xs text-zinc-400 mb-1">Frist (optional)</label>
-          <div class="flex gap-2">
+          <div class="flex items-center justify-between mb-1 gap-2">
+            <label class="text-xs text-zinc-400">Frist (optional)</label>
+            <div class="flex text-xs rounded overflow-hidden border border-zinc-800">
+              <button @click="deadlineMode = 'zeitpunkt'"
+                      class="px-2 py-0.5"
+                      :class="deadlineMode === 'zeitpunkt' ? 'bg-zinc-700 text-zinc-100' : 'bg-zinc-950 text-zinc-500 hover:text-zinc-300'">Zeitpunkt</button>
+              <button @click="deadlineMode = 'dauer'"
+                      class="px-2 py-0.5 border-l border-zinc-800"
+                      :class="deadlineMode === 'dauer' ? 'bg-zinc-700 text-zinc-100' : 'bg-zinc-950 text-zinc-500 hover:text-zinc-300'">Dauer</button>
+            </div>
+          </div>
+
+          <div x-show="deadlineMode === 'zeitpunkt'" class="flex gap-2">
             <input type="datetime-local" x-model="deadlineAt"
                    class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm flex-1" />
             <button x-show="deadlineAt" @click="deadlineAt = ''"
                     title="Frist entfernen"
                     class="px-2 text-zinc-500 hover:text-zinc-200">✕</button>
           </div>
-          <p class="text-xs mt-1" :class="deadlineAt ? 'text-zinc-400' : 'text-zinc-600'"
-             x-text="deadlinePreview"></p>
+
+          <div x-show="deadlineMode === 'dauer'" class="flex gap-2 items-center">
+            <input type="number" min="0" x-model="deadlineHours" placeholder="0"
+                   class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm w-20" />
+            <span class="text-xs text-zinc-500">Std.</span>
+            <input type="number" min="0" max="59" x-model="deadlineMins" placeholder="0"
+                   class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm w-20" />
+            <span class="text-xs text-zinc-500">Min. ab Versand</span>
+          </div>
+
+          <p class="text-xs mt-1 text-zinc-400" x-text="deadlinePreview"></p>
         </div>
       </div>
 
