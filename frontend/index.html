@@ -454,8 +454,18 @@
                         :class="c.is_active === false
                           ? 'bg-green-900/40 border-green-700/60 text-green-400 hover:bg-green-700 hover:border-green-500 hover:text-white'
                           : 'bg-zinc-800/70 border-zinc-700 text-zinc-400 hover:bg-red-800 hover:border-red-600 hover:text-white'">
-                  <span x-show="!togglingActive[c.id]">⏻</span>
-                  <span x-show="togglingActive[c.id]" class="animate-spin text-xs">◌</span>
+                  <!-- Power-Icon als SVG statt Unicode ⏻ (U+23FB) — das Zeichen
+                       fehlt in vielen Schriften und erschien als leeres Kaestchen. -->
+                  <svg x-show="!togglingActive[c.id]" class="w-4 h-4" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="2.2"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3v9" />
+                    <path d="M18.4 7.6a9 9 0 1 1-12.8 0" />
+                  </svg>
+                  <svg x-show="togglingActive[c.id]" class="w-4 h-4 animate-spin" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <path d="M21 12a9 9 0 1 1-6.2-8.6" />
+                  </svg>
                 </button>
               </div>
               <p class="text-sm text-zinc-400 line-clamp-3" x-text="c.story_background || 'Keine Story.'"></p>
