@@ -27,6 +27,9 @@ async def init_db() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         await _add_column_if_missing(conn, "players", "last_seen", "DATETIME")
+        # Anwesenheit (None=offen, 1=erschienen, 0=No-Show) auf beiden Tabellen
+        await _add_column_if_missing(conn, "slot_assignments", "attended", "INTEGER")
+        await _add_column_if_missing(conn, "completed_participations", "attended", "INTEGER")
 
 
 async def _add_column_if_missing(conn, table: str, column: str, sql_type: str) -> None:

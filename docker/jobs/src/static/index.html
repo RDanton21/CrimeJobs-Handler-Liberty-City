@@ -275,9 +275,26 @@
                             <p x-show="s.assigned.length > 0" class="text-xs text-zinc-400 mt-1">
                               Eingetragen:
                               <template x-for="a in s.assigned" :key="a.player_discord_id">
-                                <span class="inline-flex items-center gap-1 bg-[#262b2e] border border-[#3d4a4d]/60
-                                             rounded px-1.5 py-0.5 mr-1 mt-1 text-zinc-300">
-                                  <span x-text="a.username"></span>
+                                <!-- Chip-Farbe = Anwesenheit: gruen erschienen, rot No-Show -->
+                                <span class="inline-flex items-center gap-1 bg-[#262b2e] border
+                                             rounded px-1.5 py-0.5 mr-1 mt-1"
+                                      :class="a.attended === 1 ? 'border-[#15803d]/70 text-green-300'
+                                            : a.attended === 0 ? 'border-[#b91c1c]/70 text-red-300/90'
+                                            : 'border-[#3d4a4d]/60 text-zinc-300'">
+                                  <span :class="a.attended === 0 ? 'line-through' : ''"
+                                        x-text="a.username"></span>
+                                  <!-- Admin: Anwesenheit durchschalten offen -> erschienen -> No-Show.
+                                       Nur Kosmetik fuers UI — der Server prueft selbst -->
+                                  <button x-show="me.is_admin" @click="cycleAttendance(s, a)"
+                                          :title="a.attended === 1 ? 'Erschienen — klicken für No-Show'
+                                                : a.attended === 0 ? 'No-Show — klicken zum Zurücksetzen'
+                                                : 'Anwesenheit offen — klicken für Erschienen'"
+                                          class="font-bold leading-none px-0.5"
+                                          :class="a.attended === 1 ? 'text-green-400 hover:text-green-200'
+                                                : a.attended === 0 ? 'text-red-400 hover:text-red-200'
+                                                : 'text-zinc-500 hover:text-zinc-200'">
+                                    <span x-text="a.attended === 1 ? '✓' : a.attended === 0 ? '✗' : '•'"></span>
+                                  </button>
                                   <!-- Admin-Kick: nur Kosmetik fuers UI — der Server prueft selbst -->
                                   <button x-show="me.is_admin" @click="adminKick(s, a)"
                                           title="Spieler austragen (Admin)"
@@ -529,9 +546,11 @@
 
           <template x-if="!statsLoading && stats && stats.players.length > 0">
             <div>
-              <div class="flex gap-4 mb-3 text-xs text-zinc-400">
+              <div class="flex gap-4 mb-3 text-xs text-zinc-400 flex-wrap">
                 <span>Spieler: <span class="text-zinc-200" x-text="stats.total_players"></span></span>
                 <span>Einsätze gesamt: <span class="text-zinc-200" x-text="stats.total_completed"></span></span>
+                <span>Erschienen: <span class="text-green-400" x-text="stats.total_attended"></span></span>
+                <span>No-Shows: <span class="text-red-400" x-text="stats.total_no_show"></span></span>
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full text-sm">
@@ -541,6 +560,8 @@
                       <th class="py-1.5 pr-2 font-medium">Spieler</th>
                       <th class="py-1.5 px-2 font-medium text-right">Aufträge</th>
                       <th class="py-1.5 px-2 font-medium text-right">Rollen</th>
+                      <th class="py-1.5 px-2 font-medium text-right">da</th>
+                      <th class="py-1.5 px-2 font-medium text-right">No-Show</th>
                       <th class="py-1.5 px-2 font-medium text-right">offen</th>
                       <th class="py-1.5 pl-2 font-medium">zuletzt</th>
                     </tr>
@@ -550,8 +571,14 @@
                       <tr class="border-b border-[#3d4a4d]/25">
                         <td class="py-1.5 pr-2 text-zinc-500" x-text="i + 1"></td>
                         <td class="py-1.5 pr-2 font-medium" x-text="p.username"></td>
-                        <td class="py-1.5 px-2 text-right text-green-400" x-text="p.missions_done"></td>
+                        <td class="py-1.5 px-2 text-right text-zinc-300" x-text="p.missions_done"></td>
                         <td class="py-1.5 px-2 text-right text-zinc-300" x-text="p.slots_done"></td>
+                        <td class="py-1.5 px-2 text-right"
+                            :class="p.attended > 0 ? 'text-green-400' : 'text-zinc-600'"
+                            x-text="p.attended"></td>
+                        <td class="py-1.5 px-2 text-right"
+                            :class="p.no_show > 0 ? 'text-red-400' : 'text-zinc-600'"
+                            x-text="p.no_show"></td>
                         <td class="py-1.5 px-2 text-right"
                             :class="p.open > 0 ? 'text-[#d9ae6e]' : 'text-zinc-600'"
                             x-text="p.open"></td>
@@ -563,6 +590,7 @@
               </div>
               <p class="text-[11px] text-zinc-500 mt-3">
                 „Aufträge" = abgeschlossene Einsätze, „Rollen" = einzelne Plätze darin,
+                „da"/„No-Show" = vom Admin bestätigte Anwesenheit (✓/✗ am Namen im Board),
                 „offen" = aktuelle Eintragungen in noch laufenden Aufträgen.
               </p>
             </div>
@@ -890,6 +918,30 @@
           }
           this.busySlots[slot.id] = false;
           await this.loadBoard(false);
+        },
+
+        // Anwesenheit durchschalten: offen -> erschienen -> No-Show -> offen.
+        // Lokal sofort umschalten (kein Board-Reload), der Server prueft is_admin.
+        async cycleAttendance(slot, player) {
+          const next = player.attended === 1 ? false : player.attended === 0 ? null : true;
+          try {
+            const r = await fetch(
+              '/api/admin/attendance/' + slot.id + '/' + player.player_discord_id,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ attended: next }),
+              }
+            );
+            if (r.ok) {
+              player.attended = next === null ? null : (next ? 1 : 0);
+            } else {
+              const j = await r.json().catch(() => ({}));
+              this.showToast(j.detail || 'Anwesenheit speichern fehlgeschlagen', true);
+            }
+          } catch (e) {
+            this.showToast('Verbindung zum Server fehlgeschlagen', true);
+          }
         },
 
         // Admin-Kick: fremdes Assignment entfernen (Server prueft is_admin)

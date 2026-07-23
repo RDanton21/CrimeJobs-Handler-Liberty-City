@@ -40,6 +40,9 @@ class SlotAssignment(Base):
     player_discord_id: Mapped[str] = mapped_column(String, index=True)
     username: Mapped[str] = mapped_column(String, default="")
     assigned_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    # Anwesenheit, vom Admin gesetzt: None = noch offen, 1 = erschienen, 0 = No-Show.
+    # Wird beim Archivieren in CompletedParticipation uebernommen.
+    attended: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 class CompletedParticipation(Base):
@@ -62,6 +65,8 @@ class CompletedParticipation(Base):
     crew_name: Mapped[str] = mapped_column(String, default="")
     slot_name: Mapped[str] = mapped_column(String, default="")
     completed_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    # Anwesenheit aus dem Live-Assignment uebernommen (None/1/0), s. SlotAssignment.
+    attended: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 class DismissedMission(Base):

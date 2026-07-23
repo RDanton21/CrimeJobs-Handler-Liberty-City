@@ -20,7 +20,7 @@ import httpx
 from fastapi import Body, Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
-from sqlalchemy import delete, exists, func, select, update
+from sqlalchemy import case, delete, exists, func, select, update
 from sqlalchemy.exc import IntegrityError
 
 from . import config, discord_oauth
@@ -242,7 +242,11 @@ def _enrich_mission(mission: dict, assignments_by_slot: dict, me: dict) -> dict:
         s = dict(slot)
         assigned = assignments_by_slot.get(slot.get("id"), [])
         s["assigned"] = [
-            {"player_discord_id": a.player_discord_id, "username": a.username}
+            {
+                "player_discord_id": a.player_discord_id,
+                "username": a.username,
+                "attended": a.attended,  # None=offen, 1=erschienen, 0=No-Show
+            }
             for a in assigned
         ]
         s["assigned_count"] = len(assigned)
@@ -470,6 +474,7 @@ async def _record_completed(missions: list[dict], assignments_by_slot: dict) -> 
                     username=a.username,
                     crew_name=crew_name,
                     slot_name=slot.get("name") or "",
+                    attended=a.attended,
                 ))
     if not neu:
         return
@@ -481,7 +486,17 @@ async def _record_completed(missions: list[dict], assignments_by_slot: dict) -> 
                 async with session.begin():
                     session.add(row)
             except IntegrityError:
-                pass
+                # Historie existiert schon -> nur die Anwesenheit nachziehen,
+                # falls der Admin sie am Live-Slot nachtraeglich geaendert hat
+                async with session.begin():
+                    await session.execute(
+                        update(CompletedParticipation)
+                        .where(
+                            CompletedParticipation.slot_id == row.slot_id,
+                            CompletedParticipation.player_discord_id == row.player_discord_id,
+                        )
+                        .values(attended=row.attended)
+                    )
 
 
 @app.get("/api/board")
@@ -722,6 +737,59 @@ def _require_admin(me: dict) -> None:
         raise HTTPException(status_code=403, detail="Nur für Admins")
 
 
+@app.post("/api/admin/attendance/{slot_id}/{player_discord_id}")
+async def admin_set_attendance(
+    slot_id: int,
+    player_discord_id: str,
+    payload: dict = Body(...),
+    me: dict = Depends(require_session),
+):
+    """Anwesenheit eines Spielers in einem Slot setzen (nur Admins).
+
+    Body: {"attended": true|false|null}
+      true  -> erschienen (1)
+      false -> No-Show (0)
+      null  -> Bewertung zuruecknehmen (offen)
+
+    Schreibt in beide Tabellen: das Live-Assignment (falls noch vorhanden) und
+    — bei bereits archivierten Auftraegen — die Historie. So funktioniert das
+    Markieren sowohl waehrend des Events als auch danach.
+    """
+    _require_admin(me)
+    raw = payload.get("attended", False)
+    if raw is None:
+        attended = None
+    elif isinstance(raw, bool):
+        attended = 1 if raw else 0
+    else:
+        raise HTTPException(
+            status_code=422, detail="attended muss true, false oder null sein"
+        )
+
+    async with SessionLocal() as session:
+        r_live = await session.execute(
+            update(SlotAssignment)
+            .where(
+                SlotAssignment.slot_id == slot_id,
+                SlotAssignment.player_discord_id == player_discord_id,
+            )
+            .values(attended=attended)
+        )
+        r_done = await session.execute(
+            update(CompletedParticipation)
+            .where(
+                CompletedParticipation.slot_id == slot_id,
+                CompletedParticipation.player_discord_id == player_discord_id,
+            )
+            .values(attended=attended)
+        )
+        await session.commit()
+
+    if r_live.rowcount == 0 and r_done.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Kein Eintrag gefunden")
+    return {"detail": "Anwesenheit gespeichert", "attended": attended}
+
+
 @app.post("/api/admin/clear-completed")
 async def admin_clear_completed(me: dict = Depends(require_session)):
     """Alle erledigten Auftraege sofort vom Board nehmen.
@@ -772,6 +840,9 @@ async def admin_stats(me: dict = Depends(require_session)):
                 func.count(func.distinct(CompletedParticipation.mission_id)),
                 func.count(CompletedParticipation.id),
                 func.max(CompletedParticipation.completed_at),
+                # Anwesenheit: 1=erschienen, 0=No-Show, NULL=unbewertet
+                func.sum(case((CompletedParticipation.attended == 1, 1), else_=0)),
+                func.sum(case((CompletedParticipation.attended == 0, 1), else_=0)),
             ).group_by(CompletedParticipation.player_discord_id)
         )
         fertig = {
@@ -781,6 +852,8 @@ async def admin_stats(me: dict = Depends(require_session)):
                 "missions_done": row[2],
                 "slots_done": row[3],
                 "last_done": row[4].isoformat() if row[4] else None,
+                "attended": row[5] or 0,
+                "no_show": row[6] or 0,
             }
             for row in res.all()
         }
@@ -812,15 +885,18 @@ async def admin_stats(me: dict = Depends(require_session)):
             spieler[pid] = {
                 "player_discord_id": pid, "username": data["username"],
                 "missions_done": 0, "slots_done": 0, "last_done": None,
+                "attended": 0, "no_show": 0,
                 "open": data["open"],
             }
 
     liste = sorted(
         spieler.values(),
-        key=lambda p: (-p["missions_done"], -p["open"], p["username"].lower()),
+        key=lambda p: (-p["attended"], -p["missions_done"], -p["open"], p["username"].lower()),
     )
     return {
         "players": liste,
         "total_players": len(liste),
         "total_completed": sum(p["slots_done"] for p in liste),
+        "total_attended": sum(p["attended"] for p in liste),
+        "total_no_show": sum(p["no_show"] for p in liste),
     }
