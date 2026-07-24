@@ -208,6 +208,10 @@
                               class="text-xs text-zinc-400 hover:text-zinc-200 underline">
                         <span x-text="expanded[m.id] ? 'Auftrag ausblenden' : 'Auftrag anzeigen'"></span>
                       </button>
+                      <span x-show="!m.briefing_released && !(m.content || m.content_excerpt)"
+                            class="text-xs text-[#b98a4a]/80 whitespace-nowrap">
+                        🔒 Auftrag folgt beim Einsatz
+                      </span>
                       <button @click="briefOpen[m.id] = !briefOpen[m.id]"
                               x-show="m.personnel_brief"
                               class="text-xs text-zinc-400 hover:text-zinc-200 underline">
@@ -471,6 +475,10 @@
                   <p class="text-xs text-zinc-400 mt-1.5 border-l-2 border-[#3d4a4d] pl-2"
                      x-show="entry.mission.content || entry.mission.content_excerpt"
                      x-text="shorten(entry.mission.content || entry.mission.content_excerpt, 180)"></p>
+                  <p class="text-xs text-[#b98a4a]/80 mt-1.5 border-l-2 border-[#b98a4a]/40 pl-2"
+                     x-show="!entry.mission.briefing_released && !(entry.mission.content || entry.mission.content_excerpt)">
+                    🔒 Auftrag folgt beim Einsatz
+                  </p>
 
                   <p class="text-[10px] text-[#b98a4a]/80 mt-1.5">Zum Auftrag springen →</p>
                 </div>

@@ -526,7 +526,12 @@ async def public_active_missions(session: AsyncSession = Depends(get_session)):
     out: list[dict] = []
     for m in missions:
         slots = slots_by_mission.get(m.id, [])
-        content = m.content_final or m.content_generated or ""
+        # Der Auftragstext wird erst mit dem Discord-Versand freigegeben
+        # (sent_at gesetzt). Vorher steht der Personalbedarf schon auf dem
+        # Board, damit die Leute sich melden koennen — aber der kryptische
+        # Auftrag bleibt verborgen, sonst waere die Spannung weg.
+        released = m.sent_at is not None
+        content = (m.content_final or m.content_generated or "") if released else ""
         # Mission-weites Slot-Fenster: erstes nicht-leeres slot_window der Slots
         slot_window = next((s.slot_window for s in slots if s.slot_window), "")
         # Einsatzfenster als Unix-Zeit, damit das Board "laeuft gerade"
@@ -548,6 +553,9 @@ async def public_active_missions(session: AsyncSession = Depends(get_session)):
                 "color_hex": m.crew.color_hex or "",
             },
             "slot_window": slot_window,
+            # briefing_released: false = Auftrag noch nicht gesendet, Board
+            # zeigt statt des Textes einen "folgt beim Einsatz"-Hinweis.
+            "briefing_released": released,
             # content = kompletter Auftragstext (das Board zeigt ihn aufgeklappt
             # vollstaendig). content_excerpt bleibt als Kurzform erhalten, damit
             # aeltere Dashboard-Versionen weiter funktionieren.
