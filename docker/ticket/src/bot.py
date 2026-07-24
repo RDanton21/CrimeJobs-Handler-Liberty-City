@@ -43,6 +43,14 @@ SILENT_MENTIONS = os.getenv("SILENT_MENTIONS", "false").lower() in ("1", "true",
 # Kategorie-Slugs mit eigenem Channel-Prefix (slug-NNNN-user statt lc-NNNN-slug-user)
 _CUSTOM_PREFIX_SLUGS = {"crime", "gewerbe", "staatlich", "als-questgeber-bewerben", "team-bewerbung"}
 
+# Kurz-Prefix fuer Channel-Namen statt langem Slug (Channel: prefix-NNNN-user)
+_CHANNEL_PREFIX = {"als-questgeber-bewerben": "qg"}
+
+
+def _slug_prefix(slug: str) -> str:
+    """Channel-Prefix fuer einen Slug (Kurzform falls definiert, sonst Slug selbst)."""
+    return _CHANNEL_PREFIX.get(slug, slug)
+
 # Channels wo die KI aufgegeben hat (needs_human=True) → wartet auf Mod-Übernahme
 _ai_handed_off: set[int] = set()
 # Channels wo ein Mod manuell geantwortet hat → KI bleibt dauerhaft stumm
@@ -54,7 +62,7 @@ def _is_ticket_channel(name: str) -> bool:
     if name.startswith("lc-"):
         return True
     for slug in _CUSTOM_PREFIX_SLUGS:
-        if name.startswith(f"{slug}-"):
+        if name.startswith(f"{slug}-") or name.startswith(f"{_slug_prefix(slug)}-"):
             return True
     return False
 
@@ -94,9 +102,10 @@ def _is_ai_ticket_channel(name: str, topic: str = "") -> bool:
         log.debug("_is_ai_ticket_channel(%r): kein Slug gefunden → True (generic)", name)
         return True  # Generisches Ticket ohne Kategorie → KI AN
     for cat in all_cats:
-        if name.startswith(cat["id"] + "-"):
+        pfx = _slug_prefix(cat["id"])
+        if name.startswith(cat["id"] + "-") or name.startswith(pfx + "-"):
             result = _ai_for_slug(cat["id"])
-            log.debug("_is_ai_ticket_channel(%r) via prefix=%r → %s", name, cat["id"], result)
+            log.debug("_is_ai_ticket_channel(%r) via prefix=%r → %s", name, pfx, result)
             return result
 
     log.debug("_is_ai_ticket_channel(%r): kein Match → False", name)
@@ -203,7 +212,7 @@ class AskModal(discord.ui.Modal):
 
 async def _open_ticket(interaction: discord.Interaction, category_slug: str = None):
     """Generischer Ticket-Flow (ohne Sonderformular). Wird von FallbackButton + nicht-crime Kategorien genutzt."""
-    await interaction.response.defer(ephemeral=True, thinking=True)
+    await interaction.response.defer()  # Typ 6: stille Bestaetigung, keine sichtbare Meldung
     ch = await _create_ticket_channel(interaction, category_slug)
     if not ch:
         return
@@ -226,7 +235,6 @@ async def _open_ticket(interaction: discord.Interaction, category_slug: str = No
     )
     am = _NO_MENTIONS if SILENT_MENTIONS else discord.AllowedMentions(users=True)
     await ch.send(embed=embed, view=TicketActions(), allowed_mentions=am)
-    await interaction.followup.send(f"Ticket erstellt: {ch.mention}", ephemeral=True)
     log.info("Ticket geöffnet: %s von %s (%s) [Kategorie: %s]",
              ch.id, interaction.user, interaction.user.id, category_slug or "–")
 
@@ -272,7 +280,7 @@ async def _create_ticket_channel(interaction: discord.Interaction, category_slug
     guild_category = guild.get_channel(TICKET_CATEGORY_ID) if TICKET_CATEGORY_ID else None
     num = await _next_ticket_number()
     if category_slug and category_slug in _CUSTOM_PREFIX_SLUGS:
-        ticket_name = f"{category_slug}-{num:04d}-{safe_name}"[:100]
+        ticket_name = f"{_slug_prefix(category_slug)}-{num:04d}-{safe_name}"[:100]
     elif category_slug:
         ticket_name = f"lc-{num:04d}-{category_slug}-{safe_name}"[:100]
     else:
@@ -335,7 +343,7 @@ class CrimeFormModal(discord.ui.Modal):
         self.crime_type = crime_type
 
     async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True, thinking=True)
+        await interaction.response.defer()  # Typ 6: stille Bestaetigung, keine sichtbare Meldung
         ch = await _create_ticket_channel(interaction, "crime")
         if not ch:
             return
@@ -350,17 +358,16 @@ class CrimeFormModal(discord.ui.Modal):
             color=0xD42070,
             timestamp=discord.utils.utcnow(),
         )
+        embed.add_field(name="Bewerber",                  value=interaction.user.mention,  inline=False)
         embed.add_field(name="Typ",                       value=self.crime_type.title(),   inline=True)
         embed.add_field(name="Name der Gruppierung",      value=str(self.name_gruppe),     inline=True)
         embed.add_field(name="Name des Leaders",          value=str(self.name_leader),     inline=True)
         embed.add_field(name="Mitgliedsnamen (Discord)",  value=str(self.mitglieder),      inline=False)
         if str(self.sonstiges).strip():
             embed.add_field(name="Sonstiges",             value=str(self.sonstiges),       inline=False)
-        embed.set_footer(text=f"Eingereicht von {interaction.user.name}")
 
         am = _NO_MENTIONS if SILENT_MENTIONS else discord.AllowedMentions(users=True)
         await ch.send(embed=embed, view=TicketActions(), allowed_mentions=am)
-        await interaction.followup.send(f"Ticket erstellt: {ch.mention}", ephemeral=True)
         log.info("Crime-Ticket geöffnet: %s von %s (%s) [%s]",
                  ch.id, interaction.user, interaction.user.id, self.crime_type)
 
@@ -415,7 +422,7 @@ class GewerbeFormModal(discord.ui.Modal):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True, thinking=True)
+        await interaction.response.defer()  # Typ 6: stille Bestaetigung, keine sichtbare Meldung
         ch = await _create_ticket_channel(interaction, "gewerbe")
         if not ch:
             return
@@ -428,17 +435,16 @@ class GewerbeFormModal(discord.ui.Modal):
             color=0xD42070,
             timestamp=discord.utils.utcnow(),
         )
+        embed.add_field(name="Bewerber",                     value=interaction.user.mention, inline=False)
         embed.add_field(name="Name des Gewerbes",            value=str(self.name_gewerbe), inline=True)
         embed.add_field(name="DC Name des Geschäftsführers", value=str(self.name_gf),      inline=True)
         if str(self.mitarbeiter).strip():
             embed.add_field(name="Weitere Mitarbeiter (Discord)", value=str(self.mitarbeiter), inline=False)
         if str(self.sonstiges).strip():
             embed.add_field(name="Sonstiges",                value=str(self.sonstiges),    inline=False)
-        embed.set_footer(text=f"Eingereicht von {interaction.user.name}")
 
         am = _NO_MENTIONS if SILENT_MENTIONS else discord.AllowedMentions(users=True)
         await ch.send(embed=embed, view=TicketActions(), allowed_mentions=am)
-        await interaction.followup.send(f"Ticket erstellt: {ch.mention}", ephemeral=True)
         log.info("Gewerbe-Ticket geöffnet: %s von %s (%s)", ch.id, interaction.user, interaction.user.id)
 
 
@@ -481,7 +487,7 @@ class TeamBewerbungModal(discord.ui.Modal):
         self.add_item(self.sonstiges_input)
 
     async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True, thinking=True)
+        await interaction.response.defer()  # Typ 6: stille Bestaetigung, keine sichtbare Meldung
         ch = await _create_ticket_channel(interaction, "team-bewerbung")
         if not ch:
             return
@@ -494,16 +500,15 @@ class TeamBewerbungModal(discord.ui.Modal):
             color=0xD42070,
             timestamp=discord.utils.utcnow(),
         )
+        embed.add_field(name="Bewerber",                           value=interaction.user.mention,  inline=False)
         embed.add_field(name="Unterstützungsbereich",              value=str(self.bereich_input),   inline=False)
         embed.add_field(name="Erfahrungen im genannten Bereich",   value=str(self.erfahrung),       inline=True)
         embed.add_field(name="Aktuell in anderen Projekten tätig", value=str(self.andere_projekte), inline=True)
         if str(self.sonstiges_input).strip():
             embed.add_field(name="Sonstiges",                      value=str(self.sonstiges_input), inline=False)
-        embed.set_footer(text=f"Eingereicht von {interaction.user.name}")
 
         am = _NO_MENTIONS if SILENT_MENTIONS else discord.AllowedMentions(users=True)
         await ch.send(embed=embed, view=TicketActions(), allowed_mentions=am)
-        await interaction.followup.send(f"Ticket erstellt: {ch.mention}", ephemeral=True)
         log.info("Team-Ticket geöffnet: %s von %s (%s)", ch.id, interaction.user, interaction.user.id)
 
 
@@ -569,7 +574,7 @@ class StaatlichFormModal(discord.ui.Modal):
     )
 
     async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True, thinking=True)
+        await interaction.response.defer()  # Typ 6: stille Bestaetigung, keine sichtbare Meldung
         ch = await _create_ticket_channel(interaction, "staatlich")
         if not ch:
             return
@@ -582,17 +587,16 @@ class StaatlichFormModal(discord.ui.Modal):
             color=0xD42070,
             timestamp=discord.utils.utcnow(),
         )
+        embed.add_field(name="Bewerber",                     value=interaction.user.mention, inline=False)
         embed.add_field(name="Name der Fraktion",            value=str(self.name_fraktion), inline=True)
         embed.add_field(name="DC Name des Leiters",          value=str(self.name_leiter),   inline=True)
         if str(self.mitarbeiter).strip():
             embed.add_field(name="Weitere Mitarbeiter (Discord)", value=str(self.mitarbeiter), inline=False)
         if str(self.sonstiges).strip():
             embed.add_field(name="Sonstiges",                value=str(self.sonstiges),     inline=False)
-        embed.set_footer(text=f"Eingereicht von {interaction.user.name}")
 
         am = _NO_MENTIONS if SILENT_MENTIONS else discord.AllowedMentions(users=True)
         await ch.send(embed=embed, view=TicketActions(), allowed_mentions=am)
-        await interaction.followup.send(f"Ticket erstellt: {ch.mention}", ephemeral=True)
         log.info("Staatlich-Ticket geöffnet: %s von %s (%s)", ch.id, interaction.user, interaction.user.id)
 
 
@@ -643,7 +647,7 @@ class QuestgeberFormModal(discord.ui.Modal):
         self.add_item(self.hinweis)
 
     async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.defer(ephemeral=True, thinking=True)
+        await interaction.response.defer()  # Typ 6: stille Bestaetigung, keine sichtbare Meldung
         ch = await _create_ticket_channel(interaction, "als-questgeber-bewerben")
         if not ch:
             return
@@ -656,16 +660,16 @@ class QuestgeberFormModal(discord.ui.Modal):
             color=0xD42070,
             timestamp=discord.utils.utcnow(),
         )
+        embed.add_field(name="Bewerber",                         value=interaction.user.mention, inline=False)
         embed.add_field(name="Schon auf Sektor gespielt?",       value=str(self.gespielt),     inline=True)
         embed.add_field(name="Wie viele Jahre ungefähr?",        value=str(self.jahre) or "—", inline=True)
         embed.add_field(name="Letzter Char & Bereich auf Sektor", value=str(self.letzter_char), inline=False)
         if str(self.sonstiges).strip():
             embed.add_field(name="Sonstiges",                    value=str(self.sonstiges),    inline=False)
-        embed.set_footer(text=f"Wir gucken uns deine Questgeber-Bewerbung an und melden uns • {interaction.user.name}")
+        embed.set_footer(text="Wir gucken uns deine Questgeber-Bewerbung an und melden uns")
 
         am = _NO_MENTIONS if SILENT_MENTIONS else discord.AllowedMentions(users=True)
         await ch.send(embed=embed, view=TicketActions(), allowed_mentions=am)
-        await interaction.followup.send(f"Ticket erstellt: {ch.mention}", ephemeral=True)
         log.info("Questgeber-Ticket geöffnet: %s von %s (%s)", ch.id, interaction.user, interaction.user.id)
 
 
