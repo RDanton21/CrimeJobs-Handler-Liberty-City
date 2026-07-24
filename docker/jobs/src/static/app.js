@@ -7,6 +7,20 @@ function jobsBoard() {
     loading: true,
     me: null,
     board: null,
+    escShow: true,  // Eskalations-Leiste ein-/ausgeklappt
+    _escNames: ['Ruhig', 'Angespannt', 'Konflikt', 'Eskalation', 'Krieg'],
+    escLabel(lvl) { return this._escNames[lvl || 0]; },
+    escDotClass(lvl) { lvl = lvl || 0; return 'esc-dot esc-c' + lvl + (lvl > 0 ? ' esc-a' + lvl : ''); },
+    escBadgeClass(lvl) { return 'escbadge escbadge' + (lvl || 0); },
+    // Crews nach Stufe sortiert (heißeste oben); nur mit Aktivität oder Stufe > 0
+    crewsRanked() {
+      if (!this.board || !this.board.crews) return [];
+      return this.board.crews
+        .filter(c => (c.escalation || 0) > 0 || (c.active_count || 0) > 0)
+        .slice()
+        .sort((a, b) => (b.escalation - a.escalation) || (b.active_count - a.active_count)
+          || (a.name || '').localeCompare(b.name || ''));
+    },
     activeDay: null,
     expanded: {},   // mission_id -> Auftrags-Text aufgeklappt
     briefOpen: {},  // mission_id -> Regie-Details (Personal-Brief) aufgeklappt

@@ -55,6 +55,23 @@ _state_serializer = URLSafeTimedSerializer(config.SESSION_SECRET, salt="jobs-oau
 # Deutsche Wochentags-Kuerzel (Montag=0)
 WEEKDAYS_DE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
+# Eskalationsstufen 0-4 (Ruhig->Krieg). Auto aus der Aktivitaet einer Crew.
+ESC_SLUGS = ["calm", "tense", "conflict", "escalation", "war"]
+
+
+def _auto_escalation(active_count: int) -> int:
+    """Automatische Stufe aus der Anzahl aktiver (nicht archivierter) Auftraege
+    einer Crew: mehr gleichzeitige Operationen = hoehere Spannung."""
+    if active_count <= 0:
+        return 0
+    if active_count == 1:
+        return 1
+    if active_count == 2:
+        return 2
+    if active_count <= 4:
+        return 3
+    return 4
+
 #: Referenzen auf Fire-and-forget-Tasks (DM-Versand) — asyncio haelt selbst
 #: nur schwache Referenzen, ohne dieses Set koennte der GC laufende Tasks
 #: einsammeln.
@@ -793,12 +810,25 @@ async def api_board(me: dict = Depends(require_session)):
     if dismissed:
         missions = [m for m in missions if m.get("id") not in dismissed]
 
+    # Auto-Eskalation: aktive (nicht archivierte) Auftraege je Crew -> Stufe 0-4
+    active_by_crew: dict = {}
+    for m in missions:
+        if not m.get("archived_at"):
+            cid = (m.get("crew") or {}).get("id")
+            if cid is not None:
+                active_by_crew[cid] = active_by_crew.get(cid, 0) + 1
+    crew_level = {cid: _auto_escalation(n) for cid, n in active_by_crew.items()}
+
     # Missions auf Berlin-Kalendertage verteilen
     event_days = _event_days()
     buckets: dict[str, list[dict]] = {d.isoformat(): [] for d, _, _ in event_days}
     other: list[dict] = []
     for mission in sorted(missions, key=_mission_sort_key):
         enriched = _enrich_mission(mission, assignments_by_slot, waitlist_by_slot, me)
+        _cid = (mission.get("crew") or {}).get("id")
+        _lvl = crew_level.get(_cid, 0)
+        enriched["escalation"] = _lvl
+        enriched["escalation_slug"] = ESC_SLUGS[_lvl]
         day = _mission_day(mission)
         key = day.isoformat() if day else None
         if key is not None and key in buckets:
@@ -845,7 +875,13 @@ async def api_board(me: dict = Depends(require_session)):
             ],
         },
         "days": days_out,
-        "crews": crews,
+        # Crews mit effektiver Auto-Stufe (Cache nie mutieren -> neue Dicts)
+        "crews": [
+            {**c, "escalation": crew_level.get(c.get("id"), 0),
+             "escalation_slug": ESC_SLUGS[crew_level.get(c.get("id"), 0)],
+             "active_count": active_by_crew.get(c.get("id"), 0)}
+            for c in crews
+        ],
         "online": online,
         # is_admin normalisieren: Sessions von vor dem Admin-Feature haben den
         # Key nicht — das UI soll trotzdem immer einen Bool sehen
