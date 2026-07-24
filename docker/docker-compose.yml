@@ -193,41 +193,48 @@ services:
   # ticket-bot â€” RAG-gestÃ¼tzte Ticket-Verwaltung (Discord + Claude + ChromaDB)
   # Route: https://ticket.bots.sektorrp.eu/
   # ---------------------------------------------------------------------------
-  ticket-bot:
-    build:
-      context: ./ticket
-      dockerfile: Dockerfile
-    container_name: sekt6r-ticket
-    restart: unless-stopped
-    environment:
-      DISCORD_TOKEN: "${TICKET_DISCORD_TOKEN}"
-      ANTHROPIC_API_KEY: "${TICKET_ANTHROPIC_API_KEY}"
-      DISCORD_GUILD_ID: "${TICKET_DISCORD_GUILD_ID}"
-      TICKET_CHANNEL_ID: "${TICKET_CHANNEL_ID}"
-      MOD_ROLE_ID: "${TICKET_MOD_ROLE_ID}"
-      TICKET_ACCESS_ROLE_ID: "${TICKET_ACCESS_ROLE_ID}"
-      TICKET_CATEGORY_ID: "${TICKET_CATEGORY_ID}"
-      TICKET_ARCHIVE_CHANNEL_ID: "${TICKET_ARCHIVE_CHANNEL_ID:-}"
-      CLAUDE_MODEL: "${TICKET_CLAUDE_MODEL:-claude-sonnet-4-5-20250929}"
-      EMBED_MODEL: "${TICKET_EMBED_MODEL:-sentence-transformers/multilingual-e5-small}"
-      CONFIDENCE_THRESHOLD: "${TICKET_CONFIDENCE_THRESHOLD:-0.6}"
-      MAX_TOKENS: "${TICKET_MAX_TOKENS:-1500}"
-      TOP_K: "${TICKET_TOP_K:-5}"
-      SNIPPET_THRESHOLD: "${TICKET_SNIPPET_THRESHOLD:-0.3}"
-      SILENT_MENTIONS: "${TICKET_SILENT_MENTIONS:-true}"
-      ADMIN_USER: "${TICKET_ADMIN_USER}"
-      ADMIN_PASSWORD: "${TICKET_ADMIN_PASSWORD}"
-      ADMIN_HOST: "0.0.0.0"
-      ADMIN_PORT: "5555"
-      HF_HOME: "/app/hf-cache"
-      TZ: Europe/Berlin
-    volumes:
-      - ticket_data:/app/data
-      - ticket_kb:/app/kb
-      - ticket_hf:/app/hf-cache
-      - ticket_logs:/app/logs
-    networks:
-      - sekt6r-net
+  # ------------------------------------------------------------------
+  # ACHTUNG — ticket-bot ist bewusst AUSGEBLENDET (24.07.2026).
+  # Der Ticket-Bot laeuft aktuell auf dem alten Dedicated. Wird der
+  # Docker-Container zusaetzlich gestartet, laufen zwei Instanzen mit
+  # demselben Discord-Token parallel (doppelte Antworten, Konflikte).
+  # Erst den Dedicated-Service stoppen, dann hier wieder einkommentieren.
+  # ------------------------------------------------------------------
+  # ticket-bot:
+  #   build:
+  #     context: ./ticket
+  #     dockerfile: Dockerfile
+  #   container_name: sekt6r-ticket
+  #   restart: unless-stopped
+  #   environment:
+  #     DISCORD_TOKEN: "${TICKET_DISCORD_TOKEN}"
+  #     ANTHROPIC_API_KEY: "${TICKET_ANTHROPIC_API_KEY}"
+  #     DISCORD_GUILD_ID: "${TICKET_DISCORD_GUILD_ID}"
+  #     TICKET_CHANNEL_ID: "${TICKET_CHANNEL_ID}"
+  #     MOD_ROLE_ID: "${TICKET_MOD_ROLE_ID}"
+  #     TICKET_ACCESS_ROLE_ID: "${TICKET_ACCESS_ROLE_ID}"
+  #     TICKET_CATEGORY_ID: "${TICKET_CATEGORY_ID}"
+  #     TICKET_ARCHIVE_CHANNEL_ID: "${TICKET_ARCHIVE_CHANNEL_ID:-}"
+  #     CLAUDE_MODEL: "${TICKET_CLAUDE_MODEL:-claude-sonnet-4-5-20250929}"
+  #     EMBED_MODEL: "${TICKET_EMBED_MODEL:-sentence-transformers/multilingual-e5-small}"
+  #     CONFIDENCE_THRESHOLD: "${TICKET_CONFIDENCE_THRESHOLD:-0.6}"
+  #     MAX_TOKENS: "${TICKET_MAX_TOKENS:-1500}"
+  #     TOP_K: "${TICKET_TOP_K:-5}"
+  #     SNIPPET_THRESHOLD: "${TICKET_SNIPPET_THRESHOLD:-0.3}"
+  #     SILENT_MENTIONS: "${TICKET_SILENT_MENTIONS:-true}"
+  #     ADMIN_USER: "${TICKET_ADMIN_USER}"
+  #     ADMIN_PASSWORD: "${TICKET_ADMIN_PASSWORD}"
+  #     ADMIN_HOST: "0.0.0.0"
+  #     ADMIN_PORT: "5555"
+  #     HF_HOME: "/app/hf-cache"
+  #     TZ: Europe/Berlin
+  #   volumes:
+  #     - ticket_data:/app/data
+  #     - ticket_kb:/app/kb
+  #     - ticket_hf:/app/hf-cache
+  #     - ticket_logs:/app/logs
+  #   networks:
+  #     - sekt6r-net
 
   # ---------------------------------------------------------------------------
   # countdown-bot â€” Discord + Flask Web-Admin
