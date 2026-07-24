@@ -2327,4 +2327,4 @@ def api_stats():
 if __name__ == "__main__":
     print(f"[admin] Panel -> http://localhost:{ADMIN_PORT}")
     print(f"[admin] Login: {ADMIN_USER} / (siehe .env)")
-    app.run(host="127.0.0.1", port=ADMIN_PORT, debug=False)
+    app.run(host="0.0.0.0", port=ADMIN_PORT, debug=False)
