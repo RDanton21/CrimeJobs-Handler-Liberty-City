@@ -253,6 +253,9 @@
                           :title="`Aktuell gepflegt: ${p.current_label}`">
                       war: <span x-text="p.current_label"></span>
                     </span>
+                    <span x-show="p.current_notes"
+                          class="text-[10px] text-zinc-600 cursor-help"
+                          :title="p.current_notes">📝</span>
                   </div>
                 </td>
                 <td class="px-4 py-2 text-right whitespace-nowrap">

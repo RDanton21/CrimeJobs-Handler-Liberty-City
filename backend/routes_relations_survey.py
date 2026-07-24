@@ -403,6 +403,9 @@ async def survey_matrix(session: AsyncSession = Depends(get_session)):
     crel: dict[tuple[int, int], str] = {
         (r.crew_a_id, r.crew_b_id): _type_name(r.relation_type) for r in crel_rows
     }
+    crel_notes: dict[tuple[int, int], str] = {
+        (r.crew_a_id, r.crew_b_id): (r.notes or "") for r in crel_rows
+    }
 
     pairs: list[dict] = []
     for i, a in enumerate(crews):
@@ -433,6 +436,7 @@ async def survey_matrix(session: AsyncSession = Depends(get_session)):
                 # "haertere" (hoehere Skala) — Konflikte eskalieren im RP eher.
                 "current": current,
                 "current_label": LABEL_BY_TYPE.get(current or "", ""),
+                "current_notes": crel_notes.get((lo, hi), ""),
                 "vorschlag": _finalize_suggestion(ab_t, ba_t, current),
             })
 
@@ -535,6 +539,11 @@ class FinalizeRequest(BaseModel):
     b_id: int
     #: RelationType-Name. Leer/None => Beziehung fuer das Paar loeschen.
     relation_type: str | None = None
+    #: Notiz zur Beziehung (z.B. die KI-Begruendung). Sie landet in
+    #: crew_relations.notes und fliesst in die Auftragsgenerierung ein — die
+    #: KI erfaehrt dadurch das WARUM. None => bestehende Notiz unveraendert
+    #: lassen; "" => Notiz leeren.
+    notes: str | None = None
 
 
 @router.post("/finalize")
@@ -576,9 +585,14 @@ async def finalize_pair(
 
     if row:
         row.relation_type = rel
+        if payload.notes is not None:
+            row.notes = payload.notes.strip()
         aktion = "aktualisiert"
     else:
-        session.add(CrewRelation(crew_a_id=lo, crew_b_id=hi, relation_type=rel))
+        session.add(CrewRelation(
+            crew_a_id=lo, crew_b_id=hi, relation_type=rel,
+            notes=(payload.notes or "").strip(),
+        ))
         aktion = "angelegt"
     await session.commit()
     return {"ok": True, "aktion": aktion, "relation_type": rel.name}

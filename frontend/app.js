@@ -3065,21 +3065,30 @@ function relationsSurvey() {
       return p.current || p.vorschlag || "";
     },
     async finalize(p) {
+      const k = `${p.a_id}-${p.b_id}`;
       const val = this.finalValue(p);
       const label = (this.relOptions.find(o => o.v === val) || {}).label || "keine Beziehung";
+      // Wenn für dieses Paar ein KI-Vorschlag geholt wurde, dessen Begründung
+      // als Notiz mitspeichern — sie fließt in die Auftragsgenerierung ein.
+      // Nur wenn der übernommene Wert auch dem KI-Wert entspricht, sonst passt
+      // die Begründung nicht zur Beziehung.
+      const ai = this.aiResult[k];
+      const notes = (ai && ai.relation_type === val) ? (ai.begruendung || "") : null;
+      const notizHinweis = notes ? `\n\nKI-Begründung wird als Notiz gespeichert (fließt in Aufträge ein).` : "";
       if (!confirm(
         `Beziehung zwischen ${p.a_name} und ${p.b_name} auf "${label}" setzen?\n\n` +
         `Das schreibt in die echte Beziehungsmatrix und wirkt ab dem nächsten ` +
-        `generierten Auftrag auf Aufträge und Story.`
+        `generierten Auftrag auf Aufträge und Story.` + notizHinweis
       )) return;
       this.error = "";
       try {
-        await api.post("/api/relations/survey/finalize", {
-          a_id: p.a_id, b_id: p.b_id, relation_type: val || null,
-        });
-        delete this.finalDraft[`${p.a_id}-${p.b_id}`];
+        const body = { a_id: p.a_id, b_id: p.b_id, relation_type: val || null };
+        if (notes !== null) body.notes = notes;
+        await api.post("/api/relations/survey/finalize", body);
+        delete this.finalDraft[k];
         await this.loadAll();
-        this.sendResult = `✓ ${p.a_name} ↔ ${p.b_name}: ${label} übernommen`;
+        this.sendResult = `✓ ${p.a_name} ↔ ${p.b_name}: ${label} übernommen`
+          + (notes ? " (mit KI-Notiz)" : "");
       } catch (e) {
         this.error = "Übernehmen fehlgeschlagen: " + (e.message || e);
       }
