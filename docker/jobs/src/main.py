@@ -462,6 +462,7 @@ _STATIC_FILES: dict[str, tuple[str, int]] = {
     "favicon-32.png": ("image/png", 604800),
     "apple-touch-icon.png": ("image/png", 604800),
     "tailwind.css": ("text/css", 3600),
+    "ecg.svg": ("image/svg+xml", 604800),
     "app.js": ("text/javascript", 3600),
     "alpine.min.js": ("text/javascript", 86400),
     "oswald-latin.woff2": ("font/woff2", 2592000),
