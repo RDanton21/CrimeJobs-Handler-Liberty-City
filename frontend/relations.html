@@ -204,8 +204,14 @@
                 <td class="px-4 py-2 font-medium" x-text="p.a_name"></td>
                 <td class="px-4 py-2">
                   <span class="inline-flex items-center gap-1">
-                    <span :class="chip(p.a_zu_b)" class="px-2 py-0.5 rounded text-xs"
-                          x-text="p.a_zu_b_label || '—'"></span>
+                    <select :class="chipSelect(p.a_zu_b)"
+                            class="rounded text-xs px-1.5 py-0.5 border-0 cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                            @change="setDirection(p, 'ab', $event.target.value)">
+                      <option value="" x-text="p.a_zu_b ? '' : '— offen —'" :selected="!p.a_zu_b" :disabled="!!p.a_zu_b"></option>
+                      <template x-for="o in relOptions" :key="o.v">
+                        <option :value="o.v" :selected="p.a_zu_b === o.v" x-text="o.label"></option>
+                      </template>
+                    </select>
                     <button x-show="p.a_zu_b" @click="delDirection(p, 'ab')"
                             :title="`Einschätzung von ${p.a_name} über ${p.b_name} löschen`"
                             class="text-zinc-600 hover:text-red-400 text-xs px-1">✕</button>
@@ -214,8 +220,14 @@
                 <td class="px-4 py-2 font-medium" x-text="p.b_name"></td>
                 <td class="px-4 py-2">
                   <span class="inline-flex items-center gap-1">
-                    <span :class="chip(p.b_zu_a)" class="px-2 py-0.5 rounded text-xs"
-                          x-text="p.b_zu_a_label || '—'"></span>
+                    <select :class="chipSelect(p.b_zu_a)"
+                            class="rounded text-xs px-1.5 py-0.5 border-0 cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                            @change="setDirection(p, 'ba', $event.target.value)">
+                      <option value="" x-text="p.b_zu_a ? '' : '— offen —'" :selected="!p.b_zu_a" :disabled="!!p.b_zu_a"></option>
+                      <template x-for="o in relOptions" :key="o.v">
+                        <option :value="o.v" :selected="p.b_zu_a === o.v" x-text="o.label"></option>
+                      </template>
+                    </select>
                     <button x-show="p.b_zu_a" @click="delDirection(p, 'ba')"
                             :title="`Einschätzung von ${p.b_name} über ${p.a_name} löschen`"
                             class="text-zinc-600 hover:text-red-400 text-xs px-1">✕</button>
@@ -242,9 +254,10 @@
       </div>
 
       <p class="text-xs text-zinc-600 mt-3">
-        „Abweichend" heißt: benachbart auf der Skala verbündet → geschäftlich → neutral →
-        rivalisierend → feindlich. „Widerspruch" heißt zwei oder mehr Stufen Abstand —
-        das sind die Fälle, die eine Entscheidung brauchen.
+        Jede Bewertung ist ein Dropdown — zum Korrigieren einfach umstellen, offene Richtungen
+        lassen sich so auch von Hand nachtragen. „Abweichend" heißt: benachbart auf der Skala
+        verbündet → geschäftlich → neutral → rivalisierend → feindlich. „Widerspruch" heißt
+        zwei oder mehr Stufen Abstand — das sind die Fälle, die eine Entscheidung brauchen.
       </p>
     </section>
   </div>

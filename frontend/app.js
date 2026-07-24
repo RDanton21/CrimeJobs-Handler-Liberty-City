@@ -3027,6 +3027,32 @@ function relationsSurvey() {
       );
     },
 
+    // Auswahl für die editierbaren Bewertungs-Dropdowns — Reihenfolge = Skala
+    get relOptions() {
+      return [
+        { v: "ALLIED", label: "verbündet" },
+        { v: "BUSINESS", label: "geschäftlich" },
+        { v: "NEUTRAL", label: "neutral" },
+        { v: "RIVAL", label: "rivalisierend" },
+        { v: "HOSTILE", label: "feindlich" },
+      ];
+    },
+    // Eine Meldung per Dropdown ändern/nachtragen. Gerichtet: 'ab' = A über B.
+    async setDirection(p, richtung, value) {
+      if (!value) return;
+      const [von, zu] = richtung === "ab" ? [p.a_id, p.b_id] : [p.b_id, p.a_id];
+      this.error = "";
+      try {
+        await api.put("/api/relations/survey/proposal", {
+          from_crew_id: von, to_crew_id: zu, relation_type: value,
+        });
+        await this.loadAll();
+      } catch (e) {
+        this.error = "Konnte Bewertung nicht setzen: " + (e.message || e);
+        await this.loadAll();  // Dropdown auf echten Stand zurückholen
+      }
+    },
+
     chip(type) {
       return ({
         ALLIED: "bg-green-900/60 text-green-300",
@@ -3035,6 +3061,10 @@ function relationsSurvey() {
         RIVAL: "bg-amber-900/60 text-amber-300",
         HOSTILE: "bg-red-900/60 text-red-300",
       })[type] || "bg-zinc-900 text-zinc-600";
+    },
+    // wie chip(), aber für <select> — offener Wert bekommt einen dezenten Rahmen
+    chipSelect(type) {
+      return this.chip(type) + (type ? "" : " ring-1 ring-zinc-700");
     },
     statusLabel(s) {
       return ({ einig: "einig", abweichend: "abweichend", widerspruch: "Widerspruch", offen: "offen" })[s] || s;

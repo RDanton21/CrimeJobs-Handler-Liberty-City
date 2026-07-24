@@ -230,6 +230,63 @@ async def _purge_messages(session: AsyncSession, rows: list[SurveyMessage]) -> d
     return {"ok": True, "geloescht": geloescht, "fehler": fehler}
 
 
+class ProposalSetRequest(BaseModel):
+    from_crew_id: int
+    to_crew_id: int
+    #: Einer der RelationType-Namen: ALLIED, BUSINESS, NEUTRAL, RIVAL, HOSTILE
+    relation_type: str
+
+
+@router.put("/proposal")
+async def set_proposal(
+    payload: ProposalSetRequest, session: AsyncSession = Depends(get_session)
+):
+    """Eine einzelne Einschaetzung setzen — Admin-Korrektur.
+
+    Upsert: existiert die Richtung schon, wird der Wert geaendert; sonst neu
+    angelegt (so lassen sich auch 'offene' Richtungen von Hand fuellen, wenn
+    eine Gruppierung nicht geantwortet hat). Gerichtet — betrifft nur diese
+    eine Richtung, die Gegenrichtung bleibt unangetastet.
+    """
+    try:
+        rel = RelationType[payload.relation_type]
+    except KeyError:
+        raise HTTPException(400, f"Unbekannter Beziehungstyp: {payload.relation_type!r}")
+    if payload.from_crew_id == payload.to_crew_id:
+        raise HTTPException(400, "Eine Gruppierung kann sich nicht selbst bewerten")
+
+    # Beide Gruppierungen muessen existieren — sonst sind es Karteileichen
+    for cid in (payload.from_crew_id, payload.to_crew_id):
+        if not await session.get(Crew, cid):
+            raise HTTPException(404, f"Gruppierung {cid} nicht gefunden")
+
+    row = (await session.execute(
+        select(RelationProposal).where(
+            RelationProposal.from_crew_id == payload.from_crew_id,
+            RelationProposal.to_crew_id == payload.to_crew_id,
+        )
+    )).scalar_one_or_none()
+
+    if row:
+        row.relation_type = rel
+        # Als Hand-Korrektur markieren, damit spaeter nachvollziehbar bleibt,
+        # dass hier nicht die Gruppierung selbst geklickt hat.
+        row.discord_user_name = "Hand-Korrektur"
+        row.discord_user_id = ""
+        row.updated_at = datetime.utcnow()
+        neu = False
+    else:
+        session.add(RelationProposal(
+            from_crew_id=payload.from_crew_id,
+            to_crew_id=payload.to_crew_id,
+            relation_type=rel,
+            discord_user_name="Hand-Korrektur",
+        ))
+        neu = True
+    await session.commit()
+    return {"ok": True, "angelegt": neu, "relation_type": rel.name}
+
+
 @router.delete("/messages/{crew_id}")
 async def delete_survey_messages(crew_id: int, session: AsyncSession = Depends(get_session)):
     """Umfrage-Nachrichten EINER Gruppierung aus ihrem Channel entfernen.
