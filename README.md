@@ -185,6 +185,7 @@ Vollständige Anleitung: **[docs/INSTALLATION.md](docs/INSTALLATION.md)**
 
 | Datei | Inhalt |
 |---|---|
+| **[SYSTEM_UEBERBLICK.md](docs/SYSTEM_UEBERBLICK.md)** ⭐ | Was das System kann — kompakter Überblick über alle drei Säulen (auch als PDF) |
 | **[INSTALLATION.md](docs/INSTALLATION.md)** | Detaillierte Installation, Windows-Services, Linux-Setup |
 | **[DISCORD_BOT_SETUP.md](docs/DISCORD_BOT_SETUP.md)** ⭐ | **Idiotensichere Schritt-für-Schritt-Anleitung** für die Discord-Bot-Konfiguration (auch ohne Vorerfahrung) |
 | **[CONFIGURATION.md](docs/CONFIGURATION.md)** | Alle Settings im Detail, KI-Provider-Konfiguration, Channel-IDs, System-Prompts |
