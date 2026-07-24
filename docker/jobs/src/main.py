@@ -11,6 +11,8 @@ Datenquellen:
 """
 import asyncio
 import contextlib
+import csv
+import io
 import logging
 import secrets
 import time
@@ -85,15 +87,35 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(title="SEKTOR Personal-Boerse", lifespan=lifespan)
 
 
+#: Strikte CSP — moeglich, seit alle Assets self-hosted sind (kein CDN,
+#: keine Google Fonts, kein Inline-Skript). Ausnahmen:
+#:   'unsafe-eval'   -> Alpine.js wertet x-*-Ausdruecke per new Function() aus
+#:   style 'unsafe-inline' -> Alpines :style-Bindings + x-show setzen
+#:                     Inline-Style-ATTRIBUTE (nicht hashbar)
+#:   img cdn.discordapp.com -> Discord-Avatare
+CSP = (
+    "default-src 'self'; "
+    "script-src 'self' 'unsafe-eval'; "
+    "style-src 'self' 'unsafe-inline'; "
+    "img-src 'self' https://cdn.discordapp.com; "
+    "font-src 'self'; "
+    "connect-src 'self'; "
+    "frame-ancestors 'none'; "
+    "base-uri 'none'; "
+    "form-action 'self'; "
+    "object-src 'none'"
+)
+
+
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     """Basis-Security-Header fuer alle Responses (oeffentlich erreichbares
-    Dashboard hinter Traefik). CSP ist wegen Tailwind-CDN + Alpine (eval)
-    aktuell nicht sinnvoll setzbar — siehe README, Abschnitt Sicherheit."""
+    Dashboard hinter Traefik)."""
     response = await call_next(request)
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "same-origin")
+    response.headers.setdefault("Content-Security-Policy", CSP)
     return response
 
 
@@ -395,41 +417,41 @@ async def index():
     return FileResponse(STATIC_DIR / "index.html")
 
 
-@app.get("/static/bg.jpg")
-async def static_bg():
-    """Kino-Hintergrundbild. Bewusst Einzeldatei-Endpoint statt generischem
-    StaticFiles-Mount (Security-Review: nur explizit freigegebene Dateien)."""
+#: Explizite Allowlist statt StaticFiles-Mount (Security-Review: nur bewusst
+#: freigegebene Dateien werden ausgeliefert). filename -> (media_type, max_age).
+#: css/js kuerzer gecacht (aendern sich bei Deploys), Fonts/Icons lange.
+_STATIC_FILES: dict[str, tuple[str, int]] = {
+    "bg.jpg": ("image/jpeg", 86400),
+    "favicon.ico": ("image/x-icon", 604800),
+    "favicon-32.png": ("image/png", 604800),
+    "apple-touch-icon.png": ("image/png", 604800),
+    "tailwind.css": ("text/css", 3600),
+    "app.js": ("text/javascript", 3600),
+    "alpine.min.js": ("text/javascript", 86400),
+    "oswald-latin.woff2": ("font/woff2", 2592000),
+    "oswald-latin-ext.woff2": ("font/woff2", 2592000),
+}
+
+
+@app.get("/static/{filename}")
+async def static_file(filename: str):
+    """Einzeldatei-Auslieferung; alles ausserhalb der Allowlist ist 404.
+    filename ist ein einzelnes Pfadsegment (Route matcht kein '/'), die
+    Allowlist verhindert zusaetzlich jede Traversal-Spielerei."""
+    meta = _STATIC_FILES.get(filename)
+    if meta is None:
+        raise HTTPException(status_code=404, detail="Nicht gefunden")
+    media_type, max_age = meta
     return FileResponse(
-        STATIC_DIR / "bg.jpg",
-        media_type="image/jpeg",
-        headers={"Cache-Control": "public, max-age=86400"},
+        STATIC_DIR / filename,
+        media_type=media_type,
+        headers={"Cache-Control": f"public, max-age={max_age}"},
     )
-
-
-# Favicon/App-Icons: SEKTOR-Logo. Wie bg.jpg bewusst einzeln freigegeben,
-# kein StaticFiles-Mount. Lange Cache-Zeit — die Dateien aendern sich selten.
-_ICON_CACHE = {"Cache-Control": "public, max-age=604800"}
 
 
 @app.get("/favicon.ico")
 async def favicon():
-    return FileResponse(
-        STATIC_DIR / "favicon.ico", media_type="image/x-icon", headers=_ICON_CACHE
-    )
-
-
-@app.get("/static/favicon-32.png")
-async def favicon_png():
-    return FileResponse(
-        STATIC_DIR / "favicon-32.png", media_type="image/png", headers=_ICON_CACHE
-    )
-
-
-@app.get("/static/apple-touch-icon.png")
-async def apple_touch_icon():
-    return FileResponse(
-        STATIC_DIR / "apple-touch-icon.png", media_type="image/png", headers=_ICON_CACHE
-    )
+    return await static_file("favicon.ico")
 
 
 @app.get("/auth/login")
@@ -1370,6 +1392,95 @@ async def admin_stats(me: dict = Depends(require_session)):
         "total_attended": sum(p["attended"] for p in liste),
         "total_no_show": sum(p["no_show"] for p in liste),
     }
+
+
+@app.get("/api/admin/export.csv")
+async def admin_export_csv(me: dict = Depends(require_session)):
+    """Belegungs-Export fuers Event-Briefing: eine Zeile pro Eintragung bzw.
+    Wartelisten-Platz, sortiert wie das Board. Semikolon + BOM = oeffnet
+    sauber in deutschem Excel."""
+    _require_admin(me)
+    missions, _ = await _fetch_crime_data()
+    async with SessionLocal() as session:
+        assignments = (
+            await session.execute(
+                select(SlotAssignment).order_by(SlotAssignment.assigned_at)
+            )
+        ).scalars().all()
+        waitlist = (
+            await session.execute(
+                select(WaitlistEntry).order_by(WaitlistEntry.joined_at, WaitlistEntry.id)
+            )
+        ).scalars().all()
+        dismissed = set(
+            (await session.execute(select(DismissedMission.mission_id))).scalars().all()
+        )
+    # Vom Admin ausgeblendete Auftraege gehoeren wie im Board nicht in den Export
+    if dismissed:
+        missions = [m for m in missions if m.get("id") not in dismissed]
+    assignments_by_slot: dict[int, list[SlotAssignment]] = {}
+    for a in assignments:
+        assignments_by_slot.setdefault(a.slot_id, []).append(a)
+    waitlist_by_slot: dict[int, list[WaitlistEntry]] = {}
+    for w_ in waitlist:
+        waitlist_by_slot.setdefault(w_.slot_id, []).append(w_)
+
+    def _cell(v):
+        """Excel-Formel-Injektion entschaerfen: Zellen, die mit =, +, - oder @
+        beginnen, wuerden Excel als Formel ausfuehren — und Nutzernamen kommen
+        von Discord, sind also fremdgesteuert."""
+        if isinstance(v, str) and v[:1] in ("=", "+", "-", "@"):
+            return "'" + v
+        return v
+
+    buf = io.StringIO()
+    w = csv.writer(buf, delimiter=";")
+    w.writerow([
+        "Datum", "Zeitfenster", "Crew", "Stadtteil", "Auftrag-ID", "Slot-ID",
+        "Rolle", "Funktion", "Treffpunkt", "Kostüm", "Status", "Spieler",
+        "Discord-ID", "Anwesenheit",
+    ])
+    attended_label = {1: "erschienen", 0: "No-Show"}
+    for mission in sorted(missions, key=_mission_sort_key):
+        day = _mission_day(mission)
+        datum = day.strftime("%d.%m.%Y") if day else ""
+        crew = mission.get("crew") or {}
+        for slot in mission.get("slots", []):
+            base = [
+                datum,
+                slot.get("slot_window") or mission.get("slot_window") or "",
+                crew.get("name") or "",
+                crew.get("district") or "",
+                mission.get("id"),
+                slot.get("id"),
+                slot.get("name") or (f"NPC #{slot.get('npc_number')}" if slot.get("npc_number") else ""),
+                slot.get("function") or "",
+                slot.get("location") or "",
+                slot.get("costume") or "",
+            ]
+            rows_written = False
+            for a in assignments_by_slot.get(slot.get("id"), []):
+                w.writerow([_cell(c) for c in base + [
+                    "eingetragen", a.username, a.player_discord_id,
+                    attended_label.get(a.attended, ""),
+                ]])
+                rows_written = True
+            for i, wl in enumerate(waitlist_by_slot.get(slot.get("id"), []), start=1):
+                w.writerow([_cell(c) for c in base + [
+                    f"Warteliste #{i}", wl.username, wl.player_discord_id, "",
+                ]])
+                rows_written = True
+            if not rows_written:
+                w.writerow([_cell(c) for c in base + ["offen", "", "", ""]])
+
+    return Response(
+        content="\ufeff" + buf.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": 'attachment; filename="personal-boerse.csv"',
+            "Cache-Control": "no-store",
+        },
+    )
 
 
 @app.get("/api/admin/audit")

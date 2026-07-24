@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* latin-ext */
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 200 700;
+  font-display: swap;
+  src: url(/static/oswald-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Oswald';
+  font-style: normal;
+  font-weight: 200 700;
+  font-display: swap;
+  src: url(/static/oswald-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+[x-cloak] { display: none !important; }
+
+/* ---------------------------------------------------------------------
+   Kino-Look: Filmstill (Lagerhalle) als fixer Hintergrund.
+   Fallback-Flaeche #141719, falls bg.jpg nicht laedt.
+   ::before = Bild (fix, cover) | ::after = Abdunklung + Vignette
+   (fixe Ebenen statt background-attachment:fixed — das ruckelt auf iOS)
+   --------------------------------------------------------------------- */
+/* Nie horizontal scrollen — lieber umbrechen als einen Scrollbalken zeigen */
+html, body { max-width: 100%; overflow-x: hidden; }
+body { background-color: #141719; }
+/* Lange Ortsangaben/URLs ohne Leerzeichen sprengen sonst die Karten.
+   Bewusst NICHT global auf span/div — das wuerde die Tag-Chips zerreissen. */
+p, .brief, .brief * { overflow-wrap: anywhere; }
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: -2;
+  background: url('/static/bg.jpg') center center / cover no-repeat;
+}
+body::after {
+  content: "";
+  position: fixed; inset: 0; z-index: -1;
+  background:
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(0,0,0,0.72) 100%),
+    linear-gradient(180deg, rgba(10,11,12,0.72) 0%, rgba(10,11,12,0.85) 100%);
+}
+
+/* Condensed-Uppercase fuer Titel, Header, Tabs, Buttons */
+.headline {
+  font-family: 'Oswald', 'Arial Narrow', sans-serif-condensed, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+/* Karten: dunkles Glas ueber dem Filmstill */
+.card-cine {
+  background: rgba(20, 23, 25, 0.78);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}

@@ -101,19 +101,62 @@ Crime-Backend (Il Padrino, Public-API mit JOBS_API_KEY)
   landen mit Admin, Ziel, Slot und Zeitstempel in der Tabelle `admin_actions`
   (Einsicht: `GET /api/admin/audit` bzw. „Admin-Protokoll" in der Auswertung).
   Einträge werden nie gelöscht.
-- **Statische Dateien**: bewusst nur Einzeldatei-Endpoints (`/`, `/static/bg.jpg`
-  mit `Cache-Control: public, max-age=86400`) statt eines generischen
-  StaticFiles-Mounts.
+- **Statische Dateien**: explizite Allowlist (`_STATIC_FILES` in `main.py`)
+  statt eines generischen StaticFiles-Mounts — nur bewusst freigegebene
+  Dateien werden ausgeliefert, alles andere ist 404.
 - **OAuth-CSRF**: `state` wird als signiertes 5-Minuten-Cookie abgelegt und im
   Callback verglichen; `redirect_uri` kommt ausschließlich aus der Config.
 - **Public-API-Key**: Vergleich im Crime-Backend mit `secrets.compare_digest`
   (konstante Laufzeit); der Key taucht in keinem Log und keiner Response auf.
-- **Security-Header**: `X-Content-Type-Options`, `X-Frame-Options`,
-  `Referrer-Policy` werden per Middleware gesetzt. Eine strikte CSP ist erst
-  möglich, wenn Tailwind/Alpine nicht mehr per CDN geladen werden (beide
-  brauchen aktuell `eval`/Inline); CDN-Versionen sind deshalb fest gepinnt.
+- **Security-Header + strikte CSP**: `X-Content-Type-Options`,
+  `X-Frame-Options`, `Referrer-Policy` und eine `Content-Security-Policy`
+  mit `default-src 'self'` werden per Middleware gesetzt. Möglich, weil alle
+  Assets self-hosted sind (kein CDN, **keine Google Fonts** — auch DSGVO-seitig
+  sauber): Tailwind vorkompiliert, Alpine + Oswald-Fonts lokal, JS in
+  `app.js` statt inline. Ausnahmen: `'unsafe-eval'` (Alpine wertet
+  `x-*`-Ausdrücke aus), Style-Attribute inline (`:style`-Bindings),
+  `img-src` erlaubt `cdn.discordapp.com` (Avatare).
+- **CSV-Export** (`GET /api/admin/export.csv`, Admin-only): Belegung +
+  Warteliste aller Aufträge fürs Event-Briefing. Zellen mit führendem
+  `=`/`+`/`-`/`@` werden neutralisiert (Excel-Formel-Injektion über
+  Discord-Nutzernamen).
 - **Proxy**: uvicorn läuft mit `--proxy-headers` hinter Traefik (TLS-Terminierung);
   Port 8080 ist nur im Docker-Netz erreichbar.
+
+## Frontend-Assets bauen
+
+`tailwind.css` ist vorkompiliert (kein CDN). Nach Änderungen an
+Tailwind-Klassen in `index.html` oder `app.js` neu bauen:
+
+Die Build-Inputs liegen versioniert unter `assets-src/`
+(`input.css` = `@tailwind`-Direktiven + `@font-face` für Oswald +
+Custom-Styles; `tailwind.config.js` = Content-Scan über `index.html` + `app.js`):
+
+```bash
+curl -sfL -o /tmp/tailwindcss \
+  https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.16/tailwindcss-linux-x64
+chmod +x /tmp/tailwindcss
+cd assets-src
+/tmp/tailwindcss -c tailwind.config.js -i input.css -o ../src/static/tailwind.css --minify
+```
+
+Die Custom-Styles (Kino-Look, `.headline`, `.card-cine`) und die
+`@font-face`-Blöcke stecken mit im kompilierten CSS. `alpine.min.js` ist der
+gepinnte unpkg-Snapshot von Alpine 3.14.9; die Oswald-Fonts (Variable Font,
+latin + latin-ext) liegen als `oswald-*.woff2` in `src/static/`.
+
+## Tests
+
+```bash
+docker run --rm -v "$PWD":/app -w /app python:3.13-slim \
+  sh -c "pip install -q -r requirements-dev.txt && python -m pytest -q"
+```
+
+Die Suite (`tests/`) testet gegen die echte App (signierte Session-Cookies,
+eigene SQLite-DB unter `/tmp`), nur das Crime-Backend und der DM-Versand
+sind gefakt. Abgedeckt: Auth/AuthZ, Eintragen/Kapazität, Warteliste inkl.
+FIFO-Nachrücken + Überbuchungs-Invariante, Anwesenheit, Audit-Log,
+CSV-Export inkl. Formel-Injektion, eigene Bilanz, Event-Perioden-Parser.
 
 ## Lokaler Test (ohne Docker, Windows)
 
