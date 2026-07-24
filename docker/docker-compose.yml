@@ -170,13 +170,16 @@ services:
   # ---------------------------------------------------------------------------
   # whitelist-bot â€” Discord-Bot, sync zu externer sektorrp.eu Webseiten-DB
   # (Discord-only, kein Public-Route)
+  # HINWEIS: laeuft auf dem alten Dedicated. Hier "restart: no" (kein
+  # Autostart, kein Ausfall-Alarm in der Kommandozentrale). Per Klick
+  # startbar, falls der Dedicated-Bot mal aus ist — dann aber nur EINER.
   # ---------------------------------------------------------------------------
   whitelist-bot:
     build:
       context: ./whitelist
       dockerfile: Dockerfile
     container_name: sekt6r-whitelist
-    restart: unless-stopped
+    restart: "no"
     environment:
       BOT_TOKEN: "${WHITELIST_BOT_TOKEN}"
       DB_HOST: "${WHITELIST_DB_HOST}"
@@ -240,13 +243,16 @@ services:
   # ---------------------------------------------------------------------------
   # countdown-bot â€” Discord + Flask Web-Admin
   # Route: https://countdown.bots.sektorrp.eu/
+  # HINWEIS: dauerhaft aus. "restart: no" (kein Autostart, kein Ausfall-
+  # Alarm in der Kommandozentrale). Per Klick startbar, wenn wieder
+  # gebraucht.
   # ---------------------------------------------------------------------------
   countdown-bot:
     build:
       context: ./countdown
       dockerfile: Dockerfile
     container_name: sekt6r-countdown
-    restart: unless-stopped
+    restart: "no"
     environment:
       DISCORD_TOKEN: "${COUNTDOWN_DISCORD_TOKEN}"
       ADMIN_HOST: "0.0.0.0"
