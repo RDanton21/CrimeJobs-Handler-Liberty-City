@@ -16,6 +16,8 @@ DEFAULTS = {
     # Support-Panel Embed (/panel)
     "panel_title":        "🎫 Support",
     "panel_description":  "**Ticket eröffnen** — Privater Channel, KI antwortet auf Fragen.\n**Direkte Frage** — Schnelle Antwort ohne Ticket (nur du siehst sie).",
+    # Button "Direkte Frage"
+    "ask_btn_label":      "Direkte Antwort auf deine Frage, nur du siehst die Antwort !",
     # Modal "Direkte Frage"
     "modal_title":        "Frage an die Wissensbasis",
     "modal_label":        "Deine Frage",
@@ -32,6 +34,12 @@ DEFAULTS = {
     # --- Staatlich ---
     "staatlich_modal_title": "Staatliche Fraktion Bewerbung",
     "staatlich_embed_title": "🏛 Staatliche Fraktion Bewerbung — Ticket",
+    # --- Team Bewerbung ---
+    "team_modal_title":  "Team Bewerbung",
+    "team_embed_title":  "👥 Team Bewerbung — Ticket",
+    # --- Questgeber Bewerbung ---
+    "questgeber_modal_title": "Questgeber Bewerbung",
+    "questgeber_embed_title": "🎯 Questgeber Bewerbung — Ticket",
 }
 
 

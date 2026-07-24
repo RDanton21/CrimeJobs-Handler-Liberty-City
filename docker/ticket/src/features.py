@@ -10,8 +10,10 @@ ROOT = Path(__file__).resolve().parent.parent
 FEATURES_FILE = ROOT / "data" / "features.json"
 
 DEFAULTS = {
-    "snippets_enabled": True,
-    "rag_enabled":      True,
+    "snippets_enabled":    True,
+    "rag_enabled":         True,
+    "ticket_open_enabled": True,
+    "ask_btn_enabled":     True,
 }
 
 # mtime-Cache: Datei nur bei Änderung neu lesen

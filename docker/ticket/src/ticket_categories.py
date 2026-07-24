@@ -17,10 +17,10 @@ CATEGORIES_FILE = ROOT / "data" / "ticket_categories.json"
 _SLUG_RE = re.compile(r"[^a-z0-9-]")
 
 DEFAULTS: List[Dict[str, Any]] = [
-    {"id": "crime",      "label": "Crime",               "emoji": "🔫", "description": "",  "enabled": True,  "order": 0},
-    {"id": "gewerbe",    "label": "Gewerbe",              "emoji": "🏪", "description": "",  "enabled": True,  "order": 1},
-    {"id": "staatlich",  "label": "Staatliche Fraktion",  "emoji": "🏛", "description": "",  "enabled": True,  "order": 2},
-    {"id": "sonstiges",  "label": "Sonstiges",            "emoji": "❓", "description": "",  "enabled": True,  "order": 3},
+    {"id": "crime",      "label": "Crime",               "emoji": "🔫", "description": "",  "enabled": True,  "ai_enabled": False, "order": 0},
+    {"id": "gewerbe",    "label": "Gewerbe",              "emoji": "🏪", "description": "",  "enabled": True,  "ai_enabled": False, "order": 1},
+    {"id": "staatlich",  "label": "Staatliche Fraktion",  "emoji": "🏛", "description": "",  "enabled": True,  "ai_enabled": False, "order": 2},
+    {"id": "sonstiges",  "label": "Sonstiges",            "emoji": "❓", "description": "",  "enabled": True,  "ai_enabled": True,  "order": 3},
 ]
 
 
@@ -77,6 +77,7 @@ def create(label: str, emoji: str = "🎫", description: str = "") -> Dict[str, 
         "emoji": emoji.strip() or "🎫",
         "description": description.strip(),
         "enabled": True,
+        "ai_enabled": False,
         "order": len(items),
     }
     items.append(cat)
@@ -103,6 +104,17 @@ def delete(cat_id: str) -> bool:
         return False
     _save(new)
     return True
+
+
+def set_ai_enabled(cat_id: str, value: bool) -> bool:
+    """Setzt ai_enabled für eine Kategorie."""
+    items = _load()
+    for c in items:
+        if c["id"] == cat_id:
+            c["ai_enabled"] = bool(value)
+            _save(items)
+            return True
+    return False
 
 
 def toggle(cat_id: str) -> Optional[bool]:

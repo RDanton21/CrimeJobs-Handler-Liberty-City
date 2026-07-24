@@ -22,7 +22,7 @@ import signal
 from pathlib import Path
 from datetime import datetime
 
-from flask import Flask, request, redirect, url_for, render_template_string, flash, jsonify, send_from_directory, abort, session
+from flask import Flask, request, redirect, url_for, render_template_string, flash, jsonify, send_from_directory, send_file, abort, session
 from markupsafe import Markup
 from dotenv import load_dotenv, dotenv_values
 
@@ -437,6 +437,7 @@ LAYOUT = """<!DOCTYPE html>
     <a href="{{ url_for('snippets_page') }}" class="{{ 'active' if active=='snip' else '' }}">Snippets</a>
     <a href="{{ url_for('messages_page') }}" class="{{ 'active' if active=='msg' else '' }}">Bot-Texte</a>
     <a href="{{ url_for('categories_page') }}" class="{{ 'active' if active=='cats' else '' }}">Kategorien</a>
+    <a href="{{ url_for('team_areas_page') }}" class="{{ 'active' if active=='team_areas' else '' }}">Team-Bereiche</a>
     <a href="{{ url_for('discord_page') }}" class="{{ 'active' if active=='discord' else '' }}">Discord</a>
     <a href="{{ url_for('settings_page') }}" class="{{ 'active' if active=='settings' else '' }}">Settings</a>
     <a href="{{ url_for('logs_page') }}" class="{{ 'active' if active=='logs' else '' }}">Logs</a>
@@ -1002,8 +1003,10 @@ def dashboard():
     ticket_count = _get_ticket_count()
     import features as feature_flags
     flags = feature_flags.get()
-    snip_on = flags.get("snippets_enabled", True)
-    rag_on  = flags.get("rag_enabled", True)
+    snip_on       = flags.get("snippets_enabled", True)
+    rag_on        = flags.get("rag_enabled", True)
+    open_btn_on   = flags.get("ticket_open_enabled", True)
+    ask_btn_on    = flags.get("ask_btn_enabled", True)
 
     def _toggle_btn(key, label, enabled):
         btn_cls = "btn-success" if enabled else "btn-danger"
@@ -1083,6 +1086,8 @@ def dashboard():
         <span style="color:var(--text-secondary)">Wenn beide AUS: Bot antwortet nicht mehr automatisch.</span>
       </p>
       <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+        {_toggle_btn("ask_btn_enabled", "Button &bdquo;Direkte Antwort&ldquo;", ask_btn_on)}
+        {_toggle_btn("ticket_open_enabled", "Button &bdquo;Ticket eröffnen&ldquo;", open_btn_on)}
         {_toggle_btn("snippets_enabled", "Snippets (Q&amp;A-Shortcuts)", snip_on)}
         {_toggle_btn("rag_enabled", "Wissensbasis (RAG + KI)", rag_on)}
       </div>
@@ -1205,10 +1210,11 @@ def kb_page():
             if f["editable"] else
             '<span class="small muted" style="margin-right:0.5rem">nicht editierbar</span>'
         )
+        dl_btn = f'<a class="btn btn-secondary" style="margin-right:0.3rem" href="{url_for("kb_download", filename=f["name"])}">⬇ Download</a>'
         return (
             f"""<tr><td>{html.escape(f['name'])}</td><td><span class=badge>{f['ext']}</span></td>
         <td>{f['size']}</td><td class=muted>{f['modified']}</td>
-        <td>{edit_btn}<form method=post action="{url_for('kb_delete', filename=f['name'])}" style="display:inline">
+        <td>{dl_btn}{edit_btn}<form method=post action="{url_for('kb_delete', filename=f['name'])}" style="display:inline">
         <button class="btn btn-danger" type=submit onclick="return confirm('{html.escape(f['name'], quote=True)} loeschen?')">Löschen</button></form></td></tr>"""
         )
     rows = "".join(_row(f) for f in files) or "<tr><td colspan=5 class=muted>Keine Dokumente. Upload unten.</td></tr>"
@@ -1235,9 +1241,12 @@ def kb_page():
     </div>
 
     <div class=card><h2>Indexierte Dokumente · {len(files)}</h2>
-      <form method=post action="{url_for('reindex_action')}" style="margin-bottom:1rem">
-        <button class="btn btn-warn" type=submit onclick="return confirm('Reindex starten? Dauert je nach Menge 10-60 Sekunden.')">♻️ Reindex alle</button>
-      </form>
+      <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+        <form method=post action="{url_for('reindex_action')}">
+          <button class="btn btn-warn" type=submit onclick="return confirm('Reindex starten? Dauert je nach Menge 10-60 Sekunden.')">♻️ Reindex alle</button>
+        </form>
+        <a class="btn btn-secondary" href="{url_for('kb_export_zip')}">📦 Alle als ZIP exportieren</a>
+      </div>
       <table><tr><th>Datei</th><th>Typ</th><th>Groesse</th><th>Geaendert</th><th></th></tr>{rows}</table>
     </div>
     """
@@ -1378,6 +1387,35 @@ def kb_edit_save(filename):
     return redirect(url_for("kb_page"))
 
 
+@app.route("/kb/download/<path:filename>")
+@auth.login_required
+def kb_download(filename):
+    target = _kb_resolve(filename)
+    if target is None or not target.exists() or not target.is_file():
+        abort(404)
+    return send_file(target, as_attachment=True, download_name=target.name)
+
+
+@app.route("/kb/export/zip")
+@auth.login_required
+def kb_export_zip():
+    import io, zipfile
+    buf = io.BytesIO()
+    files = list_kb_files()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for f in files:
+            p = _kb_resolve(f["name"])
+            if p and p.exists():
+                zf.write(p, f["name"])
+    buf.seek(0)
+    return send_file(
+        buf,
+        mimetype="application/zip",
+        as_attachment=True,
+        download_name="wissensbasis_export.zip",
+    )
+
+
 @app.route("/reindex", methods=["POST"])
 @auth.login_required
 def reindex_action():
@@ -1454,6 +1492,9 @@ def snippets_page():
     </div>
 
     <div class=card><h2>Alle Snippets · {len(items)}</h2>
+      <div style="margin-bottom:.75rem">
+        <a class="btn btn-secondary" href="{url_for('snippets_export_txt')}">📄 Als TXT exportieren</a>
+      </div>
       <table><tr><th>Frage / Antwort-Preview</th><th>Hits</th><th>Erstellt</th><th></th></tr>{rows}</table>
     </div>
     """
@@ -1530,6 +1571,27 @@ def snippet_delete(sid):
     return redirect(url_for("snippets_page"))
 
 
+@app.route("/snippets/export/txt")
+@auth.login_required
+def snippets_export_txt():
+    import io, snippets as snp
+    items = snp.list_all()
+    lines = ["SNIPPETS EXPORT\n" + "=" * 60 + "\n"]
+    for i, s in enumerate(items, 1):
+        lines.append(f"[{i}] FRAGE:\n{s['question']}\n")
+        lines.append(f"ANTWORT:\n{s['answer']}\n")
+        if s.get("keywords"):
+            lines.append(f"KEYWORDS: {s['keywords']}\n")
+        lines.append("-" * 60 + "\n")
+    buf = io.BytesIO("\n".join(lines).encode("utf-8"))
+    return send_file(
+        buf,
+        mimetype="text/plain; charset=utf-8",
+        as_attachment=True,
+        download_name="snippets_export.txt",
+    )
+
+
 # ---------- Feature-Flags ----------
 
 @app.route("/features/toggle", methods=["POST"])
@@ -1544,7 +1606,12 @@ def features_toggle():
         abort(400)
     new_val = not current[key]
     feature_flags.set_feature(key, new_val)
-    label = {"snippets_enabled": "Snippets", "rag_enabled": "Wissensbasis"}.get(key, key)
+    label = {
+        "ask_btn_enabled":     "Button Direkte Antwort",
+        "ticket_open_enabled": "Button Ticket eroeffnen",
+        "snippets_enabled":    "Snippets",
+        "rag_enabled":         "Wissensbasis",
+    }.get(key, key)
     state = "aktiviert" if new_val else "deaktiviert"
     flash(f"✓ {label} {state}.", "success")
     return redirect(request.referrer or url_for("dashboard"))
@@ -1562,11 +1629,13 @@ def messages_page():
         keys = [
             "ticket_title", "ticket_description",
             "panel_title", "panel_description",
+            "ask_btn_label",
             "modal_title", "modal_label", "modal_placeholder",
             "crime_btn_anmelden", "crime_btn_abmelden",
             "crime_modal_anmelden", "crime_modal_abmelden", "crime_embed_title",
             "gewerbe_modal_title", "gewerbe_embed_title",
             "staatlich_modal_title", "staatlich_embed_title",
+            "team_modal_title", "team_embed_title",
         ]
         updates = {k: request.form.get(k, "").strip() for k in keys}
         # Leere Felder ignorieren
@@ -1618,6 +1687,12 @@ def messages_page():
       </div>
 
       <div class=card>
+        <h2>🟢 Button „Direkte Frage"</h2>
+        {field("Button-Label", "ask_btn_label", msgs["ask_btn_label"],
+               hint="Max. 80 Zeichen (Discord-Limit). Änderung nach Bot-Neustart + /panel aktiv.")}
+      </div>
+
+      <div class=card>
         <h2>❓ Modal „Direkte Frage"</h2>
         <p class=small>Das Formular das sich beim Klick auf „Direkte Frage" öffnet.</p>
         {field("Modal-Titel", "modal_title", msgs["modal_title"],
@@ -1654,6 +1729,13 @@ def messages_page():
         {field("Modal-Titel", "staatlich_modal_title", msgs["staatlich_modal_title"],
                hint="Titel des Eingabe-Popups (max. 45 Zeichen)")}
         {field("Embed-Titel im Ticket", "staatlich_embed_title", msgs["staatlich_embed_title"])}
+      </div>
+
+      <div class=card>
+        <h2>👥 Team Bewerbung — Formulartexte</h2>
+        {field("Modal-Titel", "team_modal_title", msgs["team_modal_title"],
+               hint="Titel des Eingabe-Popups (max. 45 Zeichen)")}
+        {field("Embed-Titel im Ticket", "team_embed_title", msgs["team_embed_title"])}
       </div>
 
       <div class=btn-row>
@@ -1728,6 +1810,15 @@ def categories_page():
                 state = "aktiviert" if result else "deaktiviert"
                 flash(f"✓ Kategorie {state}. Panel neu senden damit die Änderung im Discord erscheint.", "success")
 
+        elif action == "toggle_ai":
+            cat_id = request.form.get("cat_id", "")
+            cat_obj = tc.get(cat_id)
+            if cat_obj is not None:
+                new_ai = not cat_obj.get("ai_enabled", True)
+                tc.set_ai_enabled(cat_id, new_ai)
+                state = "AN" if new_ai else "AUS"
+                flash(f"✓ KI für diese Kategorie: {state}. Gilt für neue Tickets sofort.", "success")
+
         elif action == "delete":
             cat_id = request.form.get("cat_id", "")
             if tc.delete(cat_id):
@@ -1759,8 +1850,11 @@ def categories_page():
     rows = ""
     for c in cats:
         enabled  = c.get("enabled", True)
+        ai_on    = c.get("ai_enabled", True)
         tog_cls  = "btn-danger" if enabled else "btn-success"
         tog_lbl  = "Deaktivieren" if enabled else "Aktivieren"
+        ai_cls   = "btn-success" if ai_on else "btn-secondary"
+        ai_lbl   = "🤖 KI AN" if ai_on else "🤖 KI AUS"
         status   = '<span class=status-on>● AN</span>' if enabled else '<span class=status-off>○ AUS</span>'
         edit_url = url_for("categories_page") + f"?edit={c['id']}"
         edit_active = "style=\"background:var(--bg-card-hover)\"" if c["id"] == edit_id else ""
@@ -1779,6 +1873,12 @@ def categories_page():
                 <input type=hidden name=action value=toggle>
                 <input type=hidden name=cat_id value="{c['id']}">
                 <button class="btn {tog_cls}" style="padding:3px 10px;font-size:.8rem">{tog_lbl}</button>
+              </form>
+              <form method=post style="display:inline">
+                {csrf_field()}
+                <input type=hidden name=action value=toggle_ai>
+                <input type=hidden name=cat_id value="{c['id']}">
+                <button class="btn {ai_cls}" style="padding:3px 10px;font-size:.8rem" title="KI-Antwort ein/ausschalten">{ai_lbl}</button>
               </form>
               <form method=post style="display:inline">
                 {csrf_field()}
@@ -1836,12 +1936,12 @@ def categories_page():
       </form>
     </div>"""
 
-    resend_url = url_for("panel_resend")
+    messages_url = url_for("messages_page")
     content = f"""
     <h1 class=page-title>Ticket-Kategorien</h1>
     <p class=small style="margin-bottom:1rem">
       Lege Kategorien fest, die als Buttons im Support-Panel erscheinen.<br>
-      Nach jeder Änderung auf <strong>„Panel neu senden"</strong> klicken.
+      Nach jeder Änderung unter <a href="{messages_url}">Bot-Texte → Panel neu senden</a> klicken.
     </p>
 
     <div class=card>
@@ -1882,15 +1982,106 @@ def categories_page():
     <div class=card>
       <h2>📨 Panel neu senden</h2>
       <p class=small style="margin-bottom:.75rem">
-        Sendet das Support-Panel mit den aktuellen Kategorien erneut in den Ticket-Channel.
+        Das Panel wird über <a href="{messages_url}">Bot-Texte</a> gesendet — dort ist die einzige Stelle für Panel-Resend.
       </p>
-      <form method=post action="{resend_url}">
-        {csrf_field()}
-        <button class="btn btn-primary" type=submit>📋 Panel neu senden</button>
-      </form>
+      <a class="btn btn-primary" href="{messages_url}">→ Zu Bot-Texte (Panel neu senden)</a>
     </div>
     """
     return render("Kategorien", content, "cats")
+
+
+# ---------- Team-Bereiche ----------
+
+@app.route("/team-areas", methods=["GET", "POST"])
+@auth.login_required
+def team_areas_page():
+    import team_areas as ta
+    if request.method == "POST":
+        if not check_csrf():
+            abort(403)
+        action = request.form.get("action", "")
+        if action == "create":
+            label = request.form.get("label", "").strip()
+            emoji = request.form.get("emoji", "🎯").strip()
+            if label:
+                ta.create(label, emoji)
+                flash(f'✓ Bereich „{label}" hinzugefügt.', "success")
+            else:
+                flash("Label darf nicht leer sein.", "err")
+        elif action == "delete":
+            ta.delete(request.form.get("area_id", ""))
+        elif action == "move_up":
+            ta.move(request.form.get("area_id", ""), -1)
+        elif action == "move_down":
+            ta.move(request.form.get("area_id", ""), +1)
+        return redirect(url_for("team_areas_page"))
+
+    areas = ta.list_all()
+    rows = ""
+    for a in areas:
+        rows += f"""
+        <tr>
+          <td style="font-size:1.3rem;text-align:center">{html.escape(a.get('emoji',''))}</td>
+          <td>{html.escape(a['label'])}</td>
+          <td>
+            <form method=post style="display:inline">
+              {csrf_field()}
+              <input type=hidden name=action value=move_up>
+              <input type=hidden name=area_id value="{a['id']}">
+              <button class="btn btn-secondary btn-sm" type=submit title="Nach oben">▲</button>
+            </form>
+            <form method=post style="display:inline">
+              {csrf_field()}
+              <input type=hidden name=action value=move_down>
+              <input type=hidden name=area_id value="{a['id']}">
+              <button class="btn btn-secondary btn-sm" type=submit title="Nach unten">▼</button>
+            </form>
+            <form method=post style="display:inline" onsubmit="return confirm('Bereich löschen?')">
+              {csrf_field()}
+              <input type=hidden name=action value=delete>
+              <input type=hidden name=area_id value="{a['id']}">
+              <button class="btn btn-danger btn-sm" type=submit>🗑</button>
+            </form>
+          </td>
+        </tr>"""
+
+    content = f"""
+    <h1 class=page-title>Team-Bereiche</h1>
+    <p class=small style="margin-bottom:1rem">
+      Verwalte die Auswahloptionen im Team-Bewerbungs-Dropdown.
+      Änderungen sind sofort aktiv — kein Bot-Neustart nötig.
+    </p>
+
+    <div class=card>
+      <h2>Aktuelle Bereiche</h2>
+      <table>
+        <tr><th>Emoji</th><th>Label</th><th>Aktionen</th></tr>
+        {rows if rows else '<tr><td colspan=3 style="color:var(--muted)">Keine Bereiche vorhanden.</td></tr>'}
+      </table>
+    </div>
+
+    <div class=card>
+      <h2>Neuen Bereich hinzufügen</h2>
+      <form method=post>
+        {csrf_field()}
+        <input type=hidden name=action value=create>
+        <div class=grid style="grid-template-columns:3fr 1fr;gap:.75rem;align-items:end">
+          <div class=form-row style="margin:0">
+            <label>Label</label>
+            <input type=text name=label placeholder="z.B. Mapping" required style="width:100%">
+          </div>
+          <div class=form-row style="margin:0">
+            <label>Emoji</label>
+            <input type=text name=emoji placeholder="🎯" maxlength=4 style="width:100%;font-size:1.2rem;text-align:center">
+          </div>
+        </div>
+        <div class=btn-row style="margin-top:.75rem">
+          <button class="btn btn-success" type=submit>➕ Hinzufügen</button>
+        </div>
+      </form>
+    </div>
+    """
+    return render("Team-Bereiche", content, "team_areas")
 
 
 # ---------- Settings ----------

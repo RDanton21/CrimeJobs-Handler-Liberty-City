@@ -26,6 +26,7 @@ import re as _re_mod
 from rag import answer as rag_answer
 import messages as msg_store
 import ticket_categories as tc_store
+import team_areas as team_areas_store
 
 ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env", override=True)
@@ -40,7 +41,7 @@ PANEL_RESEND_FLAG = ROOT / "data" / "panel_resend.flag"
 SILENT_MENTIONS = os.getenv("SILENT_MENTIONS", "false").lower() in ("1", "true", "yes")
 
 # Kategorie-Slugs mit eigenem Channel-Prefix (slug-NNNN-user statt lc-NNNN-slug-user)
-_CUSTOM_PREFIX_SLUGS = {"crime", "gewerbe", "staatlich"}
+_CUSTOM_PREFIX_SLUGS = {"crime", "gewerbe", "staatlich", "als-questgeber-bewerben", "team-bewerbung"}
 
 # Channels wo die KI aufgegeben hat (needs_human=True) → wartet auf Mod-Übernahme
 _ai_handed_off: set[int] = set()
@@ -58,10 +59,48 @@ def _is_ticket_channel(name: str) -> bool:
     return False
 
 
-def _is_ai_ticket_channel(name: str) -> bool:
+def _is_ai_ticket_channel(name: str, topic: str = "") -> bool:
     """Gibt True zurück wenn die KI in diesem Channel antworten soll.
-    Nur lc-* Tickets (Ticket eröffnen / Sonstiges) — nicht Crime/Gewerbe/Staatlich."""
-    return name.startswith("lc-")
+    Reihenfolge:
+    1. Channel-Topic  → ticket:{slug}  (neue Tickets)
+    2. Channel-Name   → slug im Namen  (alte Tickets ohne Topic)
+    3. Fallback       → lc-* = True, andere Prefixe = False"""
+    def _ai_for_slug(slug: str) -> bool:
+        cat = tc_store.get(slug)
+        result = bool(cat.get("ai_enabled", True)) if cat else True
+        log.debug("_ai_for_slug(%r): cat=%r → %s", slug, cat, result)
+        return result
+
+    # 1. Topic-basiert (neue Tickets)
+    if topic and topic.startswith("ticket:"):
+        slug = topic[len("ticket:"):]
+        if slug:
+            result = _ai_for_slug(slug)
+            log.debug("_is_ai_ticket_channel(%r) via topic=%r → %s", name, topic, result)
+            return result
+
+    # 2. Slug aus Channel-Namen lesen (Format: lc-NNNN-{slug}-{user} oder {slug}-NNNN-{user})
+    all_cats = sorted(tc_store.list_all(), key=lambda c: -len(c["id"]))
+    if name.startswith("lc-"):
+        parts = name.split("-", 2)
+        rest = parts[2] if len(parts) > 2 else ""
+        log.debug("_is_ai_ticket_channel(%r): topic=%r rest=%r", name, topic, rest)
+        for cat in all_cats:
+            s = cat["id"]
+            if rest.startswith(s + "-") or rest == s:
+                result = _ai_for_slug(s)
+                log.debug("_is_ai_ticket_channel(%r) via name-slug=%r → %s", name, s, result)
+                return result
+        log.debug("_is_ai_ticket_channel(%r): kein Slug gefunden → True (generic)", name)
+        return True  # Generisches Ticket ohne Kategorie → KI AN
+    for cat in all_cats:
+        if name.startswith(cat["id"] + "-"):
+            result = _ai_for_slug(cat["id"])
+            log.debug("_is_ai_ticket_channel(%r) via prefix=%r → %s", name, cat["id"], result)
+            return result
+
+    log.debug("_is_ai_ticket_channel(%r): kein Match → False", name)
+    return False
 
 # Kein @-Ping wenn SILENT_MENTIONS=true
 _NO_MENTIONS = discord.AllowedMentions.none()
@@ -201,13 +240,15 @@ async def _create_ticket_channel(interaction: discord.Interaction, category_slug
     cat   = tc_store.get(category_slug) if category_slug else None
 
     safe_name = user.name.lower().replace(" ", "-")
-    existing_ch = discord.utils.find(
-        lambda c: c.name.endswith(f"-{safe_name}") and _is_ticket_channel(c.name),
-        guild.text_channels,
-    )
-    if existing_ch:
+    open_tickets = [
+        c for c in guild.text_channels
+        if c.name.endswith(f"-{safe_name}") and _is_ticket_channel(c.name)
+    ]
+    if len(open_tickets) >= 2:
+        mentions = " ".join(c.mention for c in open_tickets[:2])
         await interaction.followup.send(
-            f"Du hast bereits ein offenes Ticket: {existing_ch.mention}", ephemeral=True
+            f"Du hast bereits 2 offene Tickets: {mentions}\nBitte schließe ein Ticket, bevor du ein neues eröffnest.",
+            ephemeral=True,
         )
         return None
 
@@ -242,6 +283,7 @@ async def _create_ticket_channel(interaction: discord.Interaction, category_slug
             ticket_name,
             overwrites=overwrites,
             category=guild_category,
+            topic=f"ticket:{category_slug or ''}",
             reason=f"Ticket von {user}" + (f" [{cat['label']}]" if cat else ""),
         )
         return ch
@@ -400,6 +442,97 @@ class GewerbeFormModal(discord.ui.Modal):
         log.info("Gewerbe-Ticket geöffnet: %s von %s (%s)", ch.id, interaction.user, interaction.user.id)
 
 
+class TeamBewerbungModal(discord.ui.Modal):
+    """Eingabemaske für Team-Bewerbungs-Tickets (Bereich kommt vorausgefüllt aus der Auswahl)."""
+
+    def __init__(self, bereich: str = ""):
+        super().__init__(title=msg_store.get("team_modal_title") or "Team Bewerbung")
+        self.bereich_input = discord.ui.TextInput(
+            label="In welchem Bereich willst du unterstützen?",
+            style=discord.TextStyle.short,
+            required=True,
+            max_length=200,
+            default=bereich,
+        )
+        self.erfahrung = discord.ui.TextInput(
+            label="Hast du Erfahrungen in dem genannten Bereich?",
+            style=discord.TextStyle.short,
+            required=True,
+            max_length=10,
+            placeholder="Ja / Nein",
+        )
+        self.andere_projekte = discord.ui.TextInput(
+            label="Bist du aktuell in anderen Projekten tätig?",
+            style=discord.TextStyle.short,
+            required=True,
+            max_length=10,
+            placeholder="Ja / Nein",
+        )
+        self.sonstiges_input = discord.ui.TextInput(
+            label="Willst du uns noch etwas mitteilen?",
+            style=discord.TextStyle.paragraph,
+            required=False,
+            max_length=1000,
+            placeholder="Weitere Informationen (optional)...",
+        )
+        self.add_item(self.bereich_input)
+        self.add_item(self.erfahrung)
+        self.add_item(self.andere_projekte)
+        self.add_item(self.sonstiges_input)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        ch = await _create_ticket_channel(interaction, "team-bewerbung")
+        if not ch:
+            return
+
+        cat   = tc_store.get("team-bewerbung")
+        emoji = cat.get("emoji", "👥") if cat else "👥"
+
+        embed = discord.Embed(
+            title=msg_store.get("team_embed_title") or f"{emoji} Team Bewerbung — Ticket",
+            color=0xD42070,
+            timestamp=discord.utils.utcnow(),
+        )
+        embed.add_field(name="Unterstützungsbereich",              value=str(self.bereich_input),   inline=False)
+        embed.add_field(name="Erfahrungen im genannten Bereich",   value=str(self.erfahrung),       inline=True)
+        embed.add_field(name="Aktuell in anderen Projekten tätig", value=str(self.andere_projekte), inline=True)
+        if str(self.sonstiges_input).strip():
+            embed.add_field(name="Sonstiges",                      value=str(self.sonstiges_input), inline=False)
+        embed.set_footer(text=f"Eingereicht von {interaction.user.name}")
+
+        am = _NO_MENTIONS if SILENT_MENTIONS else discord.AllowedMentions(users=True)
+        await ch.send(embed=embed, view=TicketActions(), allowed_mentions=am)
+        await interaction.followup.send(f"Ticket erstellt: {ch.mention}", ephemeral=True)
+        log.info("Team-Ticket geöffnet: %s von %s (%s)", ch.id, interaction.user, interaction.user.id)
+
+
+class TeamBewerbungAreaSelect(discord.ui.View):
+    """Bereichs-Auswahl vor dem Team-Bewerbungs-Modal — Optionen aus team_areas.json."""
+
+    def __init__(self):
+        super().__init__(timeout=120)
+        areas = team_areas_store.list_all()
+        if not areas:
+            areas = [{"label": "Allgemein", "emoji": "🎯"}]
+        options = [
+            discord.SelectOption(label=a["label"], emoji=a.get("emoji") or None)
+            for a in areas[:25]  # Discord-Limit: max. 25 Optionen
+        ]
+        self._sel = discord.ui.Select(
+            placeholder="Wähle deinen Bereich (Mehrfachauswahl möglich)",
+            min_values=1,
+            max_values=len(options),
+            options=options,
+        )
+        self._sel.callback = self._on_select
+        self.add_item(self._sel)
+
+    async def _on_select(self, interaction: discord.Interaction):
+        bereich = ", ".join(self._sel.values)
+        await interaction.response.send_modal(TeamBewerbungModal(bereich=bereich))
+
+
 # Slug → spezielle Form-Klasse.
 # Wert ist entweder ein discord.ui.View (zeigt Zwischenschritt) oder
 # ein discord.ui.Modal (öffnet direkt die Eingabemaske).
@@ -463,10 +596,85 @@ class StaatlichFormModal(discord.ui.Modal):
         log.info("Staatlich-Ticket geöffnet: %s von %s (%s)", ch.id, interaction.user, interaction.user.id)
 
 
+class QuestgeberFormModal(discord.ui.Modal):
+    """Eingabemaske für Questgeber-Bewerbungen."""
+
+    def __init__(self):
+        super().__init__(title=msg_store.get("questgeber_modal_title") or "Questgeber Bewerbung")
+        self.gespielt = discord.ui.TextInput(
+            label="Hast du schon auf Sektor gespielt?",
+            style=discord.TextStyle.short,
+            required=True,
+            max_length=10,
+            placeholder="Ja / Nein",
+        )
+        self.jahre = discord.ui.TextInput(
+            label="Falls ja, wie viele Jahre ungefähr?",
+            style=discord.TextStyle.short,
+            required=False,
+            max_length=20,
+            placeholder="z.B. 2 Jahre",
+        )
+        self.letzter_char = discord.ui.TextInput(
+            label="Letzter Char & Bereich auf Sektor",
+            style=discord.TextStyle.short,
+            required=True,
+            max_length=100,
+            placeholder="z.B. Max Mustermann – Gangster / Staatlich",
+        )
+        self.sonstiges = discord.ui.TextInput(
+            label="Sonstiges",
+            style=discord.TextStyle.paragraph,
+            required=False,
+            max_length=1000,
+            placeholder="Weitere Informationen (optional)...",
+        )
+        self.hinweis = discord.ui.TextInput(
+            label="📋 Hinweis — Bitte zur Kenntnis nehmen",
+            style=discord.TextStyle.paragraph,
+            required=False,
+            max_length=200,
+            default="Mit dem Absenden bestätigst du, dass du das Wissen über andere Gruppierungen nicht zu deinem Vorteil nutzt.",
+        )
+        self.add_item(self.gespielt)
+        self.add_item(self.jahre)
+        self.add_item(self.letzter_char)
+        self.add_item(self.sonstiges)
+        self.add_item(self.hinweis)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        ch = await _create_ticket_channel(interaction, "als-questgeber-bewerben")
+        if not ch:
+            return
+
+        cat   = tc_store.get("als-questgeber-bewerben")
+        emoji = cat.get("emoji", "🎯") if cat else "🎯"
+
+        embed = discord.Embed(
+            title=msg_store.get("questgeber_embed_title") or f"{emoji} Questgeber Bewerbung — Ticket",
+            color=0xD42070,
+            timestamp=discord.utils.utcnow(),
+        )
+        embed.add_field(name="Schon auf Sektor gespielt?",       value=str(self.gespielt),     inline=True)
+        embed.add_field(name="Wie viele Jahre ungefähr?",        value=str(self.jahre) or "—", inline=True)
+        embed.add_field(name="Letzter Char & Bereich auf Sektor", value=str(self.letzter_char), inline=False)
+        if str(self.sonstiges).strip():
+            embed.add_field(name="Sonstiges",                    value=str(self.sonstiges),    inline=False)
+        embed.set_footer(text=f"Wir gucken uns deine Questgeber-Bewerbung an und melden uns • {interaction.user.name}")
+
+        am = _NO_MENTIONS if SILENT_MENTIONS else discord.AllowedMentions(users=True)
+        await ch.send(embed=embed, view=TicketActions(), allowed_mentions=am)
+        await interaction.followup.send(f"Ticket erstellt: {ch.mention}", ephemeral=True)
+        log.info("Questgeber-Ticket geöffnet: %s von %s (%s)", ch.id, interaction.user, interaction.user.id)
+
+
 _CATEGORY_FORMS: dict = {
-    "crime":      CrimeTypeView,        # View → Auswahl anmelden/abmelden → Modal
-    "gewerbe":    GewerbeFormModal,     # Modal direkt
-    "staatlich":  StaatlichFormModal,   # Modal direkt
+    "crime":                   CrimeTypeView,
+    "gewerbe":                 GewerbeFormModal,
+    "staatlich":               StaatlichFormModal,
+    "team-bewerbung":          TeamBewerbungAreaSelect,
+    "als-questgeber-bewerben": QuestgeberFormModal,
 }
 
 
@@ -553,9 +761,9 @@ class _AskButton(
     def __init__(self):
         super().__init__(
             discord.ui.Button(
-                label="Direkte Frage",
-                emoji="❓",
-                style=discord.ButtonStyle.secondary,
+                label=msg_store.get("ask_btn_label") or "Direkte Frage ohne ein Ticket zu eröffnen - nur du kannst es lesen",
+                emoji=discord.PartialEmoji(name="5EKTORLoad", id=1432317234474389637, animated=True),
+                style=discord.ButtonStyle.success,
                 custom_id="ticket:ask",
             )
         )
@@ -578,21 +786,25 @@ class TicketPanel(discord.ui.View):
     """
     def __init__(self):
         super().__init__(timeout=None)
-        # Zeile 0: feste Buttons (immer erste Reihe)
-        open_btn = _FallbackOpenButton()
-        open_btn.row = 0
-        self.add_item(open_btn)
-        ask_btn = _AskButton()
-        ask_btn.row = 0
-        self.add_item(ask_btn)
-        # Zeilen 1-4: Kategorien (max. 20 = 4 Zeilen × 5 Buttons)
-        for i, cat in enumerate(tc_store.list_enabled()[:20]):
+        import features as _ff
+        # Zeile 0: nur "Direkte Frage"
+        if _ff.get().get("ask_btn_enabled", True):
+            ask_btn = _AskButton()
+            ask_btn.row = 0
+            self.add_item(ask_btn)
+        # Zeile 1: "Ticket eröffnen" + erste 4 Kategorien
+        # Zeilen 2-4: je 5 Kategorien → max. 19 Kategorien gesamt
+        if _ff.get().get("ticket_open_enabled", True):
+            open_btn = _FallbackOpenButton()
+            open_btn.row = 1
+            self.add_item(open_btn)
+        for i, cat in enumerate(tc_store.list_enabled()[:19]):
             btn = CategoryButton(
                 slug=cat["id"],
                 label=cat["label"],
                 emoji=cat.get("emoji", "🎫"),
             )
-            btn.row = 1 + (i // 5)
+            btn.row = 1 + ((i + 1) // 5)
             self.add_item(btn)
 
 
@@ -762,7 +974,8 @@ async def on_ready():
         bot.add_dynamic_items(CategoryButton, _FallbackOpenButton, _AskButton)
         bot.add_view(TicketActions())
         bot.add_view(AdminPanel())
-        tc_store.init_defaults()  # Standard-Kategorien anlegen falls noch nicht vorhanden
+        tc_store.init_defaults()
+        team_areas_store.init_defaults()
         _views_registered = True
         log.info("Persistente Views + DynamicItems registriert.")
     else:
@@ -770,13 +983,34 @@ async def on_ready():
     if not _check_panel_resend.is_running():
         _check_panel_resend.start()
         log.info("Panel-Resend-Task gestartet.")
+    # Slash-Command-Sync nur wenn sich die Commands geaendert haben.
+    # Sync bei JEDEM Start fuehrt zu Discord-Rate-Limits; discord.py wartet
+    # diese im gemeinsamen HTTP-Client ab -> auch send_modal() verzoegert sich
+    # ueber die 3-Sekunden-Frist -> "10062 Unknown interaction".
     try:
-        if GUILD_ID:
-            guild = discord.Object(id=GUILD_ID)
-            synced = await bot.tree.sync(guild=guild)
+        cmd_names = sorted(c.name for c in bot.tree.get_commands(
+            guild=discord.Object(id=GUILD_ID) if GUILD_ID else None
+        ))
+        signature = f"{GUILD_ID}:" + ",".join(cmd_names)
+        sig_file = ROOT / "data" / "commands_sig.txt"
+        old_sig = ""
+        try:
+            old_sig = sig_file.read_text(encoding="utf-8").strip()
+        except Exception:
+            pass
+
+        if old_sig == signature and os.getenv("FORCE_SYNC", "").lower() not in ("1", "true", "yes"):
+            log.info("Slash-Commands unveraendert (%s) - Sync uebersprungen.", len(cmd_names))
         else:
-            synced = await bot.tree.sync()
-        log.info("Slash-Commands synchronisiert: %s", len(synced))
+            if GUILD_ID:
+                synced = await bot.tree.sync(guild=discord.Object(id=GUILD_ID))
+            else:
+                synced = await bot.tree.sync()
+            sig_file.parent.mkdir(parents=True, exist_ok=True)
+            tmp = sig_file.with_suffix(".tmp")
+            tmp.write_text(signature, encoding="utf-8")
+            os.replace(tmp, sig_file)
+            log.info("Slash-Commands synchronisiert: %s", len(synced))
     except Exception as e:
         log.exception("Sync-Error: %s", e)
 
@@ -785,8 +1019,37 @@ async def on_ready():
 async def on_message(message: discord.Message):
     if message.author.bot:
         return
-    if isinstance(message.channel, discord.TextChannel) and _is_ai_ticket_channel(message.channel.name):
+    # Direkte KI-Blockade: Kategorie-ai_enabled prüfen (Topic + Name)
+    if isinstance(message.channel, discord.TextChannel):
+        _slug_to_check: str | None = None
+        _topic = message.channel.topic or ""
+        if _topic.startswith("ticket:"):
+            _s = _topic[len("ticket:"):]
+            if _s:
+                _slug_to_check = _s
+        if _slug_to_check is None:
+            # Fallback: Slug aus Channel-Name extrahieren (lc-NNNN-{slug}-{user})
+            _cname = message.channel.name
+            if _cname.startswith("lc-"):
+                _parts = _cname.split("-", 2)
+                _rest = _parts[2] if len(_parts) > 2 else ""
+                for _c in sorted(tc_store.list_all(), key=lambda c: -len(c["id"])):
+                    _s = _c["id"]
+                    if _rest.startswith(_s + "-") or _rest == _s:
+                        _slug_to_check = _s
+                        break
+        if _slug_to_check:
+            _cat = tc_store.get(_slug_to_check)
+            if _cat and not _cat.get("ai_enabled", True):
+                log.debug("KI blockiert (ai_enabled=False) für %r slug=%r", message.channel.name, _slug_to_check)
+                await bot.process_commands(message)
+                return
+    if isinstance(message.channel, discord.TextChannel) and _is_ai_ticket_channel(message.channel.name, message.channel.topic or ""):
         ch_id = message.channel.id
+        import features as _ff
+        if not _ff.get().get("rag_enabled", True):
+            await bot.process_commands(message)
+            return
 
         # Wenn Mod bereits übernommen hat → KI schweigt dauerhaft
         if ch_id in _ai_silenced:
@@ -877,6 +1140,46 @@ async def adminpanel_cmd(interaction: discord.Interaction):
     )
     await interaction.channel.send(embed=embed, view=AdminPanel())
     await interaction.response.send_message("Admin-Panel gepostet.", ephemeral=True)
+
+
+@bot.tree.command(name="ticket-add", description="Fügt einen User zum aktuellen Ticket hinzu", guild=_guild_obj())
+@app_commands.describe(user="Der Discord-User der hinzugefügt werden soll")
+async def ticket_add_cmd(interaction: discord.Interaction, user: discord.Member):
+    ch = interaction.channel
+    if not isinstance(ch, discord.TextChannel) or not _is_ticket_channel(ch.name):
+        await interaction.response.send_message("Dieser Command funktioniert nur in Ticket-Channels.", ephemeral=True)
+        return
+    member_roles = {r.id for r in getattr(interaction.user, "roles", [])}
+    is_staff = (
+        interaction.user.guild_permissions.manage_channels
+        or (MOD_ROLE_ID and MOD_ROLE_ID in member_roles)
+        or (TICKET_ACCESS_ROLE_ID and TICKET_ACCESS_ROLE_ID in member_roles)
+    )
+    if not is_staff:
+        await interaction.response.send_message("Nur Mods/Supporter können User hinzufügen.", ephemeral=True)
+        return
+    await ch.set_permissions(user, view_channel=True, send_messages=True, read_message_history=True)
+    await interaction.response.send_message(f"✅ {user.mention} wurde zum Ticket hinzugefügt.", ephemeral=False)
+
+
+@bot.tree.command(name="ticket-remove", description="Entfernt einen User aus dem aktuellen Ticket", guild=_guild_obj())
+@app_commands.describe(user="Der Discord-User der entfernt werden soll")
+async def ticket_remove_cmd(interaction: discord.Interaction, user: discord.Member):
+    ch = interaction.channel
+    if not isinstance(ch, discord.TextChannel) or not _is_ticket_channel(ch.name):
+        await interaction.response.send_message("Dieser Command funktioniert nur in Ticket-Channels.", ephemeral=True)
+        return
+    member_roles = {r.id for r in getattr(interaction.user, "roles", [])}
+    is_staff = (
+        interaction.user.guild_permissions.manage_channels
+        or (MOD_ROLE_ID and MOD_ROLE_ID in member_roles)
+        or (TICKET_ACCESS_ROLE_ID and TICKET_ACCESS_ROLE_ID in member_roles)
+    )
+    if not is_staff:
+        await interaction.response.send_message("Nur Mods/Supporter können User entfernen.", ephemeral=True)
+        return
+    await ch.set_permissions(user, overwrite=None)
+    await interaction.response.send_message(f"✅ {user.mention} wurde aus dem Ticket entfernt.", ephemeral=False)
 
 
 # ---------- Singleton-Lock ----------
