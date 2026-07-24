@@ -798,6 +798,7 @@ function crewPage() {
     personnelSavingCrew: false,
     personnelAiBusyCrew: false,
     personnelPostingId: null,        // Mission die gerade gepostet wird
+    qgSendingId: null,               // Mission die gerade an die QG-Börse geht
     personnelTemplatesCrew: [],       // Quick-Pick Vorlagen (einmal geladen)
     personnelChannelConfigured: false, // gibt's eine Admin-Channel-ID in Settings?
     // 🧩 Spieler-Slots (Jobs-Dashboard) — Badge-Counts + Editor-Modal
@@ -950,6 +951,51 @@ function crewPage() {
     },
     closeSlots() {
       this.slotsEditor = { open: false, missionId: null, loading: false, parsing: false, saving: false, error: "", slot_window: "", rows: [], announce: true };
+    },
+    // Ein-Klick: Personal-Brief per KI in Slots wandeln und direkt an die
+    // QG-Börse (jobs.bots.sektorrp.eu) senden — ohne den Editor-Umweg. Für den
+    // Feinschliff bleibt der 🧩-Editor daneben.
+    async sendToQGBoerse(m) {
+      const hasSlots = (this.slotCounts[m.id] || 0) > 0;
+      const frage = hasSlots
+        ? "Es sind bereits Rollen für diesen Auftrag auf der Börse.\n\nErneut senden lässt die KI den Bedarf neu auslesen und ersetzt die vorhandenen Rollen — bereits eingetragene Spieler verlieren dabei ihren Platz.\n\nTrotzdem neu senden?"
+        : "Personalbedarf per KI in Rollen umwandeln und an die QG-Börse senden?\n\nDie Rollen erscheinen dann auf jobs.bots.sektorrp.eu, und die Spieler-Rolle wird im Discord gepingt.";
+      if (!confirm(frage)) return;
+      this.qgSendingId = m.id;
+      try {
+        // 1) KI-Parse (Preview, speichert nichts)
+        const parsed = await api.post(`/api/missions/${m.id}/parse-slots`);
+        if (!parsed.slots || parsed.slots.length === 0) {
+          alert(parsed.raw
+            ? "Die KI konnte aus dem Personalbedarf keine Rollen erkennen.\n\nÖffne „🧩 Personalbedarf“, um es manuell zu prüfen."
+            : "Die KI hat im Personalbedarf keine Spieler-Rollen gefunden.");
+          return;
+        }
+        // 2) direkt speichern (id:null = alle neu) + Discord-Ankündigung
+        const res = await api.put(`/api/missions/${m.id}/slots`, {
+          slot_window: parsed.slot_window || "",
+          announce: true,
+          slots: parsed.slots.map(s => ({
+            id: null,
+            npc_number: (typeof s.npc_number === "number") ? s.npc_number : null,
+            name: s.name || "", function: s.function || "",
+            location: s.location || "", costume: s.costume || "",
+            required_count: Math.max(1, parseInt(s.required_count, 10) || 1),
+            slot_window: "", notes: s.notes || "",
+          })),
+        });
+        await this.loadSlotCounts();
+        const anz = parsed.slots.length;
+        this.slotsToast = res && res.announce_sent
+          ? `📋 ${anz} Rolle(n) an die QG-Börse gesendet — Spieler-Rolle im Discord gepingt.`
+          : `📋 ${anz} Rolle(n) an die QG-Börse gesendet.`;
+        this.slotsToastError = false;
+        setTimeout(() => { this.slotsToast = ""; }, 6000);
+      } catch (e) {
+        alert("An QG-Börse senden fehlgeschlagen: " + (e.message || e));
+      } finally {
+        this.qgSendingId = null;
+      }
     },
     // ---- Personal-Brief auf der Crew-Seite ----
     startEditPersonnelCrew(m) {

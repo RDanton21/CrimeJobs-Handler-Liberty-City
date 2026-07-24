@@ -585,8 +585,16 @@
                       ✓ Im Admin-Channel
                     </span>
                     <button x-show="(m.personnel_brief || '').trim()"
+                            @click="sendToQGBoerse(m)"
+                            :disabled="qgSendingId === m.id"
+                            title="Personalbedarf per KI in Rollen umwandeln und direkt an die QG-Börse (jobs.bots.sektorrp.eu) senden"
+                            class="text-xs px-2 py-1 rounded bg-emerald-700 hover:bg-emerald-600 disabled:opacity-50">
+                      <span x-show="qgSendingId !== m.id">📋 An QG-Börse</span>
+                      <span x-show="qgSendingId === m.id">Sende…</span>
+                    </button>
+                    <button x-show="(m.personnel_brief || '').trim()"
                             @click="openSlots(m)"
-                            title="Personalbedarf für die Personal-Börse verwalten (KI-Parse + Editor)"
+                            title="Personalbedarf für die Personal-Börse verwalten (KI-Parse + Editor zum Prüfen)"
                             class="text-xs px-2 py-1 rounded bg-indigo-800 hover:bg-indigo-700">
                       🧩 Personalbedarf
                     </button>

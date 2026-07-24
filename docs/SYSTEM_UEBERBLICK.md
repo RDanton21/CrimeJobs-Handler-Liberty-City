@@ -32,7 +32,8 @@ Die Bühne hinter dem Auftrag: welche Rollen es braucht und wer sie besetzt.
 - Zu jedem Auftrag erzeugt die KI einen Personalbedarf — welche NPCs, Rollen,
   Kostüme und Einsatzorte gebraucht werden.
 - Der Bedarf wird auf einer eigenen öffentlichen Seite ausgespielt, auf der sich
-  Spieler für Rollen eintragen können.
+  Spieler für Rollen eintragen können. Ein Knopf am Auftrag schickt den Bedarf
+  per KI in einem Schritt dorthin.
 - Der Personalbedarf kann schon vor dem Auftrag sichtbar sein — der eigentliche
   Auftragstext bleibt dabei verborgen, bis er offiziell rausgeht.
 - Warteliste mit automatischem Nachrücken, Anwesenheits-Erfassung und
