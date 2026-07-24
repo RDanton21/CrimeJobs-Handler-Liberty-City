@@ -93,3 +93,31 @@ body::after {
 .escbadge2 { color: #eab06a; border-color: rgba(217,131,36,.4); background: rgba(217,131,36,.1); }
 .escbadge3 { color: #f0a3a3; border-color: rgba(213,35,42,.45); background: rgba(213,35,42,.12); }
 .escbadge4 { color: #ff9a9e; border-color: rgba(239,43,50,.6); background: rgba(239,43,50,.15); }
+
+/* ---------------------------------------------------------------------
+   Eskalation als EKG/Kardiogramm: eine scrollende Herzschlag-Linie.
+   Tempo, Amplitude, Farbe und Leuchten steigen mit der Stufe (Ruhig->Krieg).
+   Umsetzung per CSS-Maske (eine SVG-Kachel) -> CSP-sicher, keine Libs.
+   --------------------------------------------------------------------- */
+.ecg {
+  --ecg-col: #3bab6b; --ecg-dur: 3.4s; --ecg-amp: 60%; --ecg-glow: none;
+  --ecg-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 20' preserveAspectRatio='none'%3E%3Cpolyline points='0,10 10,10 12,10 13,8 14,10 17,10 18,13 19,2 20,15 21,10 24,7 26,10 34,10' fill='none' stroke='white' stroke-width='1.6' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E");
+  display: inline-block; width: 58px; height: 18px; flex: none;
+  background: var(--ecg-col); filter: var(--ecg-glow);
+  -webkit-mask-image: var(--ecg-mask); mask-image: var(--ecg-mask);
+  -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
+  -webkit-mask-size: 34px var(--ecg-amp); mask-size: 34px var(--ecg-amp);
+  -webkit-mask-position: 0 center; mask-position: 0 center;
+  animation: ecgscroll var(--ecg-dur) linear infinite;
+}
+.ecg-sm { width: 26px; height: 12px; }
+@keyframes ecgscroll {
+  from { -webkit-mask-position: 0 center; mask-position: 0 center; }
+  to   { -webkit-mask-position: -34px center; mask-position: -34px center; }
+}
+@media (prefers-reduced-motion: reduce) { .ecg { animation: none; } }
+.ecg0 { --ecg-col: #3bab6b; --ecg-dur: 4s;    --ecg-amp: 42%; }
+.ecg1 { --ecg-col: #c59a1f; --ecg-dur: 2.8s;  --ecg-amp: 58%; }
+.ecg2 { --ecg-col: #d98324; --ecg-dur: 2s;    --ecg-amp: 78%; }
+.ecg3 { --ecg-col: #d5232a; --ecg-dur: 1.15s; --ecg-amp: 100%; --ecg-glow: drop-shadow(0 0 3px rgba(213,35,42,0.7)); }
+.ecg4 { --ecg-col: #ef2b32; --ecg-dur: 0.68s; --ecg-amp: 120%; --ecg-glow: drop-shadow(0 0 4px rgba(239,43,50,0.95)); }

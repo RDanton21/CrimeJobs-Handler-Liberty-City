@@ -167,7 +167,7 @@
           <div x-show="escShow" class="card-cine rounded-lg border border-[#3d4a4d] p-3 max-w-md mx-auto space-y-1.5">
             <template x-for="c in crewsRanked()" :key="c.id">
               <div class="flex items-center gap-2.5">
-                <span :class="escDotClass(c.escalation)"></span>
+                <span class="ecg" :class="'ecg'+(c.escalation||0)"></span>
                 <span class="text-sm font-medium truncate flex-1" x-text="c.name"></span>
                 <span class="text-[11px] text-zinc-500" x-text="'auto'"></span>
                 <span :class="escBadgeClass(c.escalation)" x-text="escLabel(c.escalation)"></span>
@@ -205,9 +205,9 @@
                         <h2 class="headline font-semibold tracking-wider"
                             x-text="m.crew ? m.crew.name : 'Unbekannte Crew'"></h2>
                         <span class="text-xs text-zinc-400" x-text="m.crew ? m.crew.district : ''"></span>
-                        <!-- Eskalations-Badge (animierter Punkt + Stufe) -->
+                        <!-- Eskalations-Badge (EKG-Herzschlag + Stufe) -->
                         <span :class="escBadgeClass(m.escalation)">
-                          <span :class="escDotClass(m.escalation)" style="width:7px;height:7px"></span>
+                          <span class="ecg ecg-sm" :class="'ecg'+(m.escalation||0)"></span>
                           <span x-text="escLabel(m.escalation)"></span>
                         </span>
                         <span class="headline text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded border"
