@@ -348,21 +348,40 @@ def _event_days() -> list[tuple[date, int, str]]:
 
 
 def _mission_day(mission: dict) -> date | None:
-    """Berlin-Kalendertag einer Mission: scheduled_send_at > sent_at > deadline_at."""
+    """Berlin-Kalendertag einer Mission.
+
+    Reihenfolge: scheduled_send_at > sent_at > deadline_at > window_start.
+    Der window_start-Fallback (Einsatzfenster der Slots, Unix-Sekunden) ist
+    wichtig fuer DRAFT-Auftraege, deren Personalbedarf schon vor dem Versand
+    auf der Boerse steht: sie haben noch kein Versanddatum, aber ihre Slots
+    haben ein Zeitfenster. Ohne diesen Fallback bekaemen sie keinen Tag und
+    fielen aus der Tagesansicht — der Bedarf waere unsichtbar.
+    """
     ts = (
         mission.get("scheduled_send_at")
         or mission.get("sent_at")
         or mission.get("deadline_at")
     )
-    if not ts:
-        return None
-    try:
-        dt = datetime.fromisoformat(ts)
-    except (TypeError, ValueError):
-        return None
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=config.UTC_TZ)  # Backend liefert naive UTC
-    return dt.astimezone(config.BERLIN_TZ).date()
+    if ts:
+        try:
+            dt = datetime.fromisoformat(ts)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=config.UTC_TZ)  # Backend liefert naive UTC
+            return dt.astimezone(config.BERLIN_TZ).date()
+        except (TypeError, ValueError):
+            pass
+
+    ws = mission.get("window_start")
+    if ws:
+        try:
+            return (
+                datetime.fromtimestamp(int(ws), config.UTC_TZ)
+                .astimezone(config.BERLIN_TZ)
+                .date()
+            )
+        except (TypeError, ValueError, OSError):
+            pass
+    return None
 
 
 def _enrich_mission(
