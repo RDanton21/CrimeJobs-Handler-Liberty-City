@@ -146,6 +146,11 @@ def get_container_status(service_name: str) -> dict[str, Any]:
         health = state.get("Health", {}).get("Status") if state.get("Health") else None
         # Uptime
         started_at = state.get("StartedAt", "")
+        # Restart-Policy: "no" = bewusst manuell gesteuert (kein Ausfall-Alarm),
+        # unless-stopped/always = sollte laufen (Alarm, wenn nicht).
+        restart_policy = (
+            (attrs.get("HostConfig", {}) or {}).get("RestartPolicy", {}) or {}
+        ).get("Name", "") or "no"
         # CPU + RAM (snapshot, kein Streaming)
         stats = None
         try:
@@ -169,6 +174,7 @@ def get_container_status(service_name: str) -> dict[str, Any]:
             "status": c.status,
             "health": health,
             "started_at": started_at,
+            "restart_policy": restart_policy,
             "image": (attrs.get("Config", {}) or {}).get("Image", ""),
             "cpu_percent": round(cpu_pct, 1),
             "mem_used_mb": round(mem_used / (1024 * 1024), 1),
