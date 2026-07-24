@@ -195,6 +195,7 @@
               <th class="text-left px-4 py-2">Gruppierung B</th>
               <th class="text-left px-4 py-2">sieht A als</th>
               <th class="text-left px-4 py-2">Befund</th>
+              <th class="text-left px-4 py-2">Finaler Stand</th>
               <th class="text-right px-4 py-2">Aktion</th>
             </tr>
           </thead>
@@ -237,11 +238,34 @@
                   <span class="px-2 py-0.5 rounded text-xs" :class="statusChip(p.status)"
                         x-text="statusLabel(p.status)"></span>
                 </td>
-                <td class="px-4 py-2 text-right">
+                <td class="px-4 py-2">
+                  <div class="flex items-center gap-2">
+                    <select :class="chipSelect(finalValue(p))"
+                            class="rounded text-xs px-1.5 py-0.5 border-0 cursor-pointer focus:outline-none focus:ring-1 focus:ring-zinc-500"
+                            @change="finalDraft[`${p.a_id}-${p.b_id}`] = $event.target.value">
+                      <option value="" :selected="!finalValue(p)">— keiner —</option>
+                      <template x-for="o in relOptions" :key="o.v">
+                        <option :value="o.v" :selected="finalValue(p) === o.v" x-text="o.label"></option>
+                      </template>
+                    </select>
+                    <span x-show="p.current && p.current !== finalValue(p)"
+                          class="text-[10px] text-zinc-600 whitespace-nowrap"
+                          :title="`Aktuell gepflegt: ${p.current_label}`">
+                      war: <span x-text="p.current_label"></span>
+                    </span>
+                  </div>
+                </td>
+                <td class="px-4 py-2 text-right whitespace-nowrap">
+                  <button @click="finalize(p)"
+                          :disabled="finalValue(p) === (p.current || '')"
+                          title="Diesen Wert als geltende Beziehung übernehmen (wirkt auf Aufträge & Story)"
+                          class="text-xs px-2 py-1 rounded border border-zinc-800 text-emerald-500 hover:border-emerald-700 hover:text-emerald-300 disabled:opacity-30 disabled:hover:border-zinc-800 disabled:hover:text-emerald-500">
+                    Übernehmen
+                  </button>
                   <button x-show="p.a_zu_b || p.b_zu_a" @click="delPair(p)"
                           title="Beide Richtungen dieses Paares löschen"
                           class="text-xs px-2 py-1 rounded border border-zinc-800 text-zinc-500 hover:border-red-700 hover:text-red-300">
-                    Paar löschen
+                    Löschen
                   </button>
                 </td>
               </tr>
@@ -254,10 +278,12 @@
       </div>
 
       <p class="text-xs text-zinc-600 mt-3">
-        Jede Bewertung ist ein Dropdown — zum Korrigieren einfach umstellen, offene Richtungen
-        lassen sich so auch von Hand nachtragen. „Abweichend" heißt: benachbart auf der Skala
-        verbündet → geschäftlich → neutral → rivalisierend → feindlich. „Widerspruch" heißt
-        zwei oder mehr Stufen Abstand — das sind die Fälle, die eine Entscheidung brauchen.
+        Die beiden linken Bewertungen sind die Erhebung (gerichtet, zum Korrigieren umstellen).
+        <span class="text-zinc-400">„Finaler Stand"</span> ist die eine geltende Beziehung des
+        Paares — vorbelegt mit einem Vorschlag (bei Uneinigkeit der härtere Wert).
+        <span class="text-emerald-600">Übernehmen</span> schreibt sie in die echte Matrix und
+        <span class="text-emerald-600">wirkt sofort auf Auftragsgenerierung und Story</span>.
+        „war: …" zeigt den bisher gepflegten Wert, falls er abweicht.
       </p>
     </section>
   </div>

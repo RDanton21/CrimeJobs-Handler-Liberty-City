@@ -3037,6 +3037,36 @@ function relationsSurvey() {
         { v: "HOSTILE", label: "feindlich" },
       ];
     },
+    // Entwurf des finalen Werts pro Paar (Key "aId-bId"), bis übernommen wird.
+    finalDraft: {},
+    // Was im Finaler-Stand-Dropdown steht: der Entwurf, sonst gepflegter Wert,
+    // sonst der Server-Vorschlag.
+    finalValue(p) {
+      const k = `${p.a_id}-${p.b_id}`;
+      if (k in this.finalDraft) return this.finalDraft[k];
+      return p.current || p.vorschlag || "";
+    },
+    async finalize(p) {
+      const val = this.finalValue(p);
+      const label = (this.relOptions.find(o => o.v === val) || {}).label || "keine Beziehung";
+      if (!confirm(
+        `Beziehung zwischen ${p.a_name} und ${p.b_name} auf "${label}" setzen?\n\n` +
+        `Das schreibt in die echte Beziehungsmatrix und wirkt ab dem nächsten ` +
+        `generierten Auftrag auf Aufträge und Story.`
+      )) return;
+      this.error = "";
+      try {
+        await api.post("/api/relations/survey/finalize", {
+          a_id: p.a_id, b_id: p.b_id, relation_type: val || null,
+        });
+        delete this.finalDraft[`${p.a_id}-${p.b_id}`];
+        await this.loadAll();
+        this.sendResult = `✓ ${p.a_name} ↔ ${p.b_name}: ${label} übernommen`;
+      } catch (e) {
+        this.error = "Übernehmen fehlgeschlagen: " + (e.message || e);
+      }
+    },
+
     // Eine Meldung per Dropdown ändern/nachtragen. Gerichtet: 'ab' = A über B.
     async setDirection(p, richtung, value) {
       if (!value) return;

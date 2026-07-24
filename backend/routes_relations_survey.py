@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .auth import require_admin
 from .config import settings
 from .db import get_session
-from .models import Crew, RelationProposal, RelationType, SurveyMessage
+from .models import Crew, CrewRelation, RelationProposal, RelationType, SurveyMessage
 
 router = APIRouter(
     prefix="/api/relations/survey",
@@ -113,6 +113,29 @@ def _deadline_ts(payload: SurveySendRequest) -> int | None:
 
 def _type_name(value) -> str:
     return value.name if hasattr(value, "name") else str(value)
+
+
+#: Umgekehrte Skala — von der Zahl zum Typ, fuer den Uebernahme-Vorschlag.
+_TYPE_BY_SCALE = {v: k for k, v in SCALE.items()}
+
+
+def _finalize_suggestion(ab_t: str | None, ba_t: str | None, current: str | None) -> str | None:
+    """Vorschlag fuer den finalen, symmetrischen Wert eines Paares.
+
+    - Beide einig  -> dieser Wert.
+    - Uneinig      -> der haertere (hoehere Skalenwert). Im RP eskaliert ein
+                      Konflikt eher, als dass er sich in Wohlwollen aufloest;
+                      ausserdem soll der Vorschlag auffallen, nicht glaetten.
+    - Nur eine Seite / keine -> die vorhandene Angabe, sonst der bereits
+                      gepflegte Wert, sonst nichts.
+    Nur ein VORSCHLAG — entschieden wird per Hand in der UI.
+    """
+    have = [t for t in (ab_t, ba_t) if t]
+    if len(have) == 2:
+        return _TYPE_BY_SCALE[max(SCALE[ab_t], SCALE[ba_t])]
+    if len(have) == 1:
+        return have[0]
+    return current
 
 
 async def _survey_crews(session: AsyncSession) -> list[Crew]:
@@ -366,6 +389,14 @@ async def survey_matrix(session: AsyncSession = Depends(get_session)):
         (p.from_crew_id, p.to_crew_id): p for p in rows
     }
 
+    # Aktuell gepflegte Beziehungen (crew_relations) — kanonisch a_id < b_id.
+    # Das ist der Stand, mit dem heute gespielt wird; die Uebernahme schreibt
+    # genau hierhin.
+    crel_rows = (await session.execute(select(CrewRelation))).scalars().all()
+    crel: dict[tuple[int, int], str] = {
+        (r.crew_a_id, r.crew_b_id): _type_name(r.relation_type) for r in crel_rows
+    }
+
     pairs: list[dict] = []
     for i, a in enumerate(crews):
         for b in crews[i + 1:]:
@@ -380,6 +411,9 @@ async def survey_matrix(session: AsyncSession = Depends(get_session)):
                 abstand = abs(SCALE[ab_t] - SCALE[ba_t])
                 status = "einig" if abstand == 0 else ("abweichend" if abstand == 1 else "widerspruch")
 
+            lo, hi = (a.id, b.id) if a.id < b.id else (b.id, a.id)
+            current = crel.get((lo, hi))
+
             pairs.append({
                 "a_id": a.id, "a_name": a.name,
                 "b_id": b.id, "b_name": b.name,
@@ -387,6 +421,12 @@ async def survey_matrix(session: AsyncSession = Depends(get_session)):
                 "b_zu_a": ba_t, "b_zu_a_label": LABEL_BY_TYPE.get(ba_t or "", ""),
                 "status": status,
                 "abstand": abstand,
+                # Aktueller Stand in der echten Matrix + ein Vorschlag fuer die
+                # Uebernahme: bei Einigkeit der gemeinsame Wert, sonst der
+                # "haertere" (hoehere Skala) — Konflikte eskalieren im RP eher.
+                "current": current,
+                "current_label": LABEL_BY_TYPE.get(current or "", ""),
+                "vorschlag": _finalize_suggestion(ab_t, ba_t, current),
             })
 
     rang = {"widerspruch": 0, "abweichend": 1, "einig": 2, "offen": 3}
@@ -399,6 +439,60 @@ async def survey_matrix(session: AsyncSession = Depends(get_session)):
         "items": pairs,
         "gruppen": [{"id": c.id, "name": c.name} for c in by_id.values()],
     }
+
+
+class FinalizeRequest(BaseModel):
+    a_id: int
+    b_id: int
+    #: RelationType-Name. Leer/None => Beziehung fuer das Paar loeschen.
+    relation_type: str | None = None
+
+
+@router.post("/finalize")
+async def finalize_pair(
+    payload: FinalizeRequest, session: AsyncSession = Depends(get_session)
+):
+    """Finalen, symmetrischen Wert eines Paares in die echte Matrix schreiben.
+
+    Schreibt nach crew_relations (kanonisch crew_a_id < crew_b_id) — das ist
+    der Stand, den Auftragsgenerierung und Story tatsaechlich lesen. Bewusst
+    ein einzelner, per Hand ausgeloester Schritt: die Erhebung sammelt
+    Wuensche, HIER wird entschieden, was gilt.
+    """
+    if payload.a_id == payload.b_id:
+        raise HTTPException(400, "Ein Paar braucht zwei verschiedene Gruppierungen")
+    for cid in (payload.a_id, payload.b_id):
+        if not await session.get(Crew, cid):
+            raise HTTPException(404, f"Gruppierung {cid} nicht gefunden")
+
+    lo, hi = sorted((payload.a_id, payload.b_id))
+    row = (await session.execute(
+        select(CrewRelation).where(
+            CrewRelation.crew_a_id == lo, CrewRelation.crew_b_id == hi
+        )
+    )).scalar_one_or_none()
+
+    # Leerer Typ = Beziehung entfernen (zurueck auf implizit neutral).
+    if not (payload.relation_type or "").strip():
+        if row:
+            await session.delete(row)
+            await session.commit()
+            return {"ok": True, "aktion": "geloescht"}
+        return {"ok": True, "aktion": "war schon leer"}
+
+    try:
+        rel = RelationType[payload.relation_type]
+    except KeyError:
+        raise HTTPException(400, f"Unbekannter Beziehungstyp: {payload.relation_type!r}")
+
+    if row:
+        row.relation_type = rel
+        aktion = "aktualisiert"
+    else:
+        session.add(CrewRelation(crew_a_id=lo, crew_b_id=hi, relation_type=rel))
+        aktion = "angelegt"
+    await session.commit()
+    return {"ok": True, "aktion": aktion, "relation_type": rel.name}
 
 
 @router.delete("/proposal")
