@@ -191,6 +191,8 @@ Vollständige Anleitung: **[docs/INSTALLATION.md](docs/INSTALLATION.md)**
 | **[FEATURES.md](docs/FEATURES.md)** | Komplette Feature-Übersicht mit Screenshots und Workflows |
 | **[ADMIN_GUIDE.md](docs/ADMIN_GUIDE.md)** | Spielleiter-Handbuch — Best Practices, Event-Setup, Personal-Planung |
 | **[API.md](docs/API.md)** | Komplette REST-API-Referenz mit Endpoints, Schemas, Beispielen |
+| **[BEZIEHUNGS_ERHEBUNG.md](docs/BEZIEHUNGS_ERHEBUNG.md)** ⭐ | Beziehungs-Erhebung haarklein: Discord-Umfrage → Korrektur → KI-Schiedsspruch → Übernahme in die geltende Matrix, inkl. aller Design-Begründungen |
+| **[CREW_RELATIONS.md](docs/CREW_RELATIONS.md)** | Statische Ausgangs-Beziehungsmatrix (von Hand gepflegt) |
 | **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** | Tech-Architektur, Datenmodell, Backend/Bot-Kommunikation |
 | **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** | Häufige Probleme + Lösungen, Log-Analyse, Debug-Workflows |
 
