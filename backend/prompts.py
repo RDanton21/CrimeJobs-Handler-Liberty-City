@@ -603,3 +603,61 @@ def build_personnel_slot_parse_prompt(personnel_brief: str) -> str:
         "- Wenn der Brief keine Spieler-NPCs benoetigt: \"slots\": [].\n"
         "- Fehlende Angaben als leeren String \"\" ausgeben, nichts erfinden."
     )
+
+
+RELATION_ARBITRATION_SYSTEM_PROMPT = (
+    "Du bist Schiedsrichter fuer die Beziehungen zwischen Gruppierungen einer "
+    "GTA-Liberty-City-Roleplay-Krimiserie. Zwei Gruppierungen haben ihre "
+    "Sicht aufeinander abgegeben — teils widerspruechlich. Du bestimmst die "
+    "EINE Beziehung, die zwischen ihnen gilt.\n\n"
+    "Entscheide anhand der Hintergrund-Storys und des kriminellen Geschaefts "
+    "beider Seiten, nicht per Kompromiss. Frage dich: Was ist dramaturgisch "
+    "das staerkste, glaubwuerdigste Verhaeltnis? Konkurrierende Geschaefte "
+    "im selben Feld sprechen fuer Rivalitaet oder Feindschaft; sich "
+    "ergaenzende fuer geschaeftliche Naehe. Eine einseitig behauptete "
+    "Freundschaft, die die Gegenseite nicht teilt, ist meist keine — sie "
+    "kippt eher in Rivalitaet. Neutral ist die Antwort nur, wenn wirklich "
+    "nichts die beiden verbindet oder trennt.\n\n"
+    "Antworte mit NUR einem JSON-Objekt, keine Markdown-Fences, kein Text "
+    "davor oder danach:\n"
+    '{"relation_type": "HOSTILE", "begruendung": "<1-2 Saetze, konkret auf '
+    'die beiden Storys bezogen>"}\n\n'
+    "relation_type ist GENAU einer von: ALLIED (verbuendet), BUSINESS "
+    "(geschaeftlich), NEUTRAL (neutral), RIVAL (rivalisierend), HOSTILE "
+    "(feindlich). Die begruendung ist deutsch, knapp, ohne Floskeln."
+)
+
+
+def build_relation_arbitration_prompt(
+    a_name: str, a_story: str, a_business: str,
+    b_name: str, b_story: str, b_business: str,
+    a_zu_b: str, b_zu_a: str, current: str,
+) -> str:
+    """User-Prompt fuer den Beziehungs-Schiedsspruch. Labels sind die
+    deutschen Begriffe (verbuendet/geschaeftlich/...), damit die KI die
+    abgegebenen Sichten direkt versteht."""
+    def block(name: str, story: str, business: str) -> str:
+        parts = [f"### {name}"]
+        parts.append(f"Hintergrund: {story.strip() or '(keine Story hinterlegt)'}")
+        if business.strip():
+            parts.append(f"Kriminelles Geschaeft (intern): {business.strip()}")
+        return "\n".join(parts)
+
+    lines = [
+        "## Die beiden Gruppierungen",
+        block(a_name, a_story, a_business),
+        "",
+        block(b_name, b_story, b_business),
+        "",
+        "## Ihre abgegebenen Sichten",
+        f"- {a_name} sieht {b_name} als: {a_zu_b or '(keine Angabe)'}",
+        f"- {b_name} sieht {a_name} als: {b_zu_a or '(keine Angabe)'}",
+    ]
+    if current:
+        lines.append(f"- Bisher gepflegt: {current}")
+    lines.append("")
+    lines.append(
+        f"## Aufgabe\nBestimme die eine geltende Beziehung zwischen {a_name} "
+        f"und {b_name} und begruende sie."
+    )
+    return "\n".join(lines)

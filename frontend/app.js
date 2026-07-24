@@ -3039,6 +3039,24 @@ function relationsSurvey() {
     },
     // Entwurf des finalen Werts pro Paar (Key "aId-bId"), bis übernommen wird.
     finalDraft: {},
+    aiBusy: {},
+    aiResult: {},
+    // KI liest beide Storys, schlägt die geltende Beziehung vor und setzt sie
+    // ins Finaler-Stand-Dropdown (übernommen wird erst per Klick auf Übernehmen).
+    async aiSuggest(p) {
+      const k = `${p.a_id}-${p.b_id}`;
+      this.aiBusy[k] = true;
+      this.error = "";
+      try {
+        const r = await api.post("/api/relations/survey/ai-suggest", { a_id: p.a_id, b_id: p.b_id });
+        this.aiResult[k] = r;
+        this.finalDraft[k] = r.relation_type;
+      } catch (e) {
+        this.error = `KI-Vorschlag für ${p.a_name} ↔ ${p.b_name} fehlgeschlagen: ` + (e.message || e);
+      } finally {
+        this.aiBusy[k] = false;
+      }
+    },
     // Was im Finaler-Stand-Dropdown steht: der Entwurf, sonst gepflegter Wert,
     // sonst der Server-Vorschlag.
     finalValue(p) {

@@ -256,6 +256,13 @@
                   </div>
                 </td>
                 <td class="px-4 py-2 text-right whitespace-nowrap">
+                  <button @click="aiSuggest(p)"
+                          :disabled="aiBusy[`${p.a_id}-${p.b_id}`]"
+                          title="KI liest beide Storys und schlägt die geltende Beziehung vor"
+                          class="text-xs px-2 py-1 rounded border border-zinc-800 text-purple-400 hover:border-purple-700 hover:text-purple-300 disabled:opacity-40">
+                    <span x-show="!aiBusy[`${p.a_id}-${p.b_id}`]">🪄 KI</span>
+                    <span x-show="aiBusy[`${p.a_id}-${p.b_id}`]">…</span>
+                  </button>
                   <button @click="finalize(p)"
                           :disabled="finalValue(p) === (p.current || '')"
                           title="Diesen Wert als geltende Beziehung übernehmen (wirkt auf Aufträge & Story)"
@@ -267,6 +274,18 @@
                           class="text-xs px-2 py-1 rounded border border-zinc-800 text-zinc-500 hover:border-red-700 hover:text-red-300">
                     Löschen
                   </button>
+                </td>
+              </tr>
+              <tr x-show="aiResult[`${p.a_id}-${p.b_id}`]" x-cloak
+                  class="border-t border-zinc-800/40">
+                <td colspan="7" class="px-4 py-2 bg-purple-950/20">
+                  <div class="flex items-start gap-2 text-xs text-purple-200">
+                    <span class="shrink-0">🪄</span>
+                    <span>
+                      <span class="font-medium" x-text="`KI schlägt „${aiResult[`${p.a_id}-${p.b_id}`]?.relation_label}“ vor:`"></span>
+                      <span class="text-purple-300/90" x-text="aiResult[`${p.a_id}-${p.b_id}`]?.begruendung"></span>
+                    </span>
+                  </div>
                 </td>
               </tr>
             </template>

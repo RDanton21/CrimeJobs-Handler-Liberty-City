@@ -13,6 +13,7 @@ werden, bevor daraus ein gemeinsamer Nenner wird.
 """
 from __future__ import annotations
 
+import json
 from datetime import datetime, timedelta, timezone
 
 import httpx
@@ -21,10 +22,16 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .ai import get_provider
 from .auth import require_admin
 from .config import settings
 from .db import get_session
 from .models import Crew, CrewRelation, RelationProposal, RelationType, SurveyMessage
+from .prompts import (
+    RELATION_ARBITRATION_SYSTEM_PROMPT,
+    build_relation_arbitration_prompt,
+)
+from .settings_store import get as settings_get_value
 
 router = APIRouter(
     prefix="/api/relations/survey",
@@ -438,6 +445,88 @@ async def survey_matrix(session: AsyncSession = Depends(get_session)):
         "zusammenfassung": zusammenfassung,
         "items": pairs,
         "gruppen": [{"id": c.id, "name": c.name} for c in by_id.values()],
+    }
+
+
+class AiSuggestRequest(BaseModel):
+    a_id: int
+    b_id: int
+    provider: str | None = None
+    model: str | None = None
+
+
+@router.post("/ai-suggest")
+async def ai_suggest_pair(
+    payload: AiSuggestRequest, session: AsyncSession = Depends(get_session)
+):
+    """KI-Schiedsspruch fuer EIN Paar: liest die Storys beider Gruppierungen
+    und die abgegebenen Sichten, empfiehlt einen finalen Beziehungstyp mit
+    Begruendung. Schreibt NICHTS — reiner Vorschlag fuer die UI."""
+    a = await session.get(Crew, payload.a_id)
+    b = await session.get(Crew, payload.b_id)
+    if not a or not b:
+        raise HTTPException(404, "Gruppierung nicht gefunden")
+
+    ab = (await session.execute(select(RelationProposal).where(
+        RelationProposal.from_crew_id == a.id, RelationProposal.to_crew_id == b.id
+    ))).scalar_one_or_none()
+    ba = (await session.execute(select(RelationProposal).where(
+        RelationProposal.from_crew_id == b.id, RelationProposal.to_crew_id == a.id
+    ))).scalar_one_or_none()
+
+    lo, hi = sorted((a.id, b.id))
+    crel = (await session.execute(select(CrewRelation).where(
+        CrewRelation.crew_a_id == lo, CrewRelation.crew_b_id == hi
+    ))).scalar_one_or_none()
+
+    keys = {
+        "anthropic": await settings_get_value(session, "anthropic_api_key", settings.anthropic_api_key),
+        "openai": await settings_get_value(session, "openai_api_key", settings.openai_api_key),
+    }
+    models = {
+        "claude": await settings_get_value(session, "default_claude_model", settings.default_claude_model),
+        "openai": await settings_get_value(session, "default_openai_model", settings.default_openai_model),
+    }
+    provider_name = payload.provider or await settings_get_value(
+        session, "default_provider", settings.default_ai_provider
+    )
+    provider = await get_provider(provider_name, keys=keys, models=models)
+
+    user_prompt = build_relation_arbitration_prompt(
+        a_name=a.name, a_story=a.story_background or "", a_business=a.crime_business or "",
+        b_name=b.name, b_story=b.story_background or "", b_business=b.crime_business or "",
+        a_zu_b=LABEL_BY_TYPE.get(_type_name(ab.relation_type), "") if ab else "",
+        b_zu_a=LABEL_BY_TYPE.get(_type_name(ba.relation_type), "") if ba else "",
+        current=LABEL_BY_TYPE.get(_type_name(crel.relation_type), "") if crel else "",
+    )
+    try:
+        text = await provider.generate(
+            user_prompt, model=payload.model, system_prompt=RELATION_ARBITRATION_SYSTEM_PROMPT
+        )
+    except Exception as exc:
+        raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+
+    raw = (text or "").strip()
+    parsed: dict | None = None
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        s, e = raw.find("{"), raw.rfind("}")
+        if s != -1 and e > s:
+            try:
+                parsed = json.loads(raw[s:e + 1])
+            except json.JSONDecodeError:
+                parsed = None
+
+    if not isinstance(parsed, dict) or parsed.get("relation_type") not in RelationType.__members__:
+        raise HTTPException(502, f"KI-Antwort unbrauchbar: {raw[:200]}")
+
+    return {
+        "ok": True,
+        "relation_type": parsed["relation_type"],
+        "relation_label": LABEL_BY_TYPE.get(parsed["relation_type"], parsed["relation_type"]),
+        "begruendung": str(parsed.get("begruendung", "")).strip(),
+        "provider": provider.name,
     }
 
 
