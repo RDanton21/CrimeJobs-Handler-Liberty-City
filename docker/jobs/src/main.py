@@ -53,6 +53,18 @@ _state_serializer = URLSafeTimedSerializer(config.SESSION_SECRET, salt="jobs-oau
 # Deutsche Wochentags-Kuerzel (Montag=0)
 WEEKDAYS_DE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
+#: Referenzen auf Fire-and-forget-Tasks (DM-Versand) — asyncio haelt selbst
+#: nur schwache Referenzen, ohne dieses Set koennte der GC laufende Tasks
+#: einsammeln.
+_background_tasks: set = set()
+
+
+def _spawn_background(coro) -> None:
+    task = asyncio.create_task(coro)
+    _background_tasks.add(task)
+    task.add_done_callback(_background_tasks.discard)
+
+
 #: Wie lange jemand nach dem letzten Board-Aufruf als "gerade aktiv" gilt.
 #: Das Board laedt alle 30 Sekunden nach, 5 Minuten decken also auch eine
 #: kurze Unterbrechung ab, ohne dass jemand faelschlich als online gilt.
@@ -126,22 +138,29 @@ async def _recheck_roles(me: dict) -> dict:
 
     async with SessionLocal() as session:
         player = await session.get(Player, user_id)
+
+    def _stored_flags() -> dict:
+        """Letzten bekannten DB-Stand anwenden — NIE auf rohe Cookie-Rechte
+        zurueckfallen: ein gespeicherter Entzug bleibt auch dann wirksam,
+        wenn Discord gerade nicht fragbar ist."""
+        if player is not None and player.role_ok == 0:
+            raise HTTPException(
+                status_code=401, detail="Berechtigung entzogen — bitte neu anmelden"
+            )
+        if player is not None and player.admin_ok is not None:
+            return {**me, "is_admin": bool(player.admin_ok)}
+        return me
+
     if (
         player is not None
         and player.role_checked_at is not None
         and jetzt - player.role_checked_at < ttl
     ):
         # Frischer Check vorhanden -> gespeicherte Flags anwenden
-        if player.role_ok == 0:
-            raise HTTPException(
-                status_code=401, detail="Berechtigung entzogen — bitte neu anmelden"
-            )
-        if player.admin_ok is not None:
-            return {**me, "is_admin": bool(player.admin_ok)}
-        return me
+        return _stored_flags()
 
     if time.monotonic() < _recheck_backoff_until:
-        return me
+        return _stored_flags()
 
     try:
         member = await discord_oauth.fetch_member_bot(config.DISCORD_GUILD_ID, user_id)
@@ -154,21 +173,24 @@ async def _recheck_roles(me: dict) -> dict:
             role_ok, admin_ok = False, False
         else:
             _recheck_backoff_until = time.monotonic() + 60
-            return me
+            return _stored_flags()
 
     async with SessionLocal() as session:
-        player = await session.get(Player, user_id)
-        if player is None:  # Session aelter als die players-Row (z.B. DB neu)
-            player = Player(
-                discord_user_id=user_id,
-                username=me.get("username", ""),
-                avatar=me.get("avatar", ""),
-            )
-            session.add(player)
-        player.role_ok = 1 if role_ok else 0
-        player.admin_ok = 1 if admin_ok else 0
-        player.role_checked_at = jetzt
-        await session.commit()
+        try:
+            db_player = await session.get(Player, user_id)
+            if db_player is None:  # Session aelter als die players-Row (z.B. DB neu)
+                db_player = Player(
+                    discord_user_id=user_id,
+                    username=me.get("username", ""),
+                    avatar=me.get("avatar", ""),
+                )
+                session.add(db_player)
+            db_player.role_ok = 1 if role_ok else 0
+            db_player.admin_ok = 1 if admin_ok else 0
+            db_player.role_checked_at = jetzt
+            await session.commit()
+        except IntegrityError:
+            pass  # paralleler Request hat dieselbe Row soeben angelegt
 
     if not role_ok:
         raise HTTPException(
@@ -554,6 +576,59 @@ async def api_me(me: dict = Depends(require_session)):
     }
 
 
+@app.get("/api/me/stats")
+async def my_stats(me: dict = Depends(require_session)):
+    """Eigene Einsatz-Bilanz: Summen + Historie. Bewusst nur eigene Daten —
+    die Gesamt-Auswertung aller Spieler bleibt Admin-only."""
+    uid = me["discord_user_id"]
+    async with SessionLocal() as session:
+        agg = (
+            await session.execute(
+                select(
+                    func.count(func.distinct(CompletedParticipation.mission_id)),
+                    func.count(CompletedParticipation.id),
+                    func.sum(case((CompletedParticipation.attended == 1, 1), else_=0)),
+                    func.sum(case((CompletedParticipation.attended == 0, 1), else_=0)),
+                ).where(CompletedParticipation.player_discord_id == uid)
+            )
+        ).one()
+        rows = (
+            await session.execute(
+                select(CompletedParticipation)
+                .where(CompletedParticipation.player_discord_id == uid)
+                .order_by(CompletedParticipation.completed_at.desc(),
+                          CompletedParticipation.id.desc())
+                .limit(100)
+            )
+        ).scalars().all()
+        # Offene Eintragungen: noch nicht als erledigt festgeschrieben
+        noch_offen = ~exists().where(
+            CompletedParticipation.slot_id == SlotAssignment.slot_id,
+            CompletedParticipation.player_discord_id == SlotAssignment.player_discord_id,
+        )
+        open_count = await session.scalar(
+            select(func.count())
+            .select_from(SlotAssignment)
+            .where(SlotAssignment.player_discord_id == uid, noch_offen)
+        )
+    return {
+        "missions_done": agg[0] or 0,
+        "slots_done": agg[1] or 0,
+        "attended": agg[2] or 0,
+        "no_show": agg[3] or 0,
+        "open": open_count or 0,
+        "history": [
+            {
+                "crew_name": r.crew_name or "",
+                "slot_name": r.slot_name or "",
+                "completed_at": r.completed_at.isoformat() if r.completed_at else None,
+                "attended": r.attended,
+            }
+            for r in rows
+        ],
+    }
+
+
 async def _record_completed(missions: list[dict], assignments_by_slot: dict) -> None:
     """Eintragungen archivierter Auftraege in die Historie uebernehmen.
 
@@ -579,24 +654,44 @@ async def _record_completed(missions: list[dict], assignments_by_slot: dict) -> 
                 ))
     if not neu:
         return
+
+    async def _live_attended(session, row):
+        """Aktuelle Anwesenheit frisch aus dem Live-Assignment (None = Row weg).
+        Der Snapshot des Board-Requests kann veraltet sein und wuerde eine
+        soeben gesetzte Admin-Bewertung wieder ueberschreiben (Lost Update)."""
+        return (
+            await session.execute(
+                select(SlotAssignment.attended).where(
+                    SlotAssignment.slot_id == row.slot_id,
+                    SlotAssignment.player_discord_id == row.player_discord_id,
+                )
+            )
+        ).one_or_none()
+
     async with SessionLocal() as session:
         for row in neu:
             # Einzeln, damit ein bereits vorhandener Eintrag die anderen
             # nicht mit zurueckrollt
             try:
                 async with session.begin():
+                    live = await _live_attended(session, row)
+                    if live is not None:
+                        row.attended = live[0]
                     session.add(row)
             except IntegrityError:
-                # Historie existiert schon -> nur die Anwesenheit nachziehen,
-                # falls der Admin sie am Live-Slot nachtraeglich geaendert hat
+                # Historie existiert schon -> Anwesenheit vom Live-Assignment
+                # nachziehen (nur solange es das Assignment noch gibt)
                 async with session.begin():
+                    live = await _live_attended(session, row)
+                    if live is None:
+                        continue
                     await session.execute(
                         update(CompletedParticipation)
                         .where(
                             CompletedParticipation.slot_id == row.slot_id,
                             CompletedParticipation.player_discord_id == row.player_discord_id,
                         )
-                        .values(attended=row.attended)
+                        .values(attended=live[0])
                     )
 
 
@@ -828,18 +923,15 @@ async def _promote_waitlist(slot_id: int) -> None:
         required = slot.get("required_count") or 1
 
         promoted: list[tuple[str, str]] = []  # (discord_id, username)
+
+        class _SlotVoll(Exception):
+            """Slot ist (wieder) voll — Transaktion zurueckrollen, fertig."""
+
         async with SessionLocal() as session:
             while True:
                 entry = None
                 try:
                     async with session.begin():
-                        count = await session.scalar(
-                            select(func.count())
-                            .select_from(SlotAssignment)
-                            .where(SlotAssignment.slot_id == slot_id)
-                        )
-                        if (count or 0) >= required:
-                            break
                         entry = (
                             await session.execute(
                                 select(WaitlistEntry)
@@ -861,8 +953,23 @@ async def _promote_waitlist(slot_id: int) -> None:
                                 username=entry.username,
                             )
                         )
+                        # Race-sicher wie assign_slot: ERST einfuegen (flush nimmt
+                        # den SQLite-Write-Lock), DANN zaehlen. Ein Count vor dem
+                        # Insert waere ein ungeschuetzter Snapshot (aiosqlite
+                        # startet die DB-Transaktion erst beim ersten Write) —
+                        # ein paralleles Eintragen koennte den Slot ueberbuchen.
                         await session.flush()
-                        promoted.append((entry.player_discord_id, entry.username))
+                        count = await session.scalar(
+                            select(func.count())
+                            .select_from(SlotAssignment)
+                            .where(SlotAssignment.slot_id == slot_id)
+                        )
+                        if (count or 0) > required:
+                            # Rollt Insert UND Wartelisten-Delete zurueck — der
+                            # Wartende bleibt fuer den naechsten freien Platz
+                            raise _SlotVoll()
+                except _SlotVoll:
+                    break
                 except IntegrityError:
                     # Nachruecker war schon (anders) eingetragen — der Rollback hat
                     # auch das Wartelisten-Delete zurueckgenommen, also gezielt
@@ -873,14 +980,16 @@ async def _promote_waitlist(slot_id: int) -> None:
                                 delete(WaitlistEntry).where(WaitlistEntry.id == entry.id)
                             )
                     continue
+                promoted.append((entry.player_discord_id, entry.username))
 
         for discord_id, username in promoted:
             logging.getLogger("jobs.waitlist").info(
                 "Nachgerueckt: %s in Slot %d", username, slot_id
             )
-            # DM best effort im Hintergrund — der Request wartet nicht darauf
-            asyncio.create_task(
-                reminders.send_single_dm(
+            # DM best effort im Hintergrund (mit Retry bei 429/5xx) —
+            # der Request wartet nicht darauf
+            _spawn_background(
+                reminders.send_single_dm_with_retry(
                     discord_id, reminders.build_promotion_message(mission, slot)
                 )
             )
@@ -1082,7 +1191,11 @@ async def admin_set_attendance(
     Markieren sowohl waehrend des Events als auch danach.
     """
     _require_admin(me)
-    raw = payload.get("attended", False)
+    if "attended" not in payload:
+        raise HTTPException(
+            status_code=422, detail="attended fehlt (true, false oder null)"
+        )
+    raw = payload["attended"]
     if raw is None:
         attended = None
     elif isinstance(raw, bool):
@@ -1171,6 +1284,13 @@ async def admin_clear_completed(me: dict = Depends(require_session)):
                 entfernt += 1
             except IntegrityError:
                 pass  # war schon ausgeblendet
+        # Wartelisten-Eintraege erledigter Auftraege sind tot -> mit aufraeumen
+        async with session.begin():
+            await session.execute(
+                delete(WaitlistEntry).where(
+                    WaitlistEntry.mission_id.in_([m["id"] for m in erledigt])
+                )
+            )
     if entfernt:
         await _log_admin_action(
             me, "clear_completed", details=f"{entfernt} erledigte Aufträge entfernt"

@@ -105,6 +105,22 @@ async def send_single_dm(user_id: str, content: str) -> str:
         return await _send_dm(client, user_id, content)
 
 
+async def send_single_dm_with_retry(user_id: str, content: str, attempts: int = 3) -> str:
+    """DM mit Wiederholung bei temporaeren Fehlern (429/5xx/Netz/Token).
+
+    Fuer Fire-and-forget-Aufrufer wie das Wartelisten-Nachruecken, bei denen
+    es keinen naechsten Tick gibt, der es sonst erneut versuchen wuerde."""
+    delays = (5.0, 30.0)
+    for i in range(attempts):
+        result = await send_single_dm(user_id, content)
+        if result != "retry":
+            return result
+        if i < attempts - 1:
+            await asyncio.sleep(delays[min(i, len(delays) - 1)])
+    log.warning("DM an %s nach %d Versuchen aufgegeben", user_id, attempts)
+    return "retry"
+
+
 async def _send_dm(client: httpx.AsyncClient, user_id: str, content: str) -> str:
     """DM schicken. Rueckgabe:
     'ok'     -> zugestellt
@@ -124,6 +140,12 @@ async def _send_dm(client: httpx.AsyncClient, user_id: str, content: str) -> str
             await asyncio.sleep(float(r.headers.get("Retry-After", "2")))
             return "retry"
         if r.status_code >= 500:
+            return "retry"
+        if r.status_code == 401:
+            # Unser Token ist kaputt (rotiert/entzogen) — das ist KEIN
+            # Nutzer-Problem: retry statt closed, sonst wuerden Erinnerungen
+            # als "verschickt" festgeschrieben und gingen dauerhaft verloren
+            log.error("Bot-Token ungueltig (401) — DM-Versand pausiert bis zum Fix")
             return "retry"
         if r.status_code != 200:
             # 400/403: unbekannter Nutzer, Bot geblockt, ... -> aufgeben
@@ -146,6 +168,9 @@ async def _send_dm(client: httpx.AsyncClient, user_id: str, content: str) -> str
         return "retry"
     if r.status_code in (200, 201):
         return "ok"
+    if r.status_code == 401:
+        log.error("Bot-Token ungueltig (401) — DM-Versand pausiert bis zum Fix")
+        return "retry"
     # 403 code 50007 = "Cannot send messages to this user" (DMs deaktiviert)
     log.warning("DM an %s fehlgeschlagen (HTTP %s): %s", user_id, r.status_code, r.text[:200])
     return "closed"
@@ -200,7 +225,10 @@ async def _tick(fetch_crime_data) -> None:
             if result == "retry":
                 continue  # naechster Tick probiert es erneut
             # 'ok' und 'closed' festschreiben — closed wuerde sonst jede
-            # Minute erneut gegen die Wand laufen
+            # Minute erneut gegen die Wand laufen. Bewusst SENDEN vor
+            # SCHREIBEN: stirbt der Container genau dazwischen, gibt es nach
+            # dem Neustart schlimmstenfalls eine Doppel-DM — die umgekehrte
+            # Reihenfolge wuerde die Erinnerung stattdessen still verlieren.
             async with SessionLocal() as session:
                 try:
                     async with session.begin():

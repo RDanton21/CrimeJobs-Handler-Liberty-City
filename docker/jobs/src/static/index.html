@@ -113,8 +113,8 @@
           </h1>
           <p class="text-xs text-zinc-400 mt-1" x-show="board" x-text="eventLabel()"></p>
           <div class="flex items-center justify-center gap-3 mt-3 flex-wrap">
-            <button @click="myOpen = true"
-                    title="Zeigt, wo du eingetragen bist"
+            <button @click="openMy()"
+                    title="Zeigt, wo du eingetragen bist — und deine Einsatz-Bilanz"
                     class="headline px-2.5 py-1 rounded-full bg-[#b98a4a]/15 border border-[#b98a4a]/50
                            text-[#d9ae6e] text-xs font-medium tracking-wider
                            hover:bg-[#b98a4a]/30 hover:border-[#b98a4a] transition-colors"
@@ -331,6 +331,17 @@
                                 Abgeschlossen
                               </span>
                             </template>
+                            <!-- Warteliste eines abgeschlossenen Auftrags: nachgerueckt
+                                 wird nicht mehr — Austragen bleibt moeglich -->
+                            <template x-if="m.archived_at && s.on_waitlist">
+                              <button @click="leaveWaitlist(s)" :disabled="!!busySlots[s.id]"
+                                      title="Auftrag ist abgeschlossen — von der Warteliste austragen"
+                                      class="headline px-3 py-1.5 rounded bg-[#b98a4a]/20 border border-[#b98a4a]
+                                             text-[#d9ae6e] hover:bg-[#b98a4a]/35 text-xs font-medium tracking-wider
+                                             disabled:opacity-50 transition-colors">
+                                Wartend ✕
+                              </button>
+                            </template>
                             <template x-if="!m.archived_at && s.mine">
                               <button @click="unassign(s)" :disabled="!!busySlots[s.id]"
                                       class="headline px-3 py-1.5 rounded border border-[#b91c1c] text-red-400
@@ -339,8 +350,10 @@
                                 Austragen
                               </button>
                             </template>
-                            <!-- Frei = gruen und klickbar -->
-                            <template x-if="!m.archived_at && !s.mine && s.free > 0">
+                            <!-- Frei = gruen und klickbar. !on_waitlist: wer (noch)
+                                 auf der Warteliste steht, sieht nur den Wartend-Button
+                                 — nachruecken uebernimmt der Server -->
+                            <template x-if="!m.archived_at && !s.mine && s.free > 0 && !s.on_waitlist">
                               <button @click="assign(s, m)" :disabled="!!busySlots[s.id]"
                                       class="headline px-3 py-1.5 rounded bg-[#15803d] hover:bg-[#1a9c4b]
                                              border border-white/10 text-white text-xs font-medium tracking-wider
@@ -506,6 +519,37 @@
           <p class="text-[11px] text-zinc-500 mt-4 text-center" x-show="mySlots().length > 0">
             Wenn du doch nicht kannst, trag dich bitte aus — dann wird der Platz wieder frei.
           </p>
+
+          <!-- Meine Bilanz: eigene abgeschlossene Einsaetze (nur eigene Daten) -->
+          <template x-if="myStats">
+            <div class="mt-5 border-t border-[#3d4a4d]/50 pt-4">
+              <h3 class="headline text-xs font-semibold tracking-[.16em] text-zinc-400 mb-2">
+                Meine Bilanz
+              </h3>
+              <div class="flex gap-3 flex-wrap text-xs text-zinc-400 mb-2">
+                <span>Aufträge: <span class="text-zinc-200" x-text="myStats.missions_done"></span></span>
+                <span>Rollen: <span class="text-zinc-200" x-text="myStats.slots_done"></span></span>
+                <span>Erschienen: <span class="text-green-400" x-text="myStats.attended"></span></span>
+                <span x-show="myStats.no_show > 0">No-Shows:
+                  <span class="text-red-400" x-text="myStats.no_show"></span></span>
+                <span>Offen: <span class="text-[#d9ae6e]" x-text="myStats.open"></span></span>
+              </div>
+              <p x-show="myStats.history.length === 0" class="text-xs text-zinc-500">
+                Noch keine abgeschlossenen Einsätze — deine erledigten Aufträge erscheinen hier.
+              </p>
+              <div class="space-y-1 max-h-48 overflow-y-auto pr-1" x-show="myStats.history.length > 0">
+                <template x-for="(h, hi) in myStats.history" :key="hi">
+                  <p class="text-[11px] text-zinc-400 leading-snug">
+                    <span class="text-zinc-600" x-text="dateShort(h.completed_at)"></span>
+                    <span class="text-zinc-300" x-text="h.crew_name || 'Crew'"></span>
+                    <span x-show="h.slot_name" x-text="'— ' + h.slot_name"></span>
+                    <span x-show="h.attended === 1" class="text-green-400" title="erschienen">✓</span>
+                    <span x-show="h.attended === 0" class="text-red-400" title="No-Show">✗</span>
+                  </p>
+                </template>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -659,6 +703,7 @@
         briefOpen: {},  // mission_id -> Regie-Details (Personal-Brief) aufgeklappt
         busySlots: {},  // slot_id -> Request laeuft
         myOpen: false,  // Overlay "Meine Eintragungen"
+        myStats: null,  // eigene Einsatz-Bilanz (beim Oeffnen des Overlays geladen)
         jumpedTo: null, // mission_id kurz hervorheben nach dem Sprung
         now: Math.floor(Date.now() / 1000),  // tickt, damit "Läuft gerade" umspringt
         statsOpen: false,     // Admin-Auswertung
@@ -765,14 +810,28 @@
         async loadBoard(pickDay) {
           try {
             const r = await fetch('/api/board');
-            if (r.status === 401) { this.me = null; this.board = null; return; }
+            if (r.status === 401) {
+              // Session weg (Logout/Rolle entzogen): Overlays mit schliessen,
+              // sonst laegen sie ueber der Login-Karte
+              this.me = null; this.board = null;
+              this.myOpen = false; this.statsOpen = false;
+              return;
+            }
             if (!r.ok) {
               const j = await r.json().catch(() => ({}));
               this.showToast(j.detail || 'Board konnte nicht geladen werden', true);
               return;
             }
             this.board = await r.json();
-            if (pickDay || !this.activeDay) this.pickDefaultDay();
+            // Admin-Status kann sich durch den Rollen-Recheck aendern —
+            // das Board liefert den aktuellen Stand mit
+            if (this.board.me) this.me = { ...this.me, is_admin: !!this.board.me.is_admin };
+            // activeDay kann verschwinden (z.B. Pseudo-Tag "Ausserhalb Event",
+            // sobald dessen letzte Mission weg ist) -> sonst leere Seite
+            if (pickDay || !this.activeDay
+                || !this.board.days.find(d => d.date === this.activeDay)) {
+              this.pickDefaultDay();
+            }
           } catch (e) {
             this.showToast('Verbindung zum Server fehlgeschlagen', true);
           }
@@ -982,6 +1041,17 @@
           }
           this.busySlots[slot.id] = false;
           await this.loadBoard(false);
+        },
+
+        // "Meine Slots" oeffnen + eigene Bilanz nachladen (best effort)
+        async openMy() {
+          this.myOpen = true;
+          try {
+            const r = await fetch('/api/me/stats');
+            this.myStats = r.ok ? await r.json() : null;
+          } catch (e) {
+            this.myStats = null;  // Bilanz ist optional — Overlay bleibt nutzbar
+          }
         },
 
         // Warteliste: beitreten/verlassen. Nachruecken macht der Server (FIFO + DM).
