@@ -146,14 +146,29 @@ function jobsBoard() {
       }
     },
 
+    // Heutiges Datum als "YYYY-MM-DD" (lokal)
+    _todayStr() {
+      const n = new Date();
+      return n.getFullYear() + '-'
+        + String(n.getMonth() + 1).padStart(2, '0') + '-'
+        + String(n.getDate()).padStart(2, '0');
+    },
+
+    // Vergangener Tag OHNE Aufträge -> als "ungültig" markieren (durchgestrichen)
+    isPastEmpty(d) {
+      return d && d.date && d.date !== 'other'
+        && d.date < this._todayStr()
+        && (!d.missions || d.missions.length === 0);
+    },
+
     pickDefaultDay() {
       if (!this.board || !this.board.days.length) return;
-      const now = new Date();
-      const today = now.getFullYear() + '-'
-        + String(now.getMonth() + 1).padStart(2, '0') + '-'
-        + String(now.getDate()).padStart(2, '0');
+      const today = this._todayStr();
       const hit = this.board.days.find(d => d.date === today);
-      this.activeDay = hit ? hit.date : this.board.days[0].date;
+      if (hit) { this.activeDay = hit.date; return; }
+      // sonst der erste kommende Tag (>= heute), sonst der erste vorhandene
+      const upcoming = this.board.days.find(d => d.date !== 'other' && d.date >= today);
+      this.activeDay = (upcoming || this.board.days[0]).date;
     },
 
     currentDay() {

@@ -137,9 +137,13 @@
               <div class="flex flex-wrap justify-center gap-1.5">
                 <template x-for="d in row.days" :key="d.date">
                   <button @click="activeDay = d.date"
-                          :class="activeDay === d.date
-                            ? 'bg-[#b91c1c] border-[#b91c1c] text-white shadow-lg shadow-red-950/40'
-                            : 'bg-[#17191b]/80 border-[#3d4a4d] text-zinc-300 hover:border-zinc-400 hover:text-zinc-100'"
+                          :title="isPastEmpty(d) ? 'Vergangen — keine Aufträge' : ''"
+                          :class="[
+                            activeDay === d.date
+                              ? 'bg-[#b91c1c] border-[#b91c1c] text-white shadow-lg shadow-red-950/40'
+                              : 'bg-[#17191b]/80 border-[#3d4a4d] text-zinc-300 hover:border-zinc-400 hover:text-zinc-100',
+                            isPastEmpty(d) ? 'day-x' : ''
+                          ]"
                           class="headline px-3 py-1.5 rounded border text-xs font-medium tracking-wider
                                  whitespace-nowrap transition-colors">
                     <span x-text="d.label"></span>
