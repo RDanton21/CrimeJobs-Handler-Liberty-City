@@ -1,7 +1,9 @@
 # Secrets — NIEMALS committen!
+# Alle .env-Varianten AUSSER .env.example ausschliessen — .env.save,
+# .env.bak, .env.<datum> enthalten dieselben Tokens wie .env.
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
 
 # Volumes-Backups (lokal)
 *.bak
