@@ -100,23 +100,25 @@ gilt. Die Asymmetrie lebt in `relation_proposals` weiter, wo sie hingehört.
 
 ---
 
-## 3. Der Gesamtablauf in fünf Schritten
+## 3. Der Gesamtablauf in sechs Schritten
 
 ```
-1. ERHEBEN      Dropdown-Umfrage im Discord  →  relation_proposals (gerichtet)
+1. ERHEBEN       Dropdown-Umfrage im Discord  →  relation_proposals (gerichtet)
       ↓
-2. KORRIGIEREN  Meldungen in der Tabelle umstellen / nachtragen
+2. KORRIGIEREN   Meldungen in der Tabelle umstellen / nachtragen
       ↓
-3. BEFUND       System vergleicht beide Richtungen: einig / abweichend / Widerspruch
+3. BEFUND        System vergleicht beide Richtungen: einig / abweichend / Widerspruch
       ↓
-4. KI-SPRUCH    KI liest beide Storys, empfiehlt die geltende Beziehung + Begründung
+4. KI-SPRUCH     KI liest beide Storys, empfiehlt die geltende Beziehung + Begründung
       ↓
-5. ÜBERNEHMEN   ein Klick  →  crew_relations (symmetrisch)  →  wirkt auf Aufträge & Story
+5. ÜBERNEHMEN    ein Klick  →  crew_relations (symmetrisch)  →  wirkt auf Aufträge & Story
+      ↓
+6. VERÖFFENTLICHEN  jede Gruppierung bekommt ihren eigenen Stand in ihren Channel
 ```
 
 Jeder Schritt schreibt nur in `relation_proposals` — **außer Schritt 5**, der als
 einziger `crew_relations` anfasst. Das ist die bewusste Grenze zwischen „gesammelt"
-und „gilt".
+und „gilt". Schritt 6 liest nur und postet nach Discord.
 
 ---
 
@@ -271,6 +273,40 @@ stellst ihn jederzeit um.
 
 ---
 
+## 8b. Schritt 6 — Stand veröffentlichen
+
+Ganz unten auf der Beziehungsseite steht **„Stand veröffentlichen"**. Nach dem
+Übernehmen bekommt so jede Gruppierung ihren **eigenen** finalen Beziehungsstand
+in ihren Auftrags-Channel gepostet — mit Begründungen, damit die Spieler wissen,
+*warum* sie zu wem wie stehen.
+
+- **Vorschau zuerst:** „Vorschau laden" baut für jede aktive Gruppierung ihren
+  Text aus `crew_relations`. Jeder Eintrag ist aufklappbar — du siehst **exakt**,
+  was gepostet wird, bevor etwas rausgeht.
+- **Einzeln oder alle:** pro Gruppierung ein „Senden" (zum Testen) und ein
+  „An alle veröffentlichen". Jede sieht nur den eigenen Stand — niemand erfährt,
+  was die anderen wollten.
+- **Optionaler Einleitungstext** über jedem Stand. Wird er nach dem Laden noch
+  geändert, warnt der Versand, dass die Vorschau nicht frisch ist.
+
+**Was in den Stand kommt:** Reihenfolge feindlich → rivalisierend → geschäftlich
+→ verbündet, dann „neutral: alle übrigen". Angezeigt werden **alle** geltenden
+Beziehungen — auch zu **inaktiven** Gruppierungen (Institutionen wie LCPD/DoJ):
+eine Feindschaft zur Polizei gehört in den Stand, egal ob sie eine spielbare
+Crew ist. Nur der „alle übrigen"-Sammelposten meint die aktiven, die überhaupt
+bewertet werden konnten.
+
+**Discord-Limit:** Lange Zusammenfassungen (viele Beziehungen mit Begründung)
+werden automatisch an Absatzgrenzen auf mehrere Nachrichten aufgeteilt — die
+Vorschau zeigt, wie viele es werden.
+
+Der Stand basiert auf `crew_relations`, also dem, was in Schritt 5 übernommen
+wurde. Die Begründungen sind dieselben `notes`, die auch die Auftrags-KI liest
+(siehe §9) — willst du eine für die Spieler zurückhalten, editiere sie vorher
+auf der Gang-Detailseite.
+
+---
+
 ## 9. Wie die Begründung in die Aufträge fließt
 
 Das ist der Punkt, der den ganzen Aufwand auszahlt.
@@ -365,6 +401,8 @@ Alle Endpunkte unter `/api/relations/survey`, Admin-Auth (Basic).
 | `DELETE` | `/reset` | alle Erhebungs-Antworten |
 | `POST` | `/ai-suggest` | KI-Vorschlag für ein Paar (schreibt nichts) |
 | `POST` | `/finalize` | geltenden Stand + Notiz nach `crew_relations` (der einzige Schreibzugriff auf die geltende Matrix) |
+| `GET` | `/summary` | Vorschau der „EUER STAND"-Nachrichten für alle aktiven Gruppierungen (sendet nichts) |
+| `POST` | `/summary/send` | postet jeder gewählten Gruppierung ihren Stand in ihren Channel (Schritt 6) |
 | `DELETE` | `/messages/{crew_id}` · `/messages` | Discord-Umfrage-Nachrichten entfernen |
 
 **Bot-Endpunkt** (intern, HTTP-API auf `:8001`):

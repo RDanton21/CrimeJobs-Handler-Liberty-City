@@ -3087,6 +3087,49 @@ function relationsSurvey() {
     finalDraft: {},
     aiBusy: {},
     aiResult: {},
+    // --- Stand veröffentlichen ---
+    summaries: [],
+    sumLoading: false,
+    sumSending: false,
+    sumIntro: "Das ist der Stand, mit dem gespielt wird.",
+    sumOpen: {},
+    sumResult: "",
+    sumDirty: false,
+    async loadSummaries() {
+      this.sumLoading = true; this.error = "";
+      try {
+        const r = await api.get("/api/relations/survey/summary?intro=" + encodeURIComponent(this.sumIntro || ""));
+        this.summaries = r.items || [];
+        this.sumDirty = false;
+      } catch (e) {
+        this.error = "Vorschau fehlgeschlagen: " + (e.message || e);
+      } finally {
+        this.sumLoading = false;
+      }
+    },
+    async sendSummaries(crewIds) {
+      // crewIds = [id] für eine Gruppierung, null für alle
+      const alle = !crewIds;
+      const wer = alle
+        ? `alle ${this.summaries.filter(s => s.hat_channel).length} Gruppierungen`
+        : (this.summaries.find(s => s.crew_id === crewIds[0]) || {}).name;
+      if (this.sumDirty && !confirm("Der Einleitungstext wurde geändert, aber die Vorschau nicht neu geladen. Trotzdem mit dem aktuellen Stand senden?")) return;
+      if (!confirm(`Beziehungs-Stand an ${wer} in den/die Discord-Channel posten?`)) return;
+      this.sumSending = true; this.sumResult = ""; this.error = "";
+      try {
+        const body = { intro: this.sumIntro || "" };
+        if (!alle) body.crew_ids = crewIds;
+        const r = await api.post("/api/relations/survey/summary/send", body);
+        const ok = (r.gesendet || []).length;
+        const weg = r.uebersprungen || [];
+        this.sumResult = `✓ an ${ok} gesendet` +
+          (weg.length ? ` · ${weg.length} übersprungen: ${weg.map(w => `${w.crew} (${w.grund})`).join(", ")}` : "");
+      } catch (e) {
+        this.error = "Veröffentlichen fehlgeschlagen: " + (e.message || e);
+      } finally {
+        this.sumSending = false;
+      }
+    },
     // KI liest beide Storys, schlägt die geltende Beziehung vor und setzt sie
     // ins Finaler-Stand-Dropdown (übernommen wird erst per Klick auf Übernehmen).
     async aiSuggest(p) {

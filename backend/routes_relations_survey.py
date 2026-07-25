@@ -53,6 +53,65 @@ LABEL_BY_TYPE = {
 #: >=2 = echter Widerspruch, der eine Entscheidung braucht.
 SCALE = {"ALLIED": 0, "BUSINESS": 1, "NEUTRAL": 2, "RIVAL": 3, "HOSTILE": 4}
 
+#: Emoji + Reihenfolge fuer die veroeffentlichte Zusammenfassung — Konflikte
+#: zuerst (dramaturgisch), neutral als Sammelposten am Ende.
+SUMMARY_ORDER = [
+    ("HOSTILE", "🔥", "feindlich"),
+    ("RIVAL", "⚔️", "rivalisierend"),
+    ("BUSINESS", "💼", "geschäftlich"),
+    ("ALLIED", "🤝", "verbündet"),
+]
+_LINE = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+
+def _build_summary_text(crew, relations_of, all_active_names, intro: str) -> str:
+    """Discord-Text 'EUER STAND' fuer eine Gruppierung, mit Begruendungen.
+
+    relations_of: dict {other_name: (relation_type, notes)} — die geltenden
+    Beziehungen (crew_relations) dieser Gruppierung.
+    all_active_names: alle aktiven Gruppierungs-Namen (fuer 'alle uebrigen').
+    """
+    parts: list[str] = []
+    if intro.strip():
+        parts.append(intro.strip())
+    parts.append(f"{_LINE}\n## EUER STAND — {crew.name.upper()}\n{_LINE}")
+
+    for rtype, emoji, label in SUMMARY_ORDER:
+        block = [(o, n) for o, (t, n) in relations_of.items() if t == rtype]
+        if not block:
+            continue
+        parts.append(f"{emoji} **{label}**")
+        for other, notes in sorted(block, key=lambda x: x[0].lower()):
+            if notes.strip():
+                parts.append(f"**{other}**\n{notes.strip()}")
+            else:
+                parts.append(f"**{other}**")
+
+    # neutral = alle aktiven ausser der eigenen und den oben genannten
+    genannt = set(relations_of.keys()) | {crew.name}
+    uebrig = [n for n in all_active_names if n not in genannt]
+    parts.append(f"➖ **neutral**\nalle übrigen ({len(uebrig)})")
+
+    return "\n\n".join(parts)
+
+
+def _split_for_discord(text: str, limit: int = 1990) -> list[str]:
+    """Zu lange Zusammenfassung an Absatzgrenzen (\\n\\n) auf mehrere
+    Nachrichten aufteilen — Begruendungen koennen 2000 Zeichen sprengen."""
+    if len(text) <= limit:
+        return [text]
+    chunks, cur = [], ""
+    for block in text.split("\n\n"):
+        add = (cur + "\n\n" + block) if cur else block
+        if len(add) > limit and cur:
+            chunks.append(cur)
+            cur = block
+        else:
+            cur = add
+    if cur:
+        chunks.append(cur)
+    return chunks
+
 
 class SurveySendRequest(BaseModel):
     #: Leer = alle aktiven Gruppierungen mit Channel. Sonst nur diese IDs —
@@ -450,6 +509,95 @@ async def survey_matrix(session: AsyncSession = Depends(get_session)):
         "items": pairs,
         "gruppen": [{"id": c.id, "name": c.name} for c in by_id.values()],
     }
+
+
+async def _summaries(session: AsyncSession, intro: str) -> list[dict]:
+    """Baut fuer jede aktive Gruppierung ihren 'EUER STAND'-Text aus der
+    geltenden Matrix (crew_relations, mit Begruendungen).
+
+    Wichtig: Angezeigt werden ALLE geltenden Beziehungen — auch zu inaktiven
+    Gruppierungen (Institutionen wie LCPD/DoJ). Eine Feindschaft zur Polizei
+    gehoert in den Stand, egal ob sie eine spielbare Crew ist. Nur der
+    'neutral = alle uebrigen'-Sammelposten bezieht sich auf die aktiven, die
+    ueberhaupt bewertet werden konnten.
+    """
+    active = await _survey_crews(session)
+    active_names = [c.name for c in active]
+
+    all_crews = (await session.execute(select(Crew))).scalars().all()
+    name_by_id = {c.id: c.name for c in all_crews}
+
+    crel = (await session.execute(select(CrewRelation))).scalars().all()
+    # pro AKTIVE Crew: {other_name: (typ, notes)} — other darf inaktiv sein
+    rel_of: dict[int, dict] = {c.id: {} for c in active}
+    for r in crel:
+        t = _type_name(r.relation_type)
+        if r.crew_a_id in rel_of and r.crew_b_id in name_by_id:
+            rel_of[r.crew_a_id][name_by_id[r.crew_b_id]] = (t, r.notes or "")
+        if r.crew_b_id in rel_of and r.crew_a_id in name_by_id:
+            rel_of[r.crew_b_id][name_by_id[r.crew_a_id]] = (t, r.notes or "")
+
+    out = []
+    for c in active:
+        text = _build_summary_text(c, rel_of[c.id], active_names, intro)
+        out.append({
+            "crew_id": c.id,
+            "name": c.name,
+            "hat_channel": bool((c.discord_channel_id or "").strip()),
+            "beziehungen": len(rel_of[c.id]),
+            "text": text,
+            "teile": len(_split_for_discord(text)),
+        })
+    return out
+
+
+@router.get("/summary")
+async def summary_preview(intro: str = "", session: AsyncSession = Depends(get_session)):
+    """Vorschau der 'EUER STAND'-Nachrichten fuer alle aktiven Gruppierungen —
+    sendet nichts."""
+    return {"items": await _summaries(session, intro)}
+
+
+class SummarySendRequest(BaseModel):
+    #: Leer/None = alle aktiven Gruppierungen mit Channel. Sonst nur diese.
+    crew_ids: list[int] | None = None
+    intro: str = ""
+
+
+@router.post("/summary/send")
+async def summary_send(
+    payload: SummarySendRequest, session: AsyncSession = Depends(get_session)
+):
+    """Postet jeder gewaehlten Gruppierung ihren geltenden Beziehungs-Stand in
+    ihren Auftrags-Channel. Lange Zusammenfassungen werden auf mehrere
+    Nachrichten aufgeteilt."""
+    items = await _summaries(session, payload.intro or "")
+    if payload.crew_ids:
+        wanted = set(payload.crew_ids)
+        items = [i for i in items if i["crew_id"] in wanted]
+
+    crews = {c.id: c for c in await _survey_crews(session)}
+    sent, skipped = [], []
+    for i in items:
+        crew = crews.get(i["crew_id"])
+        channel = (crew.discord_channel_id or "").strip() if crew else ""
+        if not channel:
+            skipped.append({"crew": i["name"], "grund": "keine Channel-ID"})
+            continue
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as cli:
+                for teil in _split_for_discord(i["text"]):
+                    r = await cli.post(
+                        f"{settings.bot_api_url}/post_text",
+                        json={"channel_id": channel, "content": teil},
+                    )
+                    if r.status_code >= 400:
+                        raise RuntimeError(r.text[:120])
+            sent.append({"crew": i["name"], "teile": i["teile"]})
+        except Exception as exc:
+            skipped.append({"crew": i["name"], "grund": str(exc)})
+
+    return {"ok": True, "gesendet": sent, "uebersprungen": skipped}
 
 
 class AiSuggestRequest(BaseModel):

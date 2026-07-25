@@ -308,8 +308,71 @@
         „war: …" zeigt den bisher gepflegten Wert, falls er abweicht.
       </p>
     </section>
+
+    <!-- Ergebnis veröffentlichen -->
+    <section class="mt-10">
+      <div class="flex items-baseline justify-between mb-3 flex-wrap gap-3">
+        <h2 class="text-xl font-semibold">Stand veröffentlichen</h2>
+        <div class="flex gap-2 items-center">
+          <button @click="loadSummaries()" :disabled="sumLoading"
+                  class="text-xs px-2.5 py-1 rounded border border-zinc-800 text-zinc-400 hover:text-zinc-200 disabled:opacity-40">
+            <span x-show="!sumLoading">Vorschau laden / aktualisieren</span>
+            <span x-show="sumLoading">Lade…</span>
+          </button>
+          <button @click="sendSummaries(null)" :disabled="sumSending || !(summaries.length)"
+                  title="Jeder Gruppierung ihren geltenden Stand in ihren Channel posten"
+                  class="text-xs px-2.5 py-1 rounded bg-red-600 hover:bg-red-500 disabled:opacity-40 font-medium">
+            <span x-show="!sumSending">📤 An alle veröffentlichen</span>
+            <span x-show="sumSending">Sende…</span>
+          </button>
+        </div>
+      </div>
+
+      <p class="text-xs text-zinc-500 mb-3">
+        Jede Gruppierung bekommt ihren eigenen Stand aus der finalen Matrix — mit Begründungen,
+        in ihren Auftrags-Channel. Niemand sieht, was die anderen wollten. Erst „Vorschau laden",
+        dann pro Gruppierung prüfen und einzeln oder alle senden.
+      </p>
+
+      <label class="block text-xs text-zinc-400 mb-1">Einleitungstext (steht über jedem Stand, optional)</label>
+      <textarea x-model="sumIntro" rows="2" @input="sumDirty = true"
+                placeholder="z.B. Das ist der Stand, mit dem gespielt wird."
+                class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm mb-4"></textarea>
+
+      <p x-show="sumResult" x-text="sumResult" class="text-sm text-zinc-400 mb-3"></p>
+
+      <div class="space-y-3">
+        <template x-for="s in summaries" :key="s.crew_id">
+          <div class="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+            <div class="flex items-center justify-between gap-2 px-4 py-2 border-b border-zinc-800">
+              <div class="flex items-center gap-2">
+                <button @click="sumOpen[s.crew_id] = !sumOpen[s.crew_id]"
+                        class="text-zinc-400 hover:text-zinc-200 text-xs">
+                  <span x-text="sumOpen[s.crew_id] ? '▾' : '▸'"></span>
+                </button>
+                <span class="font-medium" x-text="s.name"></span>
+                <span class="text-xs text-zinc-500"
+                      x-text="`${s.beziehungen} Beziehung${s.beziehungen === 1 ? '' : 'en'}${s.teile > 1 ? ' · '+s.teile+' Nachrichten' : ''}`"></span>
+                <span x-show="!s.hat_channel" class="text-xs text-amber-500">⚠ kein Channel</span>
+              </div>
+              <button @click="sendSummaries([s.crew_id])" :disabled="sumSending || !s.hat_channel"
+                      title="Nur an diese Gruppierung senden (zum Testen)"
+                      class="text-xs px-2 py-1 rounded border border-zinc-800 text-emerald-500 hover:border-emerald-700 hover:text-emerald-300 disabled:opacity-30">
+                📤 Senden
+              </button>
+            </div>
+            <pre x-show="sumOpen[s.crew_id]" x-cloak
+                 class="text-xs text-zinc-300 whitespace-pre-wrap px-4 py-3 bg-zinc-950/60 font-sans leading-relaxed"
+                 x-text="s.text"></pre>
+          </div>
+        </template>
+        <p x-show="!summaries.length && !sumLoading" class="text-zinc-600 text-sm">
+          Noch keine Vorschau geladen. Klick oben auf „Vorschau laden".
+        </p>
+      </div>
+    </section>
   </div>
 
-  <script src="/static/app.js?v=20260723"></script>
+  <script src="/static/app.js?v=20260724"></script>
 </body>
 </html>
