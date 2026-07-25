@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260725f" />
-  <script defer src="/static/app.js?v=20260725f"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260725g" />
+  <script defer src="/static/app.js?v=20260725g"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -209,20 +209,20 @@
           </div>
         </section>
 
-        <!-- Einsatz-Countdown: laufendes bzw. naechstes Zeitfenster -->
-        <div class="card-cine rounded-lg border border-[#3d4a4d] px-4 py-2 mb-4 flex items-center justify-center text-sm"
-             x-show="board && (liveWindow() || nextWindow())" x-cloak>
-          <template x-if="liveWindow()">
+        <!-- Einsatz-Countdown: ALLE laufenden Zeitfenster bzw. das naechste -->
+        <div class="card-cine rounded-lg border border-[#3d4a4d] px-4 py-2 mb-4 flex items-center justify-center gap-x-8 gap-y-1.5 flex-wrap text-sm"
+             x-show="board && (liveWindows().length || nextWindow())" x-cloak>
+          <template x-for="x in liveWindows()" :key="x.m.id">
             <span class="flex items-center gap-2 flex-wrap justify-center">
               <span class="inline-block h-2 w-2 rounded-full bg-[#b91c1c] animate-pulse"></span>
               <span class="headline text-[11px] tracking-[.15em] text-red-400">Zeitfenster läuft</span>
-              <span class="font-medium" x-text="liveWindow().m.crew ? liveWindow().m.crew.name : ''"></span>
+              <span class="font-medium" x-text="x.m.crew ? x.m.crew.name : ''"></span>
               <span class="text-zinc-600">·</span>
               <span class="text-[#d9ae6e] tabular-nums"
-                    x-text="'endet in ' + fmtCountdown(liveWindow().m.window_end)"></span>
+                    x-text="'endet in ' + fmtCountdown(x.m.window_end)"></span>
             </span>
           </template>
-          <template x-if="!liveWindow() && nextWindow()">
+          <template x-if="!liveWindows().length && nextWindow()">
             <span class="flex items-center gap-2 flex-wrap justify-center">
               <span class="headline text-[11px] tracking-[.15em] text-zinc-400">Nächster Einsatz</span>
               <span class="font-medium" x-text="nextWindow().m.crew ? nextWindow().m.crew.name : ''"></span>

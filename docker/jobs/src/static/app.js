@@ -323,10 +323,10 @@ function jobsBoard() {
       return out;
     },
 
-    // Läuft gerade ein Einsatzfenster? -> {day, m} oder null
-    liveWindow() {
-      return this._allMissions().find(x => x.m.window_start && x.m.window_end
-        && x.m.window_start <= this.clock && this.clock <= x.m.window_end) || null;
+    // Alle gerade laufenden Einsatzfenster -> [{day, m}, ...]
+    liveWindows() {
+      return this._allMissions().filter(x => x.m.window_start && x.m.window_end
+        && x.m.window_start <= this.clock && this.clock <= x.m.window_end);
     },
 
     // Naechstes kommendes Einsatzfenster -> {day, m} oder null
