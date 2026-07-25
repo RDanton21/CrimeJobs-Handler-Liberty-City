@@ -602,25 +602,41 @@ async def summary_send(
     return {"ok": True, "gesendet": sent, "uebersprungen": skipped}
 
 
-def _gang_widersprueche(crew_id: int, prop: dict, by_id: dict) -> list[dict]:
-    """Alle Widersprueche (Abstand >= 2), an denen crew_id beteiligt ist —
-    aus Sicht dieser Gruppierung: {other, mine, theirs}."""
-    out = []
+def _gang_profile(crew_id: int, prop: dict) -> dict:
+    """Volles Beziehungsprofil einer Gruppierung fuer die Bewertung:
+    - sieht_andere: {label: anzahl} — wie sie die anderen einschaetzt
+    - wird_gesehen: {label: anzahl} — wie die anderen sie einschaetzen
+    - reibungen: [{mine, theirs}] — Paare mit abweichender Sicht (Abstand>=1),
+      anonym; nach Abstand absteigend (die staerksten zuerst)
+    - anzahl: Anzahl Reibungspunkte
+    """
+    sieht: dict[str, int] = {}
+    gesehen: dict[str, int] = {}
+    reib: list[tuple[int, dict]] = []
     for (frm, to), p in prop.items():
-        if frm != crew_id:
-            continue
-        back = prop.get((to, frm))
-        if not back:
-            continue
-        mine = _type_name(p.relation_type)
-        theirs = _type_name(back.relation_type)
-        if abs(SCALE[mine] - SCALE[theirs]) >= 2:
-            out.append({
-                "other": by_id[to].name if to in by_id else f"#{to}",
-                "mine": LABEL_BY_TYPE.get(mine, mine),
-                "theirs": LABEL_BY_TYPE.get(theirs, theirs),
-            })
-    return out
+        if frm == crew_id:
+            lbl = LABEL_BY_TYPE.get(_type_name(p.relation_type), "")
+            sieht[lbl] = sieht.get(lbl, 0) + 1
+        if to == crew_id:
+            lbl = LABEL_BY_TYPE.get(_type_name(p.relation_type), "")
+            gesehen[lbl] = gesehen.get(lbl, 0) + 1
+        if frm == crew_id:
+            back = prop.get((to, frm))
+            if back:
+                mine, theirs = _type_name(p.relation_type), _type_name(back.relation_type)
+                dist = abs(SCALE[mine] - SCALE[theirs])
+                if dist >= 1:
+                    reib.append((dist, {
+                        "mine": LABEL_BY_TYPE.get(mine, mine),
+                        "theirs": LABEL_BY_TYPE.get(theirs, theirs),
+                    }))
+    reib.sort(key=lambda x: -x[0])
+    return {
+        "sieht_andere": sieht,
+        "wird_gesehen": gesehen,
+        "reibungen": [r for _, r in reib],
+        "anzahl": len(reib),
+    }
 
 
 class GangAnalysisRequest(BaseModel):
@@ -639,16 +655,15 @@ async def gang_analysis(
     if not crew:
         raise HTTPException(404, "Gruppierung nicht gefunden")
 
-    crews = await _survey_crews(session)
-    by_id = {c.id: c for c in crews}
     rows = (await session.execute(select(RelationProposal))).scalars().all()
     prop = {(p.from_crew_id, p.to_crew_id): p for p in rows}
 
-    widersprueche = _gang_widersprueche(crew_id, prop, by_id)
-    if not widersprueche:
-        return {"ok": True, "titel": "Keine Widersprüche", "einordnung":
-                "Diese Gruppierung hat keine widersprüchlichen Beziehungen — "
-                "ihre Sicht deckt sich mit der der anderen.", "anzahl": 0}
+    profile = _gang_profile(crew_id, prop)
+    if not profile["sieht_andere"] and not profile["wird_gesehen"]:
+        return {"ok": True, "titel": "Noch keine Daten", "bewertung": "—",
+                "zusammenfassung": "Zu dieser Gruppierung liegen noch keine "
+                "Bewertungen vor — weder hat sie abgestimmt, noch wurde sie "
+                "bewertet.", "anzahl": 0}
 
     keys = {
         "anthropic": await settings_get_value(session, "anthropic_api_key", settings.anthropic_api_key),
@@ -664,7 +679,8 @@ async def gang_analysis(
     provider = await get_provider(provider_name, keys=keys, models=models)
 
     user_prompt = build_gang_analysis_prompt(
-        crew.name, crew.story_background or "", widersprueche
+        crew.name, crew.story_background or "",
+        profile["sieht_andere"], profile["wird_gesehen"], profile["reibungen"],
     )
     try:
         text = await provider.generate(
@@ -690,8 +706,9 @@ async def gang_analysis(
     return {
         "ok": True,
         "titel": str(parsed["titel"]).strip(),
-        "einordnung": str(parsed.get("einordnung", "")).strip(),
-        "anzahl": len(widersprueche),
+        "bewertung": str(parsed.get("bewertung", "")).strip(),
+        "zusammenfassung": str(parsed.get("zusammenfassung", "")).strip(),
+        "anzahl": profile["anzahl"],
         "provider": provider.name,
     }
 

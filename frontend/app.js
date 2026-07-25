@@ -3092,20 +3092,25 @@ function relationsSurvey() {
     analysisBusy: {},
     anaOpen: {},
     anaFacts: {},
-    // Gangs mit Widersprüchen, absteigend nach Anzahl. Aus der Matrix berechnet.
+    // ALLE Gangs, mit ihren Reibungspunkten (abweichend + Widerspruch),
+    // absteigend nach Reibungs-Anzahl. Aus der Matrix berechnet.
     get gangConflicts() {
       const items = this.matrix.items || [];
       const by = {};
+      // erst alle Gangs aus der Gruppen-Liste anlegen (auch die ohne Reibung)
+      for (const g of (this.matrix.gruppen || [])) {
+        by[g.id] = { crew_id: g.id, name: g.name, konflikte: [] };
+      }
       for (const p of items) {
-        if (p.status !== "widerspruch") continue;
-        for (const [id, name, mine, theirs] of [
-          [p.a_id, p.a_name, p.a_zu_b_label, p.b_zu_a_label],
-          [p.b_id, p.b_name, p.b_zu_a_label, p.a_zu_b_label],
+        if (p.status !== "widerspruch" && p.status !== "abweichend") continue;
+        for (const [id, mine, theirs] of [
+          [p.a_id, p.a_zu_b_label, p.b_zu_a_label],
+          [p.b_id, p.b_zu_a_label, p.a_zu_b_label],
         ]) {
-          (by[id] = by[id] || { crew_id: id, name, konflikte: [] })
-            .konflikte.push({
-              other: id === p.a_id ? p.b_name : p.a_name, mine, theirs,
-            });
+          if (!by[id]) continue;
+          by[id].konflikte.push({
+            other: id === p.a_id ? p.b_name : p.a_name, mine, theirs,
+          });
         }
       }
       return Object.values(by).sort((a, b) => b.konflikte.length - a.konflikte.length);

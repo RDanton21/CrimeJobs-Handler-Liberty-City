@@ -664,55 +664,62 @@ def build_relation_arbitration_prompt(
 
 
 GANG_ANALYSIS_SYSTEM_PROMPT = (
-    "Du analysierst das GESAMTBILD einer Gruppierung in einer GTA-Liberty-City-"
-    "Roleplay-Krimiserie anhand ihrer widerspruechlichen Beziehungssichten — "
-    "also der Faelle, in denen die Gruppierung eine andere anders einschaetzt "
-    "als die andere sie.\n\n"
-    "Schau NICHT auf einzelne Paare, sondern auf das Muster ueber alle "
-    "Widersprueche hinweg: Ueberschaetzt die Gruppierung ihre Allianzen? Sieht "
-    "sie ueberall Feinde, wo keine sind? Wird sie unterschaetzt? Ist sie "
-    "isoliert, aggressiv, paranoid, ueberheblich? Leite daraus einen "
-    "dramaturgischen Charakterzug ab.\n\n"
+    "Du bewertest das GESAMTBILD einer Gruppierung in einer GTA-Liberty-City-"
+    "Roleplay-Krimiserie: wie sie zur restlichen Stadt steht und wie die Stadt "
+    "zu ihr. Du bekommst, wie diese Gruppierung die anderen einschaetzt, wie "
+    "die anderen SIE einschaetzen, und wo beide Sichten auseinandergehen.\n\n"
+    "Schau auf das MUSTER, nicht auf Einzelfaelle: Ist die Gruppierung "
+    "aggressiv, kooperativ, isoliert, paranoid, ueberheblich, vermittelnd? "
+    "Ueberschaetzt sie ihre Bedeutung oder Allianzen? Deckt sich ihr Selbstbild "
+    "mit dem Fremdbild oder klafft es auseinander?\n\n"
     "WICHTIG — Anonymitaet: Nenne NIEMALS, welche konkrete andere Gruppierung "
     "wie abgestimmt hat. Es darf NICHT nachvollziehbar sein, wer wen wie "
-    "eingeschaetzt hat. Schreibe ueber die ANALYSIERTE Gruppierung selbst und "
-    "ihr Muster — nutze 'die meisten anderen', 'mehrere Gruppierungen', 'die "
-    "Stadt' statt fremde Namen mit ihrer Bewertung. Die abgegebenen Sichten "
-    "sind nur DEIN Analysematerial, kein Inhalt fuer den Text.\n\n"
+    "eingeschaetzt hat. Schreibe ueber die BEWERTETE Gruppierung selbst — nutze "
+    "'die meisten', 'mehrere', 'die Stadt' statt fremde Namen mit ihrer "
+    "Bewertung.\n\n"
     "Antworte mit NUR einem JSON-Objekt, keine Markdown-Fences, kein Text "
     "davor oder danach:\n"
-    '{"titel": "<prägnante Einordnung, max 8 Wörter, wie eine Schlagzeile>", '
-    '"einordnung": "<2-4 Sätze: was das Muster ueber die Gruppierung sagt — '
-    'OHNE fremde Namen mit ihrer Bewertung, plus eine kurze Empfehlung, wie '
-    'mit ihrer Haltung umzugehen ist>"}\n\n'
-    "Deutsch, knapp, ohne Floskeln. Der titel ist eine Charakterisierung "
-    "(z.B. 'Der Aggressor, den keiner ernst nimmt'), keine blosse Wiederholung "
-    "des Namens."
+    '{"titel": "<prägnante Charakter-Schlagzeile, max 8 Wörter>", '
+    '"bewertung": "<die Grundhaltung in 2-5 Wörtern, z.B. '
+    '\'Konfrontativ, überschätzt sich\' oder \'Kooperativ und vernetzt\'>", '
+    '"zusammenfassung": "<2-4 Sätze: wie die Gruppierung zur Stadt steht, ob '
+    'Selbst- und Fremdbild zusammenpassen, plus eine kurze Empfehlung>"}\n\n'
+    "Deutsch, knapp, ohne Floskeln. Der titel ist eine Charakterisierung, "
+    "keine blosse Wiederholung des Namens."
 )
 
 
 def build_gang_analysis_prompt(
-    gang_name: str, gang_story: str, widersprueche: list[dict]
+    gang_name: str, gang_story: str,
+    sieht_andere: dict, wird_gesehen: dict, reibungen: list[dict],
 ) -> str:
-    """User-Prompt fuer die Gang-Einordnung. widersprueche: Liste von
-    {other, mine, theirs} (deutsche Labels).
+    """User-Prompt fuer die Gang-Bewertung.
 
-    Die Namen der Gegenueber (w['other']) werden BEWUSST weggelassen — so
-    kann die KI sie im Text nicht verraten, und die Anonymitaet der
-    Abstimmungen bleibt gewahrt. Uebergeben wird nur das Muster der
-    Bewertungspaare.
+    sieht_andere / wird_gesehen: {label: anzahl} — die Verteilung der
+    abgegebenen bzw. empfangenen Bewertungen (deutsche Labels).
+    reibungen: Liste {mine, theirs} — Paare, wo Selbst- und Fremdsicht
+    auseinandergehen (anonym, ohne Namen der Gegenueber).
     """
+    def verteilung(d: dict) -> str:
+        if not d:
+            return "  (keine Angaben)"
+        order = ["feindlich", "rivalisierend", "neutral", "geschäftlich", "verbündet"]
+        return "  " + ", ".join(f"{d[k]}× {k}" for k in order if d.get(k))
+
     lines = [f"## Gruppierung\n{gang_name}"]
     if gang_story.strip():
         lines.append(f"\n## Hintergrund\n{gang_story.strip()}")
+    lines.append(f"\n## Wie {gang_name} die anderen sieht\n{verteilung(sieht_andere)}")
+    lines.append(f"\n## Wie die anderen {gang_name} sehen\n{verteilung(wird_gesehen)}")
+    if reibungen:
+        lines.append(f"\n## Reibungspunkte ({len(reibungen)}) — anonymisiert")
+        lines.append("Je Zeile: wie WIR das Gegenüber sehen / wie es UNS sieht")
+        for r in reibungen:
+            lines.append(f"- wir: {r['mine']} / sie: {r['theirs']}")
+    else:
+        lines.append("\n## Reibungspunkte\n  Keine — Selbst- und Fremdbild decken sich.")
     lines.append(
-        f"\n## Muster der Widersprüche ({len(widersprueche)}) — anonymisiert"
-    )
-    lines.append("Je Zeile: wie DIESE Gruppierung das Gegenüber sieht / wie das Gegenüber sie sieht")
-    for w in widersprueche:
-        lines.append(f"- wir: {w['mine']} / sie: {w['theirs']}")
-    lines.append(
-        "\n## Aufgabe\nLeite aus dem MUSTER dieser Widersprüche einen "
-        "Charakterzug der Gruppierung ab. Titel + Einordnung."
+        "\n## Aufgabe\nBewerte das Gesamtbild dieser Gruppierung. "
+        "Titel + Bewertung + Zusammenfassung."
     )
     return "\n".join(lines)

@@ -241,21 +241,25 @@ durch **Übernehmen**. Die „vorher sehen, dann freigeben"-Logik bleibt gewahrt
 
 ---
 
-## 7b. Widerspruchs-Analyse pro Gang
+## 7b. Gang-Bewertung — jede Gruppierung
 
-Der KI-Schiedsspruch (§7) erklärt **einzelne Paare**. Die Widerspruchs-Analyse
-geht eine Ebene höher: Sie liest **alle Widersprüche einer Gang als Muster** und
-leitet daraus einen dramaturgischen Charakterzug ab — auswerten mit Begründung,
-das Gesamtbild statt der Einzelfälle.
+Der KI-Schiedsspruch (§7) erklärt **einzelne Paare**. Die Gang-Bewertung geht
+eine Ebene höher: Sie liefert **zu jeder Gruppierung eine Zusammenfassung und
+Bewertung** — wie sie zur Stadt steht und ob ihr Selbstbild zum Fremdbild passt.
+Grundlage ist das gesamte Beziehungsprofil: wie die Gang die anderen einschätzt,
+wie die anderen sie sehen, und wo beide Sichten auseinandergehen (alle
+Reibungspunkte ab 1 Stufe Abstand, nicht nur die harten Widersprüche).
 
-Der Abschnitt „Widerspruchs-Analyse" auf der Seite zeigt:
+Der Abschnitt „Gang-Bewertung" auf der Seite zeigt:
 
 - **Ein Kuchendiagramm** der Befund-Verteilung (Widerspruch / abweichend / einig
   / offen) mit Beschriftung und Zahlen — die Temperatur der ganzen Erhebung auf
   einen Blick.
-- **Eine Karte pro Gang**, die in Widersprüche verwickelt ist, sortiert nach
-  Anzahl. Der **Titel jeder Karte ist die KI-Einordnung** (`POST /analysis/{id}`)
-  — eine Schlagzeile wie „Die Paranoiden Gesetzeshüter", darunter die Begründung.
+- **Eine Karte je Gruppierung**, sortiert nach Reibungs-Anzahl. Der **Titel ist
+  die KI-Charakterisierung** (`POST /analysis/{id}`) — eine Schlagzeile wie „Die
+  Paranoiden Gesetzeshüter", daneben die **Bewertung** als kurzes Label
+  („Isoliert und missverstanden"), darunter die Zusammenfassung. Auch Gangs mit
+  nur leichten Abweichungen oder ganz ohne Reibung bekommen ein Urteil.
 
 **Anonym gehalten:** Der KI-Text nennt **nie**, welche andere Gruppierung wie
 abgestimmt hat — die Anonymität der Erhebung bleibt gewahrt. Technisch
@@ -436,7 +440,7 @@ Alle Endpunkte unter `/api/relations/survey`, Admin-Auth (Basic).
 | `DELETE` | `/crew/{crew_id}` | alle Antworten einer Gruppierung |
 | `DELETE` | `/reset` | alle Erhebungs-Antworten |
 | `POST` | `/ai-suggest` | KI-Vorschlag für ein Paar (schreibt nichts) |
-| `POST` | `/analysis/{crew_id}` | KI-Einordnung einer Gang aus ihren Widersprüchen: Titel + Begründung (schreibt nichts) |
+| `POST` | `/analysis/{crew_id}` | KI-Bewertung einer Gang aus ihrem ganzen Beziehungsprofil: Titel + Bewertung + Zusammenfassung, anonym (schreibt nichts) |
 | `POST` | `/finalize` | geltenden Stand + Notiz nach `crew_relations` (der einzige Schreibzugriff auf die geltende Matrix) |
 | `GET` | `/summary` | Vorschau der „EUER STAND"-Nachrichten für alle aktiven Gruppierungen (sendet nichts) |
 | `POST` | `/summary/send` | postet jeder gewählten Gruppierung ihren Stand in ihren Channel (Schritt 6) |

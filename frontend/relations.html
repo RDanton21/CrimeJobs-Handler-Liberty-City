@@ -312,17 +312,17 @@
     <!-- Widerspruchs-Analyse -->
     <section class="mt-10">
       <div class="flex items-baseline justify-between mb-3 flex-wrap gap-3">
-        <h2 class="text-xl font-semibold">Widerspruchs-Analyse</h2>
+        <h2 class="text-xl font-semibold">Gang-Bewertung</h2>
         <button @click="analyzeAll()" :disabled="!gangConflicts.length"
                 class="text-xs px-2.5 py-1 rounded bg-purple-700 hover:bg-purple-600 disabled:opacity-40 font-medium">
-          🪄 Alle analysieren
+          🪄 Alle bewerten
         </button>
       </div>
 
       <p class="text-sm text-zinc-400 mb-5">
-        Auswerten mit Begründung: Die KI erklärt nicht nur einzelne Paare (das kann sie schon),
-        sondern das <span class="text-zinc-200">Gesamtbild einer Gang</span> — was das Muster ihrer
-        Widersprüche über sie verrät.
+        Zu <span class="text-zinc-200">jeder Gruppierung</span> eine Zusammenfassung und Bewertung:
+        Die KI erklärt nicht nur einzelne Paare (das kann sie schon), sondern das Gesamtbild einer
+        Gang — wie sie zur Stadt steht und ob ihr Selbstbild zum Fremdbild passt.
       </p>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -360,13 +360,18 @@
             <div class="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
               <div class="flex items-start justify-between gap-3 px-4 py-3">
                 <div class="min-w-0">
-                  <!-- Titel = KI-Einordnung, solange keine da: der Gang-Name -->
+                  <!-- Titel = KI-Charakterisierung, solange keine da: der Gang-Name -->
                   <h3 class="font-semibold leading-snug"
                       :class="analysis[g.crew_id] ? 'text-purple-300' : 'text-zinc-200'"
                       x-text="analysis[g.crew_id]?.titel || g.name"></h3>
-                  <p class="text-xs text-zinc-500 mt-0.5">
-                    <span x-text="g.name"></span> ·
-                    <span x-text="`${g.konflikte.length} Widerspr${g.konflikte.length === 1 ? 'uch' : 'üche'}`"></span>
+                  <p class="text-xs text-zinc-500 mt-0.5 flex items-center gap-1.5 flex-wrap">
+                    <span x-text="g.name"></span>
+                    <span x-show="analysis[g.crew_id]?.bewertung"
+                          class="px-1.5 py-0.5 rounded bg-purple-900/50 text-purple-300"
+                          x-text="analysis[g.crew_id]?.bewertung"></span>
+                    <span x-show="g.konflikte.length"
+                          x-text="`· ${g.konflikte.length} Reibungspunkt${g.konflikte.length === 1 ? '' : 'e'}`"></span>
+                    <span x-show="!g.konflikte.length" class="text-zinc-600">· deckt sich mit allen</span>
                   </p>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
@@ -381,12 +386,15 @@
                 </div>
               </div>
               <div x-show="anaOpen[g.crew_id]" x-cloak class="px-4 pb-3 border-t border-zinc-800/70 pt-3">
-                <p x-show="analysis[g.crew_id]?.einordnung" class="text-sm text-purple-200/90 mb-3 leading-relaxed"
-                   x-text="analysis[g.crew_id]?.einordnung"></p>
+                <p x-show="analysis[g.crew_id]?.zusammenfassung" class="text-sm text-purple-200/90 mb-3 leading-relaxed"
+                   x-text="analysis[g.crew_id]?.zusammenfassung"></p>
+                <p x-show="analysis[g.crew_id] && !g.konflikte.length" class="text-xs text-zinc-500 mb-2">
+                  Keine Reibungspunkte — diese Gruppierung wird von allen so gesehen, wie sie sich selbst sieht.
+                </p>
                 <!-- Fakten: dezenter Beleg, standardmäßig zu. Zeigt die konkreten
                      Abstimmungen — nur intern für die Spielleitung, nicht Teil
-                     der anonymen Einordnung oben. -->
-                <button @click="anaFacts[g.crew_id] = !anaFacts[g.crew_id]"
+                     der anonymen Zusammenfassung oben. -->
+                <button x-show="g.konflikte.length" @click="anaFacts[g.crew_id] = !anaFacts[g.crew_id]"
                         class="text-[11px] uppercase tracking-wide text-zinc-600 hover:text-zinc-400 flex items-center gap-1">
                   <span x-text="anaFacts[g.crew_id] ? '▾' : '▸'"></span>
                   <span x-text="`Beleg — wer stimmte wie (${g.konflikte.length}), nur intern`"></span>
@@ -406,8 +414,7 @@
             </div>
           </template>
           <p x-show="!gangConflicts.length" class="text-zinc-600 text-sm">
-            Keine Widersprüche — nichts zu analysieren. (Erst „Vorschau/Matrix laden" über
-            „Aktualisieren", falls die Tabelle leer ist.)
+            Noch keine Gruppierungen geladen — klick oben auf „Aktualisieren", falls die Tabelle leer ist.
           </p>
         </div>
       </div>
