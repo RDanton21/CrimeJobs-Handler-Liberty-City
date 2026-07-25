@@ -156,23 +156,38 @@
           </template>
         </div>
 
-        <!-- Eskalations-Leiste: Crews nach aktueller Stufe sortiert (animiert) -->
-        <div x-show="board && crewsRanked().length" x-cloak class="mb-5">
+        <!-- Eskalation: horizontale Legende (alle Stufen) + Leiste der aktiven Crews -->
+        <div x-show="board" x-cloak class="mb-5">
           <button @click="escShow = !escShow"
                   class="headline text-[11px] tracking-[.2em] uppercase text-zinc-400 hover:text-zinc-200
                          flex items-center gap-2 mx-auto mb-2 transition-colors">
             Eskalation
             <span class="text-zinc-600" x-text="escShow ? '▾' : '▸'"></span>
           </button>
-          <div x-show="escShow" class="card-cine rounded-lg border border-[#3d4a4d] p-3 max-w-md mx-auto space-y-1.5">
-            <template x-for="c in crewsRanked()" :key="c.id">
-              <div class="flex items-center gap-2.5">
-                <span class="ecg" :class="'ecg'+(c.escalation||0)"></span>
-                <span class="text-sm font-medium truncate flex-1" x-text="c.name"></span>
-                <span class="text-[11px] text-zinc-500" x-text="'auto'"></span>
-                <span :class="escBadgeClass(c.escalation)" x-text="escLabel(c.escalation)"></span>
-              </div>
-            </template>
+          <div x-show="escShow" class="card-cine rounded-lg border border-[#3d4a4d] p-3 max-w-md mx-auto">
+            <!-- Legende: alle Stufen nebeneinander -->
+            <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 pb-2.5 border-b border-[#2a3335]">
+              <template x-for="lv in [0,1,2,3,4]" :key="lv">
+                <span class="flex items-center gap-1.5 text-[11px] text-zinc-400 whitespace-nowrap">
+                  <span class="ecg ecg-sm" :class="'ecg'+lv"></span>
+                  <span x-text="escLabel(lv)"></span>
+                </span>
+              </template>
+            </div>
+            <!-- aktuell aktive Crews (nach Stufe sortiert) -->
+            <div class="space-y-1.5 pt-2.5" x-show="crewsRanked().length">
+              <template x-for="c in crewsRanked()" :key="c.id">
+                <div class="flex items-center gap-2.5">
+                  <span class="ecg" :class="'ecg'+(c.escalation||0)"></span>
+                  <span class="text-sm font-medium truncate flex-1" x-text="c.name"></span>
+                  <span class="text-[11px] text-zinc-500" x-text="'auto'"></span>
+                  <span :class="escBadgeClass(c.escalation)" x-text="escLabel(c.escalation)"></span>
+                </div>
+              </template>
+            </div>
+            <p class="text-[11px] text-zinc-500 text-center pt-2.5" x-show="!crewsRanked().length">
+              Aktuell keine aktiven Aufträge — alle Crews ruhig.
+            </p>
           </div>
         </div>
 
