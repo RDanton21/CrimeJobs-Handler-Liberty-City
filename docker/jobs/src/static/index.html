@@ -59,7 +59,7 @@
 
     <!-- Eingeloggt: Event-Board -->
     <template x-if="!loading && me">
-      <div class="max-w-screen-2xl mx-auto px-3 sm:px-5 py-4 sm:py-6">
+      <div class="max-w-[110rem] mx-auto px-3 sm:px-5 py-4 sm:py-6">
 
         <!-- Topbar: Marke links, Aktionen + Nutzer rechts -->
         <header class="card-cine rounded-lg border border-[#3d4a4d] px-4 py-2.5 mb-5
@@ -113,12 +113,12 @@
           </div>
         </header>
 
-        <!-- Desktop: linke Seitenspalte (Tage/Eskalation/Aktiv) + Auftragsbereich.
-             Auf schmalen Screens stapelt sich alles wie bisher untereinander. -->
-        <div class="lg:flex lg:items-start lg:gap-5">
+        <!-- Desktop (ab xl): Tage links, Auftraege mittig, Gerade aktiv rechts.
+             Auf schmalen Screens stapelt sich alles untereinander. -->
+        <div class="xl:flex xl:items-start xl:gap-5">
 
-          <!-- Seitenspalte: auf Desktop links + sticky, mobil oberhalb der Auftraege -->
-          <aside class="lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-4 space-y-4 mb-5 lg:mb-0">
+          <!-- Linke Spalte: Tage (sticky) -->
+          <aside class="xl:w-72 xl:flex-shrink-0 xl:sticky xl:top-4 space-y-4 mb-5 xl:mb-0">
 
             <!-- Tage: eine Zeile pro Kalenderwoche.
                  Vor der ersten Woche eines Zeitraums steht dessen Name. -->
@@ -153,32 +153,6 @@
               </template>
             </section>
 
-            <!-- Gerade aktiv: wer die Boerse in den letzten 5 Minuten offen hatte -->
-            <section class="card-cine rounded-lg border border-[#3d4a4d] p-3"
-                     x-show="board && board.online && board.online.length" x-cloak>
-              <div class="flex items-center gap-2 mb-2">
-                <span class="inline-block h-2 w-2 rounded-full bg-[#15803d] animate-pulse"></span>
-                <span class="headline text-[10px] tracking-widest uppercase text-zinc-400">
-                  Gerade aktiv
-                </span>
-                <span class="text-[10px] text-zinc-500 ml-auto"
-                      x-text="board.online.length"></span>
-              </div>
-              <div class="space-y-1.5 max-h-56 overflow-y-auto">
-                <template x-for="p in board.online" :key="p.discord_user_id">
-                  <div class="flex items-center gap-2">
-                    <img :src="p.avatar" alt=""
-                         class="h-5 w-5 rounded-full border border-[#3d4a4d] flex-shrink-0" />
-                    <span class="text-xs truncate"
-                          :class="p.is_me ? 'text-[#d9ae6e] font-medium' : 'text-zinc-300'"
-                          x-text="p.username + (p.is_me ? ' (du)' : '')"></span>
-                  </div>
-                </template>
-              </div>
-              <p class="text-[10px] text-zinc-600 mt-2 leading-snug">
-                Wer die Börse in den letzten 5 Minuten offen hatte
-              </p>
-            </section>
           </aside>
 
           <!-- Auftragsbereich -->
@@ -194,12 +168,12 @@
               Eskalation
               <span class="text-zinc-600" x-text="escShow ? '▾' : '▸'"></span>
             </button>
-            <!-- Legende: alle Stufen mittig -->
-            <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 flex-1"
+            <!-- Legende: alle Stufen gross und gleichmaessig ueber die Breite verteilt -->
+            <div class="flex flex-wrap items-center justify-evenly gap-x-10 gap-y-2 flex-1 min-w-0"
                  x-show="escShow">
               <template x-for="lv in [0,1,2,3,4]" :key="lv">
-                <span class="flex items-center gap-1.5 text-[11px] text-zinc-400 whitespace-nowrap">
-                  <span class="ecg ecg-sm" :class="'ecg'+lv"></span>
+                <span class="flex items-center gap-2.5 text-sm text-zinc-300 whitespace-nowrap">
+                  <span class="ecg" :class="'ecg'+lv"></span>
                   <span x-text="escLabel(lv)"></span>
                 </span>
               </template>
@@ -448,6 +422,35 @@
           </div>
         </template>
           </main>
+
+          <!-- Rechte Spalte: Gerade aktiv (sticky) -->
+          <aside class="xl:w-56 xl:flex-shrink-0 xl:sticky xl:top-4 mt-5 xl:mt-0">
+            <section class="card-cine rounded-lg border border-[#3d4a4d] p-3"
+                     x-show="board && board.online && board.online.length" x-cloak>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="inline-block h-2 w-2 rounded-full bg-[#15803d] animate-pulse"></span>
+                <span class="headline text-[10px] tracking-widest uppercase text-zinc-400">
+                  Gerade aktiv
+                </span>
+                <span class="text-[10px] text-zinc-500 ml-auto"
+                      x-text="board.online.length"></span>
+              </div>
+              <div class="space-y-1.5 max-h-56 overflow-y-auto">
+                <template x-for="p in board.online" :key="p.discord_user_id">
+                  <div class="flex items-center gap-2">
+                    <img :src="p.avatar" alt=""
+                         class="h-5 w-5 rounded-full border border-[#3d4a4d] flex-shrink-0" />
+                    <span class="text-xs truncate"
+                          :class="p.is_me ? 'text-[#d9ae6e] font-medium' : 'text-zinc-300'"
+                          x-text="p.username + (p.is_me ? ' (du)' : '')"></span>
+                  </div>
+                </template>
+              </div>
+              <p class="text-[10px] text-zinc-600 mt-2 leading-snug">
+                Wer die Börse in den letzten 5 Minuten offen hatte
+              </p>
+            </section>
+          </aside>
         </div>
       </div>
     </template>
