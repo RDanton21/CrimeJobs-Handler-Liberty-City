@@ -59,147 +59,176 @@
 
     <!-- Eingeloggt: Event-Board -->
     <template x-if="!loading && me">
-      <div class="max-w-3xl mx-auto px-4 py-5 sm:py-8">
+      <div class="max-w-screen-2xl mx-auto px-3 sm:px-5 py-4 sm:py-6">
 
-        <!-- Header: alles mittig, Nutzerzeile darunter -->
-        <header class="text-center mb-6">
-          <h1 class="headline text-2xl sm:text-3xl font-semibold tracking-[.16em]
-                     [text-shadow:0_2px_12px_rgba(0,0,0,0.85)]">
-            Sektor RP — Personal-Börse
-          </h1>
-          <p class="text-xs text-zinc-400 mt-1" x-show="board" x-text="eventLabel()"></p>
-          <div class="flex items-center justify-center gap-3 mt-3 flex-wrap">
+        <!-- Topbar: Marke links, Aktionen + Nutzer rechts -->
+        <header class="card-cine rounded-lg border border-[#3d4a4d] px-4 py-2.5 mb-5
+                       flex items-center justify-between gap-x-4 gap-y-2 flex-wrap">
+          <div class="min-w-0">
+            <h1 class="headline text-lg sm:text-xl font-semibold tracking-[.14em] leading-tight
+                       [text-shadow:0_2px_12px_rgba(0,0,0,0.85)]">
+              Sektor RP — Personal-Börse
+            </h1>
+            <p class="text-[11px] text-zinc-400" x-show="board" x-text="eventLabel()"></p>
+          </div>
+          <div class="flex items-center gap-2.5 flex-wrap">
             <button @click="openMy()"
                     title="Zeigt, wo du eingetragen bist — und deine Einsatz-Bilanz"
                     class="headline px-2.5 py-1 rounded-full bg-[#b98a4a]/15 border border-[#b98a4a]/50
                            text-[#d9ae6e] text-xs font-medium tracking-wider
                            hover:bg-[#b98a4a]/30 hover:border-[#b98a4a] transition-colors"
                     x-text="'Meine Slots: ' + myCount()"></button>
+            <!-- Admin-Aktionen: nur fuer Admins, der Server prueft zusaetzlich -->
+            <template x-if="me.is_admin">
+              <div class="flex items-center gap-2 flex-wrap">
+                <button @click="openStats()"
+                        class="headline px-2.5 py-1 rounded border border-[#3d4a4d] bg-[#17191b]/80
+                               text-zinc-300 text-[11px] font-medium tracking-wider
+                               hover:border-zinc-400 hover:text-zinc-100 transition-colors">
+                  Auswertung
+                </button>
+                <button @click="clearCompleted()" :disabled="clearing"
+                        title="Nimmt alle erledigten Aufträge sofort vom Board"
+                        class="headline px-2.5 py-1 rounded border border-[#3d4a4d] bg-[#17191b]/80
+                               text-zinc-300 text-[11px] font-medium tracking-wider
+                               hover:border-zinc-400 hover:text-zinc-100 disabled:opacity-50
+                               transition-colors">
+                  <span x-show="!clearing">Erledigte entfernen</span>
+                  <span x-show="clearing" x-cloak>Entferne…</span>
+                </button>
+                <a href="/api/admin/export.csv"
+                   title="Belegung aller Aufträge als CSV (fürs Event-Briefing)"
+                   class="headline px-2.5 py-1 rounded border border-[#3d4a4d] bg-[#17191b]/80
+                          text-zinc-300 text-[11px] font-medium tracking-wider
+                          hover:border-zinc-400 hover:text-zinc-100 transition-colors">
+                  CSV-Export
+                </a>
+              </div>
+            </template>
             <div class="flex items-center gap-2">
               <img :src="me.avatar" alt="" class="h-7 w-7 rounded-full border border-[#3d4a4d]" />
-              <span class="text-sm font-medium" x-text="me.username"></span>
+              <span class="text-sm font-medium hidden sm:inline" x-text="me.username"></span>
             </div>
             <a href="/auth/logout" class="text-xs text-zinc-400 hover:text-zinc-100 underline">Logout</a>
           </div>
-
-          <!-- Admin-Leiste: nur fuer Admins, der Server prueft zusaetzlich -->
-          <div x-show="me.is_admin" x-cloak
-               class="flex items-center justify-center gap-2 mt-3 flex-wrap">
-            <button @click="openStats()"
-                    class="headline px-2.5 py-1 rounded border border-[#3d4a4d] bg-[#17191b]/80
-                           text-zinc-300 text-[11px] font-medium tracking-wider
-                           hover:border-zinc-400 hover:text-zinc-100 transition-colors">
-              Auswertung
-            </button>
-            <button @click="clearCompleted()" :disabled="clearing"
-                    title="Nimmt alle erledigten Aufträge sofort vom Board"
-                    class="headline px-2.5 py-1 rounded border border-[#3d4a4d] bg-[#17191b]/80
-                           text-zinc-300 text-[11px] font-medium tracking-wider
-                           hover:border-zinc-400 hover:text-zinc-100 disabled:opacity-50
-                           transition-colors">
-              <span x-show="!clearing">Erledigte entfernen</span>
-              <span x-show="clearing" x-cloak>Entferne…</span>
-            </button>
-            <a href="/api/admin/export.csv"
-               title="Belegung aller Aufträge als CSV (fürs Event-Briefing)"
-               class="headline px-2.5 py-1 rounded border border-[#3d4a4d] bg-[#17191b]/80
-                      text-zinc-300 text-[11px] font-medium tracking-wider
-                      hover:border-zinc-400 hover:text-zinc-100 transition-colors">
-              CSV-Export
-            </a>
-          </div>
         </header>
 
-        <!-- "Gerade aktiv" kompakt: die feste Leiste rechts gibt es erst ab xl,
-             auf dem Handy (Hauptnutzung) waere sie sonst unsichtbar -->
-        <div x-show="board && board.online && board.online.length" x-cloak
-             class="xl:hidden flex items-center justify-center gap-1.5 mb-4 flex-wrap">
-          <span class="inline-block h-1.5 w-1.5 rounded-full bg-[#15803d] animate-pulse"></span>
-          <span class="headline text-[10px] tracking-widest uppercase text-zinc-500">Aktiv:</span>
-          <template x-for="p in board.online" :key="p.discord_user_id">
-            <img :src="p.avatar" :alt="p.username"
-                 :title="p.username + (p.is_me ? ' (du)' : '')"
-                 class="h-5 w-5 rounded-full border"
-                 :class="p.is_me ? 'border-[#b98a4a]' : 'border-[#3d4a4d]'" />
-          </template>
-        </div>
+        <!-- Desktop: linke Seitenspalte (Tage/Eskalation/Aktiv) + Auftragsbereich.
+             Auf schmalen Screens stapelt sich alles wie bisher untereinander. -->
+        <div class="lg:flex lg:items-start lg:gap-5">
 
-        <!-- Tag-Tabs: eine Zeile pro Kalenderwoche, mittig, kein Scrollen.
-             Vor der ersten Woche eines Zeitraums steht dessen Name. -->
-        <div class="mb-6 space-y-1.5" x-show="board">
-          <template x-for="(row, ri) in dayRows()" :key="row.week">
-            <div>
-              <!-- Zeitraum-Ueberschrift: nur bei der ersten Woche des Zeitraums -->
-              <div x-show="row.period_label && (ri === 0 || dayRows()[ri-1].period !== row.period)"
-                   class="headline text-[11px] tracking-[.2em] uppercase text-[#b98a4a]
-                          text-center mt-5 first:mt-0 mb-2"
-                   x-text="row.period_label"></div>
-              <div class="flex flex-wrap justify-center gap-1.5">
-                <template x-for="d in row.days" :key="d.date">
-                  <button @click="activeDay = d.date"
-                          :title="isPastEmpty(d) ? 'Vergangen — keine Aufträge' : ''"
-                          :class="[
-                            activeDay === d.date
-                              ? 'bg-[#b91c1c] border-[#b91c1c] text-white shadow-lg shadow-red-950/40'
-                              : 'bg-[#17191b]/80 border-[#3d4a4d] text-zinc-300 hover:border-zinc-400 hover:text-zinc-100',
-                            isPastEmpty(d) ? 'day-x' : ''
-                          ]"
-                          class="headline px-3 py-1.5 rounded border text-xs font-medium tracking-wider
-                                 whitespace-nowrap transition-colors">
-                    <span x-text="d.label"></span>
-                    <span x-show="d.missions.length > 0" class="ml-1 opacity-70"
-                          x-text="'(' + d.missions.length + ')'"></span>
-                  </button>
-                </template>
-              </div>
-            </div>
-          </template>
-        </div>
+          <!-- Seitenspalte: auf Desktop links + sticky, mobil oberhalb der Auftraege -->
+          <aside class="lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-4 space-y-4 mb-5 lg:mb-0">
 
-        <!-- Eskalation: horizontale Legende (alle Stufen) + Leiste der aktiven Crews -->
-        <div x-show="board" x-cloak class="mb-5">
-          <button @click="escShow = !escShow"
-                  class="headline text-[11px] tracking-[.2em] uppercase text-zinc-400 hover:text-zinc-200
-                         flex items-center gap-2 mx-auto mb-2 transition-colors">
-            Eskalation
-            <span class="text-zinc-600" x-text="escShow ? '▾' : '▸'"></span>
-          </button>
-          <div x-show="escShow" class="card-cine rounded-lg border border-[#3d4a4d] p-3 max-w-2xl mx-auto">
-            <!-- Legende: alle Stufen nebeneinander, gleichmaessig verteilt -->
-            <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 pb-2.5 border-b border-[#2a3335]">
-              <template x-for="lv in [0,1,2,3,4]" :key="lv">
-                <span class="flex items-center gap-1.5 text-[11px] text-zinc-400 whitespace-nowrap">
-                  <span class="ecg ecg-sm" :class="'ecg'+lv"></span>
-                  <span x-text="escLabel(lv)"></span>
-                </span>
-              </template>
-            </div>
-            <!-- aktuell aktive Crews (nach Stufe sortiert) -->
-            <div class="space-y-1.5 pt-2.5" x-show="crewsRanked().length">
-              <template x-for="c in crewsRanked()" :key="c.id">
-                <div class="flex items-center gap-2.5">
-                  <span class="ecg" :class="'ecg'+(c.escalation||0)"></span>
-                  <span class="text-sm font-medium truncate flex-1" x-text="c.name"></span>
-                  <span class="text-[11px] text-zinc-500" x-text="'auto'"></span>
-                  <span :class="escBadgeClass(c.escalation)" x-text="escLabel(c.escalation)"></span>
+            <!-- Tage: eine Zeile pro Kalenderwoche.
+                 Vor der ersten Woche eines Zeitraums steht dessen Name. -->
+            <section class="card-cine rounded-lg border border-[#3d4a4d] p-3" x-show="board">
+              <h2 class="headline text-[11px] tracking-[.2em] uppercase text-zinc-400 mb-2">Tage</h2>
+              <template x-for="(row, ri) in dayRows()" :key="row.week">
+                <div>
+                  <!-- Zeitraum-Ueberschrift: nur bei der ersten Woche des Zeitraums -->
+                  <div x-show="row.period_label && (ri === 0 || dayRows()[ri-1].period !== row.period)"
+                       class="headline text-[10px] tracking-[.18em] uppercase text-[#b98a4a]
+                              mt-3 first:mt-0 mb-1.5"
+                       x-text="row.period_label"></div>
+                  <div class="flex flex-wrap gap-1.5 mb-1.5">
+                    <template x-for="d in row.days" :key="d.date">
+                      <button @click="activeDay = d.date"
+                              :title="isPastEmpty(d) ? 'Vergangen — keine Aufträge' : ''"
+                              :class="[
+                                activeDay === d.date
+                                  ? 'bg-[#b91c1c] border-[#b91c1c] text-white shadow-lg shadow-red-950/40'
+                                  : 'bg-[#17191b]/80 border-[#3d4a4d] text-zinc-300 hover:border-zinc-400 hover:text-zinc-100',
+                                isPastEmpty(d) ? 'day-x' : ''
+                              ]"
+                              class="headline px-2.5 py-1.5 rounded border text-xs font-medium tracking-wider
+                                     whitespace-nowrap transition-colors">
+                        <span x-text="d.label"></span>
+                        <span x-show="d.missions.length > 0" class="ml-1 opacity-70"
+                              x-text="'(' + d.missions.length + ')'"></span>
+                      </button>
+                    </template>
+                  </div>
                 </div>
               </template>
-            </div>
-            <p class="text-[11px] text-zinc-500 text-center pt-2.5" x-show="!crewsRanked().length">
-              Aktuell keine aktiven Aufträge — alle Crews ruhig.
-            </p>
-          </div>
-        </div>
+            </section>
+
+            <!-- Eskalation: Legende (alle Stufen) + aktive Crews -->
+            <section class="card-cine rounded-lg border border-[#3d4a4d] p-3" x-show="board" x-cloak>
+              <button @click="escShow = !escShow"
+                      class="headline text-[11px] tracking-[.2em] uppercase text-zinc-400 hover:text-zinc-200
+                             flex items-center gap-2 transition-colors">
+                Eskalation
+                <span class="text-zinc-600" x-text="escShow ? '▾' : '▸'"></span>
+              </button>
+              <div x-show="escShow" class="mt-2.5">
+                <!-- Legende: alle Stufen -->
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 pb-2.5 border-b border-[#2a3335]">
+                  <template x-for="lv in [0,1,2,3,4]" :key="lv">
+                    <span class="flex items-center gap-1.5 text-[11px] text-zinc-400 whitespace-nowrap">
+                      <span class="ecg ecg-sm" :class="'ecg'+lv"></span>
+                      <span x-text="escLabel(lv)"></span>
+                    </span>
+                  </template>
+                </div>
+                <!-- aktuell aktive Crews (nach Stufe sortiert) -->
+                <div class="space-y-1.5 pt-2.5" x-show="crewsRanked().length">
+                  <template x-for="c in crewsRanked()" :key="c.id">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="ecg ecg-sm" :class="'ecg'+(c.escalation||0)"></span>
+                      <span class="text-sm font-medium truncate flex-1" x-text="c.name"></span>
+                      <span :class="escBadgeClass(c.escalation)" x-text="escLabel(c.escalation)"></span>
+                    </div>
+                  </template>
+                </div>
+                <p class="text-[11px] text-zinc-500 pt-2.5" x-show="!crewsRanked().length">
+                  Aktuell keine aktiven Aufträge — alle Crews ruhig.
+                </p>
+              </div>
+            </section>
+
+            <!-- Gerade aktiv: wer die Boerse in den letzten 5 Minuten offen hatte -->
+            <section class="card-cine rounded-lg border border-[#3d4a4d] p-3"
+                     x-show="board && board.online && board.online.length" x-cloak>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="inline-block h-2 w-2 rounded-full bg-[#15803d] animate-pulse"></span>
+                <span class="headline text-[10px] tracking-widest uppercase text-zinc-400">
+                  Gerade aktiv
+                </span>
+                <span class="text-[10px] text-zinc-500 ml-auto"
+                      x-text="board.online.length"></span>
+              </div>
+              <div class="space-y-1.5 max-h-56 overflow-y-auto">
+                <template x-for="p in board.online" :key="p.discord_user_id">
+                  <div class="flex items-center gap-2">
+                    <img :src="p.avatar" alt=""
+                         class="h-5 w-5 rounded-full border border-[#3d4a4d] flex-shrink-0" />
+                    <span class="text-xs truncate"
+                          :class="p.is_me ? 'text-[#d9ae6e] font-medium' : 'text-zinc-300'"
+                          x-text="p.username + (p.is_me ? ' (du)' : '')"></span>
+                  </div>
+                </template>
+              </div>
+              <p class="text-[10px] text-zinc-600 mt-2 leading-snug">
+                Wer die Börse in den letzten 5 Minuten offen hatte
+              </p>
+            </section>
+          </aside>
+
+          <!-- Auftragsbereich -->
+          <main class="flex-1 min-w-0">
 
         <!-- Missions des aktiven Tags -->
         <template x-if="currentDay()">
-          <div class="space-y-4">
+          <div>
             <template x-if="currentDay().missions.length === 0">
               <p class="text-zinc-400 text-sm text-center py-12 [text-shadow:0_1px_6px_rgba(0,0,0,0.8)]">
                 Keine Aufträge mit Personal-Bedarf an diesem Tag.
               </p>
             </template>
 
+            <!-- Auf sehr breiten Screens zweispaltig, sonst eine Spalte -->
+            <div class="grid grid-cols-1 2xl:grid-cols-2 gap-4 items-start">
             <template x-for="m in currentDay().missions" :key="m.id">
               <!-- id = Sprungziel aus dem "Meine Slots"-Overlay -->
               <div class="card-cine rounded-lg overflow-hidden flex transition-shadow duration-500"
@@ -414,8 +443,11 @@
                 </div>
               </div>
             </template>
+            </div>
           </div>
         </template>
+          </main>
+        </div>
       </div>
     </template>
 
@@ -582,37 +614,6 @@
         </div>
       </div>
     </div>
-
-    <!-- "Gerade aktiv": feste Leiste rechts, erst ab breiten Fenstern.
-         Auf schmalen Geräten würde sie den Inhalt verdecken. -->
-    <aside x-show="me && board && board.online && board.online.length"
-           x-cloak
-           class="hidden xl:block fixed top-24 right-6 w-52 z-30">
-      <div class="card-cine rounded-lg border border-[#3d4a4d] p-3">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="inline-block h-2 w-2 rounded-full bg-[#15803d] animate-pulse"></span>
-          <span class="headline text-[10px] tracking-widest uppercase text-zinc-400">
-            Gerade aktiv
-          </span>
-          <span class="text-[10px] text-zinc-500 ml-auto"
-                x-text="board.online.length"></span>
-        </div>
-        <div class="space-y-1.5 max-h-[60vh] overflow-y-auto">
-          <template x-for="p in board.online" :key="p.discord_user_id">
-            <div class="flex items-center gap-2">
-              <img :src="p.avatar" alt=""
-                   class="h-5 w-5 rounded-full border border-[#3d4a4d] flex-shrink-0" />
-              <span class="text-xs truncate"
-                    :class="p.is_me ? 'text-[#d9ae6e] font-medium' : 'text-zinc-300'"
-                    x-text="p.username + (p.is_me ? ' (du)' : '')"></span>
-            </div>
-          </template>
-        </div>
-        <p class="text-[10px] text-zinc-600 mt-2 leading-snug">
-          Wer die Börse in den letzten 5 Minuten offen hatte
-        </p>
-      </div>
-    </aside>
 
     <!-- Admin-Auswertung: wer hat wie viele Einsätze gemacht -->
     <div x-show="statsOpen" x-cloak
