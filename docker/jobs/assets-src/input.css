@@ -136,3 +136,7 @@ body::after {
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb { background: #3d4a4d; border-radius: 4px; }
 *::-webkit-scrollbar-thumb:hover { background: #52646a; }
+
+/* Scrollbar unsichtbar, aber weiter scrollbar (Mausrad/Touch) */
+.noscrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.noscrollbar::-webkit-scrollbar { display: none; }
