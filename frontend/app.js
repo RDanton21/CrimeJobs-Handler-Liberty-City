@@ -3091,6 +3091,7 @@ function relationsSurvey() {
     analysis: {},       // crew_id -> {titel, einordnung, anzahl}
     analysisBusy: {},
     anaOpen: {},
+    anaFacts: {},
     // Gangs mit Widersprüchen, absteigend nach Anzahl. Aus der Matrix berechnet.
     get gangConflicts() {
       const items = this.matrix.items || [];

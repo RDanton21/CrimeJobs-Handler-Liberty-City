@@ -673,12 +673,18 @@ GANG_ANALYSIS_SYSTEM_PROMPT = (
     "sie ueberall Feinde, wo keine sind? Wird sie unterschaetzt? Ist sie "
     "isoliert, aggressiv, paranoid, ueberheblich? Leite daraus einen "
     "dramaturgischen Charakterzug ab.\n\n"
+    "WICHTIG — Anonymitaet: Nenne NIEMALS, welche konkrete andere Gruppierung "
+    "wie abgestimmt hat. Es darf NICHT nachvollziehbar sein, wer wen wie "
+    "eingeschaetzt hat. Schreibe ueber die ANALYSIERTE Gruppierung selbst und "
+    "ihr Muster — nutze 'die meisten anderen', 'mehrere Gruppierungen', 'die "
+    "Stadt' statt fremde Namen mit ihrer Bewertung. Die abgegebenen Sichten "
+    "sind nur DEIN Analysematerial, kein Inhalt fuer den Text.\n\n"
     "Antworte mit NUR einem JSON-Objekt, keine Markdown-Fences, kein Text "
     "davor oder danach:\n"
     '{"titel": "<prägnante Einordnung, max 8 Wörter, wie eine Schlagzeile>", '
-    '"einordnung": "<2-4 Sätze: was das Muster ueber die Gruppierung sagt, '
-    'konkret auf ihre Widersprueche und Story bezogen, plus eine kurze '
-    'Empfehlung, wie die Konflikte aufzuloesen sind>"}\n\n'
+    '"einordnung": "<2-4 Sätze: was das Muster ueber die Gruppierung sagt — '
+    'OHNE fremde Namen mit ihrer Bewertung, plus eine kurze Empfehlung, wie '
+    'mit ihrer Haltung umzugehen ist>"}\n\n'
     "Deutsch, knapp, ohne Floskeln. Der titel ist eine Charakterisierung "
     "(z.B. 'Der Aggressor, den keiner ernst nimmt'), keine blosse Wiederholung "
     "des Namens."
@@ -689,14 +695,22 @@ def build_gang_analysis_prompt(
     gang_name: str, gang_story: str, widersprueche: list[dict]
 ) -> str:
     """User-Prompt fuer die Gang-Einordnung. widersprueche: Liste von
-    {other, mine, theirs} (deutsche Labels)."""
+    {other, mine, theirs} (deutsche Labels).
+
+    Die Namen der Gegenueber (w['other']) werden BEWUSST weggelassen — so
+    kann die KI sie im Text nicht verraten, und die Anonymitaet der
+    Abstimmungen bleibt gewahrt. Uebergeben wird nur das Muster der
+    Bewertungspaare.
+    """
     lines = [f"## Gruppierung\n{gang_name}"]
     if gang_story.strip():
         lines.append(f"\n## Hintergrund\n{gang_story.strip()}")
-    lines.append(f"\n## Widersprüche ({len(widersprueche)})")
-    lines.append("Format: Gegenüber — wie WIR sie sehen / wie SIE uns sehen")
+    lines.append(
+        f"\n## Muster der Widersprüche ({len(widersprueche)}) — anonymisiert"
+    )
+    lines.append("Je Zeile: wie DIESE Gruppierung das Gegenüber sieht / wie das Gegenüber sie sieht")
     for w in widersprueche:
-        lines.append(f"- {w['other']} — wir: {w['mine']} / sie: {w['theirs']}")
+        lines.append(f"- wir: {w['mine']} / sie: {w['theirs']}")
     lines.append(
         "\n## Aufgabe\nLeite aus dem MUSTER dieser Widersprüche einen "
         "Charakterzug der Gruppierung ab. Titel + Einordnung."

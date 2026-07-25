@@ -383,8 +383,15 @@
               <div x-show="anaOpen[g.crew_id]" x-cloak class="px-4 pb-3 border-t border-zinc-800/70 pt-3">
                 <p x-show="analysis[g.crew_id]?.einordnung" class="text-sm text-purple-200/90 mb-3 leading-relaxed"
                    x-text="analysis[g.crew_id]?.einordnung"></p>
-                <p class="text-[11px] uppercase tracking-wide text-zinc-600 mb-1">Die Fakten</p>
-                <div class="space-y-1">
+                <!-- Fakten: dezenter Beleg, standardmäßig zu. Zeigt die konkreten
+                     Abstimmungen — nur intern für die Spielleitung, nicht Teil
+                     der anonymen Einordnung oben. -->
+                <button @click="anaFacts[g.crew_id] = !anaFacts[g.crew_id]"
+                        class="text-[11px] uppercase tracking-wide text-zinc-600 hover:text-zinc-400 flex items-center gap-1">
+                  <span x-text="anaFacts[g.crew_id] ? '▾' : '▸'"></span>
+                  <span x-text="`Beleg — wer stimmte wie (${g.konflikte.length}), nur intern`"></span>
+                </button>
+                <div x-show="anaFacts[g.crew_id]" x-cloak class="space-y-1 mt-2">
                   <template x-for="(k, i) in g.konflikte" :key="i">
                     <div class="text-xs text-zinc-400 flex items-center gap-2 flex-wrap">
                       <span class="text-zinc-300" x-text="k.other"></span>

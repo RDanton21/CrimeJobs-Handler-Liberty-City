@@ -255,13 +255,21 @@ Der Abschnitt „Widerspruchs-Analyse" auf der Seite zeigt:
   einen Blick.
 - **Eine Karte pro Gang**, die in Widersprüche verwickelt ist, sortiert nach
   Anzahl. Der **Titel jeder Karte ist die KI-Einordnung** (`POST /analysis/{id}`)
-  — eine Schlagzeile wie „Die Paranoiden Gesetzeshüter", darunter die Begründung
-  und die aufklappbaren Fakten (mit wem, wer wie sieht).
+  — eine Schlagzeile wie „Die Paranoiden Gesetzeshüter", darunter die Begründung.
+
+**Anonym gehalten:** Der KI-Text nennt **nie**, welche andere Gruppierung wie
+abgestimmt hat — die Anonymität der Erhebung bleibt gewahrt. Technisch
+abgesichert, indem der KI die Namen der Gegenüber gar nicht erst übergeben
+werden, nur das Muster der Bewertungspaare. Die konkreten Abstimmungen (wer
+stimmte wie) liegen in einem **eingeklappten Beleg**, der als „nur intern"
+gekennzeichnet ist — für die Spielleitung zum Nachprüfen, nicht für die
+Standardansicht.
 
 Beispiel: Blue Union meldet viermal Feindschaft, wo die Gegenseite neutral
 bleibt. Die KI macht daraus „Die Paranoiden Gesetzeshüter — sieht überall
-Bedrohung, wird aber nur neutral gesehen" plus die Empfehlung, die einseitigen
-Feindschaften nicht als *feindlich* festzuschreiben.
+Bedrohung, wird aber nur neutral gesehen" plus die Empfehlung, mit ihrer
+defensiv-aggressiven Haltung behutsam umzugehen — **ohne** eine der neutralen
+Gegenseiten zu benennen.
 
 Die Analyse **schreibt nichts** — sie ist ein Auswertungs-Werkzeug für die
 Spielleitung. „🪄 Alle analysieren" generiert die Einordnungen für alle
