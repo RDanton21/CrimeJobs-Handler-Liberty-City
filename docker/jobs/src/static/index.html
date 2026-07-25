@@ -14,8 +14,10 @@
                        neu bauen, siehe README "Frontend-Assets bauen")
        alpine.min.js = Alpine.js 3.14.9 (unpkg-Snapshot, gepinnt)
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
-  <link rel="stylesheet" href="/static/tailwind.css" />
-  <script defer src="/static/app.js"></script>
+  <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
+       (max-age 3600), damit neue Layouts sofort ankommen -->
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260725a" />
+  <script defer src="/static/app.js?v=20260725a"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -115,10 +117,10 @@
 
         <!-- Desktop (ab xl): Tage links, Auftraege mittig, Gerade aktiv rechts.
              Auf schmalen Screens stapelt sich alles untereinander. -->
-        <div class="xl:flex xl:items-start xl:gap-5">
+        <div class="lg:flex lg:items-start lg:gap-5">
 
           <!-- Linke Spalte: Tage (sticky) -->
-          <aside class="xl:w-72 xl:flex-shrink-0 xl:sticky xl:top-4 space-y-4 mb-5 xl:mb-0">
+          <aside class="lg:w-60 xl:w-72 lg:flex-shrink-0 lg:sticky lg:top-4 space-y-4 mb-5 lg:mb-0">
 
             <!-- Tage: eine Zeile pro Kalenderwoche.
                  Vor der ersten Woche eines Zeitraums steht dessen Name. -->
@@ -424,7 +426,7 @@
           </main>
 
           <!-- Rechte Spalte: Gerade aktiv (sticky) -->
-          <aside class="xl:w-56 xl:flex-shrink-0 xl:sticky xl:top-4 mt-5 xl:mt-0">
+          <aside class="lg:w-48 xl:w-56 lg:flex-shrink-0 lg:sticky lg:top-4 mt-5 lg:mt-0">
             <section class="card-cine rounded-lg border border-[#3d4a4d] p-3"
                      x-show="board && board.online && board.online.length" x-cloak>
               <div class="flex items-center gap-2 mb-2">
