@@ -40,61 +40,71 @@ def _fmt_berlin(unix_ts: int) -> str:
 
 
 def _detail_lines(mission: dict, slot: dict) -> list[str]:
-    """Einsatz-Details fuer DMs; leere Felder werden weggelassen."""
+    """Einsatz-Details fuer DMs als Discord-Markdown-Block.
+
+    Crew fett als Zeile, Details als Blockzitat mit fetten Labels,
+    leere Felder werden weggelassen."""
     crew = mission.get("crew") or {}
     crew_name = crew.get("name") or "Unbekannte Crew"
     district = crew.get("district") or ""
-    zeilen = [f"Crew: {crew_name}" + (f" ({district})" if district else "")]
+    zeilen = [f"**{crew_name}**" + (f" · {district}" if district else "")]
     rolle = slot.get("name") or (
         f"NPC #{slot['npc_number']}" if slot.get("npc_number") else ""
     )
     if slot.get("function"):
         rolle = f"{rolle} — {slot['function']}" if rolle else slot["function"]
     if rolle:
-        zeilen.append(f"Rolle: {rolle}")
+        zeilen.append(f"> 🎭 **Rolle:** {rolle}")
     fenster = slot.get("slot_window") or mission.get("slot_window") or ""
     if fenster:
-        zeilen.append(f"Zeit: {fenster}")
+        zeilen.append(f"> 🕘 **Zeit:** {fenster}")
     if slot.get("location"):
-        zeilen.append(f"Treffpunkt: {slot['location']}")
+        zeilen.append(f"> 📍 **Treffpunkt:** {slot['location']}")
     if slot.get("costume"):
-        zeilen.append(f"Kostüm: {slot['costume']}")
+        zeilen.append(f"> 👔 **Kostüm:** {slot['costume']}")
     if slot.get("notes"):
-        zeilen.append(f"Hinweis: {slot['notes']}")
+        zeilen.append(f"> 💡 **Hinweis:** {slot['notes']}")
     # Fester Orga-Hinweis fuer alle Einsatz-DMs (Wunsch SEKTOR-Team)
-    zeilen.append("Vorbereitung findet am **Francis International Airport** statt")
+    zeilen.append("")
+    zeilen.append("✈️ Vorbereitung findet am **Francis International Airport** statt")
     return zeilen
 
 
+def _footer() -> list[str]:
+    return [
+        f"📋 Alle Details: {config.PUBLIC_URL}",
+        "-# Wenn du nicht kannst: bitte austragen, damit der Platz frei wird.",
+    ]
+
+
 def _build_message(mission: dict, slot: dict, now: float) -> str:
-    """Deutsche Erinnerungs-DM."""
+    """Deutsche Erinnerungs-DM (Discord-Markdown: Ueberschrift + Zitatblock)."""
     start = mission.get("window_start")
     if start and now >= start:
-        kopf = "🎬 Dein Einsatz läuft — jetzt zählt's!"
+        kopf = ["## 🎬 Dein Einsatz läuft — jetzt zählt's!"]
     elif start:
         minuten = max(1, round((start - now) / 60))
-        kopf = (
-            f"🎬 Erinnerung: Dein Einsatz startet um {_fmt_berlin(start)} Uhr "
-            f"(in ca. {minuten} Min)."
-        )
+        kopf = [
+            f"## 🎬 Dein Einsatz startet um {_fmt_berlin(start)} Uhr",
+            f"-# Erinnerung · in ca. {minuten} Min",
+        ]
     else:
-        kopf = "🎬 Erinnerung an deinen Einsatz."
+        kopf = ["## 🎬 Erinnerung an deinen Einsatz"]
 
-    zeilen = [kopf, "", *_detail_lines(mission, slot), ""]
-    zeilen.append(f"Alle Details: {config.PUBLIC_URL}")
-    zeilen.append("Wenn du nicht kannst: bitte austragen, damit der Platz frei wird.")
+    zeilen = [*kopf, "", *_detail_lines(mission, slot), "", *_footer()]
     return "\n".join(zeilen)
 
 
 def build_promotion_message(mission: dict, slot: dict) -> str:
     """DM fuer Nachruecker: von der Warteliste in den Slot uebernommen."""
     zeilen = [
-        "🎬 Du bist nachgerückt! Ein Platz ist frei geworden — du bist jetzt fest eingetragen.",
+        "## 🎬 Du bist nachgerückt!",
+        "-# Ein Platz ist frei geworden — du bist jetzt fest eingetragen.",
         "",
         *_detail_lines(mission, slot),
         "",
-        f"Alle Details: {config.PUBLIC_URL}",
-        "Wenn du doch nicht kannst: bitte austragen, damit der Nächste nachrücken kann.",
+        f"📋 Alle Details: {config.PUBLIC_URL}",
+        "-# Wenn du doch nicht kannst: bitte austragen, damit der Nächste nachrücken kann.",
     ]
     return "\n".join(zeilen)
 
