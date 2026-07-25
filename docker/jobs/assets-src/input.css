@@ -140,3 +140,26 @@ body::after {
 /* Scrollbar unsichtbar, aber weiter scrollbar (Mausrad/Touch) */
 .noscrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .noscrollbar::-webkit-scrollbar { display: none; }
+
+/* ---------------------------------------------------------------------
+   ERLEDIGT-Stempel: diagonaler Gummistempel quer ueber abgeschlossene
+   Auftraege. pointer-events:none — die Karte bleibt darunter bedienbar.
+   --------------------------------------------------------------------- */
+.stamp-overlay {
+  position: absolute; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+  background: rgba(8, 12, 10, 0.22);
+}
+.stamp {
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  text-transform: uppercase; font-weight: 700; line-height: 1;
+  font-size: clamp(30px, 4.5vw, 52px); letter-spacing: .22em;
+  padding: 10px 26px 10px 38px;
+  color: rgba(74, 222, 128, 0.92);
+  border: 5px double rgba(74, 222, 128, 0.85);
+  border-radius: 12px;
+  transform: rotate(-11deg);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.65);
+  box-shadow: 0 2px 18px rgba(0, 0, 0, 0.45), inset 0 0 22px rgba(0, 0, 0, 0.3);
+}

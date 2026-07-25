@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260725h" />
-  <script defer src="/static/app.js?v=20260725h"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260725i" />
+  <script defer src="/static/app.js?v=20260725i"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -256,9 +256,13 @@
                  :class="currentDay().missions.length > 1 ? 'grid-cols-1 2xl:grid-cols-2' : 'grid-cols-1 max-w-4xl'">
             <template x-for="m in currentDay().missions" :key="m.id">
               <!-- id = Sprungziel aus dem "Meine Slots"-Overlay -->
-              <div class="card-cine rounded-lg overflow-hidden flex transition-shadow duration-500"
+              <div class="card-cine rounded-lg overflow-hidden flex transition-shadow duration-500 relative"
                    :id="'mission-' + m.id"
                    :class="jumpedTo === m.id ? 'ring-2 ring-[#b98a4a] shadow-lg shadow-[#b98a4a]/20' : ''">
+                <!-- ERLEDIGT-Stempel quer ueber abgeschlossene Auftraege -->
+                <template x-if="m.archived_at">
+                  <div class="stamp-overlay"><span class="stamp">Erledigt</span></div>
+                </template>
                 <!-- Farbbalken in Crew-Farbe -->
                 <div class="w-1.5 flex-shrink-0"
                      :style="'background-color:' + ((m.crew && m.crew.color_hex) || '#b91c1c')"></div>
