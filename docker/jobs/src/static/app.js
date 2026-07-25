@@ -348,19 +348,19 @@ function jobsBoard() {
       return h > 0 ? h + ':' + mm + ':' + ss : mm + ':' + ss;
     },
 
-    // Mein naechster Einsatz: eigener Slot, Fenster laeuft noch oder kommt
-    myNext() {
-      let best = null;
+    // Meine Einsaetze: ALLE Auftraege mit eigenem Slot, deren Fenster noch
+    // laeuft oder kommt — frueheste zuerst. Mehrere eigene Slots im selben
+    // Auftrag werden zusammengefasst.
+    myUpcoming() {
+      const out = [];
       for (const x of this._allMissions()) {
-        const mine = (x.m.slots || []).find(s => s.mine);
-        if (!mine) continue;
+        const mine = (x.m.slots || []).filter(s => s.mine);
+        if (!mine.length) continue;
         if (x.m.window_end && x.m.window_end < this.clock) continue;
-        const start = x.m.window_start || Infinity;
-        if (!best || start < (best.m.window_start || Infinity)) {
-          best = { day: x.day, m: x.m, slot: mine };
-        }
+        out.push({ day: x.day, m: x.m, slots: mine });
       }
-      return best;
+      out.sort((a, b) => (a.m.window_start || Infinity) - (b.m.window_start || Infinity));
+      return out;
     },
 
     // Relative Zeit fuer den Ticker

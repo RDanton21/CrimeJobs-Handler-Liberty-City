@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260725i" />
-  <script defer src="/static/app.js?v=20260725i"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260725j" />
+  <script defer src="/static/app.js?v=20260725j"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -506,26 +506,33 @@
               </p>
             </section>
 
-            <!-- Mein naechster Einsatz -->
+            <!-- Meine Einsaetze: alle eigenen Eintragungen (laufend/kommend) -->
             <section class="card-cine rounded-lg border border-[#3d4a4d] p-3"
-                     x-show="board && myNext()" x-cloak>
+                     x-show="board && myUpcoming().length" x-cloak>
               <div class="headline text-[10px] tracking-widest uppercase text-zinc-400 mb-2">
-                Mein nächster Einsatz
+                Meine Einsätze
               </div>
-              <p class="text-sm font-medium"
-                 x-text="myNext().m.crew ? myNext().m.crew.name : 'Unbekannte Crew'"></p>
-              <p class="text-xs text-zinc-400 mt-0.5" x-text="myNext().slot.name || ''"></p>
-              <p class="text-xs text-[#d9ae6e] mt-1" x-show="myNext().m.slot_window"
-                 x-text="'Zeit: ' + myNext().m.slot_window"></p>
-              <p class="text-sm mt-1.5 tabular-nums font-medium"
-                 :class="isRunning(myNext().m) ? 'text-red-400' : 'text-[#d9ae6e]'"
-                 x-text="isRunning(myNext().m)
-                   ? 'läuft gerade — endet in ' + fmtCountdown(myNext().m.window_end)
-                   : (myNext().m.window_start ? 'startet in ' + fmtCountdown(myNext().m.window_start) : '')"></p>
-              <button @click="jumpToMission({ date: myNext().day.date, mission: myNext().m })"
-                      class="text-xs text-zinc-400 underline hover:text-zinc-200 mt-2">
-                Zum Auftrag springen →
-              </button>
+              <div class="space-y-2.5">
+                <template x-for="e in myUpcoming()" :key="e.m.id">
+                  <div class="border-t border-[#2a3335] pt-2.5 first:border-t-0 first:pt-0">
+                    <p class="text-sm font-medium"
+                       x-text="e.m.crew ? e.m.crew.name : 'Unbekannte Crew'"></p>
+                    <p class="text-xs text-zinc-400 mt-0.5"
+                       x-text="e.slots.map(s => s.name).filter(Boolean).join(' · ')"></p>
+                    <p class="text-xs text-[#d9ae6e] mt-1" x-show="e.m.slot_window"
+                       x-text="'Zeit: ' + e.m.slot_window"></p>
+                    <p class="text-sm mt-1 tabular-nums font-medium"
+                       :class="isRunning(e.m) ? 'text-red-400' : 'text-[#d9ae6e]'"
+                       x-text="isRunning(e.m)
+                         ? 'läuft gerade — endet in ' + fmtCountdown(e.m.window_end)
+                         : (e.m.window_start ? 'startet in ' + fmtCountdown(e.m.window_start) : '')"></p>
+                    <button @click="jumpToMission({ date: e.day.date, mission: e.m })"
+                            class="text-xs text-zinc-400 underline hover:text-zinc-200 mt-1.5">
+                      Zum Auftrag springen →
+                    </button>
+                  </div>
+                </template>
+              </div>
             </section>
 
             <!-- Letzte Ereignisse (Aktivitaets-Ticker) -->
