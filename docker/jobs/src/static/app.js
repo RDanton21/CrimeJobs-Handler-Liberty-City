@@ -26,6 +26,7 @@ function jobsBoard() {
     briefOpen: {},  // mission_id -> Regie-Details (Personal-Brief) aufgeklappt
     busySlots: {},  // slot_id -> Request laeuft
     myOpen: false,  // Overlay "Meine Eintragungen"
+    infoOpen: false, // Overlay "So funktioniert die Börse"
     myStats: null,  // eigene Einsatz-Bilanz (beim Oeffnen des Overlays geladen)
     jumpedTo: null, // mission_id kurz hervorheben nach dem Sprung
     clock: Math.floor(Date.now() / 1000), // Sekunden-Uhr fuer Countdowns/Ticker

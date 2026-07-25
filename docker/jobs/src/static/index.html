@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260725j" />
-  <script defer src="/static/app.js?v=20260725j"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260725k" />
+  <script defer src="/static/app.js?v=20260725k"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -80,6 +80,10 @@
                            text-[#d9ae6e] text-xs font-medium tracking-wider
                            hover:bg-[#b98a4a]/30 hover:border-[#b98a4a] transition-colors"
                     x-text="'Meine Slots: ' + myCount()"></button>
+            <button @click="infoOpen = true" title="So funktioniert die Börse"
+                    class="headline h-7 w-7 rounded-full border border-[#3d4a4d] bg-[#17191b]/80
+                           text-zinc-300 text-sm font-semibold hover:border-zinc-400
+                           hover:text-zinc-100 transition-colors">?</button>
             <!-- Admin-Aktionen: nur fuer Admins, der Server prueft zusaetzlich -->
             <template x-if="me.is_admin">
               <div class="flex items-center gap-2 flex-wrap">
@@ -557,6 +561,74 @@
         </div>
       </div>
     </template>
+
+    <!-- Info-Overlay: So funktioniert die Börse -->
+    <div x-show="infoOpen" x-cloak
+         @keydown.escape.window="infoOpen = false"
+         class="fixed inset-0 z-40 flex items-start justify-center p-4 sm:p-8 overflow-y-auto
+                bg-black/70 backdrop-blur-sm">
+      <div @click.outside="infoOpen = false"
+           class="card-cine rounded-xl w-full max-w-2xl shadow-2xl border border-[#3d4a4d]">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-[#3d4a4d]/70">
+          <h2 class="headline text-sm tracking-[.2em] uppercase text-zinc-200">So funktioniert die Börse</h2>
+          <button @click="infoOpen = false"
+                  class="text-zinc-400 hover:text-zinc-100 text-xl leading-none">×</button>
+        </div>
+        <div class="px-5 py-4 space-y-4 text-sm text-zinc-300 leading-relaxed">
+          <section>
+            <h3 class="headline text-[11px] tracking-[.18em] uppercase text-[#d9ae6e] mb-1">Eintragen &amp; Austragen</h3>
+            <p>Wähle links einen Tag, such dir einen Auftrag und trag dich mit
+               <span class="text-green-400 font-medium">Eintragen</span> in eine freie Rolle ein.
+               Kannst du doch nicht: einfach austragen — der Platz wird sofort wieder frei.</p>
+          </section>
+          <section>
+            <h3 class="headline text-[11px] tracking-[.18em] uppercase text-[#d9ae6e] mb-1">Warteliste &amp; Nachrücken</h3>
+            <p>Ist ein Slot voll, setz dich auf die <span class="text-[#d9ae6e]">Warteliste</span>.
+               Wird ein Platz frei, rückst du automatisch nach — du bekommst dann eine Discord-DM.</p>
+          </section>
+          <section>
+            <h3 class="headline text-[11px] tracking-[.18em] uppercase text-[#d9ae6e] mb-1">Erinnerungen per DM</h3>
+            <p>Vor deinem Einsatzfenster schickt dir der Bot eine DM mit allen Details
+               (Rolle, Zeit, Treffpunkt, Kostüm). Die Vorbereitung findet am
+               <strong>Francis International Airport</strong> statt.</p>
+          </section>
+          <section>
+            <h3 class="headline text-[11px] tracking-[.18em] uppercase text-[#d9ae6e] mb-1">Eskalationsstufen</h3>
+            <p class="mb-2">Jede Crew und jeder Auftrag trägt eine Stufe — sie zeigt, wie heiß die
+               Lage gerade ist. Sie ergibt sich automatisch aus Story und Aktivität;
+               die Regie kann sie übersteuern.</p>
+            <div class="space-y-1.5">
+              <template x-for="lv in [0,1,2,3,4]" :key="'info'+lv">
+                <div class="flex items-center gap-2.5">
+                  <span class="ecg ecg-sm" :class="'ecg'+lv"></span>
+                  <span class="text-xs font-medium w-24 flex-shrink-0" x-text="escLabel(lv)"></span>
+                  <span class="text-xs text-zinc-500"
+                        x-text="['Alltag — nichts Besonderes', 'erste Bewegung im Viertel',
+                                 'offene Reibereien', 'es wird ernst — erhöhtes Risiko',
+                                 'höchste Eskalation'][lv]"></span>
+                </div>
+              </template>
+            </div>
+          </section>
+          <section>
+            <h3 class="headline text-[11px] tracking-[.18em] uppercase text-[#d9ae6e] mb-1">Zeitfenster &amp; Countdown</h3>
+            <p>Die Leiste über den Aufträgen zeigt laufende Zeitfenster mit Countdown — bzw. wann
+               der nächste Einsatz startet. Aufträge mit „Läuft gerade" sind jetzt aktiv.</p>
+          </section>
+          <section>
+            <h3 class="headline text-[11px] tracking-[.18em] uppercase text-[#d9ae6e] mb-1">Erledigt &amp; Anwesenheit</h3>
+            <p>Abgeschlossene Aufträge bekommen den grünen Stempel und verschwinden nach
+               15 Minuten von selbst. Ob du da warst, bestätigt die Regie — deine Bilanz
+               siehst du unter „Meine Slots".</p>
+          </section>
+          <section>
+            <h3 class="headline text-[11px] tracking-[.18em] uppercase text-[#d9ae6e] mb-1">Rechte Spalte</h3>
+            <p>„Gerade aktiv" zeigt, wer die Börse offen hat. „Meine Einsätze" listet deine
+               Eintragungen mit Countdown. „Letzte Ereignisse" ist der Live-Ticker des Boards.</p>
+          </section>
+        </div>
+      </div>
+    </div>
 
     <!-- "Meine Slots": Overlay mit allen eigenen Eintragungen -->
     <div x-show="myOpen" x-cloak
