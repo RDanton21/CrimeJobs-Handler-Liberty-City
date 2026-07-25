@@ -94,6 +94,21 @@ class AdminAction(Base):
     details: Mapped[str] = mapped_column(String, default="")
 
 
+class BoardEvent(Base):
+    """Aktivitaets-Ticker: oeffentliche Board-Ereignisse (Eintragen, Austragen,
+    Warteliste, Nachruecken, Admin-Kick). Wird beim Schreiben auf die letzten
+    ~200 Eintraege gestutzt — das Board zeigt ohnehin nur die juengsten."""
+    __tablename__ = "board_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    #: signin | signout | waitlist_join | waitlist_leave | promoted | kicked
+    kind: Mapped[str] = mapped_column(String, index=True)
+    username: Mapped[str] = mapped_column(String, default="")
+    crew_name: Mapped[str] = mapped_column(String, default="")
+    slot_name: Mapped[str] = mapped_column(String, default="")
+
+
 class WaitlistEntry(Base):
     """Warteliste fuer volle Slots — FIFO nach joined_at. Beim Freiwerden
     eines Platzes rueckt der aelteste Eintrag automatisch nach (inkl. DM)."""

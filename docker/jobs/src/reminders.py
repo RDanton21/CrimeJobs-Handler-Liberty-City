@@ -61,6 +61,8 @@ def _detail_lines(mission: dict, slot: dict) -> list[str]:
         zeilen.append(f"Kostüm: {slot['costume']}")
     if slot.get("notes"):
         zeilen.append(f"Hinweis: {slot['notes']}")
+    # Fester Orga-Hinweis fuer alle Einsatz-DMs (Wunsch SEKTOR-Team)
+    zeilen.append("Vorbereitung findet am **Francis International Airport** statt")
     return zeilen
 
 

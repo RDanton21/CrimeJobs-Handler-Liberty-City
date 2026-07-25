@@ -17,7 +17,7 @@ import logging
 import secrets
 import time
 from contextlib import asynccontextmanager
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 # Root-Logger fuer eigene Module (z.B. jobs.reminders) — uvicorn konfiguriert
@@ -35,6 +35,7 @@ from . import config, discord_oauth, reminders
 from .db import SessionLocal, init_db
 from .models import (
     AdminAction,
+    BoardEvent,
     CompletedParticipation,
     DismissedMission,
     Player,
@@ -796,6 +797,23 @@ async def api_board(me: dict = Depends(require_session)):
             }
             for row in res_online.all()
         ]
+        # Aktivitaets-Ticker: die juengsten Board-Ereignisse
+        ev_rows = (
+            await session.execute(
+                select(BoardEvent).order_by(BoardEvent.id.desc()).limit(20)
+            )
+        ).scalars().all()
+        events = [
+            {
+                "kind": e.kind,
+                "username": e.username,
+                "crew": e.crew_name,
+                "slot": e.slot_name,
+                # Unix-Sekunden (created_at ist naive UTC)
+                "ts": int(e.created_at.replace(tzinfo=timezone.utc).timestamp()),
+            }
+            for e in ev_rows
+        ]
         await session.commit()
     assignments_by_slot: dict[int, list[SlotAssignment]] = {}
     for a in assignments:
@@ -884,6 +902,7 @@ async def api_board(me: dict = Depends(require_session)):
             for c in crews
         ],
         "online": online,
+        "events": events,
         # is_admin normalisieren: Sessions von vor dem Admin-Feature haben den
         # Key nicht — das UI soll trotzdem immer einen Bool sehen
         "me": {**me, "is_admin": bool(me.get("is_admin"))},
@@ -964,6 +983,7 @@ async def assign_slot(
         )
         await session.commit()
 
+    await _log_event("signin", me.get("username", ""), found_mission, slot)
     return {"detail": "Eingetragen"}
 
 
@@ -984,6 +1004,32 @@ def _find_slot(missions: list, slot_id: int) -> tuple[dict | None, dict | None]:
             if s.get("id") == slot_id:
                 return mission, s
     return None, None
+
+
+async def _log_event(
+    kind: str, username: str, mission: dict | None, slot: dict | None
+) -> None:
+    """Ticker-Ereignis speichern (best effort — nie den Request scheitern lassen).
+
+    Stutzt die Tabelle beim Schreiben auf die letzten ~200 Zeilen, damit sie
+    nicht unbegrenzt waechst."""
+    try:
+        crew_name = ((mission or {}).get("crew") or {}).get("name") or ""
+        slot_name = (slot or {}).get("name") or ""
+        async with SessionLocal() as session:
+            session.add(BoardEvent(
+                kind=kind, username=username,
+                crew_name=crew_name, slot_name=slot_name,
+            ))
+            await session.flush()
+            max_id = await session.scalar(select(func.max(BoardEvent.id)))
+            if max_id and max_id > 200:
+                await session.execute(
+                    delete(BoardEvent).where(BoardEvent.id < max_id - 200)
+                )
+            await session.commit()
+    except Exception:
+        logging.getLogger("jobs.events").exception("Ticker-Ereignis fehlgeschlagen")
 
 
 async def _promote_waitlist(slot_id: int) -> None:
@@ -1061,6 +1107,7 @@ async def _promote_waitlist(slot_id: int) -> None:
                 promoted.append((entry.player_discord_id, entry.username))
 
         for discord_id, username in promoted:
+            await _log_event("promoted", username, mission, slot)
             logging.getLogger("jobs.waitlist").info(
                 "Nachgerueckt: %s in Slot %d", username, slot_id
             )
@@ -1094,6 +1141,10 @@ async def unassign_slot(slot_id: int, me: dict = Depends(require_session)):
         await session.commit()
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="Kein Eintrag gefunden")
+    missions, _ = await _fetch_crime_data()
+    await _log_event(
+        "signout", me.get("username", ""), *_find_slot(missions, slot_id)
+    )
     # Freigewordenen Platz sofort von der Warteliste fuellen
     await _promote_waitlist(slot_id)
     return Response(status_code=204)
@@ -1159,6 +1210,8 @@ async def admin_unassign(
         slot_id=slot_id, mission_id=mission_id,
         target_id=player_discord_id, target_name=target_name,
     )
+    missions, _ = await _fetch_crime_data()
+    await _log_event("kicked", target_name, *_find_slot(missions, slot_id))
     # Freigewordenen Platz sofort von der Warteliste fuellen
     await _promote_waitlist(slot_id)
     return Response(status_code=204)
@@ -1224,6 +1277,7 @@ async def join_waitlist(
                 status_code=409, detail="Du stehst bereits auf der Warteliste"
             )
 
+    await _log_event("waitlist_join", me.get("username", ""), mission, slot)
     # Race abfedern: wurde der Slot inzwischen frei, sofort nachruecken
     await _promote_waitlist(slot_id)
     return {"detail": "Auf der Warteliste"}
@@ -1242,6 +1296,10 @@ async def leave_waitlist(slot_id: int, me: dict = Depends(require_session)):
         await session.commit()
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="Kein Wartelisten-Eintrag gefunden")
+    missions, _ = await _fetch_crime_data()
+    await _log_event(
+        "waitlist_leave", me.get("username", ""), *_find_slot(missions, slot_id)
+    )
     return Response(status_code=204)
 
 

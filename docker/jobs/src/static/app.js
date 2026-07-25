@@ -28,6 +28,7 @@ function jobsBoard() {
     myOpen: false,  // Overlay "Meine Eintragungen"
     myStats: null,  // eigene Einsatz-Bilanz (beim Oeffnen des Overlays geladen)
     jumpedTo: null, // mission_id kurz hervorheben nach dem Sprung
+    clock: Math.floor(Date.now() / 1000), // Sekunden-Uhr fuer Countdowns/Ticker
     now: Math.floor(Date.now() / 1000),  // tickt, damit "Läuft gerade" umspringt
     statsOpen: false,     // Admin-Auswertung
     statsLoading: false,
@@ -128,6 +129,8 @@ function jobsBoard() {
       // Uhr fuer "Läuft gerade" — unabhaengig vom Board-Refresh, damit das
       // Label auch ohne neue Daten zur richtigen Minute umspringt
       setInterval(() => { this.now = Math.floor(Date.now() / 1000); }, 15000);
+      // Sekunden-Uhr nur fuer Countdown-Anzeigen und Ticker-Zeitstempel
+      setInterval(() => { this.clock = Math.floor(Date.now() / 1000); }, 1000);
     },
 
     async loadBoard(pickDay) {
@@ -304,6 +307,91 @@ function jobsBoard() {
       const end = mission.window_end;
       if (!start || !end) return false;
       return this.now >= start && this.now <= end;
+    },
+
+    // ---- Countdown / Mein naechster Einsatz / Ticker ----------------------
+
+    // Alle nicht archivierten Auftraege als {day, m}-Liste
+    _allMissions() {
+      if (!this.board) return [];
+      const out = [];
+      for (const d of this.board.days) {
+        for (const m of d.missions) {
+          if (!m.archived_at) out.push({ day: d, m });
+        }
+      }
+      return out;
+    },
+
+    // Läuft gerade ein Einsatzfenster? -> {day, m} oder null
+    liveWindow() {
+      return this._allMissions().find(x => x.m.window_start && x.m.window_end
+        && x.m.window_start <= this.clock && this.clock <= x.m.window_end) || null;
+    },
+
+    // Naechstes kommendes Einsatzfenster -> {day, m} oder null
+    nextWindow() {
+      let best = null;
+      for (const x of this._allMissions()) {
+        if (!x.m.window_start || x.m.window_start <= this.clock) continue;
+        if (!best || x.m.window_start < best.m.window_start) best = x;
+      }
+      return best;
+    },
+
+    // Sekunden bis ts als "H:MM:SS" (unter einer Stunde "MM:SS")
+    fmtCountdown(ts) {
+      let s = Math.max(0, (ts || 0) - this.clock);
+      const h = Math.floor(s / 3600); s -= h * 3600;
+      const m = Math.floor(s / 60); s -= m * 60;
+      const mm = String(m).padStart(2, '0'), ss = String(s).padStart(2, '0');
+      return h > 0 ? h + ':' + mm + ':' + ss : mm + ':' + ss;
+    },
+
+    // Mein naechster Einsatz: eigener Slot, Fenster laeuft noch oder kommt
+    myNext() {
+      let best = null;
+      for (const x of this._allMissions()) {
+        const mine = (x.m.slots || []).find(s => s.mine);
+        if (!mine) continue;
+        if (x.m.window_end && x.m.window_end < this.clock) continue;
+        const start = x.m.window_start || Infinity;
+        if (!best || start < (best.m.window_start || Infinity)) {
+          best = { day: x.day, m: x.m, slot: mine };
+        }
+      }
+      return best;
+    },
+
+    // Relative Zeit fuer den Ticker
+    agoLabel(ts) {
+      const d = Math.max(0, this.clock - (ts || 0));
+      if (d < 60) return 'gerade eben';
+      if (d < 3600) return 'vor ' + Math.floor(d / 60) + ' min';
+      if (d < 86400) return 'vor ' + Math.floor(d / 3600) + ' h';
+      return 'vor ' + Math.floor(d / 86400) + ' Tagen';
+    },
+
+    // Ticker-Zeile als Text
+    eventText(e) {
+      const wo = [e.slot ? '„' + e.slot + '"' : '', e.crew].filter(Boolean).join(' · ');
+      const map = {
+        signin: ' hat sich eingetragen',
+        signout: ' hat sich ausgetragen',
+        waitlist_join: ' steht auf der Warteliste',
+        waitlist_leave: ' hat die Warteliste verlassen',
+        promoted: ' ist von der Warteliste nachgerückt',
+        kicked: ' wurde ausgetragen (Admin)',
+      };
+      return e.username + (map[e.kind] || '') + (wo ? ' — ' + wo : '');
+    },
+
+    // Punktfarbe je Ereignis-Typ
+    eventDot(e) {
+      if (e.kind === 'signin' || e.kind === 'promoted') return 'bg-[#15803d]';
+      if (e.kind === 'kicked') return 'bg-[#b91c1c]';
+      if (e.kind === 'signout') return 'bg-zinc-500';
+      return 'bg-[#b98a4a]';
     },
 
     // Text auf N Zeichen kuerzen, ohne mitten im Wort zu schneiden

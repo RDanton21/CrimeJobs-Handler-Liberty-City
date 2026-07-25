@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260725a" />
-  <script defer src="/static/app.js?v=20260725a"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260725b" />
+  <script defer src="/static/app.js?v=20260725b"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -195,6 +195,32 @@
           </div>
         </section>
 
+        <!-- Einsatz-Countdown: laufendes bzw. naechstes Zeitfenster -->
+        <div class="card-cine rounded-lg border border-[#3d4a4d] px-4 py-2 mb-4 flex items-center justify-center text-sm"
+             x-show="board && (liveWindow() || nextWindow())" x-cloak>
+          <template x-if="liveWindow()">
+            <span class="flex items-center gap-2 flex-wrap justify-center">
+              <span class="inline-block h-2 w-2 rounded-full bg-[#b91c1c] animate-pulse"></span>
+              <span class="headline text-[11px] tracking-[.15em] text-red-400">Zeitfenster läuft</span>
+              <span class="font-medium" x-text="liveWindow().m.crew ? liveWindow().m.crew.name : ''"></span>
+              <span class="text-zinc-600">·</span>
+              <span class="text-[#d9ae6e] tabular-nums"
+                    x-text="'endet in ' + fmtCountdown(liveWindow().m.window_end)"></span>
+            </span>
+          </template>
+          <template x-if="!liveWindow() && nextWindow()">
+            <span class="flex items-center gap-2 flex-wrap justify-center">
+              <span class="headline text-[11px] tracking-[.15em] text-zinc-400">Nächster Einsatz</span>
+              <span class="font-medium" x-text="nextWindow().m.crew ? nextWindow().m.crew.name : ''"></span>
+              <span class="text-zinc-600">·</span>
+              <span class="text-zinc-400" x-text="nextWindow().day.label"></span>
+              <span class="text-zinc-600">·</span>
+              <span class="text-[#d9ae6e] font-medium tabular-nums"
+                    x-text="'startet in ' + fmtCountdown(nextWindow().m.window_start)"></span>
+            </span>
+          </template>
+        </div>
+
         <!-- Missions des aktiven Tags -->
         <template x-if="currentDay()">
           <div>
@@ -205,7 +231,10 @@
             </template>
 
             <!-- Auf sehr breiten Screens zweispaltig, sonst eine Spalte -->
-            <div class="grid grid-cols-1 2xl:grid-cols-2 gap-4 items-start">
+            <!-- Ein einzelner Auftrag bekommt die volle Breite (begrenzt),
+                 statt nur eine halbe Rasterspalte zu fuellen -->
+            <div class="grid gap-4 items-start"
+                 :class="currentDay().missions.length > 1 ? 'grid-cols-1 2xl:grid-cols-2' : 'grid-cols-1 max-w-4xl'">
             <template x-for="m in currentDay().missions" :key="m.id">
               <!-- id = Sprungziel aus dem "Meine Slots"-Overlay -->
               <div class="card-cine rounded-lg overflow-hidden flex transition-shadow duration-500"
@@ -425,8 +454,8 @@
         </template>
           </main>
 
-          <!-- Rechte Spalte: Gerade aktiv (sticky) -->
-          <aside class="lg:w-48 xl:w-56 lg:flex-shrink-0 lg:sticky lg:top-4 mt-5 lg:mt-0">
+          <!-- Rechte Spalte: Gerade aktiv + Mein naechster Einsatz + Ticker (sticky) -->
+          <aside class="lg:w-56 xl:w-64 lg:flex-shrink-0 lg:sticky lg:top-4 space-y-4 mt-5 lg:mt-0">
             <section class="card-cine rounded-lg border border-[#3d4a4d] p-3"
                      x-show="board && board.online && board.online.length" x-cloak>
               <div class="flex items-center gap-2 mb-2">
@@ -451,6 +480,46 @@
               <p class="text-[10px] text-zinc-600 mt-2 leading-snug">
                 Wer die Börse in den letzten 5 Minuten offen hatte
               </p>
+            </section>
+
+            <!-- Mein naechster Einsatz -->
+            <section class="card-cine rounded-lg border border-[#3d4a4d] p-3"
+                     x-show="board && myNext()" x-cloak>
+              <div class="headline text-[10px] tracking-widest uppercase text-zinc-400 mb-2">
+                Mein nächster Einsatz
+              </div>
+              <p class="text-sm font-medium"
+                 x-text="myNext().m.crew ? myNext().m.crew.name : 'Unbekannte Crew'"></p>
+              <p class="text-xs text-zinc-400 mt-0.5" x-text="myNext().slot.name || ''"></p>
+              <p class="text-xs text-[#d9ae6e] mt-1" x-show="myNext().m.slot_window"
+                 x-text="'Zeit: ' + myNext().m.slot_window"></p>
+              <p class="text-sm mt-1.5 tabular-nums font-medium"
+                 :class="isRunning(myNext().m) ? 'text-red-400' : 'text-[#d9ae6e]'"
+                 x-text="isRunning(myNext().m)
+                   ? 'läuft gerade — endet in ' + fmtCountdown(myNext().m.window_end)
+                   : (myNext().m.window_start ? 'startet in ' + fmtCountdown(myNext().m.window_start) : '')"></p>
+              <button @click="jumpToMission({ date: myNext().day.date, mission: myNext().m })"
+                      class="text-xs text-zinc-400 underline hover:text-zinc-200 mt-2">
+                Zum Auftrag springen →
+              </button>
+            </section>
+
+            <!-- Letzte Ereignisse (Aktivitaets-Ticker) -->
+            <section class="card-cine rounded-lg border border-[#3d4a4d] p-3"
+                     x-show="board && board.events && board.events.length" x-cloak>
+              <div class="headline text-[10px] tracking-widest uppercase text-zinc-400 mb-2">
+                Letzte Ereignisse
+              </div>
+              <div class="space-y-2 max-h-80 overflow-y-auto pr-1">
+                <template x-for="(e, i) in board.events" :key="i">
+                  <p class="text-xs leading-snug text-zinc-300">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full mr-1 align-middle"
+                          :class="eventDot(e)"></span>
+                    <span x-text="eventText(e)"></span>
+                    <span class="text-zinc-600 whitespace-nowrap" x-text="'· ' + agoLabel(e.ts)"></span>
+                  </p>
+                </template>
+              </div>
             </section>
           </aside>
         </div>
