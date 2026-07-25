@@ -153,40 +153,6 @@
               </template>
             </section>
 
-            <!-- Eskalation: Legende (alle Stufen) + aktive Crews -->
-            <section class="card-cine rounded-lg border border-[#3d4a4d] p-3" x-show="board" x-cloak>
-              <button @click="escShow = !escShow"
-                      class="headline text-[11px] tracking-[.2em] uppercase text-zinc-400 hover:text-zinc-200
-                             flex items-center gap-2 transition-colors">
-                Eskalation
-                <span class="text-zinc-600" x-text="escShow ? '▾' : '▸'"></span>
-              </button>
-              <div x-show="escShow" class="mt-2.5">
-                <!-- Legende: alle Stufen -->
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 pb-2.5 border-b border-[#2a3335]">
-                  <template x-for="lv in [0,1,2,3,4]" :key="lv">
-                    <span class="flex items-center gap-1.5 text-[11px] text-zinc-400 whitespace-nowrap">
-                      <span class="ecg ecg-sm" :class="'ecg'+lv"></span>
-                      <span x-text="escLabel(lv)"></span>
-                    </span>
-                  </template>
-                </div>
-                <!-- aktuell aktive Crews (nach Stufe sortiert) -->
-                <div class="space-y-1.5 pt-2.5" x-show="crewsRanked().length">
-                  <template x-for="c in crewsRanked()" :key="c.id">
-                    <div class="flex items-center gap-2 flex-wrap">
-                      <span class="ecg ecg-sm" :class="'ecg'+(c.escalation||0)"></span>
-                      <span class="text-sm font-medium truncate flex-1" x-text="c.name"></span>
-                      <span :class="escBadgeClass(c.escalation)" x-text="escLabel(c.escalation)"></span>
-                    </div>
-                  </template>
-                </div>
-                <p class="text-[11px] text-zinc-500 pt-2.5" x-show="!crewsRanked().length">
-                  Aktuell keine aktiven Aufträge — alle Crews ruhig.
-                </p>
-              </div>
-            </section>
-
             <!-- Gerade aktiv: wer die Boerse in den letzten 5 Minuten offen hatte -->
             <section class="card-cine rounded-lg border border-[#3d4a4d] p-3"
                      x-show="board && board.online && board.online.length" x-cloak>
@@ -217,6 +183,41 @@
 
           <!-- Auftragsbereich -->
           <main class="flex-1 min-w-0">
+
+        <!-- Eskalation: Lage-Leiste mittig ueber den Auftraegen -->
+        <section class="card-cine rounded-lg border border-[#3d4a4d] px-4 py-2.5 mb-4"
+                 x-show="board" x-cloak>
+          <div class="flex items-center gap-3 flex-wrap">
+            <button @click="escShow = !escShow"
+                    class="headline text-[11px] tracking-[.2em] uppercase text-zinc-400 hover:text-zinc-200
+                           flex items-center gap-1.5 transition-colors">
+              Eskalation
+              <span class="text-zinc-600" x-text="escShow ? '▾' : '▸'"></span>
+            </button>
+            <!-- Legende: alle Stufen mittig -->
+            <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 flex-1"
+                 x-show="escShow">
+              <template x-for="lv in [0,1,2,3,4]" :key="lv">
+                <span class="flex items-center gap-1.5 text-[11px] text-zinc-400 whitespace-nowrap">
+                  <span class="ecg ecg-sm" :class="'ecg'+lv"></span>
+                  <span x-text="escLabel(lv)"></span>
+                </span>
+              </template>
+            </div>
+          </div>
+          <!-- aktuell aktive Crews (nach Stufe sortiert) -->
+          <div class="space-y-1.5 mt-2.5 pt-2.5 border-t border-[#2a3335]"
+               x-show="escShow && crewsRanked().length">
+            <template x-for="c in crewsRanked()" :key="c.id">
+              <div class="flex items-center gap-2.5 flex-wrap">
+                <span class="ecg" :class="'ecg'+(c.escalation||0)"></span>
+                <span class="text-sm font-medium truncate flex-1" x-text="c.name"></span>
+                <span class="text-[11px] text-zinc-500">auto</span>
+                <span :class="escBadgeClass(c.escalation)" x-text="escLabel(c.escalation)"></span>
+              </div>
+            </template>
+          </div>
+        </section>
 
         <!-- Missions des aktiven Tags -->
         <template x-if="currentDay()">
