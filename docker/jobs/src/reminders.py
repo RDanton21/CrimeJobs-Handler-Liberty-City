@@ -47,7 +47,7 @@ def _detail_lines(mission: dict, slot: dict) -> list[str]:
     crew = mission.get("crew") or {}
     crew_name = crew.get("name") or "Unbekannte Crew"
     district = crew.get("district") or ""
-    zeilen = [f"**{crew_name}**" + (f" · {district}" if district else "")]
+    zeilen = [f"🗽 **{crew_name}**" + (f" · {district}" if district else "")]
     rolle = slot.get("name") or (
         f"NPC #{slot['npc_number']}" if slot.get("npc_number") else ""
     )
