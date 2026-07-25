@@ -661,3 +661,44 @@ def build_relation_arbitration_prompt(
         f"und {b_name} und begruende sie."
     )
     return "\n".join(lines)
+
+
+GANG_ANALYSIS_SYSTEM_PROMPT = (
+    "Du analysierst das GESAMTBILD einer Gruppierung in einer GTA-Liberty-City-"
+    "Roleplay-Krimiserie anhand ihrer widerspruechlichen Beziehungssichten — "
+    "also der Faelle, in denen die Gruppierung eine andere anders einschaetzt "
+    "als die andere sie.\n\n"
+    "Schau NICHT auf einzelne Paare, sondern auf das Muster ueber alle "
+    "Widersprueche hinweg: Ueberschaetzt die Gruppierung ihre Allianzen? Sieht "
+    "sie ueberall Feinde, wo keine sind? Wird sie unterschaetzt? Ist sie "
+    "isoliert, aggressiv, paranoid, ueberheblich? Leite daraus einen "
+    "dramaturgischen Charakterzug ab.\n\n"
+    "Antworte mit NUR einem JSON-Objekt, keine Markdown-Fences, kein Text "
+    "davor oder danach:\n"
+    '{"titel": "<prägnante Einordnung, max 8 Wörter, wie eine Schlagzeile>", '
+    '"einordnung": "<2-4 Sätze: was das Muster ueber die Gruppierung sagt, '
+    'konkret auf ihre Widersprueche und Story bezogen, plus eine kurze '
+    'Empfehlung, wie die Konflikte aufzuloesen sind>"}\n\n'
+    "Deutsch, knapp, ohne Floskeln. Der titel ist eine Charakterisierung "
+    "(z.B. 'Der Aggressor, den keiner ernst nimmt'), keine blosse Wiederholung "
+    "des Namens."
+)
+
+
+def build_gang_analysis_prompt(
+    gang_name: str, gang_story: str, widersprueche: list[dict]
+) -> str:
+    """User-Prompt fuer die Gang-Einordnung. widersprueche: Liste von
+    {other, mine, theirs} (deutsche Labels)."""
+    lines = [f"## Gruppierung\n{gang_name}"]
+    if gang_story.strip():
+        lines.append(f"\n## Hintergrund\n{gang_story.strip()}")
+    lines.append(f"\n## Widersprüche ({len(widersprueche)})")
+    lines.append("Format: Gegenüber — wie WIR sie sehen / wie SIE uns sehen")
+    for w in widersprueche:
+        lines.append(f"- {w['other']} — wir: {w['mine']} / sie: {w['theirs']}")
+    lines.append(
+        "\n## Aufgabe\nLeite aus dem MUSTER dieser Widersprüche einen "
+        "Charakterzug der Gruppierung ab. Titel + Einordnung."
+    )
+    return "\n".join(lines)

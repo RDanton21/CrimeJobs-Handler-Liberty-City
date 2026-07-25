@@ -3087,6 +3087,73 @@ function relationsSurvey() {
     finalDraft: {},
     aiBusy: {},
     aiResult: {},
+    // --- Widerspruchs-Analyse ---
+    analysis: {},       // crew_id -> {titel, einordnung, anzahl}
+    analysisBusy: {},
+    anaOpen: {},
+    // Gangs mit Widersprüchen, absteigend nach Anzahl. Aus der Matrix berechnet.
+    get gangConflicts() {
+      const items = this.matrix.items || [];
+      const by = {};
+      for (const p of items) {
+        if (p.status !== "widerspruch") continue;
+        for (const [id, name, mine, theirs] of [
+          [p.a_id, p.a_name, p.a_zu_b_label, p.b_zu_a_label],
+          [p.b_id, p.b_name, p.b_zu_a_label, p.a_zu_b_label],
+        ]) {
+          (by[id] = by[id] || { crew_id: id, name, konflikte: [] })
+            .konflikte.push({
+              other: id === p.a_id ? p.b_name : p.a_name, mine, theirs,
+            });
+        }
+      }
+      return Object.values(by).sort((a, b) => b.konflikte.length - a.konflikte.length);
+    },
+    async analyzeGang(g) {
+      this.analysisBusy[g.crew_id] = true;
+      this.error = "";
+      try {
+        const r = await api.post(`/api/relations/survey/analysis/${g.crew_id}`, {});
+        this.analysis[g.crew_id] = r;
+        this.anaOpen[g.crew_id] = true;
+      } catch (e) {
+        this.error = `KI-Analyse für ${g.name} fehlgeschlagen: ` + (e.message || e);
+      } finally {
+        this.analysisBusy[g.crew_id] = false;
+      }
+    },
+    async analyzeAll() {
+      for (const g of this.gangConflicts) {
+        if (!this.analysis[g.crew_id]) await this.analyzeGang(g);
+      }
+    },
+    // deutsches Label -> Typ-Key (für die Chip-Farbe in der Analyse)
+    relKeyOf(label) {
+      return ({ "verbündet": "ALLIED", "geschäftlich": "BUSINESS", "neutral": "NEUTRAL",
+                "rivalisierend": "RIVAL", "feindlich": "HOSTILE" })[label] || "";
+    },
+    // Kuchendiagramm (Donut) der Befund-Verteilung als SVG-Segmente.
+    get donut() {
+      const z = this.matrix.zusammenfassung || {};
+      const segs = [
+        { key: "widerspruch", label: "Widerspruch", val: z.widerspruch || 0, color: "#dc2626" },
+        { key: "abweichend", label: "Abweichend", val: z.abweichend || 0, color: "#d97706" },
+        { key: "einig", label: "Einig", val: z.einig || 0, color: "#16a34a" },
+        { key: "offen", label: "Offen", val: z.offen || 0, color: "#71717a" },
+      ];
+      const total = segs.reduce((s, x) => s + x.val, 0) || 1;
+      const C = 2 * Math.PI * 42;  // r=42
+      let acc = 0;
+      for (const s of segs) {
+        s.pct = Math.round((s.val / total) * 100);
+        s.len = (s.val / total) * C;
+        s.gap = C - s.len;
+        s.offset = -acc;
+        acc += s.len;
+      }
+      return { segs, total, C };
+    },
+
     // --- Stand veröffentlichen ---
     summaries: [],
     sumLoading: false,

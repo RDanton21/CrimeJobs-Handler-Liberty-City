@@ -241,6 +241,34 @@ durch **Übernehmen**. Die „vorher sehen, dann freigeben"-Logik bleibt gewahrt
 
 ---
 
+## 7b. Widerspruchs-Analyse pro Gang
+
+Der KI-Schiedsspruch (§7) erklärt **einzelne Paare**. Die Widerspruchs-Analyse
+geht eine Ebene höher: Sie liest **alle Widersprüche einer Gang als Muster** und
+leitet daraus einen dramaturgischen Charakterzug ab — auswerten mit Begründung,
+das Gesamtbild statt der Einzelfälle.
+
+Der Abschnitt „Widerspruchs-Analyse" auf der Seite zeigt:
+
+- **Ein Kuchendiagramm** der Befund-Verteilung (Widerspruch / abweichend / einig
+  / offen) mit Beschriftung und Zahlen — die Temperatur der ganzen Erhebung auf
+  einen Blick.
+- **Eine Karte pro Gang**, die in Widersprüche verwickelt ist, sortiert nach
+  Anzahl. Der **Titel jeder Karte ist die KI-Einordnung** (`POST /analysis/{id}`)
+  — eine Schlagzeile wie „Die Paranoiden Gesetzeshüter", darunter die Begründung
+  und die aufklappbaren Fakten (mit wem, wer wie sieht).
+
+Beispiel: Blue Union meldet viermal Feindschaft, wo die Gegenseite neutral
+bleibt. Die KI macht daraus „Die Paranoiden Gesetzeshüter — sieht überall
+Bedrohung, wird aber nur neutral gesehen" plus die Empfehlung, die einseitigen
+Feindschaften nicht als *feindlich* festzuschreiben.
+
+Die Analyse **schreibt nichts** — sie ist ein Auswertungs-Werkzeug für die
+Spielleitung. „🪄 Alle analysieren" generiert die Einordnungen für alle
+betroffenen Gangs nacheinander.
+
+---
+
 ## 8. Schritt 5 — Übernehmen in die geltende Matrix
 
 Der **Übernehmen**-Knopf schreibt die eine geltende Beziehung des Paares nach
@@ -400,6 +428,7 @@ Alle Endpunkte unter `/api/relations/survey`, Admin-Auth (Basic).
 | `DELETE` | `/crew/{crew_id}` | alle Antworten einer Gruppierung |
 | `DELETE` | `/reset` | alle Erhebungs-Antworten |
 | `POST` | `/ai-suggest` | KI-Vorschlag für ein Paar (schreibt nichts) |
+| `POST` | `/analysis/{crew_id}` | KI-Einordnung einer Gang aus ihren Widersprüchen: Titel + Begründung (schreibt nichts) |
 | `POST` | `/finalize` | geltenden Stand + Notiz nach `crew_relations` (der einzige Schreibzugriff auf die geltende Matrix) |
 | `GET` | `/summary` | Vorschau der „EUER STAND"-Nachrichten für alle aktiven Gruppierungen (sendet nichts) |
 | `POST` | `/summary/send` | postet jeder gewählten Gruppierung ihren Stand in ihren Channel (Schritt 6) |

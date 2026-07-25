@@ -28,7 +28,9 @@ from .config import settings
 from .db import get_session
 from .models import Crew, CrewRelation, RelationProposal, RelationType, SurveyMessage
 from .prompts import (
+    GANG_ANALYSIS_SYSTEM_PROMPT,
     RELATION_ARBITRATION_SYSTEM_PROMPT,
+    build_gang_analysis_prompt,
     build_relation_arbitration_prompt,
 )
 from .settings_store import get as settings_get_value
@@ -598,6 +600,100 @@ async def summary_send(
             skipped.append({"crew": i["name"], "grund": str(exc)})
 
     return {"ok": True, "gesendet": sent, "uebersprungen": skipped}
+
+
+def _gang_widersprueche(crew_id: int, prop: dict, by_id: dict) -> list[dict]:
+    """Alle Widersprueche (Abstand >= 2), an denen crew_id beteiligt ist —
+    aus Sicht dieser Gruppierung: {other, mine, theirs}."""
+    out = []
+    for (frm, to), p in prop.items():
+        if frm != crew_id:
+            continue
+        back = prop.get((to, frm))
+        if not back:
+            continue
+        mine = _type_name(p.relation_type)
+        theirs = _type_name(back.relation_type)
+        if abs(SCALE[mine] - SCALE[theirs]) >= 2:
+            out.append({
+                "other": by_id[to].name if to in by_id else f"#{to}",
+                "mine": LABEL_BY_TYPE.get(mine, mine),
+                "theirs": LABEL_BY_TYPE.get(theirs, theirs),
+            })
+    return out
+
+
+class GangAnalysisRequest(BaseModel):
+    provider: str | None = None
+    model: str | None = None
+
+
+@router.post("/analysis/{crew_id}")
+async def gang_analysis(
+    crew_id: int, payload: GangAnalysisRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """KI-Einordnung EINER Gruppierung: liest ihre Widersprueche als Muster
+    und leitet einen Charakterzug ab (Titel + Begruendung). Schreibt nichts."""
+    crew = await session.get(Crew, crew_id)
+    if not crew:
+        raise HTTPException(404, "Gruppierung nicht gefunden")
+
+    crews = await _survey_crews(session)
+    by_id = {c.id: c for c in crews}
+    rows = (await session.execute(select(RelationProposal))).scalars().all()
+    prop = {(p.from_crew_id, p.to_crew_id): p for p in rows}
+
+    widersprueche = _gang_widersprueche(crew_id, prop, by_id)
+    if not widersprueche:
+        return {"ok": True, "titel": "Keine Widersprüche", "einordnung":
+                "Diese Gruppierung hat keine widersprüchlichen Beziehungen — "
+                "ihre Sicht deckt sich mit der der anderen.", "anzahl": 0}
+
+    keys = {
+        "anthropic": await settings_get_value(session, "anthropic_api_key", settings.anthropic_api_key),
+        "openai": await settings_get_value(session, "openai_api_key", settings.openai_api_key),
+    }
+    models = {
+        "claude": await settings_get_value(session, "default_claude_model", settings.default_claude_model),
+        "openai": await settings_get_value(session, "default_openai_model", settings.default_openai_model),
+    }
+    provider_name = payload.provider or await settings_get_value(
+        session, "default_provider", settings.default_ai_provider
+    )
+    provider = await get_provider(provider_name, keys=keys, models=models)
+
+    user_prompt = build_gang_analysis_prompt(
+        crew.name, crew.story_background or "", widersprueche
+    )
+    try:
+        text = await provider.generate(
+            user_prompt, model=payload.model, system_prompt=GANG_ANALYSIS_SYSTEM_PROMPT
+        )
+    except Exception as exc:
+        raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+
+    raw = (text or "").strip()
+    parsed = None
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        s, e = raw.find("{"), raw.rfind("}")
+        if s != -1 and e > s:
+            try:
+                parsed = json.loads(raw[s:e + 1])
+            except json.JSONDecodeError:
+                parsed = None
+    if not isinstance(parsed, dict) or not parsed.get("titel"):
+        raise HTTPException(502, f"KI-Antwort unbrauchbar: {raw[:200]}")
+
+    return {
+        "ok": True,
+        "titel": str(parsed["titel"]).strip(),
+        "einordnung": str(parsed.get("einordnung", "")).strip(),
+        "anzahl": len(widersprueche),
+        "provider": provider.name,
+    }
 
 
 class AiSuggestRequest(BaseModel):
