@@ -122,3 +122,17 @@ body::after {
 .ecg2 { --ecg-col: #d98324; --ecg-dur: 2s;    --ecg-amp: 78%; }
 .ecg3 { --ecg-col: #d5232a; --ecg-dur: 1.15s; --ecg-amp: 100%; --ecg-glow: drop-shadow(0 0 3px rgba(213,35,42,0.7)); }
 .ecg4 { --ecg-col: #ef2b32; --ecg-dur: 0.68s; --ecg-amp: 120%; --ecg-glow: drop-shadow(0 0 4px rgba(239,43,50,0.95)); }
+
+/* Kompaktes Regie-Select im Eskalations-Panel (Admin-Override) */
+.esel {
+  background: #17191b; color: #d4d4d8; border: 1px solid #3d4a4d;
+  border-radius: 5px; font-size: 11px; padding: 2px 4px;
+}
+.esel:focus { outline: none; border-color: #b98a4a; }
+
+/* Schlanke dunkle Scrollbalken (WebKit + Firefox) statt OS-Standard */
+* { scrollbar-width: thin; scrollbar-color: #3d4a4d transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: #3d4a4d; border-radius: 4px; }
+*::-webkit-scrollbar-thumb:hover { background: #52646a; }

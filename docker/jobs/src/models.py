@@ -94,6 +94,19 @@ class AdminAction(Base):
     details: Mapped[str] = mapped_column(String, default="")
 
 
+class EscalationOverride(Base):
+    """Regie-Override der Eskalationsstufe pro Crime-Crew.
+
+    Solange ein Eintrag existiert, gewinnt er gegen die Auto-Berechnung
+    (Story-Analyse + Aktivitaet). Loeschen = zurueck auf Auto."""
+    __tablename__ = "escalation_overrides"
+
+    crew_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    level: Mapped[int] = mapped_column(Integer)
+    set_by: Mapped[str] = mapped_column(String, default="")
+    set_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class BoardEvent(Base):
     """Aktivitaets-Ticker: oeffentliche Board-Ereignisse (Eintragen, Austragen,
     Warteliste, Nachruecken, Admin-Kick). Wird beim Schreiben auf die letzten

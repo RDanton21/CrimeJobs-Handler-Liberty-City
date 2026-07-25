@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260725b" />
-  <script defer src="/static/app.js?v=20260725b"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260725d" />
+  <script defer src="/static/app.js?v=20260725d"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -188,7 +188,19 @@
               <div class="flex items-center gap-2.5 flex-wrap">
                 <span class="ecg" :class="'ecg'+(c.escalation||0)"></span>
                 <span class="text-sm font-medium truncate flex-1" x-text="c.name"></span>
-                <span class="text-[11px] text-zinc-500">auto</span>
+                <span class="text-[11px] text-zinc-500"
+                      x-text="(c.escalation_manual === null || c.escalation_manual === undefined) ? 'auto' : 'manuell'"></span>
+                <!-- Regie: Stufe uebersteuern (Auto = Story + Aktivitaet) -->
+                <template x-if="me && me.is_admin">
+                  <select class="esel" @change="setEscalation(c.id, $event.target.value)">
+                    <option value=""
+                            :selected="c.escalation_manual === null || c.escalation_manual === undefined">Auto</option>
+                    <template x-for="lv in [0,1,2,3,4]" :key="lv">
+                      <option :value="lv" :selected="c.escalation_manual === lv"
+                              x-text="escLabel(lv)"></option>
+                    </template>
+                  </select>
+                </template>
                 <span :class="escBadgeClass(c.escalation)" x-text="escLabel(c.escalation)"></span>
               </div>
             </template>
@@ -454,8 +466,9 @@
         </template>
           </main>
 
-          <!-- Rechte Spalte: Gerade aktiv + Mein naechster Einsatz + Ticker (sticky) -->
-          <aside class="lg:w-56 xl:w-64 lg:flex-shrink-0 lg:sticky lg:top-4 space-y-4 mt-5 lg:mt-0">
+          <!-- Rechte Spalte: Gerade aktiv + Mein naechster Einsatz + Ticker.
+               Bewusst nicht sticky: der Ticker darf beliebig lang werden -->
+          <aside class="lg:w-56 xl:w-64 lg:flex-shrink-0 space-y-4 mt-5 lg:mt-0">
             <section class="card-cine rounded-lg border border-[#3d4a4d] p-3"
                      x-show="board && board.online && board.online.length" x-cloak>
               <div class="flex items-center gap-2 mb-2">
@@ -510,7 +523,7 @@
               <div class="headline text-[10px] tracking-widest uppercase text-zinc-400 mb-2">
                 Letzte Ereignisse
               </div>
-              <div class="space-y-2 max-h-80 overflow-y-auto pr-1">
+              <div class="space-y-2">
                 <template x-for="(e, i) in board.events" :key="i">
                   <p class="text-xs leading-snug text-zinc-300">
                     <span class="inline-block h-1.5 w-1.5 rounded-full mr-1 align-middle"

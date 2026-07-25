@@ -386,6 +386,29 @@ function jobsBoard() {
       return e.username + (map[e.kind] || '') + (wo ? ' — ' + wo : '');
     },
 
+    // Regie-Override der Eskalationsstufe setzen ('' = zurueck auf Auto)
+    async setEscalation(crewId, value) {
+      const level = value === '' ? null : parseInt(value, 10);
+      try {
+        const r = await fetch('/api/admin/escalation/' + crewId, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ level }),
+        });
+        if (!r.ok) {
+          const j = await r.json().catch(() => ({}));
+          this.showToast(j.detail || 'Eskalation speichern fehlgeschlagen', true);
+          return;
+        }
+        this.showToast(level === null
+          ? 'Eskalation: wieder automatisch'
+          : 'Eskalation gesetzt: ' + this.escLabel(level));
+        await this.loadBoard(false);
+      } catch (e) {
+        this.showToast('Verbindung zum Server fehlgeschlagen', true);
+      }
+    },
+
     // Punktfarbe je Ereignis-Typ
     eventDot(e) {
       if (e.kind === 'signin' || e.kind === 'promoted') return 'bg-[#15803d]';

@@ -14,6 +14,7 @@ import contextlib
 import csv
 import io
 import logging
+import re
 import secrets
 import time
 from contextlib import asynccontextmanager
@@ -38,6 +39,7 @@ from .models import (
     BoardEvent,
     CompletedParticipation,
     DismissedMission,
+    EscalationOverride,
     Player,
     SlotAssignment,
     WaitlistEntry,
@@ -72,6 +74,47 @@ def _auto_escalation(active_count: int) -> int:
     if active_count <= 4:
         return 3
     return 4
+
+
+#: Story-Signale im Auftragstext -> Stufe. Hoechster Treffer zaehlt.
+#: Regex mit Wortgrenzen wo noetig — sonst zaehlt "Abschluss" als Schuss,
+#: "kriegen" als Krieg und "Sprache" als Rache.
+_STORY_SIGNALS: list[tuple[int, re.Pattern]] = [
+    (4, re.compile(
+        r"krieg\b|blutrache|anschlag|bombe|sprengs|exekut|hinricht"
+        r"|geisel|massaker")),
+    (3, re.compile(
+        r"bewaffn|waffe|\bschuss|schüsse|schie(ß|ss)|\brache|eskalier"
+        r"|entf(ü|ue)hr|erpress|brandstift|sabotage|(ü|ue)berf(a|ä|ae)ll"
+        r"|abfangen|abgefangen|drohung|einsch(ü|ue)chter|gewalt")),
+    (2, re.compile(
+        r"(ü|ue)bergabe|schmuggel|schutzgeld|diebstahl|einbr(u|e)ch"
+        r"|\bstehlen|\bklauen|\brevier|provo(kation|zier)|hehler|konflikt"
+        r"|geldw(ä|ae)sch|druck\s*mach")),
+    (1, re.compile(
+        r"beobacht|observ|aufkl(ä|ae)r|informant|spitzel"
+        r"|unauff(ä|ae)llig|stealth|lausch|\btarn")),
+]
+
+
+def _story_escalation(mission: dict) -> int:
+    """Stufe 0-4 aus dem Auftragstext (Story-Signale, hoechster Treffer zaehlt).
+
+    Arbeitet auf den ROHEN Crime-Daten (voller Text inkl. Regie-Brief) —
+    was Spieler sehen duerfen, entscheidet weiterhin die Auslieferung."""
+    parts = [
+        str(mission.get("content") or ""),
+        str(mission.get("content_excerpt") or ""),
+        str(mission.get("personnel_brief") or ""),
+    ]
+    for s in mission.get("slots", []) or []:
+        for k in ("name", "function", "location", "costume", "notes"):
+            parts.append(str(s.get(k) or ""))
+    text = " ".join(parts).lower()
+    for level, pattern in _STORY_SIGNALS:
+        if pattern.search(text):
+            return level
+    return 0
 
 #: Referenzen auf Fire-and-forget-Tasks (DM-Versand) — asyncio haelt selbst
 #: nur schwache Referenzen, ohne dieses Set koennte der GC laufende Tasks
@@ -797,6 +840,11 @@ async def api_board(me: dict = Depends(require_session)):
             }
             for row in res_online.all()
         ]
+        # Regie-Overrides der Eskalationsstufen
+        ov_rows = (
+            await session.execute(select(EscalationOverride))
+        ).scalars().all()
+        esc_overrides = {o.crew_id: o.level for o in ov_rows}
         # Aktivitaets-Ticker: die juengsten Board-Ereignisse
         ev_rows = (
             await session.execute(
@@ -829,14 +877,26 @@ async def api_board(me: dict = Depends(require_session)):
     if dismissed:
         missions = [m for m in missions if m.get("id") not in dismissed]
 
-    # Auto-Eskalation: aktive (nicht archivierte) Auftraege je Crew -> Stufe 0-4
+    # Eskalation: Regie-Override > max(Story-Analyse des Textes, Aktivitaet).
+    # Pro Auftrag zaehlt seine eigene Story-Stufe — so kann ein Auftrag
+    # "Ruhig" sein, waehrend ein anderer derselben Nacht eskaliert.
     active_by_crew: dict = {}
+    story_by_crew: dict = {}
+    mission_story: dict = {}
     for m in missions:
-        if not m.get("archived_at"):
-            cid = (m.get("crew") or {}).get("id")
-            if cid is not None:
-                active_by_crew[cid] = active_by_crew.get(cid, 0) + 1
-    crew_level = {cid: _auto_escalation(n) for cid, n in active_by_crew.items()}
+        if m.get("archived_at"):
+            continue
+        cid = (m.get("crew") or {}).get("id")
+        lvl = _story_escalation(m)
+        mission_story[m.get("id")] = lvl
+        if cid is not None:
+            active_by_crew[cid] = active_by_crew.get(cid, 0) + 1
+            story_by_crew[cid] = max(story_by_crew.get(cid, 0), lvl)
+    crew_level = {
+        cid: max(_auto_escalation(n), story_by_crew.get(cid, 0))
+        for cid, n in active_by_crew.items()
+    }
+    crew_level.update(esc_overrides)
 
     # Missions auf Berlin-Kalendertage verteilen
     event_days = _event_days()
@@ -845,7 +905,11 @@ async def api_board(me: dict = Depends(require_session)):
     for mission in sorted(missions, key=_mission_sort_key):
         enriched = _enrich_mission(mission, assignments_by_slot, waitlist_by_slot, me)
         _cid = (mission.get("crew") or {}).get("id")
-        _lvl = crew_level.get(_cid, 0)
+        # Override der Crew gilt fuer alle ihre Auftraege, sonst Story-Stufe
+        if _cid in esc_overrides:
+            _lvl = esc_overrides[_cid]
+        else:
+            _lvl = mission_story.get(mission.get("id"), 0)
         enriched["escalation"] = _lvl
         enriched["escalation_slug"] = ESC_SLUGS[_lvl]
         day = _mission_day(mission)
@@ -894,10 +958,12 @@ async def api_board(me: dict = Depends(require_session)):
             ],
         },
         "days": days_out,
-        # Crews mit effektiver Auto-Stufe (Cache nie mutieren -> neue Dicts)
+        # Crews mit effektiver Stufe (Cache nie mutieren -> neue Dicts);
+        # escalation_manual: gesetzter Regie-Override oder None (= Auto)
         "crews": [
             {**c, "escalation": crew_level.get(c.get("id"), 0),
              "escalation_slug": ESC_SLUGS[crew_level.get(c.get("id"), 0)],
+             "escalation_manual": esc_overrides.get(c.get("id")),
              "active_count": active_by_crew.get(c.get("id"), 0)}
             for c in crews
         ],
@@ -1306,6 +1372,40 @@ async def leave_waitlist(slot_id: int, me: dict = Depends(require_session)):
 def _require_admin(me: dict) -> None:
     if not me.get("is_admin"):
         raise HTTPException(status_code=403, detail="Nur für Admins")
+
+
+@app.post("/api/admin/escalation/{crew_id}")
+async def admin_set_escalation(
+    crew_id: int,
+    payload: dict = Body(...),
+    me: dict = Depends(require_session),
+):
+    """Regie-Override der Eskalationsstufe einer Crew setzen oder loeschen.
+
+    Body: {"level": 0-4} setzt fest, {"level": null} zurueck auf Auto."""
+    _require_admin(me)
+    level = payload.get("level", None)
+    if level is not None and (not isinstance(level, int) or not (0 <= level <= 4)):
+        raise HTTPException(status_code=422, detail="level muss 0-4 oder null sein")
+    async with SessionLocal() as session:
+        row = await session.get(EscalationOverride, crew_id)
+        if level is None:
+            if row is not None:
+                await session.delete(row)
+        elif row is not None:
+            row.level = level
+            row.set_by = me.get("username", "")
+            row.set_at = datetime.utcnow()
+        else:
+            session.add(EscalationOverride(
+                crew_id=crew_id, level=level, set_by=me.get("username", ""),
+            ))
+        await session.commit()
+    await _log_admin_action(
+        me, "escalation",
+        details=f"crew_id={crew_id} level={'auto' if level is None else level}",
+    )
+    return {"detail": "ok"}
 
 
 @app.post("/api/admin/attendance/{slot_id}/{player_discord_id}")
