@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260725e" />
-  <script defer src="/static/app.js?v=20260725e"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260725f" />
+  <script defer src="/static/app.js?v=20260725f"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -188,11 +188,12 @@
               <div class="flex items-center gap-2.5 flex-wrap">
                 <span class="ecg" :class="'ecg'+(c.escalation||0)"></span>
                 <span class="text-sm font-medium truncate flex-1" x-text="c.name"></span>
-                <span class="text-[11px] text-zinc-500"
+                <!-- Feste Spaltenbreiten, damit Label/Select/Badge buendig stehen -->
+                <span class="text-[11px] text-zinc-500 w-14 text-right"
                       x-text="(c.escalation_manual === null || c.escalation_manual === undefined) ? 'auto' : 'manuell'"></span>
                 <!-- Regie: Stufe uebersteuern (Auto = Story + Aktivitaet) -->
                 <template x-if="me && me.is_admin">
-                  <select class="esel" @change="setEscalation(c.id, $event.target.value)">
+                  <select class="esel w-24" @change="setEscalation(c.id, $event.target.value)">
                     <option value=""
                             :selected="c.escalation_manual === null || c.escalation_manual === undefined">Auto</option>
                     <template x-for="lv in [0,1,2,3,4]" :key="lv">
@@ -201,7 +202,8 @@
                     </template>
                   </select>
                 </template>
-                <span :class="escBadgeClass(c.escalation)" x-text="escLabel(c.escalation)"></span>
+                <span :class="escBadgeClass(c.escalation)" class="justify-center min-w-[6.5rem]"
+                      x-text="escLabel(c.escalation)"></span>
               </div>
             </template>
           </div>
