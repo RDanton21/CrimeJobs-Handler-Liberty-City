@@ -54,16 +54,16 @@ def _detail_lines(mission: dict, slot: dict) -> list[str]:
     if slot.get("function"):
         rolle = f"{rolle} — {slot['function']}" if rolle else slot["function"]
     if rolle:
-        zeilen.append(f"> 🎭 **Rolle:** {rolle}")
+        zeilen.append(f"> 🗽 **Rolle:** {rolle}")
     fenster = slot.get("slot_window") or mission.get("slot_window") or ""
     if fenster:
-        zeilen.append(f"> 🕘 **Zeit:** {fenster}")
+        zeilen.append(f"> 🗽 **Zeit:** {fenster}")
     if slot.get("location"):
-        zeilen.append(f"> 📍 **Treffpunkt:** {slot['location']}")
+        zeilen.append(f"> 🗽 **Treffpunkt:** {slot['location']}")
     if slot.get("costume"):
-        zeilen.append(f"> 👔 **Kostüm:** {slot['costume']}")
+        zeilen.append(f"> 🗽 **Kostüm:** {slot['costume']}")
     if slot.get("notes"):
-        zeilen.append(f"> 💡 **Hinweis:** {slot['notes']}")
+        zeilen.append(f"> 🗽 **Hinweis:** {slot['notes']}")
     # Fester Orga-Hinweis fuer alle Einsatz-DMs (Wunsch SEKTOR-Team)
     zeilen.append("")
     zeilen.append("✈️ Vorbereitung findet am **Francis International Airport** statt")
