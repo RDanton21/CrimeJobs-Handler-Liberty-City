@@ -24,9 +24,9 @@ Die Phasen:
 
 ## Das Showdown-Voice-Over (Big Boss spricht direkt)
 
-> *Sechzehn Tage.*
+> *Zehn Tage.*
 >
-> *Sechzehn Tage habt ihr unter mir gearbeitet, ohne mich zu sehen. Sechzehn Tage habt ihr eure Aufträge ausgeführt, eure Reviere verteidigt, eure Allianzen geschmiedet und gebrochen. Sechzehn Tage habt ihr versucht zu verstehen, was hier passiert.*
+> *Zehn Tage habt ihr unter mir gearbeitet, ohne mich zu sehen. Zehn Tage habt ihr eure Aufträge ausgeführt, eure Reviere verteidigt, eure Allianzen geschmiedet und gebrochen. Zehn Tage habt ihr versucht zu verstehen, was hier passiert.*
 >
 > *Heute erkläre ich es euch.*
 >
@@ -34,7 +34,7 @@ Die Phasen:
 >
 > *Ich brauche keinen Vermittler mehr. Ich brauche eine rechte Hand. Eine Crew, die nicht zwischen den Häusern steht, sondern über ihnen. Eine Crew, die liefert, ohne zu fragen. Eine Crew, die spürt, wann ich sie brauche, ohne dass ich sie rufe.*
 >
-> *Diese Crew habe ich gesucht. Diese Crew habe ich in den letzten sechzehn Tagen geprüft. Eure Aufträge waren nicht zufällig. Euer Tribut, eure Stille, eure Botschaft, euer Verrat, euer letzter Coup — jedes Stück eine Frage. Wer kann liefern? Wer kann schweigen? Wer kann brennen, ohne sich zu verraten? Wer kann töten, ohne zu zögern? Wer kann eine Stadt erschüttern?*
+> *Diese Crew habe ich gesucht. Diese Crew habe ich in den letzten zehn Tagen geprüft. Eure Aufträge waren nicht zufällig. Euer Tribut, eure Stille, eure Botschaft, euer Verrat, euer letzter Coup — jedes Stück eine Frage. Wer kann liefern? Wer kann schweigen? Wer kann brennen, ohne sich zu verraten? Wer kann töten, ohne zu zögern? Wer kann eine Stadt erschüttern?*
 >
 > *Ihr habt alle geantwortet. Manche besser, manche schlechter. Eine Crew hat alle Fragen mit derselben Klarheit beantwortet.*
 >
@@ -60,7 +60,7 @@ Die Phasen:
 
 ### Phase 1 — Der finale Coup (vormittags/mittags)
 
-- **Big Boss meldet sich direkt** (Voice-Over im Hauptchannel + alle Crew-Channels): Tag-16-Massen-Auftrag „Die Krone" wird verteilt.
+- **Big Boss meldet sich direkt** (Voice-Over im Hauptchannel + alle Crew-Channels): Tag-10-Massen-Auftrag „Die Krone" wird verteilt.
 - **Skript:** siehe `EVENT_BRIEFINGS_MASS.md` → Tag 10 „Das Finale: Die Krone" (Sektion vom 16.08.2026).
 - **Crews führen den Coup parallel aus.** Spielleiter dokumentiert Ergebnisse für Punkte ×3.
 - **Stimmung:** Höchste Anspannung. Jede Crew weiß, dass dieser Auftrag dreifach zählt.
@@ -99,7 +99,7 @@ Francis J. Underwood, der Head of Liberty City, erscheint live — entweder im S
 >
 > *Ich stehe hinter ihr.*
 >
-> *Sechzehn Tage habe ich an einer einzigen Frage gearbeitet: Wer in dieser Stadt verdient meine Hand? Wer kann liefern, ohne zu fragen? Wer kann schweigen, wenn die Welt schreit? Wer kann brennen, ohne sich zu verraten? Heute habe ich die Antwort.*
+> *Zehn Tage habe ich an einer einzigen Frage gearbeitet: Wer in dieser Stadt verdient meine Hand? Wer kann liefern, ohne zu fragen? Wer kann schweigen, wenn die Welt schreit? Wer kann brennen, ohne sich zu verraten? Heute habe ich die Antwort.*
 >
 > *Manche werden mich verurteilen. Manche werden mich aus dem Amt fordern. Sie können es versuchen. Sie haben gegen einen Mann gekämpft, den sie nicht sehen konnten. Jetzt kämpfen sie gegen einen Mann, der das Rathaus besitzt. Wir werden sehen, wer sich darunter sortiert.*
 >
@@ -190,8 +190,8 @@ Das passiert nur, wenn die Punkte-Mechanik fehlerhaft ist oder Spieler systemati
 Tie-Breaker (in dieser Reihenfolge):
 1. Mehr 👍 absolut
 2. Weniger 👎 absolut
-3. Tag-16-Coup-Punkte (Finale-Test, ×3-Multiplikator)
-4. Tag-15-Rivalen-Punkte (Probe)
+3. Tag-10-Coup-Punkte (Finale-Test, ×3-Multiplikator)
+4. Tag-9-Rivalen-Punkte (Probe)
 5. Spielleiter-Bauchgefühl (Crew, die das Event am besten getragen hat)
 
 ### Was wenn die Stimmung niedrig ist?
@@ -232,7 +232,7 @@ Ich weiß, ihr habt heute viel gehört. Sirenen. Schlagzeilen. Eine Stimme im Ra
 
 Ich stehe hinter ihr.
 
-Sechzehn Tage habe ich an einer einzigen Frage gearbeitet: Wer in dieser Stadt verdient meine Hand? Wer kann liefern, ohne zu fragen? Wer kann schweigen, wenn die Welt schreit? Wer kann brennen, ohne sich zu verraten? Heute habe ich die Antwort.
+Zehn Tage habe ich an einer einzigen Frage gearbeitet: Wer in dieser Stadt verdient meine Hand? Wer kann liefern, ohne zu fragen? Wer kann schweigen, wenn die Welt schreit? Wer kann brennen, ohne sich zu verraten? Heute habe ich die Antwort.
 
 Manche werden mich verurteilen. Manche werden mich aus dem Amt fordern. Sie können es versuchen. Sie haben gegen einen Mann gekämpft, den sie nicht sehen konnten. Jetzt kämpfen sie gegen einen Mann, der das Rathaus besitzt. Wir werden sehen, wer sich darunter sortiert.
 
@@ -253,7 +253,7 @@ Macht euch bereit.
 ## Verwandte Dokumente
 
 - [`EVENT_TIMELINE.md`](EVENT_TIMELINE.md) — 10-Tage-Übersicht
-- [`EVENT_BRIEFINGS_MASS.md`](EVENT_BRIEFINGS_MASS.md) — die 6 Massen-Briefings (Tag 3, 6, 9, 12, 15, 16)
+- [`EVENT_BRIEFINGS_MASS.md`](EVENT_BRIEFINGS_MASS.md) — die 5 Massen-Briefings (Tag 2, 4, 7, 9, 10)
 - [`QUEST_GIVERS.md`](QUEST_GIVERS.md) — Mittler-Profile
 - [`EVENT_BRIEFING.md`](EVENT_BRIEFING.md) — Eröffnungs-Story (Tag 1)
 - [`CITY_PUBLIC_BRIEFING_VOICEOVER_MULTI.md`](CITY_PUBLIC_BRIEFING_VOICEOVER_MULTI.md) — Multi-Voice-Skript Tag 0 (Bill/Sarah/Camino/Brian)
