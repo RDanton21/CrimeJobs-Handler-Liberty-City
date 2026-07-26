@@ -42,7 +42,7 @@ Seit über dreißig Jahren läuft diese Stadt ohne einen offenen Krieg. Keine Ex
 
 **[BILL]**
 
-[serious] Heute Nacht. Achtundzwanzigster August. Kurz vor Mitternacht.
+[serious] Heute Nacht. Sechster August. Kurz vor Mitternacht.
 
 In derselben Sekunde erschien auf jedem Bildschirm dieser Stadt dasselbe Bild. Werbetafeln, Smartphones, Geldautomaten, U-Bahn-Anzeigen.
 
@@ -174,7 +174,7 @@ Seit über dreißig Jahren läuft diese Stadt ohne einen offenen Krieg. Keine Ex
 **Voice ID:** `pqHfZKP75CvOlQylNhV4` · Stability 50 % · Style 35 %
 
 ```
-[serious] Heute Nacht. Achtundzwanzigster August. Kurz vor Mitternacht.
+[serious] Heute Nacht. Sechster August. Kurz vor Mitternacht.
 
 In derselben Sekunde erschien auf jedem Bildschirm dieser Stadt dasselbe Bild. Werbetafeln, Smartphones, Geldautomaten, U-Bahn-Anzeigen.
 
@@ -323,7 +323,7 @@ Zehn Tage. Dann ist nichts mehr, wie es war.
 
 - [ ] Wortzahl: ~630 Wörter, ~4.5 Min Audio
 - [ ] Botschaft + Camino + leerer Stuhl + Vito-Anekdote + Cliffhanger drin
-- [ ] Datum „achtundzwanzigsten August" (NICHT siebten August) in Block 2
+- [ ] Datum „sechsten August" (NICHT siebten August) in Block 2
 - [ ] „Morgen, am siebten August" in Block 9
 - [ ] Crime-Crews-Orientierungsverlust in Block 9 vorhanden
 - [ ] „kälter als Camino / Camino verhinderte Kriege, dieser will sie" in Block 9

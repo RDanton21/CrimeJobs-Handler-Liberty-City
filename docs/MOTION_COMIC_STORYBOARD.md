@@ -123,7 +123,7 @@ Aerial mid-shot of a city skyline at deep night. In the foreground harbor area, 
 ### AKT 2 — Die Botschaft + Hafenbrand (Audio-Blöcke 02, 03, 04, ~45 Sek)
 
 #### Szene 09 — „23:47 Uhr" (Bildschirm-Wand)
-**Audio-Anker:** „Achtundzwanzigster August. Kurz vor Mitternacht. … Auf den Werbetafeln am Star Junction."
+**Audio-Anker:** „Sechster August. Kurz vor Mitternacht. … Auf den Werbetafeln am Star Junction."
 **Dauer:** 8–10 Sek
 **Visual:** Times-Square-artiger Platz nachts, alle Werbetafeln gleichzeitig leuchten — dann werden sie in einem Atemzug **alle schwarz**. Eine einzige Zeile weißer Serifen-Schrift erscheint.
 
@@ -434,7 +434,7 @@ Wichtig — generiere **nicht alle 31 Szenen auf einmal**. Stattdessen:
 ### Schritt 4: Polish
 - **Color Grading:** ein einheitlicher LUT über alle Szenen (Empfehlung: „Neon Noir LUT" oder „Blade Runner 2049 LUT" — kostenlos auf YouTube findbar)
 - **Sound-Design:** zusätzliche Atmo-Layer (Stadt-Geräusche bei Akt 1, Regen bei Diner-Szenen, Sirenen bei Hafen-Brand)
-- **Text-Overlays:** „Sechsundneunzig", „Achtundzwanzigster August" als kleine Datums-Stempel in Filmkorn-Schrift unten links
+- **Text-Overlays:** „Sechsundneunzig", „Sechster August" als kleine Datums-Stempel in Filmkorn-Schrift unten links
 
 ### Schritt 5: Export
 - **Format:** MP4 H.264, 1080p, 8 Mbps
