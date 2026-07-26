@@ -12,7 +12,8 @@ from .prompts import DEFAULT_SYSTEM_PROMPT
 class AIProvider(Protocol):
     name: str
     async def generate(
-        self, user_prompt: str, model: str | None = None, system_prompt: str | None = None
+        self, user_prompt: str, model: str | None = None, system_prompt: str | None = None,
+        max_tokens: int = 600,
     ) -> str: ...
 
 
@@ -24,13 +25,14 @@ class ClaudeProvider:
         self._default_model = default_model
 
     async def generate(
-        self, user_prompt: str, model: str | None = None, system_prompt: str | None = None
+        self, user_prompt: str, model: str | None = None, system_prompt: str | None = None,
+        max_tokens: int = 600,
     ) -> str:
         if not self._client:
             raise RuntimeError("Anthropic API-Key nicht gesetzt.")
         resp = await self._client.messages.create(
             model=model or self._default_model,
-            max_tokens=600,
+            max_tokens=max_tokens,
             system=system_prompt or DEFAULT_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],
         )
@@ -49,7 +51,8 @@ class OpenAIProvider:
         self._default_model = default_model
 
     async def generate(
-        self, user_prompt: str, model: str | None = None, system_prompt: str | None = None
+        self, user_prompt: str, model: str | None = None, system_prompt: str | None = None,
+        max_tokens: int = 600,
     ) -> str:
         if not self._client:
             raise RuntimeError("OpenAI API-Key nicht gesetzt.")
@@ -59,7 +62,7 @@ class OpenAIProvider:
                 {"role": "system", "content": system_prompt or DEFAULT_SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt},
             ],
-            max_tokens=600,
+            max_tokens=max_tokens,
             temperature=0.85,
         )
         return (resp.choices[0].message.content or "").strip()

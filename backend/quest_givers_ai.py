@@ -253,7 +253,11 @@ async def check_quest_givers_consistency(
     JSON-Block fehlt oder kaputt ist, wird die Liste leer zurückgegeben —
     der Markdown-Report ist trotzdem nutzbar."""
     prompt = build_consistency_prompt(story_md, givers_md)
-    raw = await provider.generate(prompt, model=model, system_prompt=_SYSTEM_PROMPT)
+    # Report + Recommendations-JSON koennen lang werden -> hoeheres Limit als
+    # der 600-Token-Default, sonst bricht der Report/JSON-Block ab.
+    raw = await provider.generate(
+        prompt, model=model, system_prompt=_SYSTEM_PROMPT, max_tokens=4000
+    )
     raw = (raw or "").strip()
 
     # Recommendations-JSON extrahieren (3-Strategie-Parser)
@@ -346,7 +350,11 @@ async def apply_recommendation(
     den NEUEN Datei-Inhalt zurück (nicht gespeichert — das macht das
     Frontend nach User-Bestätigung)."""
     prompt = build_apply_prompt(current_content, instruction, story_context)
-    text = await provider.generate(prompt, model=model, system_prompt=_APPLY_SYSTEM_PROMPT)
+    # Ganze Datei wird zurueckgegeben -> grosszuegiges Token-Budget, sonst
+    # schneidet das Default-Limit (600) den Output mittendrin ab.
+    text = await provider.generate(
+        prompt, model=model, system_prompt=_APPLY_SYSTEM_PROMPT, max_tokens=8000
+    )
     text = (text or "").strip()
     # Falls die KI doch einen Codefence drum gemacht hat, abschneiden
     if text.startswith("```"):

@@ -37,4 +37,4 @@ Sechs Persönlichkeiten, alle dem Big Boss loyal, aber jede mit eigenem Stil und
 - **Vorbereitung:** plant Story-Beats für die kommenden Tage (Master-Plot aus EVENT_TIMELINE.md)
 - **Briefing an Mittler:** verteilt vor jedem großen Tag (2, 4, 7, 9, 10) das Voice-Over-Skript aus EVENT_BRIEFINGS_MASS.md an die Mittler — die wählen ihren Stil, übersetzen es eigenständig
 - **Zwischen den großen Tagen:** verteilt Themen / lose Auftrags-Ideen an einzelne Mittler, die selbständig RP-Begegnungen organisieren
-- **Reaktionen sammeln:** liest Discord-Channels, Info-Channels, hört Mittler-Feedback aus dem In
+- **Reaktionen sammeln:** liest Discord-Channels, Info-Channels, hört Mittler-Feedback aus dem In-Game-RP.
