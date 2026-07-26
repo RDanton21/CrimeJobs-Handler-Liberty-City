@@ -215,10 +215,12 @@ body::after {
   background: rgba(233,120,60,.8); box-shadow: 0 0 6px 1px rgba(233,90,40,.6);
   opacity: 0; pointer-events: none;
   animation: lpRise var(--dur) linear infinite; animation-delay: var(--ed); }
+.lp-ember-lg { width: 4px; height: 4px; background: rgba(240,150,70,.92);
+  box-shadow: 0 0 9px 2px rgba(233,90,40,.7); }
 @keyframes lpRise {
   0%   { opacity: 0; transform: translateY(0) translateX(0); }
   15%  { opacity: .85; }
-  100% { opacity: 0; transform: translateY(-240px) translateX(var(--drift)); }
+  100% { opacity: 0; transform: translateY(-340px) translateX(var(--drift)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
