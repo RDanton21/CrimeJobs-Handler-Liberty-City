@@ -4,7 +4,7 @@
 **Zielgruppe:** ALLE Bewohner Liberty Citys — Crime-Crews, Zivilisten, Gewerbetreibende, Behörden, Medien
 **Zweck:** Discord-Veröffentlichung vor dem Event-Start. Liefert allen Spielern dieselbe Ausgangslage, unabhängig von Rolle.
 
-> 📅 **Für die Pre-Event-Präsentation am 06.08.2026, 18:00 Uhr** wird stattdessen die Motion-Comic-Kurzversion verwendet: [`CITY_PUBLIC_BRIEFING_VOICEOVER_MOTION_COMIC.md`](CITY_PUBLIC_BRIEFING_VOICEOVER_MOTION_COMIC.md) — 3–5 Min, Botschaft + Caminos Verschwinden auf den 06.08. datiert, Cliffhanger Richtung Event-Start am 07.08.2026.
+> 📅 **Für die Pre-Event-Präsentation am 06.08.2026, 18:00 Uhr** wird stattdessen die Motion-Comic-Kurzversion verwendet: [`CITY_PUBLIC_BRIEFING_VOICEOVER_MOTION_COMIC.md`](CITY_PUBLIC_BRIEFING_VOICEOVER_MOTION_COMIC.md) — 3–5 Min, Caminos Verschwinden als Rückblick (bereits seit Anfang Juli), Botschaft auf den 06.08. datiert, Cliffhanger Richtung Event-Start am 07.08.2026.
 
 > ⚠ **Spielleiter-Hinweis (NICHT mit-veröffentlichen):** Das Probespiel und die wahre Identität des Big Boss bleiben **strikt intern**. Diese Datei enthält **keinen** Reveal — sie zeigt nur, was jeder Bürger Liberty Citys spüren, sehen und hören kann. Der Twist (Head of Liberty City Francis J. Underwood = Big Boss) wird erst am Tag 10 aufgelöst (siehe `EVENT_FINALE.md`).
 
@@ -43,7 +43,7 @@ Dann ist es weg. Keine Spur. Tech-Konzerne dementieren. LCPD ratlos. Die Bevölk
 
 **Drei Stunden später:** erster Brand im Broker-Hafen. Drei Container ausgebrannt. Versicherung Millionen. LCFD löscht bis zum Sonnenaufgang.
 
-**Drei Tage später:** Mr. Camino — der alte Vermittler — fehlt zum ersten Mal seit 26 Jahren auf seinem festen Platz im Brass-Plate-Diner. Sein Buch liegt aufgeschlagen. Sein Tee wäre kalt geworden, wäre er da gewesen.
+**Schon seit Wochen — seit Anfang Juli:** Mr. Camino, der alte Vermittler, fehlt zum ersten Mal seit 26 Jahren auf seinem festen Platz im Brass-Plate-Diner. Sein Buch liegt aufgeschlagen. Sein Tee wäre kalt geworden, wäre er da gewesen.
 
 Und dann verstehen einige in der Stadt: die Botschaft war keine PR-Aktion. Es war eine **Ankündigung**.
 

@@ -2,7 +2,7 @@
 
 **Anlass:** Pre-Event-Präsentation am **06.08.2026, 18:00 Uhr** als Motion-Comic-Trailer vor Event-Start (07.08.2026).
 **Format:** ElevenLabs v3, Multi-Voice (4 Sprecher), ~630 Wörter, **~4.5 Min Audio**.
-**Zeitstrang:** Botschaft + Caminos Verschwinden passieren am 06.08.2026. Event startet am Folgetag.
+**Zeitstrang:** Caminos Verschwinden liegt bereits im Juli (05.07.). Die Botschaft folgt am 06.08.2026, Event startet am Folgetag (07.08.).
 
 > Die ausführliche 9-Min-Langfassung ist in der Git-Historie erhalten (Commit vor dem Kürzungs-Pass).
 

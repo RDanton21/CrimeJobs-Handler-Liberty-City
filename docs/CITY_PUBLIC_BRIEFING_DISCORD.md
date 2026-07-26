@@ -18,7 +18,7 @@ Dann ist es weg. Keine Spur. Tech-Konzerne dementieren. LCPD ratlos. Die Bevölk
 
 Aber drei Stunden später: erster Brand im Broker-Hafen. Drei Container ausgebrannt. Versicherung Millionen. LCFD löscht bis zum Sonnenaufgang.
 
-Drei Tage später: Mr. Camino — der alte Vermittler — fehlt zum ersten Mal seit 26 Jahren auf seinem festen Platz im Brass-Plate-Diner. Sein Buch liegt aufgeschlagen. Sein Tee wäre kalt geworden, wäre er da gewesen.
+Schon seit Wochen — seit Anfang Juli — fehlt Mr. Camino, der alte Vermittler, zum ersten Mal seit 26 Jahren auf seinem festen Platz im Brass-Plate-Diner. Sein Buch liegt aufgeschlagen. Sein Tee wäre kalt geworden, wäre er da gewesen.
 
 Und dann verstehen einige in der Stadt: die Botschaft war keine PR-Aktion. Es war eine **Ankündigung**.
 
@@ -68,7 +68,7 @@ Er gehörte keiner Crew an. Er hat nie geschossen, nie Schutzgeld erpresst. Aber
 > *„Liberty City verzeiht nichts. Aber sie vergisst alles, was nicht zweimal hintereinander passiert."*
 > — Mr. Camino, 2020
 
-Sein Stuhl ist leer seit Tag 1. Frankie Maloney, der Diner-Wirt seit 1991, serviert den Tee trotzdem. Jeden Morgen. Jeden Abend.
+Sein Stuhl ist leer seit Anfang Juli. Frankie Maloney, der Diner-Wirt seit 1991, serviert den Tee trotzdem. Jeden Morgen. Jeden Abend.
 
 > *„Damit der Stuhl nicht das Falsche denkt."*
 
