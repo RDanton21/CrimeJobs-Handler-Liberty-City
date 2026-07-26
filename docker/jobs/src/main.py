@@ -14,6 +14,7 @@ import contextlib
 import csv
 import io
 import logging
+import os
 import re
 import secrets
 import time
@@ -27,7 +28,7 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(name)s — 
 
 import httpx
 from fastapi import Body, Depends, FastAPI, HTTPException, Request, Response
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from sqlalchemy import case, delete, exists, func, select, update
 from sqlalchemy.exc import IntegrityError
@@ -168,15 +169,85 @@ CSP = (
 )
 
 
+# ---------------------------------------------------------------------------
+# Schutz vor Floods/Brute-Force: einfacher In-Memory-Rate-Limiter (pro Prozess,
+# hinter Cloudflare+Traefik als zweite Verteidigungslinie) + Body-Groessen-
+# Grenze. Bewusst ohne Zusatz-Dependency — Fixed-Window pro (IP, Klasse).
+# ---------------------------------------------------------------------------
+
+#: Klasse -> (Limit pro Fenster, Fensterlaenge Sekunden)
+_RATE_RULES = {
+    "auth": (20, 60),    # OAuth-Fluss: Brute-Force/Redirect-Spam bremsen
+    "write": (40, 60),   # Eintragen/Austragen/Warteliste/Admin-Aktionen
+    "read": (120, 60),   # Board/Stats-Polling (regulaer alle 30s)
+}
+_MAX_BODY_BYTES = 64_000  # groesste legitime Payload ist winzig (JSON-Dicts)
+_RATE_LIMIT_ON = os.getenv("RATE_LIMIT", "1") != "0"  # Tests setzen RATE_LIMIT=0
+_rate_buckets: dict = {}
+
+
+def _client_ip(request: Request) -> str:
+    """Client-IP hinter Traefik/Cloudflare: erster Eintrag in X-Forwarded-For,
+    sonst die Socket-Adresse."""
+    fwd = request.headers.get("x-forwarded-for", "")
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return request.client.host if request.client else "?"
+
+
+def _rate_class(request: Request) -> str | None:
+    path = request.url.path
+    if path.startswith("/auth/"):
+        return "auth"
+    if path.startswith("/api/"):
+        return "write" if request.method in ("POST", "DELETE", "PATCH", "PUT") else "read"
+    return None  # Statics/Seite: kein App-Limit (macht das CDN)
+
+
+def _rate_limited(key: tuple, limit: int, window: int) -> bool:
+    now = time.monotonic()
+    bucket = _rate_buckets.get(key)
+    if bucket is None or now >= bucket[0]:
+        # Speicher begrenzen: bei zu vielen Eintraegen abgelaufene entsorgen
+        if len(_rate_buckets) > 10_000:
+            for k in [k for k, b in _rate_buckets.items() if now >= b[0]]:
+                _rate_buckets.pop(k, None)
+        _rate_buckets[key] = [now + window, 1]
+        return False
+    bucket[1] += 1
+    return bucket[1] > limit
+
+
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
-    """Basis-Security-Header fuer alle Responses (oeffentlich erreichbares
-    Dashboard hinter Traefik)."""
+    """Basis-Security-Header + Rate-Limits + Body-Groessen-Grenze fuer das
+    oeffentlich erreichbare Dashboard (hinter Traefik/Cloudflare)."""
+    # Uebergrosse Bodies gar nicht erst verarbeiten
+    try:
+        if int(request.headers.get("content-length") or 0) > _MAX_BODY_BYTES:
+            return JSONResponse({"detail": "Payload zu groß"}, status_code=413)
+    except ValueError:
+        return JSONResponse({"detail": "Ungültiger Content-Length"}, status_code=400)
+
+    klasse = _rate_class(request) if _RATE_LIMIT_ON else None
+    if klasse is not None:
+        limit, window = _RATE_RULES[klasse]
+        if _rate_limited((_client_ip(request), klasse), limit, window):
+            return JSONResponse(
+                {"detail": "Zu viele Anfragen — bitte kurz warten"},
+                status_code=429,
+                headers={"Retry-After": str(window)},
+            )
+
     response = await call_next(request)
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "same-origin")
     response.headers.setdefault("Content-Security-Policy", CSP)
+    # HTTPS erzwingen (Seite laeuft ausschliesslich hinter TLS)
+    response.headers.setdefault(
+        "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
+    )
     return response
 
 

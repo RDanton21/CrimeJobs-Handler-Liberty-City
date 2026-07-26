@@ -16,6 +16,7 @@ import uuid
 _TEST_DB = os.path.join(tempfile.gettempdir(), f"jobs-test-{uuid.uuid4().hex}.db")
 os.environ["JOBS_DB_PATH"] = _TEST_DB
 os.environ["DISCORD_BOT_TOKEN"] = ""  # Recheck + Reminder-Loop aus: kein Discord
+os.environ["RATE_LIMIT"] = "0"  # Rate-Limiter in Tests aus (Client floodet sonst)
 
 os.environ.setdefault("SESSION_SECRET", "test-secret")
 os.environ.setdefault("DISCORD_CLIENT_ID", "1")
