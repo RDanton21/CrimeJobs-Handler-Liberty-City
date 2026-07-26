@@ -49,7 +49,7 @@ Auf dem Papier eine moderne amerikanische Großstadt. Unter der Oberfläche eine
 
 Drei Jahrzehnte… ist eine lange Zeit, in einer Stadt, in der zwölf Stunden ausreichen können, um alles zu verändern.
 
-In der Nacht zum vierten September Zweitausendsechsundzwanzig hat sich etwas verändert.
+In der Nacht zum siebten August Zweitausendsechsundzwanzig hat sich etwas verändert.
 
 …
 
@@ -59,11 +59,11 @@ Für genau siebzehn Sekunden erschien überall dasselbe. Ein schwarzer Bildschir
 
 **[BOTSCHAFT — synthetisch, kalt, mit Distortion-Effekt]**
 
-Liberty City. Sechzehn Tage. Dann seht ihr, wer hier wirklich entscheidet.
+Liberty City. Zehn Tage. Dann seht ihr, wer hier wirklich entscheidet.
 
 **[ERZÄHLER]**
 
-Dann war es weg. Keine Spur. Die Tech-Konzerne dementierten. Die Polizei stand ratlos. Der Head of Liberty City, Francis J. Underwood, nannte es einen digitalen Streich. Die Bevölkerung lachte. Memes überfluteten das Netz. Hashtag Sechzehn Tage trendete bis zum Morgen.
+Dann war es weg. Keine Spur. Die Tech-Konzerne dementierten. Die Polizei stand ratlos. Der Head of Liberty City, Francis J. Underwood, nannte es einen digitalen Streich. Die Bevölkerung lachte. Memes überfluteten das Netz. Hashtag Zehn Tage trendete bis zum Morgen.
 
 Drei Stunden später brannten am Broker-Hafen drei Container. Versicherungsschaden in Millionenhöhe.
 
@@ -133,7 +133,7 @@ Liberty City verzeiht nichts. Aber sie vergisst alles… was nicht zweimal hinte
 
 …
 
-Seit dem vierten September. Sechs Uhr neunundzwanzig Morgens. Brass-Plate-Diner. Dritter Tisch links. Vom Fenster aus gezählt.
+Seit dem siebten August. Sechs Uhr neunundzwanzig Morgens. Brass-Plate-Diner. Dritter Tisch links. Vom Fenster aus gezählt.
 
 Sein Stuhl… ist leer.
 
@@ -185,17 +185,17 @@ In Dukes sehen die Straßen tagsüber aus wie das Amerika der Neunziger. Einfami
 
 …
 
-Sechzehn Tage. Das hat die Botschaft gesagt.
+Zehn Tage. Das hat die Botschaft gesagt.
 
-Sechzehn Tage… in denen Liberty City sich neu sortieren wird. Sechzehn Tage, in denen die Crime-Familien ihre Reviere prüfen, ihre Tribute fordern, ihre alten Rechnungen begleichen werden. Sechzehn Tage, in denen Zivilisten Brände in ihren Vierteln sehen werden. In denen Diner-Wirte Gespräche hören werden, die sie nicht hören sollten. In denen Werkstattbesitzer Autos reparieren werden, in deren Spurfänger Einschusslöcher stecken.
+Zehn Tage… in denen Liberty City sich neu sortieren wird. Zehn Tage, in denen die Crime-Familien ihre Reviere prüfen, ihre Tribute fordern, ihre alten Rechnungen begleichen werden. Zehn Tage, in denen Zivilisten Brände in ihren Vierteln sehen werden. In denen Diner-Wirte Gespräche hören werden, die sie nicht hören sollten. In denen Werkstattbesitzer Autos reparieren werden, in deren Spurfänger Einschusslöcher stecken.
 
-Sechzehn Tage, in denen jeder Bürger eine Wahl treffen muss. Eine kleine. Vielleicht eine große.
+Zehn Tage, in denen jeder Bürger eine Wahl treffen muss. Eine kleine. Vielleicht eine große.
 
 Dichthalten. Reden. Kooperieren. Verraten.
 
 Vier Wege. Jeder hat seine Konsequenzen.
 
-Und am sechzehnten Tag… wird Liberty City die Antwort auf die Frage bekommen, die in der Nacht zum vierten September siebzehn Sekunden lang auf jedem Bildschirm der Stadt stand.
+Und am zehnten Tag… wird Liberty City die Antwort auf die Frage bekommen, die in der Nacht zum siebten August siebzehn Sekunden lang auf jedem Bildschirm der Stadt stand.
 
 Wer hier wirklich entscheidet.
 
@@ -203,7 +203,7 @@ Wer hier wirklich entscheidet.
 
 Diese Stadt schweigt nicht ewig.
 
-Sechzehn Tage.
+Zehn Tage.
 
 Sucht euch eure Rolle. Täter. Zeuge. Opfer. Held. Memes-Macher. Verschwörer. Verräter. Beobachter.
 
@@ -213,7 +213,7 @@ Liberty City wird sich an euch erinnern… an die Nacht, in der es begann.
 
 …
 
-Liberty City. Zwei Wörter. Eine Stadt. Sechzehn Tage.
+Liberty City. Zwei Wörter. Eine Stadt. Zehn Tage.
 
 Ab jetzt.
 
@@ -233,7 +233,7 @@ Auf dem Papier eine moderne amerikanische Großstadt. Unter der Oberfläche eine
 
 Drei Jahrzehnte… ist eine lange Zeit, in einer Stadt, in der zwölf Stunden ausreichen können, um alles zu verändern.
 
-In der Nacht zum vierten September Zweitausendsechsundzwanzig hat sich etwas verändert.
+In der Nacht zum siebten August Zweitausendsechsundzwanzig hat sich etwas verändert.
 
 …
 
@@ -243,7 +243,7 @@ Für genau siebzehn Sekunden erschien überall dasselbe. Ein schwarzer Bildschir
 
 — PAUSE — Botschaft einfügen — PAUSE —
 
-Dann war es weg. Keine Spur. Die Tech-Konzerne dementierten. Die Polizei stand ratlos. Der Head of Liberty City, Francis J. Underwood, nannte es einen digitalen Streich. Die Bevölkerung lachte. Memes überfluteten das Netz. Hashtag Sechzehn Tage trendete bis zum Morgen.
+Dann war es weg. Keine Spur. Die Tech-Konzerne dementierten. Die Polizei stand ratlos. Der Head of Liberty City, Francis J. Underwood, nannte es einen digitalen Streich. Die Bevölkerung lachte. Memes überfluteten das Netz. Hashtag Zehn Tage trendete bis zum Morgen.
 
 Drei Stunden später brannten am Broker-Hafen drei Container. Versicherungsschaden in Millionenhöhe.
 
@@ -301,7 +301,7 @@ Sein eigener Satz, von Zweitausendzwanzig, ist heute in dieser Stadt tätowiert 
 
 …
 
-Seit dem vierten September. Sechs Uhr neunundzwanzig Morgens. Brass-Plate-Diner. Dritter Tisch links. Vom Fenster aus gezählt.
+Seit dem siebten August. Sechs Uhr neunundzwanzig Morgens. Brass-Plate-Diner. Dritter Tisch links. Vom Fenster aus gezählt.
 
 Sein Stuhl… ist leer.
 
@@ -349,17 +349,17 @@ In Dukes sehen die Straßen tagsüber aus wie das Amerika der Neunziger. Einfami
 
 …
 
-Sechzehn Tage. Das hat die Botschaft gesagt.
+Zehn Tage. Das hat die Botschaft gesagt.
 
-Sechzehn Tage… in denen Liberty City sich neu sortieren wird. Sechzehn Tage, in denen die Crime-Familien ihre Reviere prüfen, ihre Tribute fordern, ihre alten Rechnungen begleichen werden. Sechzehn Tage, in denen Zivilisten Brände in ihren Vierteln sehen werden. In denen Diner-Wirte Gespräche hören werden, die sie nicht hören sollten. In denen Werkstattbesitzer Autos reparieren werden, in deren Spurfänger Einschusslöcher stecken.
+Zehn Tage… in denen Liberty City sich neu sortieren wird. Zehn Tage, in denen die Crime-Familien ihre Reviere prüfen, ihre Tribute fordern, ihre alten Rechnungen begleichen werden. Zehn Tage, in denen Zivilisten Brände in ihren Vierteln sehen werden. In denen Diner-Wirte Gespräche hören werden, die sie nicht hören sollten. In denen Werkstattbesitzer Autos reparieren werden, in deren Spurfänger Einschusslöcher stecken.
 
-Sechzehn Tage, in denen jeder Bürger eine Wahl treffen muss. Eine kleine. Vielleicht eine große.
+Zehn Tage, in denen jeder Bürger eine Wahl treffen muss. Eine kleine. Vielleicht eine große.
 
 Dichthalten. Reden. Kooperieren. Verraten.
 
 Vier Wege. Jeder hat seine Konsequenzen.
 
-Und am sechzehnten Tag… wird Liberty City die Antwort auf die Frage bekommen, die in der Nacht zum vierten September siebzehn Sekunden lang auf jedem Bildschirm der Stadt stand.
+Und am zehnten Tag… wird Liberty City die Antwort auf die Frage bekommen, die in der Nacht zum siebten August siebzehn Sekunden lang auf jedem Bildschirm der Stadt stand.
 
 Wer hier wirklich entscheidet.
 
@@ -367,7 +367,7 @@ Wer hier wirklich entscheidet.
 
 Diese Stadt schweigt nicht ewig.
 
-Sechzehn Tage.
+Zehn Tage.
 
 Sucht euch eure Rolle. Täter. Zeuge. Opfer. Held. Memes-Macher. Verschwörer. Verräter. Beobachter.
 
@@ -377,7 +377,7 @@ Liberty City wird sich an euch erinnern… an die Nacht, in der es begann.
 
 …
 
-Liberty City. Zwei Wörter. Eine Stadt. Sechzehn Tage.
+Liberty City. Zwei Wörter. Eine Stadt. Zehn Tage.
 
 Ab jetzt.
 
@@ -387,7 +387,7 @@ Ab jetzt.
 
 > Generieren, dann **in Audacity nachbearbeiten**: Pitch-Shift −3 Halbtöne + Distortion (Schwellenwert 50, Lautstärke −12 dB). Optional: Bit-Crusher-Plugin für „digital glitch"-Effekt. Ziel: klingt wie aus einem Lautsprecher, nicht aus einem Mund.
 
-Liberty City. Sechzehn Tage. Dann seht ihr, wer hier wirklich entscheidet.
+Liberty City. Zehn Tage. Dann seht ihr, wer hier wirklich entscheidet.
 
 ---
 
@@ -503,7 +503,7 @@ Wenn du eine **Cinematic-Version** willst, lege einen zusätzlichen Track unter:
 - [`CITY_PUBLIC_BRIEFING_DISCORD.md`](CITY_PUBLIC_BRIEFING_DISCORD.md) — 5-Block-Kurzversion für Discord
 - [`CITY_PUBLIC_BRIEFING_VOICEOVER.md`](CITY_PUBLIC_BRIEFING_VOICEOVER.md) — Single-Voice-Version (Option A)
 - **diese Datei** — Multi-Voice-Version (Option B, empfohlen)
-- [`EVENT_FINALE.md`](EVENT_FINALE.md) — Tag-16-Reveal mit Underwood-Voice-Over-Skript (Underwood-Stimme: `5V1aDRVValmofPm493AW`)
+- [`EVENT_FINALE.md`](EVENT_FINALE.md) — Tag-10-Reveal mit Underwood-Voice-Over-Skript (Underwood-Stimme: `5V1aDRVValmofPm493AW`)
 
 ---
 
@@ -513,6 +513,6 @@ Wenn du eine **Cinematic-Version** willst, lege einen zusätzlichen Track unter:
 |---|---|---|---|
 | Erzähler (Bill) | diese Datei | `pqHfZKP75CvOlQylNhV4` | Tag 0 |
 | Botschaft (Sarah) | diese Datei | `EXAVITQu4vr4xnSDxMaL` | Tag 0 |
-| Mr. Camino (User-Custom) | diese Datei + EVENT_FINALE.md | `xVObCw3gG96REsnh3t2I` | Tag 0 + Tag 16 |
+| Mr. Camino (User-Custom) | diese Datei + EVENT_FINALE.md | `xVObCw3gG96REsnh3t2I` | Tag 0 + Tag 10 |
 | Frankie Maloney (Brian) | diese Datei | `nPczCjzI2devNBz1zQrb` | Tag 0 |
-| **Francis J. Underwood** (User-Custom) | EVENT_FINALE.md | `5V1aDRVValmofPm493AW` | **Tag 16 (Reveal)** |
+| **Francis J. Underwood** (User-Custom) | EVENT_FINALE.md | `5V1aDRVValmofPm493AW` | **Tag 10 (Reveal)** |

@@ -2,19 +2,19 @@
 
 **Verwendung:** Jeder Block ≤ 1900 Zeichen → kann 1:1 in Discord-Channel kopiert werden. Empfohlene Reihenfolge: 1 zuerst (z. B. 24 h vor Event-Start als „Trailer"), dann 2–5 in den Folgepause-Stunden oder kompakt als 5er-Burst am Event-Tag-Morgen.
 
-**Spielleiter-Hinweis:** Diese Kurzversion enthält **keinen** Reveal. Underwood wirkt als legitimer Head of Liberty City. Der Twist bleibt für Tag 16.
+**Spielleiter-Hinweis:** Diese Kurzversion enthält **keinen** Reveal. Underwood wirkt als legitimer Head of Liberty City. Der Twist bleibt für Tag 10.
 
 ---
 
 ## 📺 Block 1 / 5 — „Die Botschaft"
 
-🎙 **LIBERTY CITY — 04.09.2026 — DIE BOTSCHAFT (1/5)**
+🎙 **LIBERTY CITY — 07.08.2026 — DIE BOTSCHAFT (1/5)**
 
 23:47 Uhr. Auf jedem Bildschirm in Liberty City — TV-Werbetafeln am Star Junction, Smartphone-Lockscreens, U-Bahn-Anzeigen, ATM-Displays, sogar die LED-Schilder über dem Algonquin-Tunnel — erscheint für genau **17 Sekunden** derselbe schwarze Bildschirm mit einer einzigen Zeile:
 
-> *„Liberty City. Sechzehn Tage. Dann seht ihr, wer hier wirklich entscheidet."*
+> *„Liberty City. Zehn Tage. Dann seht ihr, wer hier wirklich entscheidet."*
 
-Dann ist es weg. Keine Spur. Tech-Konzerne dementieren. LCPD ratlos. Die Bevölkerung lacht. **#16Tage** trendet bis zum Morgen.
+Dann ist es weg. Keine Spur. Tech-Konzerne dementieren. LCPD ratlos. Die Bevölkerung lacht. **#10Tage** trendet bis zum Morgen.
 
 Aber drei Stunden später: erster Brand im Broker-Hafen. Drei Container ausgebrannt. Versicherung Millionen. LCFD löscht bis zum Sonnenaufgang.
 
@@ -22,7 +22,7 @@ Drei Tage später: Mr. Camino — der alte Vermittler — fehlt zum ersten Mal s
 
 Und dann verstehen einige in der Stadt: die Botschaft war keine PR-Aktion. Es war eine **Ankündigung**.
 
-*Sechzehn Tage. Ab jetzt.*
+*Zehn Tage. Ab jetzt.*
 
 ---
 
@@ -42,7 +42,7 @@ Aus der Pressekonferenz am Morgen nach der Botschaft:
 
 > *„Liberty City steht. Liberty City wird stehen. Was über unsere Bildschirme lief, ist digitaler Vandalismus — kein Anlass zur Sorge."*
 >
-> *— Francis J. Underwood, Head of Liberty City, City Hall, 04.09.2026, 09:15 Uhr*
+> *— Francis J. Underwood, Head of Liberty City, City Hall, 07.08.2026, 09:15 Uhr*
 
 Er trägt einen dunkelgrauen Anzug. Er lächelt nicht. Er blickt drei Sekunden zu lange in eine bestimmte Kamera. Dann verlässt er das Podium, beantwortet keine Fragen.
 
@@ -92,9 +92,9 @@ Wer ihn entfernt hat — hat das gewollt.
 
 ---
 
-## 🎭 Block 5 / 5 — „Sechzehn Tage — was kommt"
+## 🎭 Block 5 / 5 — „Zehn Tage — was kommt"
 
-🎭 **SECHZEHN TAGE — WAS KOMMT (5/5)**
+🎭 **ZEHN TAGE — WAS KOMMT (5/5)**
 
 Jeder in Liberty City erlebt diese Tage anders.
 
@@ -106,15 +106,14 @@ Jeder in Liberty City erlebt diese Tage anders.
 
 📈 **Stimmungsbogen:**
 - Tag 1–2: Witz-Stimmung. Aber: Brand, Camino weg.
-- Tag 3–6: Erste echte Schlagzeilen. Memes verstummen.
-- Tag 7–11: Stadt akzeptiert: etwas passiert.
-- Tag 12–14: Eskalation. Verrats-Vorwürfe.
-- Tag 15: Atemloser Zustand.
-- Tag 16: Ein einzelnes Großereignis schockt die Stadt. Die Wahrheit kommt.
+- Tag 3–5: Erste echte Schlagzeilen. Memes verstummen.
+- Tag 6–8: Stadt akzeptiert: etwas passiert. Eskalation, Verrats-Vorwürfe.
+- Tag 9: Atemloser Zustand.
+- Tag 10: Ein einzelnes Großereignis schockt die Stadt. Die Wahrheit kommt.
 
 ---
 
-> *Liberty City schweigt nicht ewig. Sechzehn Tage. Dann seht ihr, wer in dieser Stadt wirklich entscheidet.*
+> *Liberty City schweigt nicht ewig. Zehn Tage. Dann seht ihr, wer in dieser Stadt wirklich entscheidet.*
 >
 > *Sucht euch eure Rolle — Täter, Zeuge, Opfer, Held, Memes-Macher, Verschwörer, Verräter, Beobachter. Macht euer Spiel.*
 >

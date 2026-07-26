@@ -29,7 +29,7 @@ Liberty City ist die größte Metropole an Amerikas Ostküste. Vier Millionen Me
 **Was sich seit Wochen verändert:**
 Container im Hafen, die nicht abgeholt werden. Streifenpolizisten, die plötzlich verlegt werden. Ein Gerücht, dass das FBI in Algonquin Büros mietet. Manche Wall-Street-Trader, die schon zu viel wissen, sind plötzlich „im Urlaub". Der Head of Liberty City wirkt auf den Stufen des City Halls ungewohnt ruhig — fast zu ruhig.
 
-Und dann, in der Nacht zum 4. September, beginnt das eigentliche Spiel.
+Und dann, in der Nacht zum 7. August, beginnt das eigentliche Spiel.
 
 ---
 
@@ -37,9 +37,9 @@ Und dann, in der Nacht zum 4. September, beginnt das eigentliche Spiel.
 
 **23:47 Uhr.** Auf jedem Bildschirm in Liberty City — TV-Werbetafeln am Star Junction, Smartphone-Lockscreens, U-Bahn-Anzeigen, ATM-Displays, sogar die LED-Schilder über dem Algonquin-Tunnel — erscheint für genau **17 Sekunden** derselbe schwarze Bildschirm mit einer einzigen Zeile in weißer Serifen-Schrift:
 
-> *„Liberty City. Sechzehn Tage. Dann seht ihr, wer hier wirklich entscheidet."*
+> *„Liberty City. Zehn Tage. Dann seht ihr, wer hier wirklich entscheidet."*
 
-Dann ist es weg. Keine Spur. Tech-Konzerne dementieren. LCPD ratlos. Die Bevölkerung lacht. Memes überfluten Social Media — #16Tage trendet bis zum Morgen.
+Dann ist es weg. Keine Spur. Tech-Konzerne dementieren. LCPD ratlos. Die Bevölkerung lacht. Memes überfluten Social Media — #10Tage trendet bis zum Morgen.
 
 **Drei Stunden später:** erster Brand im Broker-Hafen. Drei Container ausgebrannt. Versicherung Millionen. LCFD löscht bis zum Sonnenaufgang.
 
@@ -246,7 +246,7 @@ Jeder in Liberty City, der versteht, was Camino bedeutete, versteht auch:
 
 ## 👀 Was alle erleben können
 
-- **Medien:** Die Botschaft ist überall reproduziert. #16Tage trendet. Talkshows debattieren. Verschwörungs-Theoretiker sehen sich bestätigt. Investigativ-Journalisten graben.
+- **Medien:** Die Botschaft ist überall reproduziert. #10Tage trendet. Talkshows debattieren. Verschwörungs-Theoretiker sehen sich bestätigt. Investigativ-Journalisten graben.
 - **Straße:** LCPD-Streifen verdoppelt. Manche Stadtteile haben plötzlich Checkpoints. Brandstellen mit Reportern.
 - **Cafés, Bars, Tankstellen:** Jeder hat eine Theorie. FBI? Hacker-Kollektiv? Mafia? Aliens? Niemand glaubt, was es wirklich ist.
 - **Wirtschaft:** Lieferanten brechen weg, neue tauchen auf. Versicherungs-Beiträge steigen. „Sicherheits-Beratung" wird Mode-Geschäftsfeld.
@@ -258,10 +258,10 @@ Jeder in Liberty City, der versteht, was Camino bedeutete, versteht auch:
 ## 🗣 Gerüchte (Café-Sätze für RP)
 
 > *„17 Sekunden. Auf jedem verfluchten Bildschirm. Das kann kein Hacker."*
-> *„Sechzehn Tage — das ist keine Drohung, das ist ein Befehl."*
+> *„Zehn Tage — das ist keine Drohung, das ist ein Befehl."*
 > *„Botschaft auf TV. Mr. Camino weg. Hafen brennt. Glaubst du an Zufälle?"*
 > *„Sieh dir Underwood an. Er lächelt nicht mehr. Aber er sieht aus, als hätte er Geburtstag."*
-> *„Sechzehn Tage. Wer kommt nach Camino? Niemand. Das ist der Punkt."*
+> *„Zehn Tage. Wer kommt nach Camino? Niemand. Das ist der Punkt."*
 
 ---
 
@@ -281,12 +281,12 @@ Jeder in Liberty City, der versteht, was Camino bedeutete, versteht auch:
 ## ❓ Was niemand öffentlich weiß (Reveal Tag 10)
 
 - Wer die Botschaft gesendet hat
-- Dass „sechzehn Tage" eine echte Frist ist
+- Dass „zehn Tage" eine echte Frist ist
 - Dass am Ende **eine Crime-Crew** die Krone bekommt
 - Dass Mr. Camino nicht entführt wurde, sondern **gewählt**
 - Wer hinter allem steht
 
-Die Antwort kommt am 19./20. September.
+Die Antwort kommt am 16. August.
 
 ---
 

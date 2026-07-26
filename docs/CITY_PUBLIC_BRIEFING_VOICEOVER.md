@@ -25,7 +25,7 @@
 
 - Sanftes Klavier oder ein gehaltener tiefer Drone-Ton (z. B. Lava Sound, frei-lizenziert)
 - Sehr leise — Sprache muss klar bleiben
-- Bei den Schlüssel-Sätzen („Sechzehn Tage", „Damit der Stuhl nicht das Falsche denkt") Musik leicht hochziehen, dann zurück
+- Bei den Schlüssel-Sätzen („Zehn Tage", „Damit der Stuhl nicht das Falsche denkt") Musik leicht hochziehen, dann zurück
 
 ---
 
@@ -39,7 +39,7 @@ Auf dem Papier eine moderne amerikanische Großstadt. Unter der Oberfläche eine
 
 Drei Jahrzehnte… ist eine lange Zeit, in einer Stadt, in der zwölf Stunden ausreichen können, um alles zu verändern.
 
-In der Nacht zum vierten September Zweitausendsechsundzwanzig hat sich etwas verändert.
+In der Nacht zum siebten August Zweitausendsechsundzwanzig hat sich etwas verändert.
 
 …
 
@@ -47,9 +47,9 @@ Es war dreiundzwanzig Uhr siebenundvierzig. Auf den TV-Werbetafeln am Star Junct
 
 Für genau siebzehn Sekunden erschien überall dasselbe. Ein schwarzer Bildschirm. Weiße Serifen-Schrift. Eine einzige Zeile.
 
-„Liberty City. Sechzehn Tage. Dann seht ihr, wer hier wirklich entscheidet."
+„Liberty City. Zehn Tage. Dann seht ihr, wer hier wirklich entscheidet."
 
-Dann war es weg. Keine Spur. Die Tech-Konzerne dementierten. Die Polizei stand ratlos. Die Bürgermeisterin… verzeihen Sie, der Head of Liberty City Francis J. Underwood… nannte es einen digitalen Streich. Die Bevölkerung lachte. Memes überfluteten das Netz. Hashtag Sechzehn Tage trendete bis zum Morgen.
+Dann war es weg. Keine Spur. Die Tech-Konzerne dementierten. Die Polizei stand ratlos. Die Bürgermeisterin… verzeihen Sie, der Head of Liberty City Francis J. Underwood… nannte es einen digitalen Streich. Die Bevölkerung lachte. Memes überfluteten das Netz. Hashtag Zehn Tage trendete bis zum Morgen.
 
 Drei Stunden später brannten am Broker-Hafen drei Container. Versicherungsschaden in Millionenhöhe.
 
@@ -107,7 +107,7 @@ Sein eigener Satz, von Zweitausendzwanzig, ist heute in dieser Stadt tätowiert 
 
 …
 
-Seit dem vierten September. Sechs Uhr neunundzwanzig Morgens. Brass-Plate-Diner. Dritter Tisch links. Vom Fenster aus gezählt.
+Seit dem siebten August. Sechs Uhr neunundzwanzig Morgens. Brass-Plate-Diner. Dritter Tisch links. Vom Fenster aus gezählt.
 
 Sein Stuhl… ist leer.
 
@@ -155,17 +155,17 @@ In Dukes sehen die Straßen tagsüber aus wie das Amerika der Neunziger. Einfami
 
 …
 
-Sechzehn Tage. Das hat die Botschaft gesagt.
+Zehn Tage. Das hat die Botschaft gesagt.
 
-Sechzehn Tage… in denen Liberty City sich neu sortieren wird. Sechzehn Tage, in denen die Crime-Familien ihre Reviere prüfen, ihre Tribute fordern, ihre alten Rechnungen begleichen werden. Sechzehn Tage, in denen Zivilisten Brände in ihren Vierteln sehen werden. In denen Diner-Wirte Gespräche hören werden, die sie nicht hören sollten. In denen Werkstattbesitzer Autos reparieren werden, in deren Spurfänger Einschusslöcher stecken.
+Zehn Tage… in denen Liberty City sich neu sortieren wird. Zehn Tage, in denen die Crime-Familien ihre Reviere prüfen, ihre Tribute fordern, ihre alten Rechnungen begleichen werden. Zehn Tage, in denen Zivilisten Brände in ihren Vierteln sehen werden. In denen Diner-Wirte Gespräche hören werden, die sie nicht hören sollten. In denen Werkstattbesitzer Autos reparieren werden, in deren Spurfänger Einschusslöcher stecken.
 
-Sechzehn Tage, in denen jeder Bürger eine Wahl treffen muss. Eine kleine. Vielleicht eine große.
+Zehn Tage, in denen jeder Bürger eine Wahl treffen muss. Eine kleine. Vielleicht eine große.
 
 Dichthalten. Reden. Kooperieren. Verraten.
 
 Vier Wege. Jeder hat seine Konsequenzen.
 
-Und am sechzehnten Tag… wird Liberty City die Antwort auf die Frage bekommen, die in der Nacht zum vierten September siebzehn Sekunden lang auf jedem Bildschirm der Stadt stand.
+Und am zehnten Tag… wird Liberty City die Antwort auf die Frage bekommen, die in der Nacht zum siebten August siebzehn Sekunden lang auf jedem Bildschirm der Stadt stand.
 
 Wer hier wirklich entscheidet.
 
@@ -173,7 +173,7 @@ Wer hier wirklich entscheidet.
 
 Diese Stadt schweigt nicht ewig.
 
-Sechzehn Tage.
+Zehn Tage.
 
 Sucht euch eure Rolle. Täter. Zeuge. Opfer. Held. Memes-Macher. Verschwörer. Verräter. Beobachter.
 
@@ -183,7 +183,7 @@ Liberty City wird sich an euch erinnern… an die Nacht, in der es begann.
 
 …
 
-Liberty City. Zwei Wörter. Eine Stadt. Sechzehn Tage.
+Liberty City. Zwei Wörter. Eine Stadt. Zehn Tage.
 
 Ab jetzt.
 
@@ -195,7 +195,7 @@ Ab jetzt.
 
 | Timecode (ungefähr) | Moment | Empfehlung |
 |---|---|---|
-| 0:30 | Erste Zeile der Botschaft („Liberty City. Sechzehn Tage…") | Stimme leicht absenken, leichte Hall-Reflexion (Reverb 15%), als Echo |
+| 0:30 | Erste Zeile der Botschaft („Liberty City. Zehn Tage…") | Stimme leicht absenken, leichte Hall-Reflexion (Reverb 15%), als Echo |
 | 4:20 | Caminos Satz „Setz dich, Vito…" | Stimme ruhiger, leichte Pause vor und nach |
 | 7:00 | Camino-Zitat „Liberty City verzeiht nichts…" | Leichte Hall-Reflexion, etwas langsamer |
 | 8:10 | Frankies Satz „Damit der Stuhl nicht das Falsche denkt." | Sehr leise, fast geflüstert |
