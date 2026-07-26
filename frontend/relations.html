@@ -7,8 +7,51 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link rel="stylesheet" href="/static/style.css" />
+  <!-- Kino-Look wie die Personal-Börse (jobs.bots.sektorrp.eu) — nur auf
+       dieser Seite (body.cine), damit die anderen Crime-Seiten unberührt
+       bleiben. Assets aus dem jobs-Static uebernommen. -->
+  <style>
+    @font-face {
+      font-family: 'Oswald'; font-style: normal; font-weight: 200 700;
+      font-display: swap; src: url(/static/oswald-latin.woff2) format('woff2');
+    }
+    @font-face {
+      font-family: 'Oswald'; font-style: normal; font-weight: 200 700;
+      font-display: swap; src: url(/static/oswald-latin-ext.woff2) format('woff2');
+      unicode-range: U+0100-02BA, U+1E00-1EFF, U+2020, U+20A0-20AB, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    body.cine { background-color: #141719; }
+    body.cine::before {
+      content: ""; position: fixed; inset: 0; z-index: -2;
+      background: url('/static/bg.jpg') center center / cover no-repeat;
+    }
+    body.cine::after {
+      content: ""; position: fixed; inset: 0; z-index: -1;
+      background:
+        radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(0,0,0,0.75) 100%),
+        linear-gradient(180deg, rgba(10,11,12,0.74) 0%, rgba(10,11,12,0.88) 100%);
+    }
+    /* Condensed-Versal fuer Ueberschriften — Oswald */
+    body.cine h1, body.cine h2, body.cine h3 {
+      font-family: 'Oswald', 'Arial Narrow', sans-serif;
+      text-transform: uppercase; letter-spacing: .07em;
+    }
+    /* Glas-Karten ueber dem Filmstill: die zinc-Flaechen transparent + blur */
+    body.cine .bg-zinc-900 {
+      background: rgba(20, 23, 25, 0.80) !important;
+      -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+      border-color: rgba(185, 138, 74, 0.18) !important;
+    }
+    body.cine .bg-zinc-950,
+    body.cine input, body.cine select, body.cine textarea {
+      background: rgba(10, 11, 12, 0.62) !important;
+    }
+    body.cine table thead { background: rgba(20, 23, 25, 0.85) !important; }
+    /* Gold-Akzent als zweite Farbe neben dem Rot */
+    body.cine .text-red-700, body.cine .text-red-600 { color: #d9ae6e !important; }
+  </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+<body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
   <div x-data="relationsSurvey()" x-init="init()" class="max-w-screen-2xl mx-auto p-6">
 
     <header class="flex items-center justify-between mb-8 flex-wrap gap-3">
