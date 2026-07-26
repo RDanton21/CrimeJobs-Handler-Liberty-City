@@ -1,6 +1,6 @@
 # Liberty City — Motion-Comic-Storyboard für Sora 2
 
-**Anlass:** Pre-Event-Präsentation am 01.08.2026, 18:00 Uhr.
+**Anlass:** Pre-Event-Präsentation am 06.08.2026, 18:00 Uhr.
 **Format:** Motion-Comic, ~9 Min Audio (siehe `CITY_PUBLIC_BRIEFING_VOICEOVER_MOTION_COMIC.md`).
 **Ziel:** Storyboard mit Szenen-für-Szene-Beschreibung + Sora-2-Prompts zur direkten Generierung der Visual-Sequenz.
 
@@ -330,8 +330,8 @@ Three rapid hard-cut shots, each 1.3 seconds: 1) Empty diner exterior at dawn, "
 Slow upward tilt along a massive corporate skyscraper at dawn, ending on the 47th floor: one single window glowing warm amber, the only lit window in the entire building. The silhouette of a man inside, standing at the window, looking down at the city. Faceless, indistinct. He doesn't move. Cold blue dawn sky behind. Mood: ominous power, watching. Cinematic noir. 16:9, 5 seconds, no zoom.
 ```
 
-#### Szene 29 — Liberty City Skyline Sonnenaufgang („In sechs Tagen…")
-**Audio-Anker:** „In sechs Tagen, am siebten August, beginnt etwas, das diese Stadt seit dreißig Jahren nicht mehr gesehen hat."
+#### Szene 29 — Liberty City Skyline Sonnenaufgang („Morgen…")
+**Audio-Anker:** „Morgen, am siebten August, beginnt etwas, das diese Stadt seit dreißig Jahren nicht mehr gesehen hat."
 **Dauer:** 10 Sek
 **Visual:** Aerial Sonnenaufgang über Liberty City. Sonne kommt über die Wolkenkratzer. Slow time-lapse: Schatten ziehen sich zurück, Stadt erwacht. Aber alles wirkt anders als vorher.
 
@@ -396,7 +396,7 @@ Pure black background. White serif text fades in slowly, large and centered: "ZE
 | 26 | 10 | Block 09 | „Mittler, die aus dem Nichts auftauchen…" |
 | 27 | 4 | Block 09 | „Wo ist Mr. Camino?" |
 | 28 | 5 | Block 09 | „Und wer hat ihn aus dem Weg geräumt?" |
-| 29 | 10 | Block 09 | „In sechs Tagen…" |
+| 29 | 10 | Block 09 | „Morgen…" |
 | 30 | 6 | Block 09 | „Manche werden steigen. Manche werden verschwinden." |
 | 31 | 6 | Block 09 | „Zehn Tage. Ab jetzt." |
 
@@ -473,4 +473,4 @@ Wichtig — generiere **nicht alle 31 Szenen auf einmal**. Stattdessen:
 | Polish + Export | 30 Min |
 | **Total** | **~7–8 Stunden** |
 
-Mit dem Storyboard ist das eine Wochenend-Produktion — am 01.08. kannst du das Motion-Comic pünktlich präsentieren.
+Mit dem Storyboard ist das eine Wochenend-Produktion — am 06.08. kannst du das Motion-Comic pünktlich präsentieren.

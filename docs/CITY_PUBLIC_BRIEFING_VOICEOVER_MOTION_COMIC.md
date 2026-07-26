@@ -1,8 +1,8 @@
 # Liberty City — Motion-Comic-Voice-Over (Kurzfassung, 3–5 Min)
 
-**Anlass:** Pre-Event-Präsentation am **01.08.2026, 18:00 Uhr** als Motion-Comic-Trailer vor Event-Start (07.08.2026).
+**Anlass:** Pre-Event-Präsentation am **06.08.2026, 18:00 Uhr** als Motion-Comic-Trailer vor Event-Start (07.08.2026).
 **Format:** ElevenLabs v3, Multi-Voice (4 Sprecher), ~630 Wörter, **~4.5 Min Audio**.
-**Zeitstrang:** Botschaft + Caminos Verschwinden passieren am 01.08.2026. Event startet sechs Tage später.
+**Zeitstrang:** Botschaft + Caminos Verschwinden passieren am 06.08.2026. Event startet am Folgetag.
 
 > Die ausführliche 9-Min-Langfassung ist in der Git-Historie erhalten (Commit vor dem Kürzungs-Pass).
 
@@ -124,7 +124,7 @@ Er ist kälter als Camino. Härter. Er kennt die alten Regeln nicht — und es i
 
 [pauses] Und wer hat ihn aus dem Weg geräumt?
 
-[dramatic] In sechs Tagen, am siebten August, bekommt Liberty City die Antwort.
+[dramatic] Morgen, am siebten August, bekommt Liberty City die Antwort.
 
 Zehn Tage. Dann ist nichts mehr, wie es war.
 
@@ -296,7 +296,7 @@ Er ist kälter als Camino. Härter. Er kennt die alten Regeln nicht — und es i
 
 [pauses] Und wer hat ihn aus dem Weg geräumt?
 
-[dramatic] In sechs Tagen, am siebten August, bekommt Liberty City die Antwort.
+[dramatic] Morgen, am siebten August, bekommt Liberty City die Antwort.
 
 Zehn Tage. Dann ist nichts mehr, wie es war.
 
@@ -324,7 +324,7 @@ Zehn Tage. Dann ist nichts mehr, wie es war.
 - [ ] Wortzahl: ~630 Wörter, ~4.5 Min Audio
 - [ ] Botschaft + Camino + leerer Stuhl + Vito-Anekdote + Cliffhanger drin
 - [ ] Datum „achtundzwanzigsten August" (NICHT siebten August) in Block 2
-- [ ] „In sechs Tagen, am siebten August" in Block 9
+- [ ] „Morgen, am siebten August" in Block 9
 - [ ] Crime-Crews-Orientierungsverlust in Block 9 vorhanden
 - [ ] „kälter als Camino / Camino verhinderte Kriege, dieser will sie" in Block 9
 - [ ] Vito-Anekdote in Vergangenheitsform
