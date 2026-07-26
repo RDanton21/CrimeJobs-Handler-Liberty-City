@@ -20,8 +20,15 @@ input[type="color"] {
 .prose-lore {
   font-size: 1.05rem;
   line-height: 1.75;
-  max-width: 75ch;
+  max-width: 100%;
   color: #e4e4e7;
+}
+/* Fließtext auf lesbare Zeilenlänge begrenzen, Tabellen & Codeblöcke dürfen die volle Breite nutzen */
+.prose-lore p,
+.prose-lore ul,
+.prose-lore ol,
+.prose-lore blockquote {
+  max-width: 82ch;
 }
 .prose-lore h2 {
   font-size: 1.75rem;
@@ -98,6 +105,28 @@ input[type="color"] {
 }
 .prose-lore th { background: #18181b; color: #fafafa; font-weight: 600; }
 .prose-lore tr:nth-child(even) td { background: #0c0c0e; }
+/* Codeblöcke (z. B. Sora-Prompts): umbrechen statt über den Rand laufen */
+.prose-lore pre {
+  background: #131316;
+  border: 1px solid #27272a;
+  border-radius: 0.4rem;
+  padding: 0.85rem 1.05rem;
+  margin: 1.1rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.prose-lore pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: #d4d4d8;
+  font-size: 0.88rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
 
 /* PDF-Export laeuft jetzt ueber window.print() in einem neuen Tab — siehe
    pdfFromHtml() in app.js. Die alten .pdf-render-area Styles wurden entfernt,
