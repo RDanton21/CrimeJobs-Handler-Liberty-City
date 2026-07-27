@@ -123,7 +123,7 @@ Aber beide werden es spüren.
 
 In Dukes ist Familie das härteste Wort.
 
-In einer Werkstatt drei Blocks weiter, *Mendoza Auto*, steht Rafael Mendoza unter einem Wagen und repariert nichts. Don Rafa. Supreme der Spanish Lords. Ein junger Lord steht neben ihm und sagt einen Satz, den er nicht wiederholen muss. Mendoza nickt. Er schaut auf seine Hände. Er weiß, dass die nächsten zwei Stunden in Dukes nicht ruhig werden.
+In einer Werkstatt drei Blocks weiter, *Mendoza Auto*, steht Rafael Mendoza unter einem Wagen und repariert nichts. Don Rafa — der Alte, der die Spanish Lords groß gemacht und die Führung längst an seinen Neffen übergeben hat. Neben ihm steht dieser Neffe: Miguel Cruzado, heute der Supreme der Lords, und sagt einen Satz, den er nicht wiederholen muss. Rafa nickt. Er schaut auf seine Hände. Er weiß, dass die nächsten zwei Stunden in Dukes nicht ruhig werden.
 
 Und in einer Wohnung in einem Plattenbau in Nord-Dukes streamt Jamal Brooks live, eine Hand am Bildschirm, die andere am Mikrofon. J-Stack der MOB. Er provoziert, wie immer. Er weiß noch nicht, dass diese Nacht seinem Stream 20.000 zusätzliche Zuschauer bringen wird — und keiner wird wegen seiner Beleidigungen kommen.
 

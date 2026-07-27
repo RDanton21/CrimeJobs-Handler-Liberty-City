@@ -157,23 +157,22 @@ Sie kontrollieren keine großen Reviere. Sie kontrollieren *Aufmerksamkeit* – 
 
 ## Spanish Lords
 
-Wenn die Latin Kings das Heilige in Dukes sind, sind die Spanish Lords das Welche.
+Wenn die Latin Kings das Heilige in Dukes sind, sind die Spanish Lords das Gegenstück.
 
-Die Spanish Lords sind die andere alte lateinamerikanische Crew Dukes' – ein eigenständiges Charter mit eigener Geschichte, eigener Tradition, und einem latenten, aber nie offen ausgesprochenen Spannungsverhältnis zu den Latin Kings, das so alt ist wie beide Crews. Wo die Kings das Brüderliche, Pyramidale, fast Religiöse haben, sind die Lords pragmatischer, geschäftiger, weniger rituell.
+Die Spanish Lords sind die andere alte lateinamerikanische Crew Dukes' – ein eigenständiges Charter mit eigener Geschichte, eigener Tradition, und einem latenten, aber nie offen ausgesprochenen Spannungsverhältnis zu den Latin Kings, das so alt ist wie beide Crews. Wo die Kings das Brüderliche, Pyramidale, fast Religiöse haben, sind die Lords pragmatischer, geschäftiger, weniger rituell. Sie sind nicht weniger lateinamerikanisch. Sie sind nicht weniger stolz. Sie sind nur *anders*.
 
-Sie sind nicht weniger lateinamerikanisch. Sie sind nicht weniger stolz. Sie sind nur *anders*.
+Die Lords haben ihre Wurzeln in einer puerto-ricanischen Familienkette, die vor zwei Generationen aus Algonquin nach Dukes gezogen ist und dort eine eigene Crew gegründet hat – mit dem Anspruch, nicht im Schatten der Kings zu stehen. Das hat funktioniert. Heute sind die Lords die zweitstärkste lateinamerikanische Kraft Dukes' und in Teilen des Viertels die *erste*. Sie tragen entweder Türkis oder Schwarz, oft mit Rot-Akzenten – ein Erbe ihrer Algonquin-Wurzeln. Ihr Logo, eine Krone mit drei Zacken, taucht auf Wänden, Jacken, Tattoos auf.
 
-Die Lords haben ihre Wurzeln in einer puerto-ricanischen Familienkette, die vor zwei Generationen aus Algonquin nach Dukes gezogen ist und dort eine eigene Crew gegründet hat – mit dem Anspruch, nicht im Schatten der Kings zu stehen. Das hat funktioniert. Heute sind die Lords die zweitstärkste lateinamerikanische Kraft Dukes' und in Teilen des Viertels die *erste*.
+Jahrzehntelang wurde die Crew von Rafael „Don Rafa" Mendoza geführt – leiser als der Inca der Kings, aber nicht weniger gefährlich, eine stille Autorität, die die Lords aus einer Werkstatt in Mid-Dukes lenkte. Als der Alte müde wurde, übergab er die Führung an seinen Neffen: **Miguel Cruzado**, Ende zwanzig, der als Junge jeden Sommer nach Dukes kam und irgendwann blieb. Wo Rafa schwieg, redet Miguel – er zieht das Geschäft dem Krieg vor, den Handschlag der Drohung, das Rechnen dem Blut. Nicht aus Schwäche, sondern weil er weiß, was ein Krieg mit den Kings kostet.
 
-Sie tragen Türkis und Schwarz, oft mit Rot-Akzenten – ein Erbe ihrer Algonquin-Wurzeln. Ihr Logo, eine Krone mit drei Zacken, taucht auf Wänden, Jacken, Tattoos auf.
-
-Ihr Supreme – Rafael „Don Rafa" Mendoza, Mitte fünfzig, leiser als der Inca der Kings, aber nicht weniger gefährlich – führt die Crew aus einer Werkstatt in Mid-Dukes.
+Doch wer ihn für weich hält, macht einen Fehler. Miguel hat bewiesen, was in ihm steckt, wenn es hart auf hart kommt: präzise eingesetzte Brutalität, Härte genau dort, wo sie nötig ist, und kluge Entscheidungen im richtigen Moment. Jeder Zug saß, jeder Schlag traf genau das, was er treffen sollte – nie mehr, nie weniger. Er hat die Lords durch Situationen geführt, die andere Crews zerrissen hätten, und sie stärker herauskommen lassen, als sie hineingingen. Unter ihm haben die Lords Boden gewonnen, Reviere gesichert, Respekt zurückgeholt. Rafa hält sich heute im Hintergrund – eine leise Instanz, die man um Rat fragt –, aber die Entscheidungen trifft der Neffe, und die Crew steht geschlossen hinter ihm, weil er ihnen jeden Grund dazu gegeben hat.
 
 > *„Wir warten nicht, bis uns gegeben wird. Wir nehmen, was uns gehört."*
 
 ### 🏛️ Struktur & Hierarchie
 
-🔱 **Supreme** (Rafael „Don Rafa" Mendoza) — Oberhaupt, letzte Stimme.
+🔱 **Supreme** (Miguel Cruzado) — Oberhaupt, letzte Stimme.
+🕯️ **El Viejo** (Rafael „Don Rafa" Mendoza) — Alt-Supreme und Onkel des Supremos, Ratgeber im Hintergrund.
 🔸 **Lieutenants** — Drei, je für ein Revier verantwortlich.
 🔹 **Veteranos** — Erfahrene Mitglieder, Stimmrecht in der Versammlung.
 ▫️ **Lords** — Vollmitglieder, Tagespräsenz.
@@ -185,7 +184,7 @@ Ihr Supreme – Rafael „Don Rafa" Mendoza, Mitte fünfzig, leiser als der Inca
 📍 Restaurant „El Borinquén" — kulturelles Zentrum
 📍 Sportplatz an der Schule — Rekrutierung und Präsenz
 
-Sie kontrollieren Reviere, in denen die Kings nicht sind, und sie respektieren – meistens – die Reviere, in denen die Kings sind. Was zwischen beiden Crews liegt, ist seit Jahren in der Schwebe und kann jederzeit umkippen.
+Die Lords kontrollieren Reviere, in denen die Kings nicht sind, und sie respektieren – meistens – die Reviere, in denen die Kings sind. Was zwischen beiden Crews liegt, ist seit Jahren in der Schwebe und kann jederzeit umkippen. Unter Miguel bleibt der Kurs pragmatisch – solange die andere Seite es zulässt.
 
 ### 💰 Business während des Events
 

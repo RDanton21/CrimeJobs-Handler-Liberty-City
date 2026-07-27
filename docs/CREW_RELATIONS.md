@@ -83,7 +83,7 @@
 | 17 | Money over Bitches | 18 | Dukes Latin Kings | `hostile` | Die Kings sehen die MOB als respektlos, die MOB sieht die Kings als überholt. Der Konflikt ist symbolisch — und damit gefährlicher als ein Geld-Konflikt. |
 | 17 | Money over Bitches | 20 | Eastline Wolves | `rival` | MOB streamt laut, Wolves bewegen leise — eine Reibung der Stile mehr als der Reviere. Mehrere Vorfälle vor dem Restaurant *Tbilisi*, jedes Mal wird die Tür danach repariert. |
 | 19 | Spanish Lords | 21 | Midtown 49ers | `business` | Die Lords lassen die 49ers durch ihre Reviere — gegen Provision. Eine kalte Übereinkunft, die funktioniert, weil keiner mehr will. |
-| 17 | Money over Bitches | 19 | Spanish Lords | `hostile` | Don Rafa verachtet den MOB-Stil. J-Stack provoziert, weil er weiß, dass es wirkt. Bisher Worte, mehr nicht. |
+| 17 | Money over Bitches | 19 | Spanish Lords | `hostile` | Die Lords verachten den MOB-Stil. J-Stack provoziert, weil er weiß, dass es wirkt. Miguel Cruzado lässt es als Lärm abtropfen — bisher nur Worte, mehr nicht. |
 
 ### Inter-District — die Stadt ist kleiner, als sie aussieht
 
