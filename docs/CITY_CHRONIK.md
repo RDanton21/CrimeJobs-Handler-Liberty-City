@@ -50,6 +50,52 @@
 
 ---
 
+## Gruppen-Lagebild — was die Crews seit dem 05.07. gemacht haben
+
+*Der Bogen jeder aktiven Gruppierung durch die stillen Tage — Ausgangslage, Entwicklung, Stand am 06.08.*
+
+### Algonquin
+
+**Italienische Mafia (Manschettis)** — Halten still, aber nicht untätig. Ohne Camino fehlt ihnen der Mann, der ihre Deals abgesichert hat. Sie ziehen sich ins Club Roma zurück, zählen, wer noch loyal ist, und lassen die Harlem Vipers vorerst gewähren. Ihr Schweigen ist Kalkül: sie warten, wer die neue „Stimme" ist, bevor sie sich festlegen.
+
+**Asiatische Yakuza (Nishiki-kai)** — Die disziplinierteste Reaktion der Stadt. Kein Wort nach außen. Sie prüfen den Algonquin-Pakt von 2003, der ohne Camino keinen Garanten mehr hat. Im Akagi wird nachts verhandelt, ein Brief nach dem anderen verschwindet vom Tisch. Bis 06.08. sind sie vorbereitet — worauf, weiß niemand.
+
+**The Harlem Vipers** — Die Gewinner der ersten Wochen. Die jüngste Crew nutzt das Vakuum am aggressivsten: sie nehmen Ecken, die früher tabu waren, und niemand hält sie auf. Von „die alten Häuser zerfallen" zu „das ist unsere Chance". Bis zum Vorabend haben sie mehr Boden gutgemacht als in zwei Jahren davor.
+
+**AOD MC** — Beobachten, patrouillieren, warten. Sie glauben nicht an Zufälle und fahren mehr Präsenz über die Algonquin-Bridge. Ihren ersten Umschlag bekommen sie spät (31.07.) — und nehmen ihn an. Ab da sind sie im Spiel.
+
+**LCPD (Zelle Revier 3)** — Siehe Cop-Faden oben: aus einzelnen Wegschauern wird eine startklare Zelle. Stand 06.08.: positioniert, finanziert, wartet auf den 07.08.
+
+### Bohan
+
+**Blue Union** — Die Ex-Cops werden zu Chronisten. Sie melden nichts mehr offiziell, aber sie wissen alles: wer über welche Brücke fährt, wer wann verschwindet. Sie sammeln, statt zu handeln. Ihre Loyalität ist die offenste Frage in Bohan.
+
+**Los Aztecas** — Nutzen die Unsicherheit, um alte Grenzen neu zu ziehen. Am 27.07. eskaliert es fast. Sie testen, wie weit sie gehen können, jetzt wo niemand mehr vermittelt.
+
+### Broker
+
+**Russian Mafia (Asimov Bratva)** — Ziehen sich in die Vorsicht zurück: Container nur bei Nebel, keine offenen Bewegungen. Sie glauben, es war die Yakuza, und rüsten leise. Der Pakhan wartet, wer zuerst einen Fehler macht.
+
+**Jamaikanische Yardis** — Drehen die Musik leiser und hören zu. Sie bekommen früh Umschläge und liefern — Broker wird ihr Testfeld dafür, wie das neue System funktioniert.
+
+**Pawn Shop (Three Coins)** — Der Umschlagplatz der neuen Ordnung. Was heiß ist, landet auf Saul Mendelsons Theke; er stellt keine Fragen mehr, er notiert nur. Wer wissen will, was in Broker durchläuft, muss zu ihm.
+
+### Colony Island
+
+**Blackline Security** — Zieht die Kontrolle enger: mehr Patrouillen, weniger Fähren. Was in den Forschungsgebäuden passiert, wird stärker abgeschirmt als je — als wüchse mit dem Vakuum etwas, das niemand sehen soll.
+
+**Independent Smugglers (Coalition)** — Verlegen Routen, meiden Muster. Die Schmuggler-Allianz profitiert vom Chaos an Land: je unübersichtlicher die Stadt, desto besser laufen die Boote.
+
+**Little Bay Pirates** — Die wildeste Crew der Insel zählt, wer neu auf dem Wasser ist, und wartet auf die Gelegenheit, die das Vakuum bringt.
+
+### Dukes
+
+**Money over Bitches (MOB)** — Machen aus allem Content. Ihr Umschlag-Video geht viral, ihre Streams werden zur inoffiziellen Chronik der Straße — laut, provokant, und näher an der Wahrheit, als sie selbst glauben.
+
+**Spanish Lords** — Lesen jede Nachricht als Botschaft an sich. Sie suchen die Handschrift hinter den Umschlägen und bereiten sich auf einen Kampf um Dukes vor, den sie kommen sehen.
+
+---
+
 ## Regie-Notizen (intern)
 
 - **Cop-Aufbau (chronologisch):** 07.07. einstecken → 11.07. Umschlag behalten → 15.07. Asservat verschwindet → 19.07. zwei erkennen sich → 21.07. Zelle (4) + Regel „nur Revier-3-Nächte" → 25.07. erste bezahlte Eskorte → 29.07. Dispatcher steuert Streifen → 31.07. 5 Officer + Preisliste → 02.08. Lieferkette Asservat→Straße → 04.08. Schutz nach Gebot → 06.08. Schichttausch, startklar.
