@@ -63,15 +63,11 @@ Drei Brücken trennen Bohan vom Rest der Stadt. Drei Brücken, über die in dies
 
 Bohan ist der Ort, an dem in Liberty City die Dinge enden, die woanders begonnen haben.
 
-An der West Bohan Bridge brennt eine Tonne Feuer. Davor stehen sechs Männer in schwarzem Leder. Die *Bohan Charter* der LOST MC. Wreck Donahue trinkt aus einer Dose, die er noch nicht weggeworfen hat. Er sieht zur Brücke hoch und sagt nichts. Sein Charter wartet. Worauf, weiß er selbst nicht. Vielleicht auf eine Patrouille der Blue Union, die nicht kommen wird. Vielleicht auf etwas, das keiner von ihnen erwartet.
-
-Drei Blocks weiter, in einem Carwash, der seit zwei Stunden offiziell geschlossen hat, sitzt Carmen Rivera auf der Motorhaube eines Wagens, der gewaschen wurde, ohne benutzt worden zu sein. La Loba. Ihre Sequidors stehen um sie. Sie spricht leise. Sie hat heute Abend etwas gehört, was sie noch nicht versteht. Sie wartet, ob es eine zweite Stimme bestätigt.
-
 Im Süden, in einem Hinterhof zwischen verlassenen Garagen, sitzt Mateo Cruz Alvarez mit drei seiner Tenientes auf Plastikstühlen. Die Aztecas. Der Jefe de Barrio raucht nicht, trinkt nicht, spricht wenig. Er hört zu. Was er hört, weiß er noch nicht zu deuten. Aber er hört.
 
 Und in einem Sportverein, an dessen Tür immer noch das alte Polizei-Logo hängt, schließt Ray Conway gerade die Schicht ab. Captain der Blue Union. Ex-Cop. Er trägt heute eine blaue Schnur am Handgelenk, sichtbar. Er trinkt seinen Kaffee aus. Sein Telefon liegt vor ihm. Es leuchtet nicht. Noch nicht.
 
-Vier Crews in Bohan. Vier verschiedene Versionen davon, was diese Nacht sein wird.
+Zwei Crews in Bohan. Zwei verschiedene Versionen davon, was diese Nacht sein wird.
 
 Und keiner von ihnen weiß, dass der Wirt eines kleinen Diners in Algonquin gerade ein Telefon in die Hand nimmt.
 
@@ -81,21 +77,17 @@ Und keiner von ihnen weiß, dass der Wirt eines kleinen Diners in Algonquin gera
 
 Broker ist die Bühne. Wenn Liberty City eine Show ist, ist Broker das Publikum, das sich selbst applaudiert.
 
-Über der Avenue brennen Neonschilder, die jeden Buchstaben einzeln gelernt haben. Davor, in einem Klub namens *Cassiopeia*, sitzt DeShawn Beaumont in seinem oberen Stock, die Sonnenbrille auf, obwohl die Sonne seit Stunden weg ist. Royale. Kingpin der Avenue Lords. Vor ihm steht ein Glas Champagner, an dem er nicht trinkt. Er hört Musik, die er selbst nicht ausgesucht hat. Er denkt nach.
-
-Drei Querstraßen weiter, in *Mercer's Gym*, schlägt Andre Cross gerade auf einen Sandsack ein, den er nicht meint. Boss der Crossline Kings. Er hat heute eine Nachricht bekommen, die er nicht beantwortet hat. Er schlägt schneller. Sein Trainer schaut weg.
-
 Im Süden, in einem Plattenladen namens *Selecta Records*, läuft eine Schallplatte zu Ende. Don Gorgon Winston Brown legt sie um. Er schaut nicht, was als nächstes kommt. Er weiß es. Er weiß heute Abend mehr Dinge, als er möchte.
 
 Zwei Blocks vom Hafen entfernt, in einer Sauna namens *Tetka Marina*, sitzt Pyotr Volkov in einem weißen Bademantel, weißes Haar, kein Lächeln. Pakhan der Asimov Bratva. Vor ihm steht ein Glas Wasser. Er trinkt nicht. Sein Sovietnik flüstert. Volkov antwortet nicht.
 
-Und in einem Lagerhallen-Komplex am Rand Brokers, der heute Nacht offiziell ein Rave wird, steht Lila Okafor — Phantom — auf einer Bühne, die sie selbst gebaut hat. Mother of the Swarm. Die Fireflys. Sie schaut über tausend Köpfe, die unter ihr leuchten, und sie weiß, dass sie heute die Lauteste in Broker ist.
+Und im Hinterzimmer von *Three Coins Pawn* zählt Saul Mendelson die Kassenschublade zum dritten Mal, obwohl sie stimmt. Der Hehler von Broker, seit die Bratva denken kann. Vor ihm liegen Dinge, die heute Nacht auf seiner Theke gelandet sind und über die niemand ein Wort verloren hat.
 
-Sie weiß auch, dass irgendwo in der Stadt ein älterer Mann nicht da ist, wo er sein sollte. Ihr Telefon hat soeben vibriert.
+Er weiß, dass irgendwo in der Stadt ein älterer Mann nicht da ist, wo er sein sollte. Sein Telefon hat soeben vibriert.
 
-Sie liest die Nachricht zwei Mal.
+Er liest die Nachricht zwei Mal.
 
-Dann legt sie sie weg, und die Musik geht weiter.
+Dann legt er sie weg, und das Neonschild im Fenster surrt weiter.
 
 ---
 
@@ -131,17 +123,9 @@ Aber beide werden es spüren.
 
 In Dukes ist Familie das härteste Wort.
 
-In einer Casa in Süd-Dukes sitzt Carlos Hernández — El Padre — am Kopfende eines langen Tisches. Inca der Dukes Latin Kings. Um ihn neunzehn Männer und drei Frauen, alle mit einer Krone irgendwo am Körper. Sie singen nicht. Sie warten. Auf der Tischmitte liegt ein Brief, ungeöffnet. Er trägt keinen Absender. Aber El Padre weiß, von wem er ist, weil das Papier riecht. Es riecht nach Theaterstraße.
-
-Er öffnet den Brief nicht.
-
 In einer Werkstatt drei Blocks weiter, *Mendoza Auto*, steht Rafael Mendoza unter einem Wagen und repariert nichts. Don Rafa. Supreme der Spanish Lords. Ein junger Lord steht neben ihm und sagt einen Satz, den er nicht wiederholen muss. Mendoza nickt. Er schaut auf seine Hände. Er weiß, dass die nächsten zwei Stunden in Dukes nicht ruhig werden.
 
-In einem Studio namens *Forty's Floor* läuft ein Track auf Repeat. Tyrell Watson sitzt in einem Drehstuhl und scrollt durch sein Telefon. CEO der 49ers. Er sieht eine Nachricht von Phantom aus Broker. Eine zweite Nachricht, von einem Kontakt, dessen Namen er gespeichert hat als „A.". Eine dritte von einem Cousin, der für die Latin Kings arbeitet. Drei Nachrichten in zwanzig Minuten. Forty stoppt den Track.
-
-Im Restaurant *Tbilisi*, an einem Tisch hinten unter einer Ikone, sitzt Kira Volkov mit drei ihrer Vatazhki und einer Tasse Tee, die schwarz und süß ist. Volka. Alpha der Eastline Wolves. Über ihnen läuft leise georgische Musik. Auf dem Tisch liegt ein Frachtbrief vom Francis Underwood International. Sie hat ihn zweimal gelesen. Sie hat das Gefühl, dass das Wochenende nicht das wird, was sie geplant hat. Sie kennt das Gefühl. Sie ignoriert es nicht.
-
-Und in einer Wohnung in einem Plattenbau in Nord-Dukes streamt Jamal Brooks live, eine Hand am Bildschirm, die andere am Mikrofon. J-Stack der MOB. Er provoziert, wie immer. Er weiß noch nicht, dass diese Nacht seinem Stream zwanzigtausend zusätzliche Zuschauer bringen wird — und keiner wird wegen seiner Beleidigungen kommen.
+Und in einer Wohnung in einem Plattenbau in Nord-Dukes streamt Jamal Brooks live, eine Hand am Bildschirm, die andere am Mikrofon. J-Stack der MOB. Er provoziert, wie immer. Er weiß noch nicht, dass diese Nacht seinem Stream 20.000 zusätzliche Zuschauer bringen wird — und keiner wird wegen seiner Beleidigungen kommen.
 
 Sondern wegen dem, was draußen passiert.
 
