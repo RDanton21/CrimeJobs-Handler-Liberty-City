@@ -17,8 +17,8 @@ Sechs Persönlichkeiten, alle dem Big Boss loyal, aber jede mit eigenem Stil und
                      ▼
    ┌─────────────────────────────────────────┐
    │   5–6 MITTLER (User + Team)              │
-   │   Miguel · Maklerin · Strategos · Der Kurier ·   │
-   │   Witwe · Skrupellose                    │
+   │   Miguel · Eintreiberin · Strategos      │
+   │   Der Kurier · Der Analyst               │
    │   • Übersetzen Briefings in eigenen Stil │
    │   • Übergeben in RP-Begegnungen          │
    │   • Sammeln Feedback aus den Gangs       │
@@ -53,23 +53,19 @@ Camino hörte sich Miguels Anliegen geduldig an, bevor er ihm einen simplen, abe
 
 ---
 
-## Maklerin
+## Die Eintreiberin
 
-Die Maklerin ist bekannt für ihre Fähigkeit, Deals und Vereinbarungen zu schließen, die den Crews von Liberty City langfristige Vorteile bieten. Ihre Expertise liegt in der Verhandlung und der Vermittlung zwischen gegensätzlichen Parteien. Sie nutzt ihr umfassendes Netzwerk in der Stadt, um Gelegenheiten für die Crews zu identifizieren, die ihnen Macht und Einfluss sichern. Die Maklerin bevorzugt es, im Hintergrund zu operieren und zieht die Fäden, ohne dass die Beteiligten merken, dass sie manipuliert werden.
+Die Eintreiberin verhandelt nicht. Sie kassiert. Wo der Kurier den Umschlag bringt, sorgt sie dafür, dass geliefert wird — pünktlich, vollständig, ohne Ausreden. Sie ist die Antwort des Bosses auf jedes „vielleicht“, jedes „später“, jedes „das schaffen wir nicht“. In einer Stadt, die drei Jahrzehnte gewohnt war, dass man über alles reden konnte, ist sie die neue Regel: Es gibt nichts mehr zu bereden. Es gibt nur noch das, was fällig ist.
 
 ### Einfluss auf die Crews
 
-Die Maklerin hat eine einzigartige Beziehung zu den verschiedenen Crews in Liberty City. Sie ist bekannt dafür, die Interessen der Jamaikanische Yardis und der Spanish Lords geschickt auszubalancieren, indem sie Handelsabkommen und Waffenstillstände vermittelt. Ihre Fähigkeit, sowohl die noblen als auch die gefährlichen Aspekte des Geschäftslebens zu navigieren, macht sie zu einer unverzichtbaren Ressource für die Money over Bitches und die Russian Mafia, die beide ihren Rat suchen, wenn es um komplexe strategische Entscheidungen geht.
+Die Eintreiberin taucht auf, wenn ein Auftrag nicht erfüllt wurde — und nie zweimal wegen derselben Sache. Die Jamaikanische Yardis haben früh gelernt, dass bei ihr nur die Lieferung zählt, nicht das Wort davor. Die Spanish Lords nennen sie nicht beim Namen, weil sie glauben, man ruft sie damit. Bei den Money over Bitches hat ein Video, das nie hätte entstehen dürfen, nie einen Stream erreicht — es verschwand, wie die Hand, die es filmte. Die Russian Mafia respektiert sie, weil sie in ihr etwas Vertrautes erkennt: jemanden, der Schulden nicht vergisst.
 
-Mit den Spanish Lords und den Harlem Vipers pflegt sie eine vorsichtige Allianz, indem sie ihnen Zugang zu exklusiven Märkten gewährt und Informationen über rivalisierende Aktivitäten liefert. In der Vergangenheit hat sie den Blue Union geholfen, einflussreiche Positionen in städtischen Behörden zu sichern, was ihre Loyalität zementiert hat. Die Maklerin ist bekannt dafür, dass sie ihre Verbindungen zu nutzen weiß, um die Crews dazu zu bringen, Entscheidungen zu treffen, die ihr langfristig nützen, selbst wenn diese Entscheidungen ursprünglich nicht in deren Interesse lagen.
-
-Ihre Fähigkeit, Informationen zu steuern und subtile Druckmittel einzusetzen, ermöglicht es ihr, die Crews dazu zu bringen, in ihrem Sinne zu handeln, oft ohne dass diese sich dessen bewusst sind. Diese subtile Kunst der Beeinflussung hat ihr den Ruf eingebracht, eine der mächtigsten Hinter-den-Kulissen-Player in Liberty City zu sein.
+Sie bietet keine Deals. Sie bietet Fristen. Wer sie einhält, sieht sie nie. Wer sie reißt, sieht sie einmal — danach entscheidet nicht mehr die Crew, was als Nächstes passiert.
 
 ### Verbindung zu Mr. Camino
 
-Die Maklerin traf Mr. Camino zum ersten Mal bei einem neutralen Treffen im Brass Plate Diner, als sie noch neu im Geschäft war. Camino hatte einen Ruf, den sie nicht ignorieren konnte, und sie wollte verstehen, warum er so respektiert wurde. Während ihres Treffens lernte sie schnell, dass Camino nicht nur ein Meister der Verhandlung war, sondern auch über eine tiefe emotionale Intelligenz verfügte, die ihm half, die wahren Bedürfnisse und Ängste der Menschen zu verstehen.
-
-Er lehrte die Maklerin, dass der Schlüssel zu einer erfolgreichen Verhandlung nicht nur in den angebotenen Inhalten liegt, sondern auch darin, die verborgenen Emotionen der Beteiligten zu erkennen und darauf einzugehen. Mit dieser Fähigkeit hat die Maklerin ihre eigene Methodik entwickelt, um Crews subtil zu beeinflussen und sie auf den für sie vorteilhaften Pfad zu führen.
+Camino und die Eintreiberin sind zwei Seiten derselben Münze — und beide wussten es. Er verhandelte; sie kassiert. Er verhinderte Kriege, indem er Menschen zum Reden brachte; sie beendet Diskussionen, bevor sie beginnen. Man erzählt sich, sie sei ihm früh einmal begegnet, als sie noch neu war — und dass er ihr den einzigen Rat gab, den sie je angenommen hat: „Sei nie die, die man rufen muss. Sei die, an die man denkt, bevor man den Fehler macht.“ Camino ist weg. An ihn denkt keiner mehr, bevor er den Fehler macht. An sie schon.
 
 ---
 
