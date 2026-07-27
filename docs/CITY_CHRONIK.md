@@ -16,7 +16,7 @@
 
 **09.07.** — Der erste Umschlag. Keine Handschrift, keine Rückadresse — nur eine Adresse und ein Betrag. Er landet bei einer Crew in Broker. Sie liefert. Es funktioniert. Das spricht sich herum.
 
-**10.07.** — Ein Fremder legt bei Saul etwas auf die Theke, das er sofort erkennt und trotzdem nicht kommentiert: eine einzelne Seite, herausgerissen aus *Der Pate* — dem italienischen Original, wie es ein alter Mann in Algonquin jeden Abend aufgeschlagen vor sich liegen hatte. Was auf der Seite steht, lässt sich nicht entziffern. Saul zahlt, ohne zu handeln. Und legt sie nicht in die Auslage.
+**10.07.** — Ein Fremder legt eine herausgerissene Seite auf die Theke: **Seite 446** — die Seite, die ein alter Mann in Algonquin zwölf Jahre lang aufgeschlagen vor sich liegen hatte und **nie umblätterte**. Sie sollte gar nicht hier sein, denn sein Buch liegt noch immer im Diner. Der Druck ist unleserlich — überschrieben von einer Hand, die niemand kennt, in einer Tinte, die zu dunkel getrocknet ist. Der Fremde wird bezahlt und verschwindet. Drei Tage später bringt ein anderer Fremder **Seite 447**.
 
 **11.07.** — In Bohan notiert Blue Union, wer über welche Brücke fährt. Und in Algonquin hebt ein Officer aus dem 3. Revier einen Umschlag auf, der nicht für ihn bestimmt war — und behält ihn. Nichts passiert. Das ist die gefährlichste Lektion dieser Stadt: dass nichts passiert.
 
