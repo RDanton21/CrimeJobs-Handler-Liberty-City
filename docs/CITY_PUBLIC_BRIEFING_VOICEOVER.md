@@ -25,7 +25,7 @@
 
 - Sanftes Klavier oder ein gehaltener tiefer Drone-Ton (z. B. Lava Sound, frei-lizenziert)
 - Sehr leise — Sprache muss klar bleiben
-- Bei den Schlüssel-Sätzen („Zehn Tage", „Damit der Stuhl nicht das Falsche denkt") Musik leicht hochziehen, dann zurück
+- Bei den Schlüssel-Sätzen („Neun Tage", „Damit der leere Stuhl nicht glaubt, dass diese Stadt ihn schon vergessen hat") Musik leicht hochziehen, dann zurück
 
 ---
 
@@ -47,9 +47,9 @@ Es war dreiundzwanzig Uhr siebenundvierzig. Auf den TV-Werbetafeln am Star Junct
 
 Für genau siebzehn Sekunden erschien überall dasselbe. Ein schwarzer Bildschirm. Weiße Serifen-Schrift. Eine einzige Zeile.
 
-„Liberty City. Zehn Tage. Dann seht ihr, wer hier wirklich entscheidet."
+„Schlaft gut — solange ihr noch könnt. Von jetzt an zählt, wer zuerst aufwacht."
 
-Dann war es weg. Keine Spur. Die Tech-Konzerne dementierten. Die Polizei stand ratlos. Die Bürgermeisterin… verzeihen Sie, der Head of Liberty City Francis J. Underwood… nannte es einen digitalen Streich. Die Bevölkerung lachte. Memes überfluteten das Netz. Hashtag Zehn Tage trendete bis zum Morgen.
+Dann war es weg. Keine Spur. Die Tech-Konzerne dementierten. Die Polizei stand ratlos. Die Bürgermeisterin… verzeihen Sie, der Head of Liberty City Francis J. Underwood… nannte es einen digitalen Streich. Die Bevölkerung lachte. Memes überfluteten das Netz. Hashtag Neun Tage trendete bis zum Morgen.
 
 Drei Stunden später brannten am Broker-Hafen drei Container. Versicherungsschaden in Millionenhöhe.
 
@@ -87,7 +87,7 @@ Hör dir an, was er in den letzten dreißig Jahren bewegt hat.
 
 Neunzehnhundertsechsundneunzig. Vito Manschetti, damals zweiunddreißig Jahre alt, war wütend. Die Famiglia Vargone hatte seinen jüngeren Bruder am Hafen erschossen. Vito wollte in derselben Nacht sechs Vargone-Männer erledigen. Er hatte den Wagen geladen, die Männer bereit. Mr. Camino rief ihn an. Auf einer Nummer, die nur drei Menschen in Liberty City kannten. Vito kam in den Diner. Mr. Camino sagte ihm einen einzigen Satz.
 
-„Setz dich, Vito. Wenn du heute Nacht schießt, schießt deine Mutter dich nächstes Jahr selbst tot — weil sie keinen Sohn mehr hat, der etwas wert ist."
+„Setz dich, Vito. Wenn du heute Nacht den ersten Schuss abgibst, dauert es nicht lange, bis deine Mutter auch dich zu Grabe tragen muss. Halte den Schaden gering."
 
 Vito setzte sich. Drei Stunden später war der Krieg vorbei. Drei Tote. Kein vierter.
 
@@ -117,7 +117,7 @@ Am Abend hat er ihn kalt zurück in die Küche getragen. Am nächsten Morgen wie
 
 Wenn man Frankie fragt, warum, antwortet er nur einen Satz.
 
-„Damit der Stuhl nicht das Falsche denkt."
+„Damit der leere Stuhl nicht glaubt, dass diese Stadt ihn schon vergessen hat."
 
 …
 
@@ -155,11 +155,11 @@ In Dukes sehen die Straßen tagsüber aus wie das Amerika der Neunziger. Einfami
 
 …
 
-Zehn Tage. Das hat die Botschaft gesagt.
+Neun Tage. So lange gibt die Stadt euch noch.
 
-Zehn Tage… in denen Liberty City sich neu sortieren wird. Zehn Tage, in denen die Crime-Familien ihre Reviere prüfen, ihre Tribute fordern, ihre alten Rechnungen begleichen werden. Zehn Tage, in denen Zivilisten Brände in ihren Vierteln sehen werden. In denen Diner-Wirte Gespräche hören werden, die sie nicht hören sollten. In denen Werkstattbesitzer Autos reparieren werden, in deren Spurfänger Einschusslöcher stecken.
+Neun Tage… in denen Liberty City sich neu sortieren wird. Neun Tage, in denen die Crime-Familien ihre Reviere prüfen, ihre Tribute fordern, ihre alten Rechnungen begleichen werden. Neun Tage, in denen Zivilisten Brände in ihren Vierteln sehen werden. In denen Diner-Wirte Gespräche hören werden, die sie nicht hören sollten. In denen Werkstattbesitzer Autos reparieren werden, in deren Spurfänger Einschusslöcher stecken.
 
-Zehn Tage, in denen jeder Bürger eine Wahl treffen muss. Eine kleine. Vielleicht eine große.
+Neun Tage, in denen jeder Bürger eine Wahl treffen muss. Eine kleine. Vielleicht eine große.
 
 Dichthalten. Reden. Kooperieren. Verraten.
 
@@ -173,7 +173,7 @@ Wer hier wirklich entscheidet.
 
 Diese Stadt schweigt nicht ewig.
 
-Zehn Tage.
+Neun Tage.
 
 Sucht euch eure Rolle. Täter. Zeuge. Opfer. Held. Memes-Macher. Verschwörer. Verräter. Beobachter.
 
@@ -183,7 +183,7 @@ Liberty City wird sich an euch erinnern… an die Nacht, in der es begann.
 
 …
 
-Liberty City. Zwei Wörter. Eine Stadt. Zehn Tage.
+Liberty City. Zwei Wörter. Eine Stadt. Neun Tage.
 
 Ab jetzt.
 
@@ -195,10 +195,10 @@ Ab jetzt.
 
 | Timecode (ungefähr) | Moment | Empfehlung |
 |---|---|---|
-| 0:30 | Erste Zeile der Botschaft („Liberty City. Zehn Tage…") | Stimme leicht absenken, leichte Hall-Reflexion (Reverb 15%), als Echo |
+| 0:30 | Erste Zeile der Botschaft („Schlaft gut…") | Stimme leicht absenken, leichte Hall-Reflexion (Reverb 15%), als Echo |
 | 4:20 | Caminos Satz „Setz dich, Vito…" | Stimme ruhiger, leichte Pause vor und nach |
 | 7:00 | Camino-Zitat „Liberty City verzeiht nichts…" | Leichte Hall-Reflexion, etwas langsamer |
-| 8:10 | Frankies Satz „Damit der Stuhl nicht das Falsche denkt." | Sehr leise, fast geflüstert |
+| 8:10 | Frankies Satz „Damit der leere Stuhl nicht glaubt, dass diese Stadt ihn schon vergessen hat." | Sehr leise, fast geflüstert |
 | 12:30 | „Wer hier wirklich entscheidet." | Lange Pause davor + danach |
 | 13:00 | Schlussworte „Ab jetzt." | Letztes Wort kurz, ohne Hall, danach Stille |
 

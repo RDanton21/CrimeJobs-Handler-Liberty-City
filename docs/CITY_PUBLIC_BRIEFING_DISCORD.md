@@ -12,9 +12,9 @@
 
 23:47 Uhr. Auf jedem Bildschirm in Liberty City — TV-Werbetafeln am Star Junction, Smartphone-Lockscreens, U-Bahn-Anzeigen, ATM-Displays, sogar die LED-Schilder über dem Algonquin-Tunnel — erscheint für genau **17 Sekunden** derselbe schwarze Bildschirm mit einer einzigen Zeile:
 
-> *„Liberty City. Zehn Tage. Dann seht ihr, wer hier wirklich entscheidet."*
+> *„Schlaft gut — solange ihr noch könnt. Von jetzt an zählt, wer zuerst aufwacht."*
 
-Dann ist es weg. Keine Spur. Tech-Konzerne dementieren. LCPD ratlos. Die Bevölkerung lacht. **#10Tage** trendet bis zum Morgen.
+Dann ist es weg. Keine Spur. Tech-Konzerne dementieren. LCPD ratlos. Die Bevölkerung lacht. **#9Tage** trendet bis zum Morgen.
 
 Aber drei Stunden später: erster Brand im Broker-Hafen. Drei Container ausgebrannt. Versicherung Millionen. LCFD löscht bis zum Sonnenaufgang.
 
@@ -22,7 +22,7 @@ Schon seit Wochen — seit Anfang Juli — fehlt Mr. Camino, der alte Vermittler
 
 Und dann verstehen einige in der Stadt: die Botschaft war keine PR-Aktion. Es war eine **Ankündigung**.
 
-*Zehn Tage. Ab jetzt.*
+*Neun Tage. Ab jetzt.*
 
 ---
 
@@ -54,13 +54,13 @@ Manche Beobachter notieren: er wirkt zu vorbereitet. Zu ruhig. Aber das ist Fran
 
 👤 **MR. CAMINO — DER LEERE STUHL (3/5)**
 
-Seit 1996 sitzt Mr. Camino jeden Morgen 07:30 und jeden Abend 19:00 im Brass Plate Diner in Algonquin, dritter Tisch links. Sein Buch — *Il Padrino*, italienische Originalausgabe — liegt aufgeschlagen auf Seite 187. Seit zwölf Jahren dieselbe Seite. Sein Earl Grey dampft.
+Seit 1996 sitzt Mr. Camino jeden Morgen 07:30 und jeden Abend 19:00 im Brass Plate Diner in Algonquin, dritter Tisch links. Sein Buch — *Il Padrino*, italienische Originalausgabe — liegt aufgeschlagen auf Seite 446. Seit zwölf Jahren dieselbe Seite. Sein Earl Grey dampft.
 
 Vor ihm: zwei Stühle. Wer Bittsteller ist, setzt sich links. Wer etwas bringt, rechts. Drei Tassen Tee = es wird geredet. Buch zugeklappt = er hört zu.
 
 Er gehörte keiner Crew an. Er hat nie geschossen, nie Schutzgeld erpresst. Aber wenn zwei Häuser einen Streit hatten, der eskalieren konnte — gingen die Boten zu ihm.
 
-**1996** beendete er den Mafia-Krieg gegen die Vargone. *„Setz dich, Vito. Wenn du heute Nacht schießt, schießt deine Mutter dich nächstes Jahr selbst tot."*
+**1996** beendete er den Mafia-Krieg gegen die Vargone. *„Setz dich, Vito. Wenn du heute Nacht den ersten Schuss abgibst, dauert es nicht lange, bis deine Mutter auch dich zu Grabe tragen muss. Halte den Schaden gering."*
 **2003** verhandelte er die Yakuza-Aufnahme in Algonquin — mit drei Tassen Earl Grey und vier Stunden Schweigen.
 **2011** schlichtete er zwischen Bratva und Mafia nach einer Hafen-Schießerei — die Stadt erwartete dreißig Tote, sie zählte drei.
 **2017** brachte er einen LOST-MC-Schützen mit einem einzigen Telefonat dazu, sich freiwillig zu stellen.
@@ -70,7 +70,7 @@ Er gehörte keiner Crew an. Er hat nie geschossen, nie Schutzgeld erpresst. Aber
 
 Sein Stuhl ist leer seit Anfang Juli. Frankie Maloney, der Diner-Wirt seit 1991, serviert den Tee trotzdem. Jeden Morgen. Jeden Abend.
 
-> *„Damit der Stuhl nicht das Falsche denkt."*
+> *„Damit der leere Stuhl nicht glaubt, dass diese Stadt ihn schon vergessen hat."*
 
 Wer ihn entfernt hat — hat das gewollt.
 
@@ -92,9 +92,9 @@ Wer ihn entfernt hat — hat das gewollt.
 
 ---
 
-## 🎭 Block 5 / 5 — „Zehn Tage — was kommt"
+## 🎭 Block 5 / 5 — „Neun Tage — was kommt"
 
-🎭 **ZEHN TAGE — WAS KOMMT (5/5)**
+🎭 **NEUN TAGE — WAS KOMMT (5/5)**
 
 Jeder in Liberty City erlebt diese Tage anders.
 
@@ -113,7 +113,7 @@ Jeder in Liberty City erlebt diese Tage anders.
 
 ---
 
-> *Liberty City schweigt nicht ewig. Zehn Tage. Dann seht ihr, wer in dieser Stadt wirklich entscheidet.*
+> *Liberty City schweigt nicht ewig. Neun Tage. Dann seht ihr, wer in dieser Stadt wirklich entscheidet.*
 >
 > *Sucht euch eure Rolle — Täter, Zeuge, Opfer, Held, Memes-Macher, Verschwörer, Verräter, Beobachter. Macht euer Spiel.*
 >

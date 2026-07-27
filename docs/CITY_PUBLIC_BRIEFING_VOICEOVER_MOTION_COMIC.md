@@ -50,7 +50,7 @@ In derselben Sekunde erschien auf jedem Bildschirm dieser Stadt dasselbe Bild. W
 
 **[SARAH]**
 
-[monotone] Liberty City. Zehn Tage. Dann seht ihr, wer hier wirklich entscheidet.
+[monotone] Schlaft gut — solange ihr noch könnt. Von jetzt an zählt, wer zuerst aufwacht.
 
 **[BILL]**
 
@@ -126,7 +126,7 @@ Er ist kälter als Camino. Härter. Er kennt die alten Regeln nicht — und es i
 
 [dramatic] Morgen, am siebten August, bekommt Liberty City die Antwort.
 
-Zehn Tage. Dann ist nichts mehr, wie es war.
+Neun Tage. Dann ist nichts mehr, wie es war.
 
 [final] [low] Ab jetzt.
 
@@ -189,7 +189,7 @@ In derselben Sekunde erschien auf jedem Bildschirm dieser Stadt dasselbe Bild. W
 **Nach Generierung:** Audacity Pitch-Shift −3 + Distortion
 
 ```
-[monotone] Liberty City. Zehn Tage. Dann seht ihr, wer hier wirklich entscheidet.
+[monotone] Schlaft gut — solange ihr noch könnt. Von jetzt an zählt, wer zuerst aufwacht.
 ```
 
 ---
@@ -298,7 +298,7 @@ Er ist kälter als Camino. Härter. Er kennt die alten Regeln nicht — und es i
 
 [dramatic] Morgen, am siebten August, bekommt Liberty City die Antwort.
 
-Zehn Tage. Dann ist nichts mehr, wie es war.
+Neun Tage. Dann ist nichts mehr, wie es war.
 
 [final] [low] Ab jetzt.
 ```

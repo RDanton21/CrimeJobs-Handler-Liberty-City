@@ -19,7 +19,7 @@ Sie werden es bemerken.
 
 Aber noch nicht.
 
-Noch ist es eine ganz normale Nacht in Liberty City. Noch sind alle an ihren Plätzen. Noch dampft in einem kleinen Café in Algonquin ein Tee auf einem Tisch, an dem niemand sitzt.
+Noch ist es eine ganz normale Nacht in Liberty City. Noch sind alle an ihren Plätzen. Noch dampft im Brass Plate Diner in Algonquin ein Tee auf einem Tisch, an dem niemand sitzt.
 
 Nur dieser eine Stuhl ist leer. Und niemand schaut hin.
 
@@ -43,7 +43,7 @@ In dieser Nacht müssen sie sich nicht sehen. In dieser Nacht reicht es, dass si
 
 Aber einer ist nicht.
 
-Ein Stuhl in einem Café drei Blocks von der Theaterstraße entfernt bleibt leer. Es ist ein kleines Café. Es hat keinen Namen über der Tür, nur die Hausnummer. Die Inhaberin kennt jeden, der hier seit dreißig Jahren am selben Tisch sitzt.
+Ein Stuhl im Brass Plate Diner, drei Blocks von der Theaterstraße entfernt, bleibt leer. Es ist ein kleines Diner in Algonquin. Der Wirt, Frankie Maloney, kennt jeden, der hier seit sechsundzwanzig Jahren am selben Tisch sitzt.
 
 Heute sitzt er nicht.
 
@@ -51,7 +51,7 @@ Sein Tee dampft. Sein Buch liegt aufgeschlagen. Seine Brille daneben.
 
 Aber sein Stuhl ist leer.
 
-Die Inhaberin schaut hin. Sie schaut ein zweites Mal hin. Dann nimmt sie das Telefon.
+Frankie schaut hin. Er schaut ein zweites Mal hin. Dann nimmt er das Telefon.
 
 ---
 
@@ -73,7 +73,7 @@ Und in einem Sportverein, an dessen Tür immer noch das alte Polizei-Logo hängt
 
 Vier Crews in Bohan. Vier verschiedene Versionen davon, was diese Nacht sein wird.
 
-Und keiner von ihnen weiß, dass eine Inhaberin in Algonquin gerade ein Telefon in die Hand nimmt.
+Und keiner von ihnen weiß, dass der Wirt eines kleinen Diners in Algonquin gerade ein Telefon in die Hand nimmt.
 
 ---
 
@@ -151,7 +151,7 @@ Sondern wegen dem, was draußen passiert.
 
 Es passiert um kurz nach zehn.
 
-Eine Inhaberin in Algonquin hat ein Telefon in die Hand genommen, weil ein Stuhl leer war.
+Der Wirt eines kleinen Diners in Algonquin hat ein Telefon in die Hand genommen, weil ein Stuhl leer war.
 
 Sie hat den Ersten angerufen, dessen Nummer sie auswendig konnte. Eine Familie Manschetti, weil sie wusste, dass die Familie Manschetti wusste, wer hier sitzt.
 
@@ -163,7 +163,7 @@ Dreißig Minuten später wussten es vier weitere Crews in Algonquin. Eine Stunde
 
 Mr. Camino war nicht da.
 
-Mr. Camino. Achtzig Jahre alt. Kein Mafioso, kein Boss, kein Mitglied einer Crew. Ein alter Mann, der seit dreißig Jahren in einem Café in Algonquin saß und zuhörte. Der für Don Manschettis Vater Pate gewesen war. Der dem Iron der AOD MC nach der Beerdigung seiner Frau die Hand gehalten hatte. Der den Inca der Latin Kings das Studieren bezahlt hatte. Der für die Aztecas in Bohan Konflikte beigelegt hatte, ohne je in Bohan gewesen zu sein. Der einer Familie der Nishiki-kai das Leben gerettet hatte, ohne je das Wort *Yakuza* in den Mund zu nehmen.
+Mr. Camino. Sein wahres Alter kennt niemand — manche sagen achtundsechzig, manche neunundsiebzig. Kein Mafioso, kein Boss, kein Mitglied einer Crew. Ein alter Mann, der seit sechsundzwanzig Jahren im Brass Plate Diner in Algonquin saß und zuhörte. Der für Don Manschettis Vater Pate gewesen war. Der dem Iron der AOD MC nach der Beerdigung seiner Frau die Hand gehalten hatte. Der den Inca der Latin Kings das Studieren bezahlt hatte. Der für die Aztecas in Bohan Konflikte beigelegt hatte, ohne je in Bohan gewesen zu sein. Der einer Familie der Nishiki-kai das Leben gerettet hatte, ohne je das Wort *Yakuza* in den Mund zu nehmen.
 
 Mr. Camino. Der Mann, mit dem jeder reden konnte, weil er zu nichts gehörte. Der Mann, dessen Stille eine Brücke war zwischen Crews, die sich seit Jahrzehnten nicht ansahen.
 

@@ -8,6 +8,8 @@
 
 ## Broker
 
+**Aktive Crews:** Jamaikanische Yardis (Trenchtown Outfit) · Pawn Shop „Three Coins" · Russian Mafia (Asimov Bratva)
+
 > *Atmosphäre: Backstein und Hafen. Werften, die Generationen ernährt haben, und Hinterhöfe, in denen Generationen verloren gegangen sind. Broker ist Liberty Citys raueste Adresse — und gleichzeitig seine ehrlichste.*
 
 Broker ist nicht über Nacht entstanden. Broker hat sich gebaut – aus Schiffsplanken, Backsteinen, Schweiß und Gerüchten. Hierher kamen die Einwanderer, als der Hafen noch alles war. Hierher kamen die Straßenhändler, als der Hafen weniger wurde. Hierher kommen die Gangs, weil das, was übrig bleibt, immer noch genug ist.
@@ -64,6 +66,8 @@ Die fünf Crews und ihre Beziehungen sind im Detail in [CREW_RELATIONS.md](CREW_
 
 ## Algonquin
 
+**Aktive Crews:** AOD MC (Angels of Death) · Asiatische Yakuza (Nishiki-kai) · Italienische Mafia (Manschettis) · The Harlem Vipers · LCPD
+
 > *Atmosphäre: Hochglanz und Hinterzimmer. Algonquin ist das wirtschaftliche, politische und kulturelle Zentrum von Liberty City — und gleichzeitig die Kreuzung, an der Luxus und Elend sich täglich begegnen, ohne sich zu erkennen. Wer hier oben wohnt, sieht nie, was direkt unter ihm liegt. Wer unten arbeitet, weiß, wem oben die Wand gehört.*
 
 Algonquin ist die Stadt, die Liberty City sein will. Glasfassaden, Bankzentralen, Mode, Medien, Politik. Hier werden die Schlagzeilen gemacht, die in Bohan oder Broker am nächsten Morgen in Café-Theken zerfetzt werden. Hier sitzen die Menschen, die entscheiden, wo die Stadt morgen baut, was sie heute kauft, wem sie nächste Woche eine Konzession entzieht.
@@ -119,6 +123,8 @@ Die **Korruptionsnetzwerke** sind keine Crew. Sie sind eine Schicht. Lobbyisten,
 ---
 
 ## Colony Island
+
+**Aktive Crews:** Blackline Security · Independent Smugglers (Coalition of Free Trade) · Little Bay Pirates
 
 > *Atmosphäre: Nebel, Salz, Stille. Eine Insel, die auf keiner Postkarte vorkommt. Eine Vergangenheit, die niemand mehr offiziell erzählt. Eine Gegenwart, die genau deshalb funktioniert. Wer Colony Island betritt, betritt einen Ort, der gelernt hat, übersehen zu werden.*
 
@@ -177,6 +183,8 @@ Und die **„Sonstigen"** — Obdachlose, die in den Gebäuden leben und sehen, 
 
 ## Dukes
 
+**Aktive Crews:** Money over Bitches (MOB) · Spanish Lords
+
 > *Atmosphäre: Vorstadt, Garage, Flughafen-Hum. Dukes sieht aus wie das, was Liberty City über sich selbst sagt: arbeitend, bürgerlich, ehrlich. Tagsüber stimmt das. Nachts wird Dukes zur Transit-Unterwelt der ganzen Stadt — und wer das Vorstadt-Bild glaubt, hat nicht hingesehen.*
 
 Dukes ist der östlichste Bezirk Liberty Citys — der Bezirk, in dem die Stadt langsam in etwas anderes übergeht. Reihenhäuser mit gepflegten Vorgärten und dem zweiten, ungenutzten Eingang im Hinterhof. Plattenbauten mit Familien, die seit drei Generationen hier wohnen. Industrieflächen, die nachts heller leuchten als tagsüber. Und über allem: der **Francis Underwood International Airport**, ein Flughafen, der nicht nur Passagiere bewegt, sondern auch Fracht — Luftfracht, die zwei Mal sortiert wird, einmal vom Zoll und einmal von Leuten, die niemand sieht.
@@ -230,6 +238,8 @@ Die **„Sonstigen"** — korrupte Flughafenbeamte, Spediteure mit doppelter Buc
 ---
 
 ## Bohan
+
+**Aktive Crews:** Blue Union · Los Aztecas
 
 > *Atmosphäre: Brücken, Beton, Brachen. Bohan ist der ärmste Bezirk Liberty Citys — abgetrennt durch Wasser, verbunden durch Brücken, geprägt von sozialen Spannungen, Kriminalität und Verfall. Wer in Liberty City einen Krieg anfängt, beendet ihn oft hier. Wer in Liberty City etwas verstecken will, versteckt es hier. Aber wer hier lebt, hat etwas, das die anderen Stadtteile vergessen haben: Gemeinschaft.*
 

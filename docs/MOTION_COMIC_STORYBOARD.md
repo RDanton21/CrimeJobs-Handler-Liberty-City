@@ -129,7 +129,7 @@ Aerial mid-shot of a city skyline at deep night. In the foreground harbor area, 
 
 **Sora-Prompt:**
 ```
-Wide shot of a Times Square style intersection at night, all giant LED billboards lit up with colorful ads. Suddenly, in perfect synchronization, every single screen turns pure black. After a one-second beat of total black silence, white serif text fades in across all of them simultaneously: "Liberty City. Zehn Tage. Dann seht ihr, wer hier wirklich entscheidet." Pedestrians stop and stare upward. Phones in hands all show the same thing. Cinematic, eerie, noir. 16:9, 10 seconds.
+Wide shot of a Times Square style intersection at night, all giant LED billboards lit up with colorful ads. Suddenly, in perfect synchronization, every single screen turns pure black. After a one-second beat of total black silence, white serif text fades in across all of them simultaneously: "Schlaft gut — solange ihr noch könnt. Von jetzt an zählt, wer zuerst aufwacht." Pedestrians stop and stare upward. Phones in hands all show the same thing. Cinematic, eerie, noir. 16:9, 10 seconds.
 ```
 
 #### Szene 10 — Smartphone + ATM + U-Bahn (Schnitt-Folge)
@@ -143,13 +143,13 @@ Rapid montage at night: a hand holding an unlocked smartphone displaying black s
 ```
 
 #### Szene 11 — Die Botschaft (statischer Hold + Sarah-Audio)
-**Audio-Anker:** Sarah spricht: „Liberty City. Zehn Tage. Dann seht ihr, wer hier wirklich entscheidet."
+**Audio-Anker:** Sarah spricht: „Schlaft gut — solange ihr noch könnt. Von jetzt an zählt, wer zuerst aufwacht."
 **Dauer:** 6 Sek
 **Visual:** Vollformat-Schwarz, weiße Serifen-Schrift Zeile für Zeile (typewriter-Effekt langsam). Halten, dann hartes Cut to white-flash → Container-Brand.
 
 **Sora-Prompt:**
 ```
-Full-frame pure black background. White serif text appears slowly, line by line, typewriter effect: "Liberty City. Zehn Tage. Dann seht ihr, wer hier wirklich entscheidet." Hold for 2 seconds after text complete. Then hard cut to white flash. 16:9, 6 seconds total. No camera movement.
+Full-frame pure black background. White serif text appears slowly, line by line, typewriter effect: "Schlaft gut — solange ihr noch könnt. Von jetzt an zählt, wer zuerst aufwacht." Hold for 2 seconds after text complete. Then hard cut to white flash. 16:9, 6 seconds total. No camera movement.
 ```
 
 #### Szene 12 — Hafenbrand am Pier 41
@@ -352,14 +352,14 @@ Aerial wide shot of a city skyline at sunrise, slow time-lapse. The sun rises be
 Split-screen vertical divide: LEFT half shows a confident man in a perfectly tailored black suit climbing the marble steps of City Hall in slow motion, looking upward. RIGHT half shows a hand carefully draping a black mourning suit jacket over an empty wooden chair in a dim room. Both halves cinematic noir, equal lighting, equal weight. Slow motion. 16:9, 6 seconds.
 ```
 
-#### Szene 31 — Letzte Worte „Zehn Tage. Ab jetzt."
-**Audio-Anker:** „Zehn Tage. Ab jetzt."
+#### Szene 31 — Letzte Worte „Neun Tage. Ab jetzt."
+**Audio-Anker:** „Neun Tage. Ab jetzt."
 **Dauer:** 6 Sek
-**Visual:** Schwarzer Hintergrund. Weiße Serifen-Schrift erscheint groß: „ZEHN TAGE." Pause. Darunter erscheint: „AB JETZT." Pause. Dann Fadeout zu Schwarz. 2 Sek Stille.
+**Visual:** Schwarzer Hintergrund. Weiße Serifen-Schrift erscheint groß: „NEUN TAGE." Pause. Darunter erscheint: „AB JETZT." Pause. Dann Fadeout zu Schwarz. 2 Sek Stille.
 
 **Sora-Prompt:**
 ```
-Pure black background. White serif text fades in slowly, large and centered: "ZEHN TAGE." Hold for 1.5 seconds. Below it, smaller, fades in: "AB JETZT." Hold for 1.5 seconds. Then both texts slowly fade to black. Hold complete black for 2 seconds. No camera movement, no other elements. Pure typography against void. 16:9, 6 seconds total.
+Pure black background. White serif text fades in slowly, large and centered: "NEUN TAGE." Hold for 1.5 seconds. Below it, smaller, fades in: "AB JETZT." Hold for 1.5 seconds. Then both texts slowly fade to black. Hold complete black for 2 seconds. No camera movement, no other elements. Pure typography against void. 16:9, 6 seconds total.
 ```
 
 ---
@@ -378,7 +378,7 @@ Pure black background. White serif text fades in slowly, large and centered: "ZE
 | 08 | 4 | Block 01 | „Bis heute" |
 | 09 | 10 | Block 02 | „Auf den Werbetafeln…" |
 | 10 | 5 | Block 02 | „Smartphones, ATMs…" |
-| 11 | 6 | **Block 03 (Sarah)** | „Liberty City. Zehn Tage…" |
+| 11 | 6 | **Block 03 (Sarah)** | „Schlaft gut…" |
 | 12 | 7 | Block 04 | „Drei Stunden später brannten…" |
 | 13 | 6 | Block 05 | „Heute Morgen blieb ein Platz leer" |
 | 14 | 8 | Block 05 | „Sie kennen doch den Brass Plate Diner" |
@@ -398,7 +398,7 @@ Pure black background. White serif text fades in slowly, large and centered: "ZE
 | 28 | 5 | Block 09 | „Und wer hat ihn aus dem Weg geräumt?" |
 | 29 | 10 | Block 09 | „Morgen…" |
 | 30 | 6 | Block 09 | „Manche werden steigen. Manche werden verschwinden." |
-| 31 | 6 | Block 09 | „Zehn Tage. Ab jetzt." |
+| 31 | 6 | Block 09 | „Neun Tage. Ab jetzt." |
 
 **Total Visual-Dauer:** ~234 Sek = **~3.9 Min**.
 **Total Audio-Dauer:** ~9.2 Min.
