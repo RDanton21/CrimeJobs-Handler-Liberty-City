@@ -28,13 +28,15 @@
 
 **19.07.** — In Dukes streamt die MOB ein Video mit 200.000 Aufrufen über Nacht: ein aufgeschlitzter Umschlag, kein Inhalt zu sehen. Und in einer Bar nahe dem 3. Revier merken zwei Officer beim dritten Bier, dass ihre Berichte der letzten Wochen zu gut zusammenpassen, um Zufall zu sein. Sie reden zum ersten Mal Klartext.
 
-**20.07.** — Zum ersten Mal führt Saul ein zweites Buch — eins, das niemand sieht. Wer zahlt, wer bringt, wer fragt. Der Hehler von Broker wird zum Archivar der stillen Tage.
+**20.07.** — Zum ersten Mal führt Saul ein zweites Buch — eins, das niemand sieht. Wer zahlt, wer bringt, wer fragt. Der Hehler von Broker wird zum Archivar der stillen Tage. Auf einer der Seiten, die inzwischen bei ihm liegen, ist ein einzelnes Zeichen der Überschreibung entkommen — sauber, absichtlich stehengelassen. Als wollte jemand, dass genau dieses eine gelesen wird.
 
 **21.07.** — Aus den zweien werden vier. Sie legen eine Regel fest: nur in Nächten, in denen Revier 3 die Streife stellt. Sie teilen das erste Bargeld in einem Wagen auf dem Parkdeck. Keiner nennt es beim Namen. Alle wissen, was es ist.
 
 **23.07.** — Auf Colony Island fällt eine Fähre aus. Kein Grund. Blackline Security patrouilliert enger, die Independent Smugglers verlegen ihre Routen, und die Little Bay Pirates zählen, wer neu auf dem Wasser ist.
 
 **25.07.** — Die Nishiki-kai lädt niemanden ein und sagt nichts — aber im Akagi brennt bis 4 Uhr Licht. Und in derselben Nacht rollt eine Lieferung durch einen Checkpoint in Broker, den ausgerechnet Revier 3 besetzt. Der Wagen wird durchgewinkt. Es ist das erste Mal, dass die Zelle für etwas bezahlt wird, statt nur wegzusehen.
+
+**26.07.** — Jemand schlägt im Brass Plate Caminos Buch auf. Es fehlen Seiten — genau die, die in Broker auf einer Theke landen. Niemand hat je gesehen, wer sie herausgetrennt hat. Frankie sagt nur einen Satz: „Das Buch war voll, als er ging.“
 
 **27.07.** — In Bohan zieht Los Aztecas eine Grenze neu, die seit Jahren galt. Es fällt kein Schuss — aber einer war nah. Blue Union hat es gesehen und nicht gemeldet.
 
@@ -48,7 +50,7 @@
 
 **04.08.** — Jede aktive Crew der Stadt hat mindestens einen Umschlag bekommen. Manche haben geliefert, manche verkauft, manche warten noch. Und Revier 3 entscheidet inzwischen, wer geschützt wird und wer fällt — nicht nach Gesetz, sondern nach Gebot. Frankie stellt den Tee weiter hin.
 
-**06.08.** — Der Tag vor dem Tag. Die Umschläge kommen stündlich. In Revier 3 wird über Schichten getauscht, damit die ganze Zelle in der Nacht des 07.08. Streife fährt. Alles liegt bereit — Kontakte, Preise, Routen. Sie warten nur noch darauf, dass die Stadt aufhört hinzusehen. Underwood wirkt ausgeruht.
+**06.08.** — Der Tag vor dem Tag. Die Umschläge kommen stündlich. In Revier 3 wird über Schichten getauscht, damit die ganze Zelle in der Nacht des 07.08. Streife fährt. Alles liegt bereit — Kontakte, Preise, Routen. Sie warten nur noch darauf, dass die Stadt aufhört hinzusehen. Underwood wirkt ausgeruht. Und wer die lesbaren Zeichen aller Seiten in ihrer Reihenfolge nebeneinanderlegt, hält plötzlich etwas in der Hand, das kein Zufall mehr ist: eine Nachricht. Vielleicht eine Koordinate. Vielleicht eine Warnung. Morgen wird man wissen, wofür.
 
 ---
 
@@ -124,6 +126,7 @@
 - **Ab 07.08. (Startschuss):** Die Zelle setzt ihr Vorhaben offen um. Im Event-Chaos ist die Deckung perfekt.
 - **Whodunit / rote Heringe:** Jede Crew hat im Lagebild ein Motiv + eine Gelegenheit + ein brüchiges Alibi. Absicht: die Verdächtigungen zeigen in alle Richtungen, damit niemand auf **Underwood** kommt (wahrer Drahtzieher, Reveal Tag 10). Bei Bedarf kann man einzelne Verdachtsmomente im RP „bestätigen" lassen (falsche Fährten legen) — nichts davon ist kanonisch wahr außer dem Underwood-Reveal.
 - **„Die Fremden“ = die Quest-Geber/Mittler** (aktiv in der Personalbörse jobs.bots.sektorrp.eu, siehe `QUEST_GIVERS.md`). Intern die Mittler des Big Boss, die die Umschläge verteilen; öffentlich namenlose Neuankömmlinge. Deniable-Zuordnung: Kurier→Der Kurier · Frau ohne Gepäck→Maklerin · Aufräumer→Fixer/Skrupellose · Mann, der nach Camino fragte→Miguel (Camino-Vergangenheit) · Der, der nur Zahlen sieht→Der Analyst. Die „Umschläge“ der Chronik sind ihre Aufträge.
+- **Der Buch-Faden (Puzzle):** Seiten aus Caminos *Der Pate* tauchen fortlaufend auf (446, 447, 448 …), meist unleserlich überschrieben. Auf einzelnen ist je EIN Zeichen lesbar geblieben. In Seiten-Reihenfolge gelegt ergeben sie eine Lösung — bewusst NICHT im Text festgelegt, damit du sie frei bestimmst (Koordinate, Ort, Zeit, Name, Warnung). Vorschlag: sie führen zum leeren Restaurant Drusilla oder zum Ort/Zeitpunkt der ersten Event-Aktion (07.08., 18:00). In-RP verifizierbar: im Brass Plate fehlen genau diese Seiten (26.07.). Verteil-Beats bisher: 10.07. (446), 13.07. (447, inline), 20.07. (erstes lesbares Zeichen), 26.07. (Diner-Check), 06.08. (Puzzle vollständig).
 - **Rhythmus fürs Posten:** 1 Eintrag alle 2 Tage; die letzten 3 (02./04./06.08.) enger takten.
 - **Crew-Einsatz:** bewusst nicht jede Crew jeden Tag; über den Bogen kommen alle aktiven mindestens einmal vor.
 - **Offen zum Ausschmücken:** Namen/Rang des Zellen-Anführers und Dispatchers, Revier-Nummer, einzelne Eskalations-Datumsanker.
