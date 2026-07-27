@@ -4,13 +4,9 @@
 **Rhythmus:** ein Eintrag alle 2 Tage — zum portionsweisen Posten im Discord im Vorlauf zum Event-Start (07.08.2026, 18:00).
 **Ton:** Stadt-Chronik. Langsames Kippen. Von „ein Gerücht" zu „jeder hat einen Umschlag". Nur aktive Crews.
 
-> ⚠ **Spielleiter-Hinweis (NICHT mit-veröffentlichen) — Roter Faden „Revier 3":**
-> Der Cop-Faden ist als **Aufbau** angelegt: aus einzelnen Wegschauern wird über die Wochen eine **Zelle korrupter Officer aus dem 3. Revier**, die am **07.08. sofort einsatzbereit** ist. Ihr Vorhaben, sobald die Ordnung offen zerfällt:
-> - **Safe Passage / Eskorten** — Lieferungen gegen Bezahlung durch Streifen & Checkpoints bringen (oder gegnerische stoppen).
-> - **Asservaten-Ausverkauf** — beschlagnahmte Waffen, Autos, Bargeld „verschwinden" und an Crews verkaufen.
-> - **Informationshandel** — wer wann wo, an den Meistbietenden.
-> - **Selektive Ordnung** — wen sie schützen, wen sie fallen lassen. Für Geld.
-> Am 07.08. ist die Deckung perfekt: im Chaos fällt nicht auf, dass ausgerechnet ein paar Cops am meisten profitieren. Ob sie freelancen oder längst auf der Gehaltsliste der „Stimme" stehen, bleibt offen (Reveal-Potenzial). Die „Stimme" bleibt anonym; Underwood öffentlich sichtbar, Reveal Tag 10.
+> ⚠ **Spielleiter-Hinweis (NICHT mit-veröffentlichen):**
+> **Roter Faden „Revier 3":** Der Cop-Faden ist als **Aufbau** angelegt — aus einzelnen Wegschauern wird eine **Zelle korrupter Officer aus dem 3. Revier**, die am **07.08. sofort einsatzbereit** ist. Vorhaben, sobald die Ordnung zerfällt: Safe-Passage/Eskorten, Asservaten-Ausverkauf, Informationshandel, selektive Ordnung.
+> **Whodunit-Design:** Das Gruppen-Lagebild ist bewusst so geschrieben, dass **jede Crew ein Motiv, eine Gelegenheit und ein brüchiges Alibi** hat — die Stadt kann in jede Richtung denken. Das ist Absicht: die Verdachtsmomente sind **rote Heringe**, damit niemand auf den Wahren kommt. Der wahre Drahtzieher ist **Underwood** (Reveal Tag 10, siehe `EVENT_FINALE.md`) — er ist der Einzige, den niemand verdächtigt, weil er öffentlich am ruhigsten bleibt. Die „Stimme" bleibt anonym.
 
 ---
 
@@ -22,7 +18,7 @@
 
 **11.07.** — In Bohan notiert Blue Union, wer über welche Brücke fährt. Und in Algonquin hebt ein Officer aus dem 3. Revier einen Umschlag auf, der nicht für ihn bestimmt war — und behält ihn. Nichts passiert. Das ist die gefährlichste Lektion dieser Stadt: dass nichts passiert.
 
-**13.07.** — Die Harlem Vipers nehmen sich eine Ecke in Algonquin, die ihnen nicht gehört. Früher hätte Camino das in einer Nacht geregelt. Diesmal regelt es niemand. Die Manschettis schweigen — und Schweigen war bei ihnen nie ein gutes Zeichen.
+**13.07.** — Die Harlem Vipers nehmen sich eine Ecke in Algonquin, die ihnen nicht gehört. Früher hätte Camino das in einer Nacht geregelt. Diesmal regelt es niemand. Die Manschettis schweigen — und Schweigen war bei ihnen nie ein gutes Zeichen. Wenige Tage darauf ist das Club Roma an der Theaterstraße dunkel: kein Licht, kein Wachposten, die Tür zu. Die älteste Familie der Stadt ist untergetaucht — oder verschwunden. Niemand weiß, was von beidem.
 
 **15.07.** — Ein Streifenwagen steht 40 Minuten vor einem Lagerhaus in Broker, in dem Licht brennt. Dann fährt er weiter, ohne dass jemand ausgestiegen wäre. Im Bericht steht „nichts Auffälliges". In der Asservatenkammer des 3. Reviers fehlt am selben Abend eine Kiste. Sie taucht nicht wieder auf.
 
@@ -52,55 +48,57 @@
 
 ## Gruppen-Lagebild — was die Crews seit dem 05.07. gemacht haben
 
-*Der Bogen jeder aktiven Gruppierung durch die stillen Tage — Ausgangslage, Entwicklung, Stand am 06.08.*
+*Der Bogen jeder aktiven Gruppierung: was sie tat, wo es eskalieren kann — und warum die Stadt ausgerechnet sie hinter Caminos Verschwinden vermuten könnte.*
+
+> Jede dieser Gruppen hätte einen Grund gehabt. Jede eine Gelegenheit. Und jede ein Alibi, das nicht ganz hält.
 
 ### Algonquin
 
-**Italienische Mafia (Manschettis)** — Halten still, aber nicht untätig. Ohne Camino fehlt ihnen der Mann, der ihre Deals abgesichert hat. Sie ziehen sich ins Club Roma zurück, zählen, wer noch loyal ist, und lassen die Harlem Vipers vorerst gewähren. Ihr Schweigen ist Kalkül: sie warten, wer die neue „Stimme" ist, bevor sie sich festlegen.
+**Italienische Mafia (Manschettis)** — Vorerst **untergetaucht**. Das Club Roma an der Theaterstraße steht **leer** — kein Licht, kein Wachposten, die Tür seit Tagen zu. Manche sagen, die Familie hat sich zurückgezogen, um abzuwarten, wer die neue „Stimme" ist. Andere fragen leiser: Ist die älteste Familie der Stadt freiwillig verschwunden — oder wurde sie, wie Camino, **eingepackt**? **Eskaliert, wenn** jemand das leere Club Roma für sich beansprucht — oder wenn die Manschettis zurückkommen und feststellen, dass in ihrer Abwesenheit alles neu verteilt wurde. **Verdacht:** Camino war der Pate ihres Alten — wer außer der Familie wusste, wann er allein war? Und doch sind ausgerechnet sie als Erste weg. Täter, die sich verstecken — oder das nächste Opfer?
 
-**Asiatische Yakuza (Nishiki-kai)** — Die disziplinierteste Reaktion der Stadt. Kein Wort nach außen. Sie prüfen den Algonquin-Pakt von 2003, der ohne Camino keinen Garanten mehr hat. Im Akagi wird nachts verhandelt, ein Brief nach dem anderen verschwindet vom Tisch. Bis 06.08. sind sie vorbereitet — worauf, weiß niemand.
+**Asiatische Yakuza (Nishiki-kai)** — Kein Wort nach außen. Sie prüfen den Algonquin-Pakt von 2003, der ohne Camino keinen Garanten mehr hat; im Akagi wird nachts verhandelt. **Eskaliert, wenn** Manschettis oder Vipers den Pakt brechen. **Verdacht:** Sie sind die Einzigen mit der Disziplin, jemanden lautlos verschwinden zu lassen — und wer profitiert mehr davon, dass der Garant des Pakts weg ist?
 
-**The Harlem Vipers** — Die Gewinner der ersten Wochen. Die jüngste Crew nutzt das Vakuum am aggressivsten: sie nehmen Ecken, die früher tabu waren, und niemand hält sie auf. Von „die alten Häuser zerfallen" zu „das ist unsere Chance". Bis zum Vorabend haben sie mehr Boden gutgemacht als in zwei Jahren davor.
+**The Harlem Vipers** — Die Gewinner der stillen Tage: nehmen Ecken, die tabu waren, mehr Boden als in zwei Jahren davor. **Eskaliert, wenn** die Manschettis zurückschlagen. **Verdacht:** „Wer am meisten gewinnt, hat am meisten Grund." Motiv und Skrupellosigkeit haben sie — ob sie die Mittel hatten, Camino zu holen, bezweifeln die meisten. Was sie zum perfekten Sündenbock macht.
 
-**AOD MC** — Beobachten, patrouillieren, warten. Sie glauben nicht an Zufälle und fahren mehr Präsenz über die Algonquin-Bridge. Ihren ersten Umschlag bekommen sie spät (31.07.) — und nehmen ihn an. Ab da sind sie im Spiel.
+**AOD MC** — Beobachten, patrouillieren, mehr Präsenz über die Algonquin-Bridge; ersten Umschlag spät (31.07.), aber angenommen. **Eskaliert, wenn** eine Lieferung über die Bridge schiefgeht. **Verdacht:** Camino brachte 2017 einen MC-Schützen dazu, sich zu stellen — nicht jeder im Club hat ihm das je verziehen.
 
-**LCPD (Zelle Revier 3)** — Siehe Cop-Faden oben: aus einzelnen Wegschauern wird eine startklare Zelle. Stand 06.08.: positioniert, finanziert, wartet auf den 07.08.
+**LCPD — Zelle Revier 3** — Aufbau siehe Cop-Faden oben; Stand 06.08.: positioniert, finanziert, startklar. **Eskaliert, wenn** ihr Ausverkauf auffliegt. **Verdacht:** Wer könnte einen Mann spurlos verschwinden lassen, ohne dass je eine Ermittlung anläuft? Jemand mit Zugriff auf genau diese Ermittlung. Die bequemste Erklärung — vielleicht deshalb die falsche.
 
 ### Bohan
 
-**Blue Union** — Die Ex-Cops werden zu Chronisten. Sie melden nichts mehr offiziell, aber sie wissen alles: wer über welche Brücke fährt, wer wann verschwindet. Sie sammeln, statt zu handeln. Ihre Loyalität ist die offenste Frage in Bohan.
+**Blue Union** — Vom Ex-Cop zum Chronisten: melden nichts, wissen alles, führen Listen. **Eskaliert, wenn** ihre Liste in die falschen Hände gerät. **Verdacht:** Sammeln sie Beweise — oder verwischen sie welche? Ex-Cops mit Zugang und altem Groll.
 
-**Los Aztecas** — Nutzen die Unsicherheit, um alte Grenzen neu zu ziehen. Am 27.07. eskaliert es fast. Sie testen, wie weit sie gehen können, jetzt wo niemand mehr vermittelt.
+**Los Aztecas** — Nutzen die Unsicherheit, um alte Grenzen neu zu ziehen; am 27.07. eskaliert es fast. **Eskaliert, wenn** die neu gezogene Grenze das nächste Mal getestet wird. **Verdacht:** Camino legte einst einen Aztecas-Konflikt bei, „ohne je in Bohan gewesen zu sein" — war das Dankbarkeit, oder eine Demütigung, die man nicht vergisst?
 
 ### Broker
 
-**Russian Mafia (Asimov Bratva)** — Ziehen sich in die Vorsicht zurück: Container nur bei Nebel, keine offenen Bewegungen. Sie glauben, es war die Yakuza, und rüsten leise. Der Pakhan wartet, wer zuerst einen Fehler macht.
+**Russian Mafia (Asimov Bratva)** — Container nur bei Nebel, keine offenen Bewegungen, rüsten leise. **Eskaliert, wenn** der erste Container am falschen Pier landet. **Verdacht:** Wer laut auf die Yakuza zeigt und dabei leise aufrüstet, lenkt manchmal ab. Camino schlichtete 2011 gegen sie — dreißig Tote weniger, aber ein Pakhan, der sein Gesicht verlor.
 
-**Jamaikanische Yardis** — Drehen die Musik leiser und hören zu. Sie bekommen früh Umschläge und liefern — Broker wird ihr Testfeld dafür, wie das neue System funktioniert.
+**Jamaikanische Yardis** — Drehen die Musik leiser und hören zu; liefern früh, Broker wird ihr Testfeld für das neue System. **Eskaliert, wenn** Broker entscheidet, wem der Hafen nachts gehört. **Verdacht:** Die Ersten, die geliefert haben — zu schnell, sagen manche. Als hätten sie gewusst, dass das neue System kommt.
 
-**Pawn Shop (Three Coins)** — Der Umschlagplatz der neuen Ordnung. Was heiß ist, landet auf Saul Mendelsons Theke; er stellt keine Fragen mehr, er notiert nur. Wer wissen will, was in Broker durchläuft, muss zu ihm.
+**Pawn Shop (Three Coins)** — Der Umschlagplatz der neuen Ordnung: was heiß ist, landet auf Saul Mendelsons Theke, er notiert nur. **Eskaliert, wenn** die falsche Ware bei ihm auftaucht. **Verdacht:** Wer alles sieht, weiß auch, was er nicht weitergibt. Ein Hehler ist nie Täter — aber immer Mitwisser.
 
 ### Colony Island
 
-**Blackline Security** — Zieht die Kontrolle enger: mehr Patrouillen, weniger Fähren. Was in den Forschungsgebäuden passiert, wird stärker abgeschirmt als je — als wüchse mit dem Vakuum etwas, das niemand sehen soll.
+**Blackline Security** — Zieht die Kontrolle enger: mehr Patrouillen, weniger Fähren, stärker abgeschirmte Forschungsgebäude. **Eskaliert, wenn** jemand eine Fähre zu viel verpasst und anfängt zu fragen, warum. **Verdacht:** Eine Privatarmee mit Mitteln, die keine Crew hat — und drei Gebäude, über die niemand redet. Der Verdacht, den niemand laut ausspricht.
 
-**Independent Smugglers (Coalition)** — Verlegen Routen, meiden Muster. Die Schmuggler-Allianz profitiert vom Chaos an Land: je unübersichtlicher die Stadt, desto besser laufen die Boote.
+**Independent Smugglers (Coalition)** — Verlegen Routen, meiden Muster, profitieren vom Chaos an Land. **Eskaliert, wenn** eine Route auffliegt. **Verdacht:** Sie bewegen alles über Wasser — auch das, was verschwinden soll. Wer einen Mann lautlos aus der Stadt bringen wollte, bräuchte genau ihre Routen.
 
-**Little Bay Pirates** — Die wildeste Crew der Insel zählt, wer neu auf dem Wasser ist, und wartet auf die Gelegenheit, die das Vakuum bringt.
+**Little Bay Pirates** — Die wildeste Crew der Insel zählt, wer neu auf dem Wasser ist, und wartet auf ihre Gelegenheit. **Eskaliert, wenn** sie sich mit den Independents überwerfen. **Verdacht:** Die Wildcard — zu klein, um Camino zu holen; laut genug, es getan zu haben, nur um größer zu wirken.
 
 ### Dukes
 
-**Money over Bitches (MOB)** — Machen aus allem Content. Ihr Umschlag-Video geht viral, ihre Streams werden zur inoffiziellen Chronik der Straße — laut, provokant, und näher an der Wahrheit, als sie selbst glauben.
+**Money over Bitches (MOB)** — Machen aus allem Content; ihr Umschlag-Video geht viral, ihre Streams werden zur inoffiziellen Chronik der Straße. **Eskaliert, wenn** der falsche Frame viral geht. **Verdacht:** Sie filmen alles — vielleicht haben sie längst etwas aufgenommen, das sie nicht verstehen. Der Zeuge, der nicht weiß, dass er einer ist.
 
-**Spanish Lords** — Lesen jede Nachricht als Botschaft an sich. Sie suchen die Handschrift hinter den Umschlägen und bereiten sich auf einen Kampf um Dukes vor, den sie kommen sehen.
+**Spanish Lords** — Lesen jede Nachricht als Botschaft an sich und suchen die Handschrift hinter den Umschlägen. **Eskaliert, wenn** der Kampf um Dukes offen ausbricht. **Verdacht:** Wer so besessen sucht, hat entweder nichts zu verbergen — oder lenkt vom Eigenen ab.
 
 ---
 
 ## Regie-Notizen (intern)
 
 - **Cop-Aufbau (chronologisch):** 07.07. einstecken → 11.07. Umschlag behalten → 15.07. Asservat verschwindet → 19.07. zwei erkennen sich → 21.07. Zelle (4) + Regel „nur Revier-3-Nächte" → 25.07. erste bezahlte Eskorte → 29.07. Dispatcher steuert Streifen → 31.07. 5 Officer + Preisliste → 02.08. Lieferkette Asservat→Straße → 04.08. Schutz nach Gebot → 06.08. Schichttausch, startklar.
-- **Ab 07.08. (Startschuss):** Die Zelle setzt ihr Vorhaben offen um — Eskorten, Asservaten-Ausverkauf, Informationshandel, selektive Ordnung. Im Event-Chaos ist die Deckung perfekt. Erste konkrete Aktion frei wählbar (z. B. eine Massen-Auftrags-Lieferung eskortieren oder eine gegnerische stoppen).
-- **Rhythmus fürs Posten:** 1 Eintrag alle 2 Tage; die letzten 3 (02./04./06.08.) enger takten, um den Druck vor dem Start zu erhöhen.
-- **Crew-Einsatz:** bewusst nicht jede Crew jeden Tag. Über den Bogen kommen alle aktiven mindestens einmal vor; die eskalierenden Tage (13./27./31.07.) tragen die Reibung.
-- **Motiv:** der leere Stuhl + Frankies Tee als wiederkehrender Anker (05./04.08.).
-- **Offen zum Ausschmücken:** Namen/Rang des Zellen-Anführers und des Dispatchers, Revier-Nummer (aktuell „3. Revier") frei anpassbar.
+- **Ab 07.08. (Startschuss):** Die Zelle setzt ihr Vorhaben offen um. Im Event-Chaos ist die Deckung perfekt.
+- **Whodunit / rote Heringe:** Jede Crew hat im Lagebild ein Motiv + eine Gelegenheit + ein brüchiges Alibi. Absicht: die Verdächtigungen zeigen in alle Richtungen, damit niemand auf **Underwood** kommt (wahrer Drahtzieher, Reveal Tag 10). Bei Bedarf kann man einzelne Verdachtsmomente im RP „bestätigen" lassen (falsche Fährten legen) — nichts davon ist kanonisch wahr außer dem Underwood-Reveal.
+- **Rhythmus fürs Posten:** 1 Eintrag alle 2 Tage; die letzten 3 (02./04./06.08.) enger takten.
+- **Crew-Einsatz:** bewusst nicht jede Crew jeden Tag; über den Bogen kommen alle aktiven mindestens einmal vor.
+- **Offen zum Ausschmücken:** Namen/Rang des Zellen-Anführers und Dispatchers, Revier-Nummer, einzelne Eskalations-Datumsanker.
