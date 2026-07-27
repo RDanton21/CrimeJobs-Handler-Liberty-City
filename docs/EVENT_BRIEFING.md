@@ -213,15 +213,15 @@ Und die Stadt, die nie schläft, lernt zum ersten Mal seit 30 Jahren, was es hei
 
 *Nicht Teil des Voice-Over-Skripts. Optionaler Anhang für die Discord-Pin oder Print-Version.*
 
-| Stadtteil | Crew | Farbcode |
+| Stadtteil | Aktive Crews | Farbcode |
 |---|---|---|
-| **Algonquin** | AOD MC · Asiatische Yakuza (Nishiki-kai) · Italienische Mafia · The Harlem Vipers | Rot |
-| **Bohan** | Blue Union · Bohan Sequidors · LOST MC · Los Aztecas | Weiß |
-| **Broker** | Avenue Lords · Crossline Kings · Jamaikanische Yardis · Russian Mafia · The Fireflys | Magenta-Pink |
+| **Algonquin** | AOD MC · Asiatische Yakuza (Nishiki-kai) · Italienische Mafia (Manschettis) · The Harlem Vipers · LCPD | Rot |
+| **Bohan** | Blue Union · Los Aztecas | Weiß |
+| **Broker** | Jamaikanische Yardis · Pawn Shop (Three Coins) · Russian Mafia (Asimov Bratva) | Magenta-Pink |
 | **Colony Island** | Blackline Security · Independent Smugglers · Little Bay Pirates | Blau |
-| **Dukes** | Latin Kings · Eastline Wolves · Midtown 49ers · Money over Bitches · Spanish Lords | Cyan-Türkis |
+| **Dukes** | Money over Bitches · Spanish Lords | Cyan-Türkis |
 
-**Mr. Camino** — 80 Jahre, Algonquin, kein Mitglied einer Crew. Vermittler seit drei Jahrzehnten. Verschwunden in der Nacht, in der dieses Briefing endet.
+**Mr. Camino** — Alter unbekannt, Algonquin, kein Mitglied einer Crew. Vermittler seit 1996. Verschwunden in der Nacht, in der dieses Briefing endet.
 
 ---
 
