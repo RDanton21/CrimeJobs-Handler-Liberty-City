@@ -167,7 +167,7 @@ Und dass diese Klammer fehlt.
 
 In den ersten Stunden glaubt jede Crew, sie wisse, wer dahintersteckt.
 
-In Algonquin glauben die Manschettis, es war die Bratva. Die Nishiki-kai glaubt nichts laut, aber Tanaka hat den Brief auf seinem Tisch noch einmal aufgeklappt. Die Harlem Vipers glauben, dass die alten Häuser zerfallen — und dass das eine Chance ist. Der AOD MC glaubt nicht an Zufälle und dreht in dieser Nacht eine Runde mehr über die Algonquin-Bridge. Und das LCPD nennt es offiziell „eine laufende Ermittlung" — und weiß inoffiziell nicht, wo es anfangen soll.
+In Algonquin glauben die Manschettis, es war die Bratva. Die Nishiki-kai glaubt nichts laut, aber irgendwo in ihren Hinterzimmern wird ein Brief auf dem Tisch noch einmal aufgeklappt. Die Harlem Vipers glauben, dass die alten Häuser zerfallen — und dass das eine Chance ist. Der AOD MC glaubt nicht an Zufälle und dreht in dieser Nacht eine Runde mehr über die Algonquin-Bridge. Und das LCPD nennt es offiziell „eine laufende Ermittlung" — und weiß inoffiziell nicht, wo es anfangen soll.
 
 In Broker glaubt die Russian Mafia, es war die Yakuza. Die Jamaikanischen Yardis drehen die Musik leiser und hören zu. Und in Saul Mendelsons Three Coins Pawn landen über Nacht Dinge auf der Theke, die niemand versichern würde.
 
