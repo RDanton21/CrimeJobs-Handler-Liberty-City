@@ -6,6 +6,7 @@ so kann der Batch EINE gemeinsame Hoehe fuer ALLE Karten verwenden, die dem
 laengsten Eintrag entspricht (kuerzer als frueher, aber einheitlich).
 Layout/Datum sitzen immer an derselben Stelle.
 """
+import os
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 
 W        = 1080
@@ -16,7 +17,15 @@ MUT      = (139, 144, 150)
 FAINT    = (46, 48, 54)
 ACC      = (216, 162, 74)      # Amber / Akten-Gold
 RED      = (226, 60, 80)       # Broadcast-Rot
-FDIR     = "/usr/share/fonts/truetype/dejavu/"
+
+def _fontdir():
+    _here = os.path.dirname(os.path.abspath(__file__))
+    for cand in (os.path.join(_here, "fonts"), "/usr/share/fonts/truetype/dejavu"):
+        if os.path.exists(os.path.join(cand, "DejaVuSans.ttf")):
+            return cand + os.sep
+    return "/usr/share/fonts/truetype/dejavu/"
+
+FDIR     = _fontdir()
 ML       = 96                  # Rand
 BODY_Y0  = 440                 # fixer Start des Fliesstexts
 BODY_LH  = int(34 * 1.55)

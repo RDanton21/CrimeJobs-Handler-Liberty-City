@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from .auth import require_admin
 from .config import settings
 from .db import init_db
+from .routes_chronik import router as chronik_router
 from .routes_crews import router as crews_router
 from .routes_dashboard import router as dashboard_router
 from .routes_expiry import router as expiry_router
@@ -48,6 +49,7 @@ app.include_router(dashboard_router)
 app.include_router(slots_router)
 app.include_router(public_slots_router)
 app.include_router(relations_survey_router)
+app.include_router(chronik_router)
 
 
 @app.get("/api/health")
@@ -112,6 +114,11 @@ async def ranking_page(_user: str = Depends(require_admin)):
 @app.get("/beziehungen")
 async def relations_page(_user: str = Depends(require_admin)):
     return FileResponse(str(FRONTEND_DIR / "relations.html"))
+
+
+@app.get("/chronik")
+async def chronik_page(_user: str = Depends(require_admin)):
+    return FileResponse(str(FRONTEND_DIR / "chronik.html"))
 
 
 @app.get("/story")

@@ -133,6 +133,7 @@ async def on_ready():
         client.loop.create_task(_deadline_watcher())
         client.loop.create_task(_scheduled_send_watcher())
         client.loop.create_task(_daily_ranking_watcher())
+        client.loop.create_task(_daily_chronik_watcher())
 
 
 async def _daily_ranking_watcher():
@@ -145,6 +146,91 @@ async def _daily_ranking_watcher():
         except Exception:
             log.exception("ranking watcher tick failed")
         await asyncio.sleep(30)
+
+
+_last_chronik_post_date = None
+
+
+async def _send_chronik_card(channel_id: str, card: dict) -> tuple[bool, str | None]:
+    p = Path(card["path"])
+    if not p.exists():
+        return False, f"Kartendatei fehlt: {p.name}"
+    channel = client.get_channel(int(channel_id))
+    if channel is None:
+        try:
+            channel = await client.fetch_channel(int(channel_id))
+        except Exception as exc:
+            return False, f"channel: {exc}"
+    try:
+        await channel.send(files=[discord.File(str(p), filename=p.name)])
+        return True, None
+    except Exception as exc:
+        log.exception("chronik send failed")
+        return False, str(exc)
+
+
+async def _post_next_chronik(session) -> tuple[bool, str | None, dict | None]:
+    """Postet die naechste Chronik-Karte in Reihenfolge, erhoeht den Index."""
+    from .settings_store import get as sget, set_value as sset
+    from .chronik import ordered_cards
+    channel_id = (await sget(session, "chronik_channel_id", "")).strip()
+    if not channel_id:
+        return False, "kein Channel konfiguriert", None
+    idx = int((await sget(session, "chronik_next_index", "0")) or "0")
+    cards = ordered_cards()
+    if idx >= len(cards):
+        return False, "alle Karten bereits gepostet", None
+    card = cards[idx]
+    ok, err = await _send_chronik_card(channel_id, card)
+    if ok:
+        await sset(session, "chronik_next_index", str(idx + 1))
+    return ok, err, card
+
+
+async def _daily_chronik_watcher():
+    """Postet taeglich zur konfigurierten Zeit die naechste Chronik-Karte."""
+    global _last_chronik_post_date
+    from .settings_store import get as sget, set_value as sset
+    await client.wait_until_ready()
+    while not client.is_closed():
+        try:
+            async with SessionLocal() as session:
+                enabled = (await sget(session, "chronik_enabled", "")).lower()
+                channel_id = (await sget(session, "chronik_channel_id", "")).strip()
+                if enabled in ("1", "true", "yes", "on") and channel_id:
+                    time_str = (await sget(session, "chronik_time", "09:00")).strip()
+                    try:
+                        h, m = [int(x) for x in time_str.split(":")]
+                    except (ValueError, AttributeError):
+                        h, m = 9, 0
+                    now = datetime.now()
+                    today = now.date()
+                    if _last_chronik_post_date != today:
+                        target = now.replace(hour=h, minute=m, second=0, microsecond=0)
+                        if now >= target:
+                            if (now - target).total_seconds() > 3600:
+                                _last_chronik_post_date = today  # zu spaet -> Tag ueberspringen
+                            else:
+                                ok, err, card = await _post_next_chronik(session)
+                                _last_chronik_post_date = today
+                                if ok:
+                                    await sset(session, "chronik_last_date", today.isoformat())
+                                    log.info("chronik card %s posted to %s", card["date"], channel_id)
+                                elif err and "bereits gepostet" not in err:
+                                    log.warning("chronik post failed: %s", err)
+        except Exception:
+            log.exception("chronik watcher tick failed")
+        await asyncio.sleep(30)
+
+
+async def http_post_chronik_now(request):
+    """POST /post_chronik_now — postet die naechste Karte sofort."""
+    async with SessionLocal() as session:
+        ok, err, card = await _post_next_chronik(session)
+    if not ok:
+        status = 400 if (err and ("Channel" in err or "bereits" in err)) else 502
+        return web.json_response({"error": err}, status=status)
+    return web.json_response({"ok": True, "posted": card["date"]})
 
 
 def _range_to_iso(range_setting: str) -> str | None:
@@ -1034,6 +1120,7 @@ def build_http_app() -> web.Application:
         web.post("/delete_in_range", http_delete_in_range),
         web.post("/read_channel", http_read_channel),
         web.post("/send_embed", http_send_embed),
+        web.post("/post_chronik_now", http_post_chronik_now),
         web.get("/health", http_health),
     ])
     return app

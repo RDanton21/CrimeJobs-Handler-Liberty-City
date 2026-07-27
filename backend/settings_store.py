@@ -46,6 +46,13 @@ KEYS = {
     "jobs_announce_channel_id",
     "jobs_ping_role_id",
     "jobs_dashboard_url",
+
+    # Chronik-Karten Auto-Post (taeglich 1 Karte in Reihenfolge)
+    "chronik_enabled",
+    "chronik_channel_id",
+    "chronik_time",          # "HH:MM" lokal
+    "chronik_next_index",    # naechste zu postende Karte (Index in Reihenfolge)
+    "chronik_last_date",     # ISO-Datum des letzten Posts (Guard)
 }
 
 
