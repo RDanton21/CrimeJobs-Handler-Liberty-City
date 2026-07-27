@@ -6,7 +6,7 @@
 
 > ⚠ **Spielleiter-Hinweis (NICHT mit-veröffentlichen):**
 > **Roter Faden „Revier 3":** Der Cop-Faden ist als **Aufbau** angelegt — aus einzelnen Wegschauern wird eine **Zelle korrupter Officer aus dem 3. Revier**, die am **07.08. sofort einsatzbereit** ist. Vorhaben, sobald die Ordnung zerfällt: Safe-Passage/Eskorten, Asservaten-Ausverkauf, Informationshandel, selektive Ordnung.
-> **Whodunit-Design:** Das Gruppen-Lagebild ist bewusst so geschrieben, dass **jede Crew ein Motiv, eine Gelegenheit und ein brüchiges Alibi** hat — die Stadt kann in jede Richtung denken. Das ist Absicht: die Verdachtsmomente sind **rote Heringe**, damit niemand auf den Wahren kommt. Der wahre Drahtzieher ist **Underwood** (Reveal Tag 10, siehe `EVENT_FINALE.md`) — er ist der Einzige, den niemand verdächtigt, weil er öffentlich am ruhigsten bleibt. Die „Stimme" bleibt anonym.
+> **Whodunit-Design:** Das Gruppen-Lagebild ist bewusst so geschrieben, dass **jede Crew ein Motiv, eine Gelegenheit und ein brüchiges Alibi** hat — die Stadt kann in jede Richtung denken. Das ist Absicht: die Verdachtsmomente sind **rote Heringe**, damit niemand auf den Wahren kommt. Der wahre Drahtzieher ist **Underwood** (Reveal Tag 10, siehe `EVENT_FINALE.md`) — er ist der Einzige, den niemand verdächtigt, weil er öffentlich am ruhigsten bleibt. Die „Stimme" bleibt anonym. **Die Fremden** (eigene Rubrik) sind bewusst mehrdeutig: mögliche Camino-Entführer, mögliche Leute der „Übermacht"/des neuen Bosses, oder bloß Opportunisten — nichts davon kanonisch außer dem Underwood-Reveal.
 
 ---
 
@@ -15,6 +15,8 @@
 **07.07.** — Das LCPD nennt es offiziell „digitalen Vandalismus und einen unabhängigen Brand". Zwei Streifenbeamte aus dem 3. Revier, die in dieser Nacht am Hafen waren, geben denselben Bericht ab — Wort für Wort gleich. Einer von ihnen steckt etwas ein, das am Tatort lag. Niemandem fällt es auf. Noch nicht.
 
 **09.07.** — Der erste Umschlag. Keine Handschrift, keine Rückadresse — nur eine Adresse und ein Betrag. Er landet bei einer Crew in Broker. Sie liefert. Es funktioniert. Das spricht sich herum.
+
+**10.07.** — Ein Fremder legt bei Saul etwas auf die Theke, das er sofort erkennt und trotzdem nicht kommentiert: eine einzelne Seite, herausgerissen aus *Der Pate* — dem italienischen Original, wie es ein alter Mann in Algonquin jeden Abend aufgeschlagen vor sich liegen hatte. Was auf der Seite steht, lässt sich nicht entziffern. Saul zahlt, ohne zu handeln. Und legt sie nicht in die Auslage.
 
 **11.07.** — In Bohan notiert Blue Union, wer über welche Brücke fährt. Und in Algonquin hebt ein Officer aus dem 3. Revier einen Umschlag auf, der nicht für ihn bestimmt war — und behält ihn. Nichts passiert. Das ist die gefährlichste Lektion dieser Stadt: dass nichts passiert.
 
@@ -25,6 +27,8 @@
 **17.07.** — Die Asimov Bratva bewegt Container nur noch bei Nebel. Im Three Coins Pawn landen Dinge auf der Theke, die niemand versichern würde — und Saul Mendelson stellt keine Fragen mehr. Er notiert nur.
 
 **19.07.** — In Dukes streamt die MOB ein Video mit 200.000 Aufrufen über Nacht: ein aufgeschlitzter Umschlag, kein Inhalt zu sehen. Und in einer Bar nahe dem 3. Revier merken zwei Officer beim dritten Bier, dass ihre Berichte der letzten Wochen zu gut zusammenpassen, um Zufall zu sein. Sie reden zum ersten Mal Klartext.
+
+**20.07.** — Zum ersten Mal führt Saul ein zweites Buch — eins, das niemand sieht. Wer zahlt, wer bringt, wer fragt. Der Hehler von Broker wird zum Archivar der stillen Tage.
 
 **21.07.** — Aus den zweien werden vier. Sie legen eine Regel fest: nur in Nächten, in denen Revier 3 die Streife stellt. Sie teilen das erste Bargeld in einem Wagen auf dem Parkdeck. Keiner nennt es beim Namen. Alle wissen, was es ist.
 
@@ -37,6 +41,8 @@
 **29.07.** — Underwood gibt eine Pressekonferenz über „die Stärke Liberty Citys" und lächelt dreimal. 3 Reporter fragen nach Mr. Camino; er beantwortet keine Frage. In derselben Woche steigt ein Dispatcher aus Revier 3 mit ein — ab jetzt fahren die Streifen dorthin, wo sie fahren sollen, und nicht dorthin, wo etwas passiert.
 
 **31.07.** — Jetzt kommen die Umschläge schneller. Der AOD MC bekommt seinen ersten, die Yardis ihren zweiten. Und in Revier 3 sind es inzwischen fünf Officer und ein Dispatcher — mit einer Preisliste, die niemand aufgeschrieben hat, aber jeder von ihnen auswendig kennt.
+
+**01.08.** — Der Three Coins wird zur Drehscheibe: Umschläge kommen rein, Ware geht raus, und keiner der beiden Wege lässt sich mehr zum anderen zurückverfolgen. Saul sagt weiter nichts. Aber er schläft schlechter.
 
 **02.08.** — Ein Wagen aus der Asservatenkammer taucht bei einer Werkstatt in Dukes auf, umlackiert, bevor er als vermisst gemeldet ist. Er wird nie gemeldet. Die Zelle hat jetzt eine Lieferkette — von der Beweismittelkammer auf die Straße.
 
@@ -76,7 +82,7 @@
 
 **Jamaikanische Yardis** — Drehen die Musik leiser und hören zu; liefern früh, Broker wird ihr Testfeld für das neue System. **Eskaliert, wenn** Broker entscheidet, wem der Hafen nachts gehört. **Verdacht:** Die Ersten, die geliefert haben — zu schnell, sagen manche. Als hätten sie gewusst, dass das neue System kommt.
 
-**Pawn Shop (Three Coins)** — Der Umschlagplatz der neuen Ordnung: was heiß ist, landet auf Saul Mendelsons Theke, er notiert nur. **Eskaliert, wenn** die falsche Ware bei ihm auftaucht. **Verdacht:** Wer alles sieht, weiß auch, was er nicht weitergibt. Ein Hehler ist nie Täter — aber immer Mitwisser.
+**Pawn Shop (Three Coins)** — Der Umschlagplatz der neuen Ordnung: was heiß ist, landet auf Saul Mendelsons Theke, er notiert nur. Zwischen der Ware lag zuletzt eine herausgerissene Seite aus *Der Pate*, die einem Verschwundenen gehörte — er hat sie behalten. **Eskaliert, wenn** die falsche Ware bei ihm auftaucht. **Verdacht:** Wer alles sieht, weiß auch, was er nicht weitergibt. Ein Hehler ist nie Täter — aber immer Mitwisser.
 
 ### Colony Island
 
@@ -94,11 +100,30 @@
 
 ---
 
+## Die Fremden in der Stadt
+
+*In den stillen Tagen sind Menschen nach Liberty City gekommen — über das Wasser, über den Frachtflughafen, über Wege, die auf keiner Karte stehen. Kein Revier, keine Farben, keine Crew. Sie treten nur in Erscheinung, wenn sie müssen. Und wer genau hinsieht, fragt sich, ob sie mit Caminos Verschwinden zu tun haben — oder gleich zur „Übermacht" gehören, die jetzt die Stadt regiert.*
+
+**Der Kurier, den niemand zweimal sieht** — Die Umschläge kommen von irgendwem. Aber nie vom selben. Jung, alt, Anzug, Kapuze — nie dasselbe Gesicht, nie eine zweite Begegnung. Als hätte jemand eine ganze Schicht Boten importiert, nur um sie danach verschwinden zu lassen.
+
+**Die Frau ohne Gepäck** — Checkt in einem Hotel in Algonquin ein, zahlt bar, kommt und geht zu Zeiten, zu denen niemand kommt oder geht. Gesehen dort, wo später Deals zustande kamen, die vorher unmöglich schienen — und Umschläge auftauchten, die es vorher nicht gab. Niemand weiß ihren Namen. Niemand fragt ihn zweimal.
+
+**Die Aufräumer** — Tauchen nach Vorfällen auf, bevor das LCPD da ist. Effizient, wortlos, ohne Zugehörigkeit. Wenn sie wieder weg sind, ist eine Brandstelle plötzlich zu sauber, ein Zeuge plötzlich verreist. Manche sagen, sie kamen mit dem Nebel über Colony Island. Andere sagen, sie waren schon immer da — man hat sie nur nie gebraucht.
+
+**Der Mann, der nach Camino fragte** — Tage *vor* dem 05.07. sitzt ein Fremder im Brass Plate, bestellt Earl Grey, fragt Frankie, wann Mr. Camino da sei. Frankie sagt „abends". Der Mann kommt abends nicht wieder. Er kommt nie wieder. Frankie erinnert sich an sein Gesicht — und an nichts sonst.
+
+**Passagiere ohne Manifest** — Die Independent Smugglers haben in den stillen Tagen Leute übers Wasser gebracht, die das Dreifache zahlten, um auf keiner Liste zu stehen. Wohin sie gingen, weiß keiner. Ob sie überhaupt wieder gingen, auch nicht.
+
+**Der, der nur die Zahlen sieht** — Ein Fremder, der in keinem Geschäft etwas kauft, aber in jedem lange auf die Kasse blickt. Er schreibt nichts sichtbar auf. Trotzdem stimmt hinterher jede Zahl, die ihn interessiert hat — und ein paar, von denen niemand wusste, dass es sie gibt.
+
+---
+
 ## Regie-Notizen (intern)
 
 - **Cop-Aufbau (chronologisch):** 07.07. einstecken → 11.07. Umschlag behalten → 15.07. Asservat verschwindet → 19.07. zwei erkennen sich → 21.07. Zelle (4) + Regel „nur Revier-3-Nächte" → 25.07. erste bezahlte Eskorte → 29.07. Dispatcher steuert Streifen → 31.07. 5 Officer + Preisliste → 02.08. Lieferkette Asservat→Straße → 04.08. Schutz nach Gebot → 06.08. Schichttausch, startklar.
 - **Ab 07.08. (Startschuss):** Die Zelle setzt ihr Vorhaben offen um. Im Event-Chaos ist die Deckung perfekt.
 - **Whodunit / rote Heringe:** Jede Crew hat im Lagebild ein Motiv + eine Gelegenheit + ein brüchiges Alibi. Absicht: die Verdächtigungen zeigen in alle Richtungen, damit niemand auf **Underwood** kommt (wahrer Drahtzieher, Reveal Tag 10). Bei Bedarf kann man einzelne Verdachtsmomente im RP „bestätigen" lassen (falsche Fährten legen) — nichts davon ist kanonisch wahr außer dem Underwood-Reveal.
+- **„Die Fremden“ = die Quest-Geber/Mittler** (aktiv in der Personalbörse jobs.bots.sektorrp.eu, siehe `QUEST_GIVERS.md`). Intern die Mittler des Big Boss, die die Umschläge verteilen; öffentlich namenlose Neuankömmlinge. Deniable-Zuordnung: Kurier→Der Kurier · Frau ohne Gepäck→Maklerin · Aufräumer→Fixer/Skrupellose · Mann, der nach Camino fragte→Miguel (Camino-Vergangenheit) · Der, der nur Zahlen sieht→Der Analyst. Die „Umschläge“ der Chronik sind ihre Aufträge.
 - **Rhythmus fürs Posten:** 1 Eintrag alle 2 Tage; die letzten 3 (02./04./06.08.) enger takten.
 - **Crew-Einsatz:** bewusst nicht jede Crew jeden Tag; über den Bogen kommen alle aktiven mindestens einmal vor.
 - **Offen zum Ausschmücken:** Namen/Rang des Zellen-Anführers und Dispatchers, Revier-Nummer, einzelne Eskalations-Datumsanker.
