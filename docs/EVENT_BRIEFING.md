@@ -189,7 +189,7 @@ In Broker glaubt die Russian Mafia, es war die Yakuza. Die Jamaikanischen Yardis
 
 In Bohan glauben die Aztecas, jemand wollte dem Viertel die Stille nehmen. Blue Union glaubt gar nichts — die Ex-Cops notieren nur, wer in dieser Nacht wohin gelaufen ist.
 
-In Dukes glauben die Spanish Lords, es war eine Botschaft an *sie*. Die Money over Bitches filmen die ganze Nacht für ihre Follower — und begreifen als Letzte, was sie da eigentlich vor der Linse haben.
+In Dukes glauben die Spanish Lords, es war eine Botschaft an *sie*. Die Money over Bitches machen aus allem Content — laut, schnell, für die Klicks. Die Ersten, die filmen. Die Letzten, die begreifen.
 
 Auf Colony Island bleibt Blackline Security länger wach als sonst, die Independent Smugglers halten ihre Boote im Nebel, und die Little Bay Pirates warten — so, wie sie immer warten.
 
