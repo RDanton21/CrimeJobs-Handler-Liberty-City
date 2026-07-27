@@ -29,7 +29,7 @@ Nur dieser eine Stuhl ist leer. Und niemand schaut hin.
 
 Beginnen wir, wo die Stadt begonnen hat.
 
-In der Theaterstraße, dort, wo die alten Gebäude aussehen, als hätten sie alles gesehen — und dort, wo das stimmt. Hinter einer Marmor-Fassade öffnet sich der Souterrain-Gang zum *Club Roma*, dem Mitgliederklub, in dem die Familie Manschetti über Liberty City entscheidet, ohne je darüber zu sprechen. Don Vincenzo Manschetti trägt heute Abend einen grauen Anzug. Er hat einen Espresso vor sich. Er hat noch nicht getrunken.
+In der Theaterstraße, dort, wo die alten Gebäude aussehen, als hätten sie alles gesehen — und dort, wo das stimmt. Hinter einer Marmor-Fassade öffnet sich der Souterrain-Gang zum *Restaurant Drusilla*, dem Mitgliederklub, in dem die Familie Manschetti über Liberty City entscheidet, ohne je darüber zu sprechen. Don Vincenzo Manschetti trägt heute Abend einen grauen Anzug. Er hat einen Espresso vor sich. Er hat noch nicht getrunken.
 
 Drei Querstraßen weiter, in einem kleinen Restaurant namens *Akagi*, sitzt Oyabun Kenji Tanaka mit zwei Männern, die seine Stille teilen. Niemand spricht. Zwischen ihnen liegt ein Brief, geöffnet, in einer Schrift, die niemand außer ihnen lesen kann. Tanaka klappt ihn zu. Er nickt. Es bedeutet etwas.
 

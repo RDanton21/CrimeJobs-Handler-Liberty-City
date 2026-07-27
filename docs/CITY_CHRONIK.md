@@ -18,7 +18,7 @@
 
 **11.07.** — In Bohan notiert Blue Union, wer über welche Brücke fährt. Und in Algonquin hebt ein Officer aus dem 3. Revier einen Umschlag auf, der nicht für ihn bestimmt war — und behält ihn. Nichts passiert. Das ist die gefährlichste Lektion dieser Stadt: dass nichts passiert.
 
-**13.07.** — Die Harlem Vipers nehmen sich eine Ecke in Algonquin, die ihnen nicht gehört. Früher hätte Camino das in einer Nacht geregelt. Diesmal regelt es niemand. Die Manschettis schweigen — und Schweigen war bei ihnen nie ein gutes Zeichen. Wenige Tage darauf ist das Club Roma an der Theaterstraße dunkel: kein Licht, kein Wachposten, die Tür zu. Die älteste Familie der Stadt ist untergetaucht — oder verschwunden. Niemand weiß, was von beidem.
+**13.07.** — Die Harlem Vipers nehmen sich eine Ecke in Algonquin, die ihnen nicht gehört. Früher hätte Camino das in einer Nacht geregelt. Diesmal regelt es niemand. Die Manschettis schweigen — und Schweigen war bei ihnen nie ein gutes Zeichen. Wenige Tage darauf ist das Restaurant Drusilla an der Theaterstraße dunkel: kein Licht, kein Wachposten, die Tür zu. Die älteste Familie der Stadt ist untergetaucht — oder verschwunden. Niemand weiß, was von beidem.
 
 **15.07.** — Ein Streifenwagen steht 40 Minuten vor einem Lagerhaus in Broker, in dem Licht brennt. Dann fährt er weiter, ohne dass jemand ausgestiegen wäre. Im Bericht steht „nichts Auffälliges". In der Asservatenkammer des 3. Reviers fehlt am selben Abend eine Kiste. Sie taucht nicht wieder auf.
 
@@ -54,7 +54,7 @@
 
 ### Algonquin
 
-**Italienische Mafia (Manschettis)** — Vorerst **untergetaucht**. Das Club Roma an der Theaterstraße steht **leer** — kein Licht, kein Wachposten, die Tür seit Tagen zu. Manche sagen, die Familie hat sich zurückgezogen, um abzuwarten, wer die neue „Stimme" ist. Andere fragen leiser: Ist die älteste Familie der Stadt freiwillig verschwunden — oder wurde sie, wie Camino, **eingepackt**? **Eskaliert, wenn** jemand das leere Club Roma für sich beansprucht — oder wenn die Manschettis zurückkommen und feststellen, dass in ihrer Abwesenheit alles neu verteilt wurde. **Verdacht:** Camino war der Pate ihres Alten — wer außer der Familie wusste, wann er allein war? Und doch sind ausgerechnet sie als Erste weg. Täter, die sich verstecken — oder das nächste Opfer?
+**Italienische Mafia (Manschettis)** — Vorerst **untergetaucht**. Das Restaurant Drusilla an der Theaterstraße steht **leer** — kein Licht, kein Wachposten, die Tür seit Tagen zu. Manche sagen, die Familie hat sich zurückgezogen, um abzuwarten, wer die neue „Stimme" ist. Andere fragen leiser: Ist die älteste Familie der Stadt freiwillig verschwunden — oder wurde sie, wie Camino, **eingepackt**? **Eskaliert, wenn** jemand das leere Restaurant Drusilla für sich beansprucht — oder wenn die Manschettis zurückkommen und feststellen, dass in ihrer Abwesenheit alles neu verteilt wurde. **Verdacht:** Camino war der Pate ihres Alten — wer außer der Familie wusste, wann er allein war? Und doch sind ausgerechnet sie als Erste weg. Täter, die sich verstecken — oder das nächste Opfer?
 
 **Asiatische Yakuza (Nishiki-kai)** — Kein Wort nach außen. Sie prüfen den Algonquin-Pakt von 2003, der ohne Camino keinen Garanten mehr hat; im Akagi wird nachts verhandelt. **Eskaliert, wenn** Manschettis oder Vipers den Pakt brechen. **Verdacht:** Sie sind die Einzigen mit der Disziplin, jemanden lautlos verschwinden zu lassen — und wer profitiert mehr davon, dass der Garant des Pakts weg ist?
 
