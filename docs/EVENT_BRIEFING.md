@@ -183,7 +183,17 @@ Und dass diese Klammer fehlt.
 
 In den ersten Stunden glaubt jede Crew, sie wisse, wer dahintersteckt.
 
-Die Manschettis glauben, es war die Bratva. Die Bratva glaubt, es war die Yakuza. Die Nishiki-kai glaubt nichts laut, aber Tanaka hat den Brief auf seinem Tisch noch einmal aufgeklappt. Die Latin Kings glauben, es war eine Botschaft an *sie*. Die Spanish Lords glauben, es war eine Botschaft *durch* die Latin Kings. Die Aztecas glauben, jemand wollte Bohan Stille nehmen. Die Vipers glauben, dass die alten Häuser zerfallen — und dass das eine Chance ist. Die MOB streamt es, ohne zu verstehen, was sie streamt. Die Fireflys posten ein Bild von einem leeren Stuhl, das innerhalb einer Stunde dreihunderttausend Mal geteilt wird.
+In Algonquin glauben die Manschettis, es war die Bratva. Die Nishiki-kai glaubt nichts laut, aber Tanaka hat den Brief auf seinem Tisch noch einmal aufgeklappt. Die Harlem Vipers glauben, dass die alten Häuser zerfallen — und dass das eine Chance ist. Der AOD MC glaubt nicht an Zufälle und dreht in dieser Nacht eine Runde mehr über die Algonquin-Bridge. Und das LCPD nennt es offiziell „eine laufende Ermittlung" — und weiß inoffiziell nicht, wo es anfangen soll.
+
+In Broker glaubt die Russian Mafia, es war die Yakuza. Die Jamaikanischen Yardis drehen die Musik leiser und hören zu. Und in Saul Mendelsons Three Coins Pawn landen über Nacht Dinge auf der Theke, die niemand versichern würde.
+
+In Bohan glauben die Aztecas, jemand wollte dem Viertel die Stille nehmen. Blue Union glaubt gar nichts — die Ex-Cops notieren nur, wer in dieser Nacht wohin gelaufen ist.
+
+In Dukes glauben die Spanish Lords, es war eine Botschaft an *sie*. Die Money over Bitches streamt alles, ohne zu verstehen, was sie streamt.
+
+Auf Colony Island bleibt Blackline Security länger wach als sonst, die Independent Smugglers halten ihre Boote im Nebel, und die Little Bay Pirates warten — so, wie sie immer warten.
+
+Und irgendjemand postet ein Bild von einem leeren Stuhl. Innerhalb einer Stunde wird es 300.000 Mal geteilt.
 
 Niemand weiß, wo Mr. Camino ist.
 
@@ -195,7 +205,7 @@ Das Einzige, was alle wissen: er ist nicht da. Und seine Stille hat etwas zugeha
 
 Liberty City wacht auf.
 
-Und die Stadt, die nie schläft, lernt zum ersten Mal seit dreißig Jahren, was es heißt, nachts zu denken, ohne dass jemand zuhört.
+Und die Stadt, die nie schläft, lernt zum ersten Mal seit 30 Jahren, was es heißt, nachts zu denken, ohne dass jemand zuhört.
 
 ---
 
