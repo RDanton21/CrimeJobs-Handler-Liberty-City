@@ -224,3 +224,64 @@ async def apply_quest_givers_recommendation(
         "old_size": len(current),
         "new_size": len(new_content),
     }
+
+
+class ApplyRecommendationsRequest(BaseModel):
+    instructions: list[str]
+
+
+@router.post("/quest-givers/apply-recommendations")
+async def apply_quest_givers_recommendations(
+    payload: ApplyRecommendationsRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Wendet MEHRERE Edit-Anweisungen nacheinander auf QUEST_GIVERS.md an —
+    jede baut auf dem Ergebnis der vorherigen auf. Returnt den finalen Inhalt
+    (NICHT gespeichert; das Frontend zeigt eine Vorschau)."""
+    instructions = [i.strip() for i in (payload.instructions or []) if i and i.strip()]
+    if not instructions:
+        raise HTTPException(400, "instructions darf nicht leer sein")
+
+    givers_path = DOCS_DIR / "QUEST_GIVERS.md"
+    if not givers_path.exists():
+        raise HTTPException(404, "QUEST_GIVERS.md existiert nicht")
+    current = givers_path.read_text(encoding="utf-8")
+
+    parts: list[str] = []
+    for fname in _CONSISTENCY_STORY_FILES:
+        p = DOCS_DIR / fname
+        if p.exists():
+            parts.append(f"## {fname}\n\n{p.read_text(encoding='utf-8')}")
+    story_md = "\n\n---\n\n".join(parts)
+
+    keys = {
+        "anthropic": await settings_get(session, "anthropic_api_key", app_settings.anthropic_api_key),
+        "openai": await settings_get(session, "openai_api_key", app_settings.openai_api_key),
+    }
+    models = {
+        "claude": await settings_get(session, "default_claude_model", app_settings.default_claude_model),
+        "openai": await settings_get(session, "default_openai_model", app_settings.default_openai_model),
+    }
+    provider_name = await settings_get(session, "default_provider", app_settings.default_ai_provider)
+    try:
+        provider = await get_provider(provider_name, keys=keys, models=models)
+    except Exception as exc:
+        raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+
+    content = current
+    applied = 0
+    for instruction in instructions:
+        try:
+            content = await apply_recommendation(provider, content, instruction, story_md)
+        except Exception as exc:
+            raise HTTPException(502, f"KI-Edit fehlgeschlagen bei Schritt {applied + 1}: {exc}") from exc
+        if not content:
+            raise HTTPException(502, f"KI hat bei Schritt {applied + 1} keinen Inhalt generiert")
+        applied += 1
+
+    return {
+        "new_content": content,
+        "old_size": len(current),
+        "new_size": len(content),
+        "applied_count": applied,
+    }

@@ -2734,6 +2734,9 @@ function questGiversPage() {
     previewNewContent: "",
     previewSaving: false,
     previewError: "",
+    previewIdx: null,               // Index der Einzel-Empfehlung in der Vorschau
+    previewIsBatch: false,          // true = "Alle anwenden"-Vorschau
+    applyingAll: false,             // Batch-Lauf aktiv
 
     _renderMarkdown(md) {
       if (!md) return "";
@@ -2812,11 +2815,35 @@ function questGiversPage() {
         this.previewTitle = rec.title;
         this.previewOldContent = this.giversRaw;
         this.previewNewContent = r.new_content || "";
+        this.previewIdx = idx;
+        this.previewIsBatch = false;
         this.previewOpen = true;
       } catch (e) {
         alert("KI-Edit fehlgeschlagen: " + (e.message || e));
       } finally {
         this.applyingIdx = null;
+      }
+    },
+    async applyAllRecommendations() {
+      if (!this.recommendations.length) return;
+      this.applyingAll = true;
+      this.previewError = "";
+      try {
+        const instructions = this.recommendations.map((r) => r.instruction);
+        const r = await api.post(
+          "/api/story/quest-givers/apply-recommendations",
+          { instructions }
+        );
+        this.previewTitle = `Alle ${instructions.length} Empfehlungen`;
+        this.previewOldContent = this.giversRaw;
+        this.previewNewContent = r.new_content || "";
+        this.previewIdx = null;
+        this.previewIsBatch = true;
+        this.previewOpen = true;
+      } catch (e) {
+        alert("KI-Edit (alle) fehlgeschlagen: " + (e.message || e));
+      } finally {
+        this.applyingAll = false;
       }
     },
     async confirmPreview() {
@@ -2833,8 +2860,16 @@ function questGiversPage() {
         this.previewOpen = false;
         this.saveMsg = "✓ Übernommen. Backup als .bak abgelegt.";
         setTimeout(() => { this.saveMsg = ""; }, 4000);
-        // Konsistenz-Check neu laufen lassen, damit die Liste frisch ist
-        this.runConsistencyCheck();
+        // Angewandte Empfehlung(en) aus der aktuellen Liste entfernen — die
+        // übrigen bleiben erhalten. KEIN automatischer Neu-Check (der würde
+        // andere/neue Vorschläge erzeugen und die Liste durcheinanderbringen).
+        if (this.previewIsBatch) {
+          this.recommendations = [];
+        } else if (this.previewIdx !== null && this.previewIdx >= 0) {
+          this.recommendations.splice(this.previewIdx, 1);
+        }
+        this.previewIdx = null;
+        this.previewIsBatch = false;
       } catch (e) {
         this.previewError = "Speichern fehlgeschlagen: " + (e.message || e);
       } finally {
@@ -2846,6 +2881,8 @@ function questGiversPage() {
       this.previewOpen = false;
       this.previewNewContent = "";
       this.previewError = "";
+      this.previewIdx = null;
+      this.previewIsBatch = false;
     },
     async save() {
       this.saving = true;

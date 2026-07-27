@@ -135,9 +135,17 @@
 
       <!-- 🤖 Auto-Apply-Cards: pro Empfehlung ein Button -->
       <div x-show="recommendations.length > 0 && !checking" class="mt-4 pt-3 border-t border-purple-800">
-        <h4 class="text-sm font-semibold text-purple-200 mb-2">
-          🤖 Automatische Umsetzung (<span x-text="recommendations.length"></span>)
-        </h4>
+        <div class="flex items-center justify-between gap-2 flex-wrap mb-2">
+          <h4 class="text-sm font-semibold text-purple-200">
+            🤖 Automatische Umsetzung (<span x-text="recommendations.length"></span>)
+          </h4>
+          <button @click="applyAllRecommendations()"
+                  :disabled="applyingIdx !== null || applyingAll"
+                  class="text-xs px-3 py-1.5 rounded bg-purple-600 hover:bg-purple-500 disabled:opacity-50 whitespace-nowrap font-medium">
+            <span x-show="!applyingAll">🤖 Alle anwenden</span>
+            <span x-show="applyingAll">KI wendet alle an…</span>
+          </button>
+        </div>
         <p class="text-xs text-purple-300/80 mb-3">
           Klick auf „Anwenden" lässt die KI die Datei entsprechend ändern.
           Du siehst eine Vorschau und kannst übernehmen oder verwerfen.
@@ -157,7 +165,7 @@
                   <p class="text-xs text-zinc-400 leading-relaxed" x-text="rec.instruction"></p>
                 </div>
                 <button @click="applyRecommendation(idx)"
-                        :disabled="applyingIdx !== null"
+                        :disabled="applyingIdx !== null || applyingAll"
                         class="text-xs px-3 py-1.5 rounded bg-purple-700 hover:bg-purple-600 disabled:opacity-50 whitespace-nowrap">
                   <span x-show="applyingIdx !== idx">🤖 Anwenden</span>
                   <span x-show="applyingIdx === idx">KI editiert…</span>
@@ -298,6 +306,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20260723"></script>
+  <script src="/static/app.js?v=20260726"></script>
 </body>
 </html>
