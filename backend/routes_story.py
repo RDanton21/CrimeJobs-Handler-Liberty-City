@@ -25,6 +25,7 @@ DOCS_DIR = ROOT_DIR / "docs"
 ALLOWED_STORY_FILES: dict[str, str] = {
     "EVENT_BRIEFING.md": "🎬 Eröffnungs-Kapitel",
     "EVENT_TIMELINE.md": "📅 10-Tage-Timeline",
+    "CITY_CHRONIK.md": "🗓️ Chronik (Vorlauf 05.07.–06.08.)",
     "EVENT_FINALE.md": "🏁 Finale",
     "EVENT_BRIEFINGS_MASS.md": "📢 Massen-Briefings",
     "CITY_PUBLIC_BRIEFING.md": "🌃 Öffentliche Grundstory",
