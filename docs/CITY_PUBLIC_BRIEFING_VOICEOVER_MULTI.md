@@ -67,7 +67,7 @@ Dann war es weg. Keine Spur. Die Tech-Konzerne dementierten. Die Polizei stand r
 
 Drei Stunden später brannten am Broker-Hafen drei Container. Versicherungsschaden in Millionenhöhe.
 
-Schon seit Anfang Juli… fehlte Mr. Camino zum ersten Mal seit sechsundzwanzig Jahren auf seinem Stuhl im Brass-Plate-Diner.
+Am nächsten Morgen… fehlte Mr. Camino zum ersten Mal seit sechsundzwanzig Jahren auf seinem Stuhl im Brass-Plate-Diner.
 
 Und einige in dieser Stadt verstanden langsam… die Botschaft war keine PR-Aktion. Es war eine Ankündigung.
 
@@ -247,7 +247,7 @@ Dann war es weg. Keine Spur. Die Tech-Konzerne dementierten. Die Polizei stand r
 
 Drei Stunden später brannten am Broker-Hafen drei Container. Versicherungsschaden in Millionenhöhe.
 
-Schon seit Anfang Juli… fehlte Mr. Camino zum ersten Mal seit sechsundzwanzig Jahren auf seinem Stuhl im Brass-Plate-Diner.
+Am nächsten Morgen… fehlte Mr. Camino zum ersten Mal seit sechsundzwanzig Jahren auf seinem Stuhl im Brass-Plate-Diner.
 
 Und einige in dieser Stadt verstanden langsam… die Botschaft war keine PR-Aktion. Es war eine Ankündigung.
 

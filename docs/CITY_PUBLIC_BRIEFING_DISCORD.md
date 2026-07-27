@@ -8,7 +8,7 @@
 
 ## 📺 Block 1 / 5 — „Die Botschaft"
 
-🎙 **LIBERTY CITY — 07.08.2026 — DIE BOTSCHAFT (1/5)**
+🎙 **LIBERTY CITY — 05.07.2026 — DIE BOTSCHAFT (1/5)**
 
 23:47 Uhr. Auf jedem Bildschirm in Liberty City — TV-Werbetafeln am Star Junction, Smartphone-Lockscreens, U-Bahn-Anzeigen, ATM-Displays, sogar die LED-Schilder über dem Algonquin-Tunnel — erscheint für genau **17 Sekunden** derselbe schwarze Bildschirm mit einer einzigen Zeile:
 
@@ -18,7 +18,7 @@ Dann ist es weg. Keine Spur. Tech-Konzerne dementieren. LCPD ratlos. Die Bevölk
 
 Aber drei Stunden später: erster Brand im Broker-Hafen. Drei Container ausgebrannt. Versicherung Millionen. LCFD löscht bis zum Sonnenaufgang.
 
-Schon seit Wochen — seit Anfang Juli — fehlt Mr. Camino, der alte Vermittler, zum ersten Mal seit 26 Jahren auf seinem festen Platz im Brass-Plate-Diner. Sein Buch liegt aufgeschlagen. Sein Tee wäre kalt geworden, wäre er da gewesen.
+Und am nächsten Morgen — zum ersten Mal seit 26 Jahren — fehlt Mr. Camino, der alte Vermittler, auf seinem festen Platz im Brass-Plate-Diner. Sein Buch liegt aufgeschlagen. Sein Tee wäre kalt geworden, wäre er da gewesen.
 
 Und dann verstehen einige in der Stadt: die Botschaft war keine PR-Aktion. Es war eine **Ankündigung**.
 
@@ -42,7 +42,7 @@ Aus der Pressekonferenz am Morgen nach der Botschaft:
 
 > *„Liberty City steht. Liberty City wird stehen. Was über unsere Bildschirme lief, ist digitaler Vandalismus — kein Anlass zur Sorge."*
 >
-> *— Francis J. Underwood, Head of Liberty City, City Hall, 07.08.2026, 09:15 Uhr*
+> *— Francis J. Underwood, Head of Liberty City, City Hall, 06.07.2026, 09:15 Uhr*
 
 Er trägt einen dunkelgrauen Anzug. Er lächelt nicht. Er blickt drei Sekunden zu lange in eine bestimmte Kamera. Dann verlässt er das Podium, beantwortet keine Fragen.
 
