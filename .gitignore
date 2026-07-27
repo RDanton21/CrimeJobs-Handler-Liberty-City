@@ -53,3 +53,4 @@ docs/districts_overrides/
 *.env.bak.*
 data/*.db.*
 data/*.db-backup*
+docs/chronik_cards/
