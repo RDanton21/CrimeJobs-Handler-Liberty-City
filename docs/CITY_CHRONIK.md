@@ -50,7 +50,7 @@
 
 **04.08.** — Jede aktive Crew der Stadt hat mindestens einen Umschlag bekommen. Manche haben geliefert, manche verkauft, manche warten noch. Und Revier 3 entscheidet inzwischen, wer geschützt wird und wer fällt — nicht nach Gesetz, sondern nach Gebot. Frankie stellt den Tee weiter hin.
 
-**06.08.** — Der Tag vor dem Tag. Die Umschläge kommen stündlich. In Revier 3 wird über Schichten getauscht, damit die ganze Zelle in der Nacht des 07.08. Streife fährt. Alles liegt bereit — Kontakte, Preise, Routen. Sie warten nur noch darauf, dass die Stadt aufhört hinzusehen. Underwood wirkt ausgeruht. Und wer die lesbaren Zeichen der bisherigen Seiten in ihrer Reihenfolge legt, erkennt ein Muster — aber noch keine Antwort. Ein Zeichen fehlt. Es wird nicht mehr in den stillen Tagen kommen. Ab morgen, wenn die Stadt aufwacht, wird sich zeigen, worauf das alles zuläuft.
+**06.08.** — Der letzte Tag vor dem Tag. Jetzt kommen die Umschläge im Stundentakt. Im LCPD tauscht man so lange Schichten, bis für die Nacht des 07.08. nur noch die Richtigen eingeteilt sind — Kontakte, Preise und Routen liegen längst bereit. Sie warten nur noch auf den einen Moment, in dem die Stadt aufhört hinzusehen. Underwood wirkt ausgeruht wie nie. Und wer die lesbaren Zeichen der bisherigen Seiten in die richtige Reihenfolge bringt, erkennt ein Muster — aber noch keine Antwort. Ein Zeichen fehlt, und es wird in den stillen Tagen nicht mehr auftauchen. Ab morgen, wenn die Stadt erwacht, zeigt sich, worauf das alles hinausläuft.
 
 ---
 
