@@ -244,11 +244,11 @@ async def http_post_chronik_now(request):
 async def _post_specific_chronik(session, filename: str) -> tuple[bool, str | None, dict | None]:
     """Postet eine bestimmte Chronik-Karte (per Dateiname), ohne den Fortschritt zu aendern."""
     from .settings_store import get as sget
-    from .chronik import ordered_cards
+    from .chronik import all_cards
     channel_id = (await sget(session, "chronik_channel_id", "")).strip()
     if not channel_id:
         return False, "kein Channel konfiguriert", None
-    card = next((c for c in ordered_cards() if c["filename"] == filename), None)
+    card = next((c for c in all_cards() if c["filename"] == filename), None)
     if not card:
         return False, "Karte nicht gefunden", None
     ok, err = await _send_chronik_card(channel_id, card)

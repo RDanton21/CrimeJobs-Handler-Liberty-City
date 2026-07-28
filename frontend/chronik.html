@@ -69,17 +69,18 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       <template x-for="c in cards" :key="c.filename">
         <div class="bg-zinc-900 border rounded-lg overflow-hidden flex flex-col h-full"
-             :class="c.status==='next' ? 'border-amber-500' : (c.status==='posted' ? 'border-zinc-800 opacity-60' : 'border-zinc-800')">
+             :class="c.extra ? 'border-violet-700' : (c.status==='next' ? 'border-amber-500' : (c.status==='posted' ? 'border-zinc-800 opacity-60' : 'border-zinc-800'))">
           <template x-if="c.exists">
             <a :href="c.url" target="_blank"><img :src="c.url" :alt="c.date" class="w-full block" loading="lazy" /></a>
           </template>
           <template x-if="!c.exists">
             <div class="w-full aspect-[1080/900] flex items-center justify-center text-zinc-600 text-xs">fehlt — „neu erzeugen"</div>
           </template>
-          <div class="flex items-center justify-between px-2 py-1.5 text-xs">
-            <span class="text-zinc-300" x-text="c.date + '.2026'"></span>
-            <span x-text="c.status==='posted' ? '✓ gepostet' : (c.status==='next' ? '▶ nächste' : '')"
+          <div class="flex items-center justify-between px-2 py-1.5 text-xs gap-1">
+            <span class="text-zinc-300 truncate" x-text="c.date + '.2026' + (c.label ? ' · ' + c.label : '')"></span>
+            <span x-show="!c.extra" x-text="c.status==='posted' ? '✓ gepostet' : (c.status==='next' ? '▶ nächste' : '')"
                   :class="c.status==='posted' ? 'text-green-500' : (c.status==='next' ? 'text-amber-400' : 'text-zinc-600')"></span>
+            <span x-show="c.extra" class="text-violet-400 whitespace-nowrap">✦ Zusatzkarte</span>
           </div>
           <div class="px-2 pb-2 mt-auto flex gap-1">
             <button @click="postCard(c)" :disabled="busy || !c.exists"

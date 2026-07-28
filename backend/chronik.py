@@ -53,8 +53,8 @@ def ordered_cards() -> list[dict]:
 
 
 def card_path(filename: str) -> str | None:
-    """Nur Dateien aus der Reihenfolge zulassen (Path-Traversal-Schutz)."""
-    valid = {card_filename(d) for d in ordered_dates()}
+    """Nur bekannte Karten-Dateien zulassen (Path-Traversal-Schutz)."""
+    valid = {c["filename"] for c in all_cards()}
     if filename not in valid:
         return None
     p = os.path.join(CARDS_DIR, filename)
@@ -67,3 +67,47 @@ def date_from_filename(filename: str) -> str | None:
         if card_filename(d) == filename:
             return d
     return None
+
+
+# --- Sonderkarten (manuell, NICHT im Auto-Post) -----------------------------
+EXTRA_HEADER = "## Sonderkarten"
+
+
+def _slug(s: str) -> str:
+    s = re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+    return s or "extra"
+
+
+def extra_entries() -> list[tuple[str, str, str]]:
+    """(date_label, label, body) aus dem '## Sonderkarten'-Abschnitt."""
+    if not os.path.exists(CHRON_MD):
+        return []
+    txt = open(CHRON_MD, encoding="utf-8").read()
+    if EXTRA_HEADER not in txt:
+        return []
+    sec = txt.split(EXTRA_HEADER, 1)[1].split("\n## ", 1)[0]
+    out = []
+    for line in sec.splitlines():
+        m = re.match(r"^\*\*(\d{2}\.\d{2})\.\s*·\s*(.+?)\*\*\s*[—-]\s*(.*)$", line)
+        if m:
+            out.append((m.group(1), m.group(2).strip(), m.group(3).strip()))
+    return out
+
+
+def extra_filename(date_label: str, label: str) -> str:
+    return f"chronik_{date_label.replace('.', '-')}_{_slug(label)}.png"
+
+
+def extra_cards() -> list[dict]:
+    out = []
+    for d, label, body in extra_entries():
+        fn = extra_filename(d, label)
+        p = os.path.join(CARDS_DIR, fn)
+        out.append({"date": d, "label": label, "body": body, "filename": fn,
+                    "path": p, "exists": os.path.exists(p), "extra": True})
+    return out
+
+
+def all_cards() -> list[dict]:
+    """Haupt-Karten (Auto-Post-Reihenfolge) + Sonderkarten (manuell) — fuer Galerie/Lookup."""
+    return ordered_cards() + extra_cards()

@@ -38,18 +38,34 @@ def blocks_for(d, body):
     return [("text", body)]
 
 
+def slug(s):
+    s = re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+    return s or "extra"
+
+
 def main():
-    head = open(CHRON, encoding="utf-8").read().split("## Gruppen-Lagebild")[0]
-    entries = []
+    txt = open(CHRON, encoding="utf-8").read()
+    head = txt.split("## Gruppen-Lagebild")[0]
+    items = []  # (filename, date_display, blocks)
+
+    # Haupt-Karten (Tages-Eintraege)
     for line in head.splitlines():
         m = re.match(r"^\*\*(\d{2}\.\d{2})\.\*\*\s*[—-]\s*(.*)$", line)
         if m:
-            entries.append((m.group(1), clean(m.group(2))))
+            d = m.group(1)
+            items.append((f"chronik_{d.replace('.', '-')}.png", d, blocks_for(d, clean(m.group(2)))))
 
-    items = [(d, blocks_for(d, body)) for d, body in entries]
+    # Zusatzkarten (## Sonderkarten, manuell)
+    if "## Sonderkarten" in txt:
+        sec = txt.split("## Sonderkarten", 1)[1].split("\n## ", 1)[0]
+        for line in sec.splitlines():
+            m = re.match(r"^\*\*(\d{2}\.\d{2})\.\s*·\s*(.+?)\*\*\s*[—-]\s*(.*)$", line)
+            if m:
+                d, label, body = m.group(1), m.group(2).strip(), clean(m.group(3))
+                items.append((f"chronik_{d.replace('.', '-')}_{slug(label)}.png", d, [("text", body)]))
 
-    # Optionale Datums-Argumente -> nur diese Karten rendern (z. B. "29.07").
-    wanted = {a.strip().rstrip(".") for a in sys.argv[1:] if a.strip()}
+    # Optionale Argumente = Dateinamen -> nur diese Karten rendern
+    wanted = {a.strip() for a in sys.argv[1:] if a.strip()}
     if wanted:
         items = [it for it in items if it[0] in wanted]
         if not items:
@@ -57,12 +73,10 @@ def main():
             return
 
     os.makedirs(OUT, exist_ok=True)
-    for d, bl in items:
+    for fn, d, bl in items:
         H = c.body_end_y(bl) + PAD          # Auto-Hoehe: passt sich dem Text an
-        fn = os.path.join(OUT, f"chronik_{d.replace('.', '-')}.png")
-        c.make_card(f"{d}.2026", bl, fn, height=H)
-    scope = ", ".join(d for d, _ in items) if wanted else "alle"
-    print(f"{len(items)} Karte(n) gerendert ({scope}) -> {OUT}")
+        c.make_card(f"{d}.2026", bl, os.path.join(OUT, fn), height=H)
+    print(f"{len(items)} Karte(n) gerendert -> {OUT}")
 
 
 if __name__ == "__main__":

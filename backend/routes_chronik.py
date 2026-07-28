@@ -36,8 +36,9 @@ async def _config(session: AsyncSession) -> dict:
 async def list_cards(session: AsyncSession = Depends(get_session)):
     cfg = await _config(session)
     ni = cfg["next_index"]
+    main = chronik.ordered_cards()
     cards = []
-    for i, c in enumerate(chronik.ordered_cards()):
+    for i, c in enumerate(main):
         v = int(os.path.getmtime(c["path"])) if c["exists"] else 0  # Cache-Bust = Datei-mtime
         cards.append({
             "index": i,
@@ -46,8 +47,21 @@ async def list_cards(session: AsyncSession = Depends(get_session)):
             "exists": c["exists"],
             "url": f"/api/chronik/card/{c['filename']}?v={v}",
             "status": "posted" if i < ni else ("next" if i == ni else "queued"),
+            "extra": False,
         })
-    return {"cards": cards, "config": cfg, "total": len(cards)}
+    for c in chronik.extra_cards():
+        v = int(os.path.getmtime(c["path"])) if c["exists"] else 0
+        cards.append({
+            "index": None,
+            "date": c["date"],
+            "label": c["label"],
+            "filename": c["filename"],
+            "exists": c["exists"],
+            "url": f"/api/chronik/card/{c['filename']}?v={v}",
+            "status": "extra",
+            "extra": True,
+        })
+    return {"cards": cards, "config": cfg, "total": len(main)}
 
 
 @router.get("/card/{filename}")
@@ -94,10 +108,10 @@ async def regenerate(payload: RegenIn | None = None):
     cmd = [sys.executable, _SCRIPT]
     target = "alle"
     if payload and payload.filename:
-        d = chronik.date_from_filename(payload.filename)
-        if not d:
+        valid = {c["filename"] for c in chronik.all_cards()}
+        if payload.filename not in valid:
             raise HTTPException(404, "Karte nicht gefunden")
-        cmd.append(d)
+        cmd.append(payload.filename)
         target = payload.filename
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)

@@ -130,3 +130,11 @@
 - **Rhythmus fürs Posten:** 1 Eintrag alle 2 Tage; die letzten 3 (02./04./06.08.) enger takten.
 - **Crew-Einsatz:** bewusst nicht jede Crew jeden Tag; über den Bogen kommen alle aktiven mindestens einmal vor.
 - **Offen zum Ausschmücken:** Namen/Rang des Zellen-Anführers und Dispatchers, Revier-Nummer, einzelne Eskalations-Datumsanker.
+
+---
+
+## Sonderkarten (manuell — nicht im Auto-Post)
+
+*Zusatzkarten für die Chronik-Seite: sie erscheinen in der Galerie und werden gezielt per „🤖 senden" gepostet — sie sind NICHT Teil des täglichen Auto-Posts. Format: `**TT.MM. · Titel** — Text`.*
+
+**04.08. · Francis International** — Der Francis International Airport öffnet eine Halle, die seit Jahren geschlossen war. Um 18:00 landen 2 Maschinen aus Los Santos — kein Linienflug, kein Name auf keiner Liste. Wer aussteigt, wird nicht abgeholt und fragt nach nichts. Sie kennen die Stadt nicht — und bewegen sich, als gehörte sie längst ihnen.
