@@ -17,7 +17,8 @@ sys.path.insert(0, HERE)
 import chronik_card as c
 
 CHRON = os.path.join(ROOT, "docs", "CITY_CHRONIK.md")
-OUT = os.path.join(ROOT, "docs", "chronik_cards")
+# Ausgabe ins geteilte data-Volume, damit Backend und Bot dieselben Karten sehen.
+OUT = os.path.join(ROOT, "data", "chronik_cards")
 PAD = 80   # Abstand Textende -> unterer Rand (Auto-Hoehe je Karte)
 
 
@@ -47,12 +48,21 @@ def main():
 
     items = [(d, blocks_for(d, body)) for d, body in entries]
 
+    # Optionale Datums-Argumente -> nur diese Karten rendern (z. B. "29.07").
+    wanted = {a.strip().rstrip(".") for a in sys.argv[1:] if a.strip()}
+    if wanted:
+        items = [it for it in items if it[0] in wanted]
+        if not items:
+            print(f"Keine passenden Karten fuer {sorted(wanted)}")
+            return
+
     os.makedirs(OUT, exist_ok=True)
     for d, bl in items:
         H = c.body_end_y(bl) + PAD          # Auto-Hoehe: passt sich dem Text an
         fn = os.path.join(OUT, f"chronik_{d.replace('.', '-')}.png")
         c.make_card(f"{d}.2026", bl, fn, height=H)
-    print(f"{len(items)} Karten (Auto-Hoehe, Breite 1080) -> {OUT}")
+    scope = ", ".join(d for d, _ in items) if wanted else "alle"
+    print(f"{len(items)} Karte(n) gerendert ({scope}) -> {OUT}")
 
 
 if __name__ == "__main__":

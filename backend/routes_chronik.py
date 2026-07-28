@@ -82,17 +82,29 @@ async def reset_progress(session: AsyncSession = Depends(get_session)):
     return await _config(session)
 
 
+class RegenIn(BaseModel):
+    filename: str | None = None  # None -> alle Karten neu; sonst nur diese eine
+
+
 @router.post("/regenerate")
-async def regenerate():
+async def regenerate(payload: RegenIn | None = None):
     if not os.path.exists(_SCRIPT):
         raise HTTPException(500, "Renderer-Skript fehlt im Container")
+    cmd = [sys.executable, _SCRIPT]
+    target = "alle"
+    if payload and payload.filename:
+        d = chronik.date_from_filename(payload.filename)
+        if not d:
+            raise HTTPException(404, "Karte nicht gefunden")
+        cmd.append(d)
+        target = payload.filename
     try:
-        r = subprocess.run([sys.executable, _SCRIPT], capture_output=True, text=True, timeout=120)
+        r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
     except Exception as exc:
         raise HTTPException(500, f"Renderer-Fehler: {exc}") from exc
     if r.returncode != 0:
         raise HTTPException(500, f"Renderer fehlgeschlagen: {(r.stderr or r.stdout)[-400:]}")
-    return {"ok": True, "output": (r.stdout or "").strip(),
+    return {"ok": True, "output": (r.stdout or "").strip(), "target": target,
             "count": sum(1 for c in chronik.ordered_cards() if c["exists"])}
 
 

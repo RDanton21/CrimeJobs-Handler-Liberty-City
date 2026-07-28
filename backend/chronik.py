@@ -11,8 +11,10 @@ YEAR = 2026  # Kanon-Jahr der Chronik (siehe CITY_CHRONIK.md)
 
 _APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # /app
 DOCS = os.path.join(_APP, "docs")
-CARDS_DIR = os.path.join(DOCS, "chronik_cards")
 CHRON_MD = os.path.join(DOCS, "CITY_CHRONIK.md")
+# Karten liegen im geteilten data-Volume, damit Backend (rendern/anzeigen)
+# und Bot (posten) exakt dieselben Dateien sehen.
+CARDS_DIR = os.path.join(_APP, "data", "chronik_cards")
 
 
 def card_date(date_label: str) -> datetime.date | None:
@@ -57,3 +59,11 @@ def card_path(filename: str) -> str | None:
         return None
     p = os.path.join(CARDS_DIR, filename)
     return p if os.path.exists(p) else None
+
+
+def date_from_filename(filename: str) -> str | None:
+    """'chronik_29-07.png' -> '29.07' (nur gueltige Reihenfolge-Dateien, ohne exists-Pruefung)."""
+    for d in ordered_dates():
+        if card_filename(d) == filename:
+            return d
+    return None
