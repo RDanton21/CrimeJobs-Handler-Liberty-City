@@ -137,4 +137,4 @@
 
 *Zusatzkarten für die Chronik-Seite: sie erscheinen in der Galerie und werden gezielt per „🤖 senden" gepostet — sie sind NICHT Teil des täglichen Auto-Posts. Format: `**TT.MM. · Titel** — Text`.*
 
-**04.08. · Francis International** — Der Francis International Airport öffnet eine Halle, die seit Jahren geschlossen war. Um 18:00 landen 2 Maschinen aus Los Santos — kein Linienflug, kein Name auf keiner Liste. Wer aussteigt, wird nicht abgeholt und fragt nach nichts. Sie kennen die Stadt nicht — und bewegen sich, als gehörte sie längst ihnen.
+**04.08. · Francis International** — Am Francis International Airport öffnet zum ersten Mal seit Jahren wieder eine alte Halle. Um Punkt 18:00 landen dort 2 Maschinen aus Los Santos — in keinem Flugplan angekündigt, die Passagiere auf keiner Liste. Niemand holt sie ab, und sie fragen niemanden nach dem Weg. Sie waren nie zuvor in Liberty City. Trotzdem bewegen sie sich durch die Stadt, als würde sie ihnen längst gehören.
