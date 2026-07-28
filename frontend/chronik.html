@@ -71,7 +71,7 @@
         <div class="bg-zinc-900 border rounded-lg overflow-hidden flex flex-col h-full"
              :class="c.status==='next' ? 'border-amber-500' : (c.status==='posted' ? 'border-zinc-800 opacity-60' : 'border-zinc-800')">
           <template x-if="c.exists">
-            <a :href="c.url + '?v=' + bust" target="_blank"><img :src="c.url + '?v=' + bust" :alt="c.date" class="w-full block" loading="lazy" /></a>
+            <a :href="c.url" target="_blank"><img :src="c.url" :alt="c.date" class="w-full block" loading="lazy" /></a>
           </template>
           <template x-if="!c.exists">
             <div class="w-full aspect-[1080/900] flex items-center justify-center text-zinc-600 text-xs">fehlt — „neu erzeugen"</div>

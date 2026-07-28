@@ -38,12 +38,13 @@ async def list_cards(session: AsyncSession = Depends(get_session)):
     ni = cfg["next_index"]
     cards = []
     for i, c in enumerate(chronik.ordered_cards()):
+        v = int(os.path.getmtime(c["path"])) if c["exists"] else 0  # Cache-Bust = Datei-mtime
         cards.append({
             "index": i,
             "date": c["date"],
             "filename": c["filename"],
             "exists": c["exists"],
-            "url": f"/api/chronik/card/{c['filename']}",
+            "url": f"/api/chronik/card/{c['filename']}?v={v}",
             "status": "posted" if i < ni else ("next" if i == ni else "queued"),
         })
     return {"cards": cards, "config": cfg, "total": len(cards)}
