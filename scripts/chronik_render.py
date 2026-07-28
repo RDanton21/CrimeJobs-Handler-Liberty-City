@@ -28,6 +28,23 @@ def clean(t):
     return t.replace("`", "").strip()
 
 
+def parse_blocks(body):
+    """Zerlegt einen Kartentext in Text-/Broadcast-Bloecke.
+    Ein Broadcast wird mit [[BC]]...[[/BC]] markiert (roter Uebertragungs-Block)."""
+    blocks = []
+    pos = 0
+    for m in re.finditer(r"\[\[BC\]\](.+?)\[\[/BC\]\]", body):
+        pre = clean(body[pos:m.start()])
+        if pre:
+            blocks.append(("text", pre))
+        blocks.append(("broadcast", clean(m.group(1))))
+        pos = m.end()
+    rest = clean(body[pos:])
+    if rest:
+        blocks.append(("text", rest))
+    return blocks or [("text", clean(body))]
+
+
 def blocks_for(d, body):
     if d == "05.07":
         return [
@@ -35,7 +52,7 @@ def blocks_for(d, body):
             ("broadcast", "Schlaft gut — solange ihr noch könnt. Von jetzt an zählt, wer zuerst aufwacht."),
             ("text", "3 Stunden später brennen am Pier 41 drei Container. Am Morgen fehlt Mr. Camino zum ersten Mal seit 26 Jahren. Frankie Maloney macht den Tee trotzdem."),
         ]
-    return [("text", body)]
+    return parse_blocks(body)
 
 
 def slug(s):
@@ -53,7 +70,7 @@ def main():
         m = re.match(r"^\*\*(\d{2}\.\d{2})\.\*\*\s*[—-]\s*(.*)$", line)
         if m:
             d = m.group(1)
-            items.append((f"chronik_{d.replace('.', '-')}.png", d, blocks_for(d, clean(m.group(2)))))
+            items.append((f"chronik_{d.replace('.', '-')}.png", d, blocks_for(d, m.group(2))))
 
     # Zusatzkarten (## Sonderkarten, manuell)
     if "## Sonderkarten" in txt:
@@ -61,8 +78,8 @@ def main():
         for line in sec.splitlines():
             m = re.match(r"^\*\*(\d{2}\.\d{2})\.\s*·\s*(.+?)\*\*\s*[—-]\s*(.*)$", line)
             if m:
-                d, label, body = m.group(1), m.group(2).strip(), clean(m.group(3))
-                items.append((f"chronik_{d.replace('.', '-')}_{slug(label)}.png", d, [("text", body)]))
+                d, label = m.group(1), m.group(2).strip()
+                items.append((f"chronik_{d.replace('.', '-')}_{slug(label)}.png", d, parse_blocks(m.group(3))))
 
     # Optionale Argumente = Dateinamen -> nur diese Karten rendern
     wanted = {a.strip() for a in sys.argv[1:] if a.strip()}
