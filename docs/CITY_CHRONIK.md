@@ -141,4 +141,4 @@
 
 **04.08. · Francis International** — Am Francis International Airport öffnet zum ersten Mal seit Jahren wieder eine alte Halle. Um Punkt 18:00 landen dort 2 Maschinen aus Los Santos — in keinem Flugplan angekündigt, die Passagiere auf keiner Liste. Niemand holt sie ab, und sie fragen niemanden nach dem Weg. Sie waren nie zuvor in Liberty City. Trotzdem bewegen sie sich durch die Stadt, als würde sie ihnen längst gehören.
 
-**07.08. · Der Weckruf** — Wochenlang war es still. Um 18:00 ist es vorbei. Auf jedem Bildschirm der Stadt erscheint noch einmal dieselbe schwarze Fläche — und eine neue Zeile. [[BC]]Guten Morgen, Liberty City. Ihr habt lange genug geschlafen.[[/BC]] Dann gehen die Lichter an, die Umschläge werden zu Befehlen — und die Stadt gehört dem, der zuerst zugreift.
+**07.08. · Der Weckruf** — Wochenlang war es still. Um 18:00 ist es vorbei. Auf jedem Bildschirm der Stadt erscheint noch einmal dieselbe schwarze Fläche — und eine neue Zeile. [[BC]]Willkommen in meiner Stadt. Betet, dass ich euch übersehe.[[/BC]] Dann gehen die Lichter an, die Umschläge werden zu Befehlen — und keiner in dieser Stadt gehört mehr sich selbst.
