@@ -40,7 +40,7 @@
 
 **27.07.** — In Bohan zieht Los Aztecas eine Grenze neu, die seit Jahren galt. Es fällt kein Schuss — aber einer war nah. Blue Union hat es gesehen und nicht gemeldet.
 
-**29.07.** — Underwood tritt vor die Kameras und spricht über „die Stärke Liberty Citys". Dreimal lächelt er. 3 Reporter fragen nach Mr. Camino — er überhört jede Frage, als wäre sie nie gestellt worden. Im hinteren Teil des Saals stehen 4 Detectives des LCPD und beobachten die Rede ganz genau — nicht die Reporter, nicht den Saal. Nur ihn. Sie schreiben nichts auf. Aber sie gehen als Letzte.
+**29.07.** — Underwood tritt vor die Kameras und spricht über „die Stärke Liberty Citys". Dreimal lächelt er. 3 Reporter fragen nach Mr. Camino — er überhört jede Frage, als wäre sie nie gestellt worden. Im hinteren Teil des Saals stehen 4 Detectives des LCPD und achten auf jedes Wort, das er sagt — nicht auf die Reporter, nicht auf den Saal. Nur auf ihn. Sie schreiben nichts auf. Aber sie gehen als Letzte.
 
 **31.07.** — Jetzt kommen die Umschläge schneller. Der AOD MC bekommt seinen ersten, die Yardis ihren zweiten. Und in Revier 3 sind es inzwischen fünf Officer und ein Dispatcher — mit einer Preisliste, die niemand aufgeschrieben hat, aber jeder von ihnen auswendig kennt.
 
