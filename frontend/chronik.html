@@ -68,7 +68,7 @@
     <!-- Galerie -->
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       <template x-for="c in cards" :key="c.filename">
-        <div class="bg-zinc-900 border rounded-lg overflow-hidden"
+        <div class="bg-zinc-900 border rounded-lg overflow-hidden flex flex-col h-full"
              :class="c.status==='next' ? 'border-amber-500' : (c.status==='posted' ? 'border-zinc-800 opacity-60' : 'border-zinc-800')">
           <template x-if="c.exists">
             <a :href="c.url" target="_blank"><img :src="c.url" :alt="c.date" class="w-full block" loading="lazy" /></a>
@@ -81,7 +81,7 @@
             <span x-text="c.status==='posted' ? '✓ gepostet' : (c.status==='next' ? '▶ nächste' : '')"
                   :class="c.status==='posted' ? 'text-green-500' : (c.status==='next' ? 'text-amber-400' : 'text-zinc-600')"></span>
           </div>
-          <div class="px-2 pb-2">
+          <div class="px-2 pb-2 mt-auto">
             <button @click="postCard(c)" :disabled="busy || !c.exists"
                     class="w-full px-2 py-1 bg-zinc-800 hover:bg-blue-700 disabled:opacity-40 rounded text-xs text-zinc-200">
               🤖 <span x-text="c.status==='posted' ? 'erneut senden' : 'senden'"></span>
