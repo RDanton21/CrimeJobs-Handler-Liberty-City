@@ -40,7 +40,7 @@
 
 **27.07.** — In Bohan zieht Los Aztecas eine Grenze neu, die seit Jahren galt. Es fällt kein Schuss — aber einer war nah. Blue Union hat es gesehen und nicht gemeldet.
 
-**29.07.** — Underwood gibt eine Pressekonferenz über „die Stärke Liberty Citys" und lächelt dreimal. 3 Reporter fragen nach Mr. Camino; er beantwortet keine Frage. In derselben Woche steigt ein Dispatcher aus Revier 3 mit ein — ab jetzt fahren die Streifen dorthin, wo sie fahren sollen, und nicht dorthin, wo etwas passiert.
+**29.07.** — Underwood tritt vor die Kameras und spricht über „die Stärke Liberty Citys". Dreimal lächelt er. 3 Reporter fragen nach Mr. Camino — er überhört jede Frage, als wäre sie nie gestellt worden. Im hinteren Teil des Saals stehen 4 Detectives des LCPD und beobachten die Rede ganz genau — nicht die Reporter, nicht den Saal. Nur ihn. Sie schreiben nichts auf. Aber sie gehen als Letzte.
 
 **31.07.** — Jetzt kommen die Umschläge schneller. Der AOD MC bekommt seinen ersten, die Yardis ihren zweiten. Und in Revier 3 sind es inzwischen fünf Officer und ein Dispatcher — mit einer Preisliste, die niemand aufgeschrieben hat, aber jeder von ihnen auswendig kennt.
 
@@ -122,7 +122,7 @@
 
 ## Regie-Notizen (intern)
 
-- **Cop-Aufbau (chronologisch):** 07.07. einstecken → 11.07. Umschlag behalten → 15.07. Asservat verschwindet → 19.07. zwei erkennen sich → 21.07. Zelle (4) + Regel „nur Revier-3-Nächte" → 25.07. erste bezahlte Eskorte → 29.07. Dispatcher steuert Streifen → 31.07. 5 Officer + Preisliste → 02.08. Lieferkette Asservat→Straße → 04.08. Schutz nach Gebot → 06.08. Schichttausch, startklar.
+- **Cop-Aufbau (chronologisch):** 07.07. einstecken → 11.07. Umschlag behalten → 15.07. Asservat verschwindet → 19.07. zwei erkennen sich → 21.07. Zelle (4) + Regel „nur Revier-3-Nächte" → 25.07. erste bezahlte Eskorte → 31.07. 5 Officer + Dispatcher + Preisliste → 02.08. Lieferkette Asservat→Straße → 04.08. Schutz nach Gebot → 06.08. Schichttausch, startklar.
 - **Ab 07.08. (Startschuss):** Die Zelle setzt ihr Vorhaben offen um. Im Event-Chaos ist die Deckung perfekt.
 - **Whodunit / rote Heringe:** Jede Crew hat im Lagebild ein Motiv + eine Gelegenheit + ein brüchiges Alibi. Absicht: die Verdächtigungen zeigen in alle Richtungen, damit niemand auf **Underwood** kommt (wahrer Drahtzieher, Reveal Tag 10). Bei Bedarf kann man einzelne Verdachtsmomente im RP „bestätigen" lassen (falsche Fährten legen) — nichts davon ist kanonisch wahr außer dem Underwood-Reveal.
 - **„Die Fremden“ = die Quest-Geber/Mittler** (aktiv in der Personalbörse jobs.bots.sektorrp.eu, siehe `QUEST_GIVERS.md`). Intern die Mittler des Big Boss, die die Umschläge verteilen; öffentlich namenlose Neuankömmlinge. Deniable-Zuordnung: Kurier→Der Kurier · Frau ohne Gepäck→Strategos · Aufräumer→Eintreiberin · Mann, der nach Camino fragte→Miguel (Camino-Vergangenheit) · Der, der nur Zahlen sieht→Der Analyst. Die „Umschläge“ der Chronik sind ihre Aufträge.
