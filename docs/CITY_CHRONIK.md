@@ -50,6 +50,8 @@
 
 **04.08.** — Jede aktive Crew der Stadt hat mindestens einen Umschlag bekommen. Manche haben geliefert, manche verkauft, manche warten noch. Und Revier 3 entscheidet inzwischen, wer geschützt wird und wer fällt — nicht nach Gesetz, sondern nach Gebot. Frankie stellt den Tee weiter hin.
 
+**05.08.** — Die Stadt leert sich wieder. Die Straßen werden stiller, die Läden schließen früher, und viele bleiben einfach hinter verriegelten Türen — ob aus Angst oder aus Wehmut, kann keiner sagen. Auch die Fremden, die am Airport aus Los Santos gekommen sind, sind über Nacht verschwunden: nicht abgereist, nur nicht mehr zu sehen, als hätte die Stadt sie eingeatmet. Niemand weiß, wohin sie gegangen sind — aber jeder spürt, dass sie noch da sind, irgendwo, und warten.
+
 **06.08.** — Der letzte Tag vor dem Tag. Jetzt kommen die Umschläge im Stundentakt. Im LCPD tauscht man so lange Schichten, bis für die Nacht des 07.08. nur noch die Richtigen eingeteilt sind — Kontakte, Preise und Routen liegen längst bereit. Sie warten nur noch auf den einen Moment, in dem die Stadt aufhört hinzusehen. Underwood wirkt ausgeruht wie nie. Und wer die lesbaren Zeichen der bisherigen Seiten in die richtige Reihenfolge bringt, erkennt ein Muster — aber noch keine Antwort. Ein Zeichen fehlt, und es wird in den stillen Tagen nicht mehr auftauchen. Ab morgen, wenn die Stadt erwacht, zeigt sich, worauf das alles hinausläuft.
 
 ---
