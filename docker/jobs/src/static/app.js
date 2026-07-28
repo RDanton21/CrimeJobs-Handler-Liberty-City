@@ -25,6 +25,8 @@ function jobsBoard() {
     expanded: {},   // mission_id -> Auftrags-Text aufgeklappt
     briefOpen: {},  // mission_id -> Regie-Details (Personal-Brief) aufgeklappt
     busySlots: {},  // slot_id -> Request laeuft
+    slotFlash: {},  // slot_id -> 'up'|'down' (kurzer Puls bei Belegungs-Aenderung)
+    statTotal: 0,   // hochzaehlende Statistik-Gesamtzahl
     myOpen: false,  // Overlay "Meine Eintragungen"
     infoOpen: false, // Overlay "So funktioniert die Börse"
     myStats: null,  // eigene Einsatz-Bilanz (beim Oeffnen des Overlays geladen)
@@ -134,6 +136,35 @@ function jobsBoard() {
       setInterval(() => { this.clock = Math.floor(Date.now() / 1000); }, 1000);
     },
 
+    // Belegung aller Slots als {slot_id: assigned_count}
+    _snapshotSlots() {
+      const m = {};
+      if (this.board) for (const d of this.board.days)
+        for (const mi of d.missions) for (const s of (mi.slots || [])) m[s.id] = s.assigned_count;
+      return m;
+    },
+    // Gestiegene/gesunkene Belegung gegenueber dem Snapshot kurz aufblitzen
+    _flashChanges(prev) {
+      if (!this.board) return;
+      for (const d of this.board.days) for (const mi of d.missions) for (const s of (mi.slots || [])) {
+        if (!(s.id in prev)) continue;
+        const diff = s.assigned_count - prev[s.id];
+        if (diff > 0) this._flash(s.id, 'up');
+        else if (diff < 0) this._flash(s.id, 'down');
+      }
+    },
+    _flash(id, dir) {
+      this.slotFlash = { ...this.slotFlash, [id]: dir };
+      setTimeout(() => {
+        const c = { ...this.slotFlash }; delete c[id]; this.slotFlash = c;
+      }, 1700);
+    },
+    // Belegungs-Prozent eines Slots (fuer den Fortschrittsbalken)
+    slotPct(s) {
+      const req = s.required_count || 1;
+      return Math.min(100, Math.round(((s.assigned_count || 0) / req) * 100));
+    },
+
     async loadBoard(pickDay) {
       try {
         const r = await fetch('/api/board');
@@ -149,7 +180,10 @@ function jobsBoard() {
           this.showToast(j.detail || 'Board konnte nicht geladen werden', true);
           return;
         }
+        // Belegung VOR dem Ueberschreiben merken -> Aenderungen aufblitzen lassen
+        const prevSnap = this.board ? this._snapshotSlots() : null;
         this.board = await r.json();
+        if (prevSnap) this._flashChanges(prevSnap);
         // Admin-Status kann sich durch den Rollen-Recheck aendern —
         // das Board liefert den aktuellen Stand mit
         if (this.board.me) this.me = { ...this.me, is_admin: !!this.board.me.is_admin };
@@ -228,6 +262,20 @@ function jobsBoard() {
     },
 
     // ---- Admin-Funktionen (Server prueft die Berechtigung erneut) ----
+    // Zahl von 0 auf Ziel hochzaehlen (weiche Animation)
+    _countUp(field, target) {
+      target = target || 0;
+      const dur = 800, t0 = Date.now();
+      this[field] = 0;
+      const tick = () => {
+        const p = Math.min(1, (Date.now() - t0) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        this[field] = Math.round(target * eased);
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    },
+
     async openStats() {
       this.statsOpen = true;
       this.statsLoading = true;
@@ -239,6 +287,7 @@ function jobsBoard() {
         if (r.ok) {
           this.stats = await r.json();
           this.audit = rAudit.ok ? await rAudit.json() : null;
+          this._countUp('statTotal', this.stats.total_completed || 0);
         } else {
           const j = await r.json().catch(() => ({}));
           this.showToast(j.detail || 'Auswertung nicht verfügbar', true);
@@ -463,6 +512,7 @@ function jobsBoard() {
           body: JSON.stringify({ mission_id: mission.id }),
         });
         if (r.status === 201) {
+          this._flash(slot.id, 'up');  // sofortige gruene Bestaetigung
           this.showToast('Eingetragen: ' + (slot.name || 'Slot'), false);
         } else {
           const j = await r.json().catch(() => ({}));

@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260725m" />
-  <script defer src="/static/app.js?v=20260725m"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260725n" />
+  <script defer src="/static/app.js?v=20260725n"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -116,6 +116,9 @@
     <!-- Eingeloggt: Event-Board -->
     <template x-if="!loading && me">
       <div class="max-w-[110rem] mx-auto px-3 sm:px-5 py-4 sm:py-6">
+        <!-- dezenter, driftender Nebel ueber dem ganzen Board (Kino-Atmosphaere) -->
+        <div class="bhaze bhaze-1" aria-hidden="true"></div>
+        <div class="bhaze bhaze-2" aria-hidden="true"></div>
 
         <!-- Topbar: Marke links, Aktionen + Nutzer rechts -->
         <header class="card-cine rounded-lg border border-[#3d4a4d] px-4 py-2.5 mb-5
@@ -314,9 +317,11 @@
                  :class="currentDay().missions.length > 1 ? 'grid-cols-1 2xl:grid-cols-2' : 'grid-cols-1 max-w-4xl'">
             <template x-for="m in currentDay().missions" :key="m.id">
               <!-- id = Sprungziel aus dem "Meine Slots"-Overlay -->
-              <div class="card-cine rounded-lg overflow-hidden flex transition-shadow duration-500 relative"
+              <div class="mcard card-cine rounded-lg overflow-hidden flex transition-all duration-300 relative"
                    :id="'mission-' + m.id"
-                   :class="jumpedTo === m.id ? 'ring-2 ring-[#b98a4a] shadow-lg shadow-[#b98a4a]/20' : ''">
+                   :style="'--crew:' + ((m.crew && m.crew.color_hex) || '#b91c1c')"
+                   :class="[ jumpedTo === m.id ? 'ring-2 ring-[#b98a4a] shadow-lg shadow-[#b98a4a]/20' : '',
+                             'esc-glow-' + (m.escalation || 0) ]">
                 <!-- ERLEDIGT-Stempel quer ueber abgeschlossene Auftraege -->
                 <template x-if="m.archived_at">
                   <div class="stamp-overlay"><span class="stamp">Erledigt</span></div>
@@ -395,8 +400,9 @@
                   <!-- Slot-Zeilen -->
                   <div class="mt-3 space-y-2">
                     <template x-for="s in m.slots" :key="s.id">
-                      <div class="bg-[#17191b]/85 border rounded p-3"
-                           :class="s.mine ? 'border-[#b91c1c]/70' : 'border-[#3d4a4d]/60'">
+                      <div class="slot-box bg-[#17191b]/85 border rounded p-3 transition-colors"
+                           :class="[ s.mine ? 'border-[#b91c1c]/70' : 'border-[#3d4a4d]/60',
+                                     slotFlash[s.id] === 'up' ? 'flash-up' : slotFlash[s.id] === 'down' ? 'flash-down' : '' ]">
                         <!-- Kein flex-wrap: Zaehler + Button bleiben immer rechts,
                              der Textblock bricht stattdessen um (min-w-0) -->
                         <div class="flex items-start justify-between gap-3">
@@ -524,6 +530,11 @@
                             </template>
                           </div>
                         </div>
+                        <!-- Belegungs-Fortschritt (animierte Breite) -->
+                        <div class="slot-bar mt-2">
+                          <div class="slot-bar-fill" :class="s.free === 0 ? 'is-full' : ''"
+                               :style="'width:' + slotPct(s) + '%'"></div>
+                        </div>
                       </div>
                     </template>
                   </div>
@@ -602,7 +613,8 @@
               <!-- scrollt per Mausrad/Touch, aber ohne sichtbaren Balken -->
               <div class="space-y-2 max-h-[28rem] overflow-y-auto noscrollbar">
                 <template x-for="(e, i) in board.events" :key="i">
-                  <p class="text-xs leading-snug text-zinc-300">
+                  <p class="text-xs leading-snug text-zinc-300 transition-colors"
+                     :class="i === 0 ? 'tick-new pl-1.5' : ''">
                     <span class="inline-block h-1.5 w-1.5 rounded-full mr-1 align-middle"
                           :class="eventDot(e)"></span>
                     <span x-text="eventText(e)"></span>
@@ -886,7 +898,7 @@
             <div>
               <div class="flex gap-4 mb-3 text-xs text-zinc-400 flex-wrap">
                 <span>Spieler: <span class="text-zinc-200" x-text="stats.total_players"></span></span>
-                <span>Einsätze gesamt: <span class="text-zinc-200" x-text="stats.total_completed"></span></span>
+                <span>Einsätze gesamt: <span class="text-zinc-200 tabular-nums" x-text="statTotal"></span></span>
                 <span>Erschienen: <span class="text-green-400" x-text="stats.total_attended"></span></span>
                 <span>No-Shows: <span class="text-red-400" x-text="stats.total_no_show"></span></span>
               </div>

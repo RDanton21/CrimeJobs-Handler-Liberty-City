@@ -227,3 +227,52 @@ body::after {
   .lp-l, .lp-sub, .lp-w, .lp-card, .lp-copy { opacity: 1 !important; transform: none !important; filter: none !important; animation: none !important; }
   .lp-fog, .lp-fbank, .lp-ember { animation: none !important; }
 }
+
+/* ---------------------------------------------------------------------
+   Dynamik-Paket: Belegungsbalken, Live-Puls, Karten-Glow/Hover,
+   Board-Nebel, Ticker-Highlight.
+   --------------------------------------------------------------------- */
+/* Belegungs-Fortschritt je Slot (Breite animiert) */
+.slot-bar { height: 3px; border-radius: 3px; background: #2a3236; overflow: hidden; }
+.slot-bar-fill { height: 100%; border-radius: 3px; background: #b98a4a;
+  width: 0; transition: width .7s cubic-bezier(.2,.8,.2,1), background-color .4s; }
+.slot-bar-fill.is-full { background: #15803d; }
+
+/* Live-Puls bei Belegungs-Aenderung (Auto-Refresh / eigenes Eintragen) */
+@keyframes flashUp   { 0% { background-color: rgba(21,128,61,.45); box-shadow: 0 0 0 1px rgba(21,128,61,.6) inset; } 100% { background-color: rgba(23,25,27,.85); } }
+@keyframes flashDown { 0% { background-color: rgba(185,28,28,.4);  box-shadow: 0 0 0 1px rgba(185,28,28,.6) inset; } 100% { background-color: rgba(23,25,27,.85); } }
+.slot-box.flash-up   { animation: flashUp 1.6s ease-out; }
+.slot-box.flash-down { animation: flashDown 1.6s ease-out; }
+
+/* Auftragskarte: sanft anheben beim Hover + Rand in Crew-Farbe */
+.mcard:hover { transform: translateY(-3px);
+  box-shadow: 0 10px 30px -8px rgba(0,0,0,.7), 0 0 0 1px color-mix(in srgb, var(--crew) 55%, transparent); }
+/* Eskalations-Glow: hoehere Stufe -> staerkeres rotes Glimmen am Rand */
+@keyframes escGlow3 { 0%,100% { box-shadow: 0 0 12px -2px rgba(213,35,42,.28); } 50% { box-shadow: 0 0 20px 0 rgba(213,35,42,.5); } }
+@keyframes escGlow4 { 0%,100% { box-shadow: 0 0 16px -1px rgba(239,43,50,.45); } 50% { box-shadow: 0 0 26px 2px rgba(239,43,50,.75); } }
+.esc-glow-3 { animation: escGlow3 2.6s ease-in-out infinite; }
+.esc-glow-4 { animation: escGlow4 1.5s ease-in-out infinite; }
+.esc-glow-3:hover, .esc-glow-4:hover { animation: none; }
+
+/* dezenter Board-Nebel (driftet, sehr subtil, hinter dem Inhalt) */
+.bhaze { position: fixed; z-index: -1; border-radius: 50%; filter: blur(70px);
+  mix-blend-mode: screen; pointer-events: none; opacity: .13; }
+.bhaze-1 { width: 55vw; height: 40vh; left: -8vw; top: 20vh;
+  background: radial-gradient(circle, rgba(90,100,108,.7), transparent 70%);
+  animation: bhazeA 34s ease-in-out infinite alternate; }
+.bhaze-2 { width: 50vw; height: 38vh; right: -6vw; bottom: 8vh;
+  background: radial-gradient(circle, rgba(120,44,48,.6), transparent 70%);
+  animation: bhazeB 42s ease-in-out infinite alternate; }
+@keyframes bhazeA { from { transform: translate(0,0); } to { transform: translate(14vw,-8vh); } }
+@keyframes bhazeB { from { transform: translate(0,0); } to { transform: translate(-12vw,6vh); } }
+
+/* Ticker: neuester Eintrag mit Gold-Akzent + kurzem Aufblenden */
+.tick-new { border-left: 2px solid rgba(185,138,74,.55); animation: tickIn 1.1s ease-out; }
+@keyframes tickIn { 0% { opacity: .35; transform: translateY(-4px); background: rgba(185,138,74,.12); }
+  100% { opacity: 1; transform: none; background: transparent; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .slot-box.flash-up, .slot-box.flash-down, .esc-glow-3, .esc-glow-4,
+  .bhaze-1, .bhaze-2, .tick-new { animation: none !important; }
+  .mcard:hover { transform: none; }
+}
