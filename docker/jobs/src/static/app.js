@@ -8,7 +8,7 @@ function jobsBoard() {
     me: null,
     board: null,
     escShow: true,  // Eskalations-Leiste ein-/ausgeklappt
-    _escNames: ['Ruhig', 'Angespannt', 'Konflikt', 'Eskalation', 'Vendetta'],
+    _escNames: ['Ruhig', 'Angespannt', 'Fehde', 'Eskalation', 'Vendetta'],
     escLabel(lvl) { return this._escNames[lvl || 0]; },
     escDotClass(lvl) { lvl = lvl || 0; return 'esc-dot esc-c' + lvl + (lvl > 0 ? ' esc-a' + lvl : ''); },
     escBadgeClass(lvl) { return 'escbadge escbadge' + (lvl || 0); },
