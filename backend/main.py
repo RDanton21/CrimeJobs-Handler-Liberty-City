@@ -71,7 +71,12 @@ async def _revalidate_static(request, call_next):
     aller Regel bei einem billigen 304.
     """
     response = await call_next(request)
-    if request.url.path.startswith("/static/"):
+    path = request.url.path
+    if path.startswith("/api/chronik/card/"):
+        # Chronik-Karten nie cachen -> ein "neu erzeugen" ist sofort sichtbar
+        # (sonst liefert Browser/Cloudflare die alte PNG unter derselben URL).
+        response.headers["Cache-Control"] = "no-store"
+    elif path.startswith("/static/") or path == "/chronik":
         response.headers["Cache-Control"] = "no-cache"
     return response
 
