@@ -107,3 +107,23 @@ async def post_now():
     if resp.status_code != 200:
         raise HTTPException(resp.status_code, resp.text)
     return resp.json()
+
+
+class PostCardIn(BaseModel):
+    filename: str
+
+
+@router.post("/post-card")
+async def post_card(payload: PostCardIn):
+    """Postet EINE bestimmte Karte erneut (per Dateiname), ohne den Fortschritt zu aendern."""
+    if not chronik.card_path(payload.filename):
+        raise HTTPException(404, "Karte nicht gefunden")
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as cli:
+            resp = await cli.post(f"{settings.bot_api_url}/post_chronik_card",
+                                  json={"filename": payload.filename})
+    except httpx.RequestError as exc:
+        raise HTTPException(502, f"Bot nicht erreichbar: {exc}") from exc
+    if resp.status_code != 200:
+        raise HTTPException(resp.status_code, resp.text)
+    return resp.json()

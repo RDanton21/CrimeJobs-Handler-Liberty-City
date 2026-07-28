@@ -169,10 +169,14 @@ async def _send_chronik_card(channel_id: str, card: dict) -> tuple[bool, str | N
         return False, str(exc)
 
 
-async def _post_next_chronik(session) -> tuple[bool, str | None, dict | None]:
-    """Postet die naechste Chronik-Karte in Reihenfolge, erhoeht den Index."""
+async def _post_next_chronik(session, enforce_date: bool = False) -> tuple[bool, str | None, dict | None]:
+    """Postet die naechste Chronik-Karte in Reihenfolge, erhoeht den Index.
+
+    enforce_date=True: Karten mit einem Datum in der Zukunft werden NICHT gepostet
+    (verhindert, dass der taegliche Auto-Post dem Kalender davonlaeuft).
+    """
     from .settings_store import get as sget, set_value as sset
-    from .chronik import ordered_cards
+    from .chronik import ordered_cards, card_date
     channel_id = (await sget(session, "chronik_channel_id", "")).strip()
     if not channel_id:
         return False, "kein Channel konfiguriert", None
@@ -181,6 +185,10 @@ async def _post_next_chronik(session) -> tuple[bool, str | None, dict | None]:
     if idx >= len(cards):
         return False, "alle Karten bereits gepostet", None
     card = cards[idx]
+    if enforce_date:
+        cd = card_date(card["date"])
+        if cd and cd > datetime.now().date():
+            return False, None, card  # Zukunftsdatum -> heute (noch) nicht posten
     ok, err = await _send_chronik_card(channel_id, card)
     if ok:
         await sset(session, "chronik_next_index", str(idx + 1))
@@ -211,7 +219,7 @@ async def _daily_chronik_watcher():
                             if (now - target).total_seconds() > 3600:
                                 _last_chronik_post_date = today  # zu spaet -> Tag ueberspringen
                             else:
-                                ok, err, card = await _post_next_chronik(session)
+                                ok, err, card = await _post_next_chronik(session, enforce_date=True)
                                 _last_chronik_post_date = today
                                 if ok:
                                     await sset(session, "chronik_last_date", today.isoformat())
@@ -229,6 +237,37 @@ async def http_post_chronik_now(request):
         ok, err, card = await _post_next_chronik(session)
     if not ok:
         status = 400 if (err and ("Channel" in err or "bereits" in err)) else 502
+        return web.json_response({"error": err}, status=status)
+    return web.json_response({"ok": True, "posted": card["date"]})
+
+
+async def _post_specific_chronik(session, filename: str) -> tuple[bool, str | None, dict | None]:
+    """Postet eine bestimmte Chronik-Karte (per Dateiname), ohne den Fortschritt zu aendern."""
+    from .settings_store import get as sget
+    from .chronik import ordered_cards
+    channel_id = (await sget(session, "chronik_channel_id", "")).strip()
+    if not channel_id:
+        return False, "kein Channel konfiguriert", None
+    card = next((c for c in ordered_cards() if c["filename"] == filename), None)
+    if not card:
+        return False, "Karte nicht gefunden", None
+    ok, err = await _send_chronik_card(channel_id, card)
+    return ok, err, card
+
+
+async def http_post_chronik_card(request):
+    """POST /post_chronik_card {filename} — postet EINE bestimmte Karte erneut (kein Index-Change)."""
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    filename = (data.get("filename") or "").strip()
+    if not filename:
+        return web.json_response({"error": "filename fehlt"}, status=400)
+    async with SessionLocal() as session:
+        ok, err, card = await _post_specific_chronik(session, filename)
+    if not ok:
+        status = 400 if (err and ("Channel" in err or "nicht gefunden" in err or "konfiguriert" in err)) else 502
         return web.json_response({"error": err}, status=status)
     return web.json_response({"ok": True, "posted": card["date"]})
 
@@ -1121,6 +1160,7 @@ def build_http_app() -> web.Application:
         web.post("/read_channel", http_read_channel),
         web.post("/send_embed", http_send_embed),
         web.post("/post_chronik_now", http_post_chronik_now),
+        web.post("/post_chronik_card", http_post_chronik_card),
         web.get("/health", http_health),
     ])
     return app

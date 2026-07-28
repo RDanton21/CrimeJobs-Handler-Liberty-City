@@ -3,13 +3,25 @@
 Die Reihenfolge kommt aus docs/CITY_CHRONIK.md (Tages-Eintraege), die Bilder
 liegen als docs/chronik_cards/chronik_TT-MM.png vor (via scripts/chronik_render.py).
 """
+import datetime
 import os
 import re
+
+YEAR = 2026  # Kanon-Jahr der Chronik (siehe CITY_CHRONIK.md)
 
 _APP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # /app
 DOCS = os.path.join(_APP, "docs")
 CARDS_DIR = os.path.join(DOCS, "chronik_cards")
 CHRON_MD = os.path.join(DOCS, "CITY_CHRONIK.md")
+
+
+def card_date(date_label: str) -> datetime.date | None:
+    """'29.07' -> date(2026, 7, 29); None wenn unparsbar."""
+    try:
+        d, mth = date_label.split(".")[:2]
+        return datetime.date(YEAR, int(mth), int(d))
+    except (ValueError, TypeError):
+        return None
 
 
 def ordered_dates() -> list[str]:
