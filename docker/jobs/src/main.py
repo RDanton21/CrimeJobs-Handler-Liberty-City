@@ -758,6 +758,69 @@ async def api_me(me: dict = Depends(require_session)):
     }
 
 
+def _ics_escape(text: str) -> str:
+    """Sonderzeichen fuer iCalendar-Text maskieren (RFC 5545)."""
+    return (str(text or "").replace("\\", "\\\\").replace(";", "\\;")
+            .replace(",", "\\,").replace("\n", "\\n"))
+
+
+@app.get("/api/me/calendar.ics")
+async def my_calendar(me: dict = Depends(require_session)):
+    """Eigene Einsaetze als iCalendar-Datei (.ics) zum Abo/Import in Google-,
+    Apple- oder Handy-Kalender. Enthaelt nur die eigenen Eintragungen."""
+    missions, _ = await _fetch_crime_data()
+    async with SessionLocal() as session:
+        rows = (await session.execute(
+            select(SlotAssignment.slot_id, SlotAssignment.mission_id)
+            .where(SlotAssignment.player_discord_id == me["discord_user_id"])
+        )).all()
+    mine = {(sid, mid) for sid, mid in rows}
+
+    lines = [
+        "BEGIN:VCALENDAR", "VERSION:2.0",
+        "PRODID:-//SEKTOR RP//Personal-Boerse//DE",
+        "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+        "X-WR-CALNAME:SEKTOR — Meine Einsätze",
+    ]
+    stamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    host = (config.PUBLIC_URL or "").split("//")[-1] or "sektorrp"
+    for m in missions:
+        if m.get("archived_at"):
+            continue
+        ws, we = m.get("window_start"), m.get("window_end")
+        if not ws or not we:
+            continue
+        crew = (m.get("crew") or {}).get("name") or "Einsatz"
+        for s in m.get("slots", []):
+            if (s.get("id"), m.get("id")) not in mine:
+                continue
+            rolle = s.get("name") or (f"NPC #{s['npc_number']}" if s.get("npc_number") else "")
+            desc = " — ".join(x for x in [
+                s.get("location") and f"Treffpunkt: {s['location']}",
+                s.get("costume") and f"Kleidung: {s['costume']}",
+                f"Alle Details: {config.PUBLIC_URL}",
+            ] if x)
+            lines += [
+                "BEGIN:VEVENT",
+                f"UID:slot-{s.get('id')}-{m.get('id')}@{host}",
+                f"DTSTAMP:{stamp}",
+                f"DTSTART:{datetime.utcfromtimestamp(ws).strftime('%Y%m%dT%H%M%SZ')}",
+                f"DTEND:{datetime.utcfromtimestamp(we).strftime('%Y%m%dT%H%M%SZ')}",
+                f"SUMMARY:{_ics_escape(crew + (' — ' + rolle if rolle else ''))}",
+                f"LOCATION:{_ics_escape(s.get('location') or '')}",
+                f"DESCRIPTION:{_ics_escape(desc)}",
+                "BEGIN:VALARM", "TRIGGER:-PT30M", "ACTION:DISPLAY",
+                f"DESCRIPTION:{_ics_escape(crew + ' startet bald')}", "END:VALARM",
+                "END:VEVENT",
+            ]
+    lines.append("END:VCALENDAR")
+    body = "\r\n".join(lines) + "\r\n"
+    return Response(
+        content=body, media_type="text/calendar; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="sektor-einsaetze.ics"'},
+    )
+
+
 @app.get("/api/me/stats")
 async def my_stats(me: dict = Depends(require_session)):
     """Eigene Einsatz-Bilanz: Summen + Historie. Bewusst nur eigene Daten —

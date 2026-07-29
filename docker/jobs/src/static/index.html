@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260725r" />
-  <script defer src="/static/app.js?v=20260725r"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260725s" />
+  <script defer src="/static/app.js?v=20260725s"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -586,8 +586,15 @@
             <!-- Meine Einsaetze: alle eigenen Eintragungen (laufend/kommend) -->
             <section class="card-cine rounded-lg border border-[#3d4a4d] p-3"
                      x-show="board && myUpcoming().length" x-cloak>
-              <div class="headline text-[10px] tracking-widest uppercase text-zinc-400 mb-2">
-                Meine Einsätze
+              <div class="flex items-center justify-between mb-2">
+                <span class="headline text-[10px] tracking-widest uppercase text-zinc-400">
+                  Meine Einsätze
+                </span>
+                <a href="/api/me/calendar.ics"
+                   title="Als Kalender abonnieren/importieren (Google, Apple, Handy)"
+                   class="text-[10px] text-zinc-400 hover:text-[#d9ae6e] underline whitespace-nowrap">
+                  📅 Kalender
+                </a>
               </div>
               <div class="space-y-2.5">
                 <template x-for="e in myUpcoming()" :key="e.m.id">
