@@ -41,6 +41,7 @@ from .models import (
     CompletedParticipation,
     DismissedMission,
     EscalationOverride,
+    EscalationSample,
     Player,
     SlotAssignment,
     WaitlistEntry,
@@ -59,8 +60,15 @@ _state_serializer = URLSafeTimedSerializer(config.SESSION_SECRET, salt="jobs-oau
 # Deutsche Wochentags-Kuerzel (Montag=0)
 WEEKDAYS_DE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
-# Eskalationsstufen 0-4 (Ruhig->Krieg). Auto aus der Aktivitaet einer Crew.
+# Eskalationsstufen 0-4 (Ruhig->Vendetta). Auto aus der Aktivitaet einer Crew.
 ESC_SLUGS = ["calm", "tense", "conflict", "escalation", "war"]
+
+# Eskalations-Verlauf: hoechstens alle SAMPLE_INTERVAL Sekunden einen Messpunkt
+# je aktiver Gang speichern; nur RETENTION lange aufbewahren.
+_ESC_SAMPLE_INTERVAL = 900          # 15 Minuten
+_ESC_SAMPLE_RETENTION = timedelta(days=7)
+_ESC_HISTORY_POINTS = 40            # so viele Punkte zeigt die Verlaufskurve
+_last_esc_sample = 0.0             # time.monotonic() des letzten Samplings
 
 
 def _auto_escalation(active_count: int) -> int:
@@ -969,6 +977,35 @@ async def api_board(me: dict = Depends(require_session)):
     }
     crew_level.update(esc_overrides)
 
+    # Eskalations-Verlauf: gedrosselt einen Messpunkt je aktiver Gang speichern
+    # und die juengsten Punkte je Gang fuer die Kurve laden.
+    global _last_esc_sample
+    esc_history: dict = {}
+    async with SessionLocal() as s_esc:
+        now_mono = time.monotonic()
+        if now_mono - _last_esc_sample >= _ESC_SAMPLE_INTERVAL:
+            _last_esc_sample = now_mono
+            for c in crews:
+                cid = c.get("id")
+                if cid is not None and (active_by_crew.get(cid, 0) > 0 or crew_level.get(cid, 0) > 0):
+                    s_esc.add(EscalationSample(
+                        crew_id=cid, crew_name=c.get("name", ""),
+                        level=crew_level.get(cid, 0),
+                    ))
+            await s_esc.execute(
+                delete(EscalationSample).where(
+                    EscalationSample.sampled_at < datetime.utcnow() - _ESC_SAMPLE_RETENTION
+                )
+            )
+            await s_esc.commit()
+        rows = (await s_esc.execute(
+            select(EscalationSample.crew_id, EscalationSample.level)
+            .order_by(EscalationSample.id)
+        )).all()
+    for cid, lvl in rows:
+        esc_history.setdefault(cid, []).append(lvl)
+    esc_history = {cid: hist[-_ESC_HISTORY_POINTS:] for cid, hist in esc_history.items()}
+
     # Missions auf Berlin-Kalendertage verteilen
     event_days = _event_days()
     buckets: dict[str, list[dict]] = {d.isoformat(): [] for d, _, _ in event_days}
@@ -1037,7 +1074,8 @@ async def api_board(me: dict = Depends(require_session)):
             {**c, "escalation": crew_level.get(c.get("id"), 0),
              "escalation_slug": ESC_SLUGS[crew_level.get(c.get("id"), 0)],
              "escalation_manual": esc_overrides.get(c.get("id")),
-             "active_count": active_by_crew.get(c.get("id"), 0)}
+             "active_count": active_by_crew.get(c.get("id"), 0),
+             "history": esc_history.get(c.get("id"), [])}
             for c in crews
         ],
         "online": online,

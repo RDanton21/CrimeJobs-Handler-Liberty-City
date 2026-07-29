@@ -107,6 +107,19 @@ class EscalationOverride(Base):
     set_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
+class EscalationSample(Base):
+    """Zeitreihe der Eskalationsstufe je Gang — fuer die Verlaufskurve.
+    Wird alle paar Minuten gesampelt (Board-Aufruf, gedrosselt); aeltere
+    Eintraege als die Aufbewahrungsfrist werden beim Sampling entsorgt."""
+    __tablename__ = "escalation_samples"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    crew_id: Mapped[int] = mapped_column(Integer, index=True)
+    crew_name: Mapped[str] = mapped_column(String, default="")
+    level: Mapped[int] = mapped_column(Integer, default=0)
+    sampled_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 class BoardEvent(Base):
     """Aktivitaets-Ticker: oeffentliche Board-Ereignisse (Eintragen, Austragen,
     Warteliste, Nachruecken, Admin-Kick). Wird beim Schreiben auf die letzten

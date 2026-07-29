@@ -276,3 +276,18 @@ body::after {
   .bhaze-1, .bhaze-2, .tick-new { animation: none !important; }
   .mcard:hover { transform: none; }
 }
+
+/* ---------------------------------------------------------------------
+   Datenvisualisierung: Eskalations-Verlaufs-Sparkline + Auslastungsbalken
+   --------------------------------------------------------------------- */
+.spark { display: inline-flex; align-items: flex-end; gap: 1px; height: 16px; flex: none; }
+.spark-bar { width: 2px; border-radius: 1px; min-height: 2px; }
+.spark-0 { background: #3bab6b; }
+.spark-1 { background: #c59a1f; }
+.spark-2 { background: #d98324; }
+.spark-3 { background: #d5232a; }
+.spark-4 { background: #ef2b32; }
+
+.util-track { height: 8px; border-radius: 4px; background: #2a3236; overflow: hidden; display: inline-block; }
+.util-fill { display: block; height: 100%; border-radius: 4px; width: 0;
+  transition: width .8s cubic-bezier(.2,.8,.2,1); }

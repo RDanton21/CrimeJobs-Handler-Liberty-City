@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260725q" />
-  <script defer src="/static/app.js?v=20260725q"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260725r" />
+  <script defer src="/static/app.js?v=20260725r"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -249,6 +249,14 @@
               <div class="flex items-center gap-2.5 flex-wrap">
                 <span class="ecg" :class="'ecg'+(c.escalation||0)"></span>
                 <span class="text-sm font-medium truncate flex-1" x-text="c.name"></span>
+                <!-- Verlaufs-Sparkline: wie hat sich die Lage entwickelt -->
+                <span class="spark" x-show="c.history && c.history.length > 1"
+                      title="Eskalations-Verlauf">
+                  <template x-for="(lv, hi) in c.history" :key="hi">
+                    <i class="spark-bar" :class="'spark-'+lv"
+                       :style="'height:' + (20 + lv * 20) + '%'"></i>
+                  </template>
+                </span>
                 <!-- Feste Spaltenbreiten, damit Label/Select/Badge buendig stehen -->
                 <span class="text-[11px] text-zinc-500 w-14 text-right"
                       x-text="(c.escalation_manual === null || c.escalation_manual === undefined) ? 'auto' : 'manuell'"></span>
@@ -887,6 +895,31 @@
 
         <div class="p-5">
           <p x-show="statsLoading" class="text-sm text-zinc-400 text-center py-6">Lade…</p>
+
+          <!-- Auslastungs-Diagramm: belegte/benoetigte Plaetze je Gang -->
+          <template x-if="!statsLoading && utilization().length">
+            <div class="mb-5">
+              <h3 class="headline text-[11px] tracking-[.18em] uppercase text-[#d9ae6e] mb-2">
+                Auslastung je Gang
+              </h3>
+              <div class="space-y-1.5">
+                <template x-for="u in utilization()" :key="u.name">
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="w-36 sm:w-44 truncate text-zinc-300" x-text="u.name"></span>
+                    <span class="flex-1 util-track">
+                      <span class="util-fill"
+                            :style="'width:' + u.pct + '%; background:' + (u.pct >= 100 ? '#15803d' : u.color)"></span>
+                    </span>
+                    <span class="w-14 text-right tabular-nums text-zinc-500" x-text="u.filled + '/' + u.req"></span>
+                    <span class="w-10 text-right tabular-nums"
+                          :class="u.pct >= 100 ? 'text-green-400' : 'text-[#d9ae6e]'"
+                          x-text="u.pct + '%'"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+
           <p x-show="!statsLoading && stats && stats.players.length === 0"
              class="text-sm text-zinc-400 text-center py-6">
             Noch keine Einsätze erfasst.<br>

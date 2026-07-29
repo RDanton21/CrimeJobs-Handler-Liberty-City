@@ -136,6 +136,28 @@ function jobsBoard() {
       setInterval(() => { this.clock = Math.floor(Date.now() / 1000); }, 1000);
     },
 
+    // Auslastung je Gang (belegte/benoetigte Plaetze ueber alle aktiven
+    // Auftraege) — fuers Auslastungs-Diagramm in der Auswertung.
+    utilization() {
+      if (!this.board) return [];
+      const agg = {};
+      for (const d of this.board.days) for (const m of d.missions) {
+        if (m.archived_at) continue;
+        const name = (m.crew && m.crew.name) || '?';
+        const a = agg[name] || (agg[name] = {
+          name, color: (m.crew && m.crew.color_hex) || '#b91c1c', filled: 0, req: 0,
+        });
+        for (const s of (m.slots || [])) {
+          a.filled += (s.assigned_count || 0);
+          a.req += (s.required_count || 1);
+        }
+      }
+      return Object.values(agg)
+        .filter(x => x.req > 0)
+        .map(x => ({ ...x, pct: Math.round((x.filled / x.req) * 100) }))
+        .sort((a, b) => b.pct - a.pct || b.req - a.req);
+    },
+
     // Belegung aller Slots als {slot_id: assigned_count}
     _snapshotSlots() {
       const m = {};
