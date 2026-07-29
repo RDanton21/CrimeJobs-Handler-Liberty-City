@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260725p" />
-  <script defer src="/static/app.js?v=20260725p"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260725q" />
+  <script defer src="/static/app.js?v=20260725q"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -232,7 +232,7 @@
               <span class="text-zinc-600" x-text="escShow ? '▾' : '▸'"></span>
             </button>
             <!-- Legende: alle Stufen gross und gleichmaessig ueber die Breite verteilt -->
-            <div class="flex flex-wrap items-center justify-evenly gap-x-10 gap-y-2 flex-1 min-w-0"
+            <div class="flex flex-wrap items-center justify-center sm:justify-evenly gap-x-8 gap-y-2 flex-1 min-w-0"
                  x-show="escShow">
               <template x-for="lv in [0,1,2,3,4]" :key="lv">
                 <span class="flex items-center gap-2.5 text-sm text-zinc-300 whitespace-nowrap">
@@ -314,7 +314,7 @@
             <!-- Ein einzelner Auftrag bekommt die volle Breite (begrenzt),
                  statt nur eine halbe Rasterspalte zu fuellen -->
             <div class="grid gap-4 items-start"
-                 :class="currentDay().missions.length > 1 ? 'grid-cols-1 2xl:grid-cols-2' : 'grid-cols-1 max-w-4xl'">
+                 :class="currentDay().missions.length > 1 ? 'grid-cols-1 2xl:grid-cols-2' : 'grid-cols-1 max-w-3xl'">
             <template x-for="m in currentDay().missions" :key="m.id">
               <!-- id = Sprungziel aus dem "Meine Slots"-Overlay -->
               <div class="mcard card-cine rounded-lg overflow-hidden flex transition-all duration-300 relative"

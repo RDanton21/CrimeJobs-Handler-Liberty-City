@@ -976,11 +976,13 @@ async def api_board(me: dict = Depends(require_session)):
     for mission in sorted(missions, key=_mission_sort_key):
         enriched = _enrich_mission(mission, assignments_by_slot, waitlist_by_slot, me)
         _cid = (mission.get("crew") or {}).get("id")
-        # Override der Crew gilt fuer alle ihre Auftraege, sonst Story-Stufe
+        # Override der Crew gilt fuer alle ihre Auftraege; sonst die eigene
+        # Story-Stufe, aber NIE niedriger als die Gang-Lage — sonst zeigt das
+        # Panel "Angespannt" und die Karte "Ruhig" (verwirrend).
         if _cid in esc_overrides:
             _lvl = esc_overrides[_cid]
         else:
-            _lvl = mission_story.get(mission.get("id"), 0)
+            _lvl = max(mission_story.get(mission.get("id"), 0), crew_level.get(_cid, 0))
         enriched["escalation"] = _lvl
         enriched["escalation_slug"] = ESC_SLUGS[_lvl]
         day = _mission_day(mission)
