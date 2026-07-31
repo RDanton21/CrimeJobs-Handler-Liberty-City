@@ -573,7 +573,13 @@ def _mission_sort_key(mission: dict) -> str:
 
 @app.get("/")
 async def index():
-    return FileResponse(STATIC_DIR / "index.html")
+    # no-cache: index.html referenziert versionierte Assets (?v=...). Der Browser
+    # muss die HTML immer revalidieren, sonst haengt er an einer alten Version fest
+    # (z. B. veralteter Event-Zeitraum oder alte app.js).
+    return FileResponse(
+        STATIC_DIR / "index.html",
+        headers={"Cache-Control": "no-cache"},
+    )
 
 
 #: Explizite Allowlist statt StaticFiles-Mount (Security-Review: nur bewusst
