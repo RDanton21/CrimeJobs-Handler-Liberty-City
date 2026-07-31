@@ -526,7 +526,11 @@ function jobsBoard() {
         return String(d.getDate()).padStart(2, '0') + '.'
           + String(d.getMonth() + 1).padStart(2, '0') + '.' + d.getFullYear();
       };
-      return 'Event: ' + f(this.board.event.start) + ' – ' + f(this.board.event.end);
+      // Header zeigt den Haupt-Event = letzter Zeitraum (z. B. "Liberty erwacht...").
+      // Die Testphase davor ist nur Vorlauf und bleibt der TAGE-Leiste vorbehalten.
+      const periods = this.board.event.periods || [];
+      const main = periods.length ? periods[periods.length - 1] : this.board.event;
+      return 'Event: ' + f(main.start) + ' – ' + f(main.end);
     },
 
     async assign(slot, mission) {
