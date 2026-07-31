@@ -49,10 +49,15 @@ function jobsBoard() {
       const rows = [];
       let cur = null;
       for (const d of this.board.days) {
-        const key = d.week || d.date;
-        if (!cur || cur.week !== key) {
+        const wk = d.week || d.date;
+        // Neue Zeile bei Wochen- ODER Perioden-Wechsel: eine Kalenderwoche kann
+        // an einer Perioden-Grenze geteilt sein (z. B. Do = Testphase, Fr = Liberty).
+        // Dann muss die Abschnitts-Ueberschrift mitten in der Woche umbrechen,
+        // sonst rutschen die ersten Liberty-Tage optisch noch unter "Testphase".
+        if (!cur || cur.week !== wk || cur.period !== d.period) {
           cur = {
-            week: key,
+            week: wk,
+            key: wk + '#' + d.period,
             week_label: d.week_label || '',
             period: d.period,
             period_label: d.period_label || '',

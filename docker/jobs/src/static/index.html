@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260725s" />
-  <script defer src="/static/app.js?v=20260725s"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260731a" />
+  <script defer src="/static/app.js?v=20260731a"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -187,7 +187,7 @@
                  Vor der ersten Woche eines Zeitraums steht dessen Name. -->
             <section class="card-cine rounded-lg border border-[#3d4a4d] p-3" x-show="board">
               <h2 class="headline text-[11px] tracking-[.2em] uppercase text-zinc-400 mb-2">Tage</h2>
-              <template x-for="(row, ri) in dayRows()" :key="row.week">
+              <template x-for="(row, ri) in dayRows()" :key="row.key">
                 <div>
                   <!-- Zeitraum-Ueberschrift: nur bei der ersten Woche des Zeitraums -->
                   <div x-show="row.period_label && (ri === 0 || dayRows()[ri-1].period !== row.period)"
