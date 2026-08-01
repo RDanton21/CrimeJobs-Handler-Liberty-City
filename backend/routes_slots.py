@@ -511,6 +511,11 @@ def _iso(dt) -> str | None:
 #: dort als "Erledigt" markiert (Stempel) und verschwindet danach von selbst.
 ARCHIVED_GRACE = timedelta(hours=3)
 
+#: Wie lange ein Auftrag mit ABGELAUFENEM Zeitfenster (versendet, nicht
+#: archiviert) noch als "Erledigt" auf dem Board sichtbar bleibt, bevor er von
+#: selbst verschwindet. Manuelles Archivieren/Loeschen entfernt ihn frueher.
+DONE_WINDOW_GRACE = timedelta(hours=8)
+
 
 @public_router.get("/active-missions")
 async def public_active_missions(session: AsyncSession = Depends(get_session)):
@@ -545,6 +550,8 @@ async def public_active_missions(session: AsyncSession = Depends(get_session)):
     for s in slot_res.scalars().all():
         slots_by_mission.setdefault(s.mission_id, []).append(s)
 
+    now_unix = int(datetime.now(timezone.utc).timestamp())
+    done_cutoff_unix = now_unix - int(DONE_WINDOW_GRACE.total_seconds())
     out: list[dict] = []
     for m in missions:
         slots = slots_by_mission.get(m.id, [])
@@ -559,6 +566,12 @@ async def public_active_missions(session: AsyncSession = Depends(get_session)):
         # Einsatzfenster als Unix-Zeit, damit das Board "laeuft gerade"
         # zuverlaessig erkennt (Zeitzonen-frei vergleichbar).
         win_start, win_end = _slot_window_unix(m, slot_window)
+        # Versendeter Auftrag mit laengst abgelaufenem Fenster: als "Erledigt"
+        # noch DONE_WINDOW_GRACE (8h) sichtbar, danach von selbst raus. Manuelles
+        # Archivieren greift ueber ARCHIVED_GRACE frueher, Purge sofort.
+        if (released and m.archived_at is None and win_end is not None
+                and win_end < done_cutoff_unix):
+            continue
         out.append({
             "id": m.id,
             "status": m.status.value,
