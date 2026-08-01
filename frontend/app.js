@@ -1409,7 +1409,7 @@ function crewPage() {
       // Anzeige-Label: 'anthropic' wird als 'Sektor-KI' angezeigt (Wert bleibt technisch gleich)
       const v = (p || "").toLowerCase();
       if (v === "anthropic" || v === "claude") return "Sektor-KI";
-      if (v === "openai") return "OpenAI";
+      if (v === "openai") return "Sektor-KI II";
       return p || "";
     },
     setPendingImage(evt) {
