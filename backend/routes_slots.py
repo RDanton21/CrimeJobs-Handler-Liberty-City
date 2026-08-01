@@ -279,12 +279,8 @@ async def _announce_slot_change(
     # <t:X:R> = Countdown ("in 3 Stunden"). Discord rendert beides in der
     # lokalen Zeitzone des jeweiligen Spielers.
     start_unix = _slot_start_unix(mission, slot_window)
-    if start_unix:
-        when_line = f"🕘 **Beginn:** <t:{start_unix}:F> (<t:{start_unix}:R>)"
-    elif slot_window:
-        when_line = f"🕘 **Zeitfenster:** {slot_window}"
-    else:
-        when_line = ""
+    when_line = f"🕘 **Beginn:** <t:{start_unix}:F> (<t:{start_unix}:R>)" if start_unix else ""
+    window_line = f"⏳ **Zeitfenster:** {slot_window.strip()}" if (slot_window or "").strip() else ""
 
     if old_total == 0:
         # Erstmal-Fall: Mission bekommt zum ersten Mal Spieler-Slots
@@ -298,6 +294,8 @@ async def _announce_slot_change(
     lines = [f"{mention}{head}", info]
     if when_line:
         lines.append(when_line)
+    if window_line:
+        lines.append(window_line)
     lines.append(f"👉 {dashboard_url}")
     content = "\n".join(lines)
 
