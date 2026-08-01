@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260731b" />
-  <script defer src="/static/app.js?v=20260731b"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260801a" />
+  <script defer src="/static/app.js?v=20260801a"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -331,7 +331,7 @@
                    :class="[ jumpedTo === m.id ? 'ring-2 ring-[#b98a4a] shadow-lg shadow-[#b98a4a]/20' : '',
                              'esc-glow-' + (m.escalation || 0) ]">
                 <!-- ERLEDIGT-Stempel quer ueber abgeschlossene Auftraege -->
-                <template x-if="m.archived_at">
+                <template x-if="isDone(m)">
                   <div class="stamp-overlay"><span class="stamp">Erledigt</span></div>
                 </template>
                 <!-- Farbbalken in Crew-Farbe -->
@@ -343,7 +343,7 @@
                   <div class="flex items-start justify-between gap-2 flex-wrap">
                     <div class="min-w-0">
                       <div class="flex items-center gap-2 flex-wrap">
-                        <span class="inline-block h-2 w-2 rounded-full flex-shrink-0"
+                        <span x-show="!isDone(m)" class="inline-block h-2 w-2 rounded-full flex-shrink-0"
                               :class="m.sent_at ? 'bg-[#b91c1c] animate-pulse' : 'bg-[#b98a4a]'"
                               :title="m.sent_at ? 'live' : 'geplant'"></span>
                         <h2 class="headline font-semibold tracking-wider"
@@ -354,7 +354,7 @@
                           <span class="ecg ecg-sm" :class="'ecg'+(m.escalation||0)"></span>
                           <span x-text="escLabel(m.escalation)"></span>
                         </span>
-                        <span class="headline text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded border"
+                        <span x-show="!isDone(m)" class="headline text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded border"
                               :class="m.sent_at
                                 ? 'border-[#b91c1c]/60 bg-[#b91c1c]/15 text-red-400'
                                 : 'border-[#b98a4a]/50 bg-[#b98a4a]/10 text-[#d9ae6e]'"
@@ -365,8 +365,8 @@
                                      border border-[#15803d] bg-[#15803d]/20 text-green-400 animate-pulse">
                           Läuft gerade
                         </span>
-                        <!-- Vom Admin archiviert -> verschwindet 1 Std spaeter -->
-                        <span x-show="m.archived_at" x-cloak
+                        <!-- Erledigt: archiviert ODER Zeitfenster abgelaufen -->
+                        <span x-show="isDone(m)" x-cloak
                               class="headline text-[10px] font-medium tracking-wider px-1.5 py-0.5 rounded
                                      border border-[#15803d] bg-[#15803d]/25 text-green-300">
                           Erledigt
@@ -479,7 +479,7 @@
                                  setzt daraus faelschlich disabled -> Button tot.
                                  Deshalb ueberall !! davor. -->
                             <!-- Abgeschlossener Auftrag: nichts mehr aenderbar -->
-                            <template x-if="m.archived_at">
+                            <template x-if="isDone(m)">
                               <span class="headline px-3 py-1.5 rounded border border-[#15803d]/60
                                            bg-[#15803d]/15 text-green-300/80 text-xs font-medium
                                            tracking-wider cursor-default">
@@ -488,7 +488,7 @@
                             </template>
                             <!-- Warteliste eines abgeschlossenen Auftrags: nachgerueckt
                                  wird nicht mehr — Austragen bleibt moeglich -->
-                            <template x-if="m.archived_at && s.on_waitlist">
+                            <template x-if="isDone(m) && s.on_waitlist">
                               <button @click="leaveWaitlist(s)" :disabled="!!busySlots[s.id]"
                                       title="Auftrag ist abgeschlossen — von der Warteliste austragen"
                                       class="headline px-3 py-1.5 rounded bg-[#b98a4a]/20 border border-[#b98a4a]
@@ -497,7 +497,7 @@
                                 Wartend ✕
                               </button>
                             </template>
-                            <template x-if="!m.archived_at && s.mine">
+                            <template x-if="!isDone(m) && s.mine">
                               <button @click="unassign(s)" :disabled="!!busySlots[s.id]"
                                       class="headline px-3 py-1.5 rounded border border-[#b91c1c] text-red-400
                                              hover:bg-[#b91c1c]/15 text-xs font-medium tracking-wider
@@ -508,7 +508,7 @@
                             <!-- Frei = gruen und klickbar. !on_waitlist: wer (noch)
                                  auf der Warteliste steht, sieht nur den Wartend-Button
                                  — nachruecken uebernimmt der Server -->
-                            <template x-if="!m.archived_at && !s.mine && s.free > 0 && !s.on_waitlist">
+                            <template x-if="!isDone(m) && !s.mine && s.free > 0 && !s.on_waitlist">
                               <button @click="assign(s, m)" :disabled="!!busySlots[s.id]"
                                       class="headline px-3 py-1.5 rounded bg-[#15803d] hover:bg-[#1a9c4b]
                                              border border-white/10 text-white text-xs font-medium tracking-wider
@@ -518,7 +518,7 @@
                             </template>
                             <!-- Voll: Warteliste statt totem Button. Wird ein Platz
                                  frei, rueckt der Aelteste automatisch nach (+ DM). -->
-                            <template x-if="!m.archived_at && !s.mine && s.free === 0 && !s.on_waitlist">
+                            <template x-if="!isDone(m) && !s.mine && s.free === 0 && !s.on_waitlist">
                               <button @click="joinWaitlist(s, m)" :disabled="!!busySlots[s.id]"
                                       title="Slot ist voll — wird ein Platz frei, rückst du automatisch nach (Discord-DM)"
                                       class="headline px-3 py-1.5 rounded border border-[#b98a4a] text-[#d9ae6e]
@@ -527,7 +527,7 @@
                                 Warteliste
                               </button>
                             </template>
-                            <template x-if="!m.archived_at && !s.mine && s.on_waitlist">
+                            <template x-if="!isDone(m) && !s.mine && s.on_waitlist">
                               <button @click="leaveWaitlist(s)" :disabled="!!busySlots[s.id]"
                                       title="Du stehst auf der Warteliste — klicken zum Austragen"
                                       class="headline px-3 py-1.5 rounded bg-[#b98a4a]/20 border border-[#b98a4a]

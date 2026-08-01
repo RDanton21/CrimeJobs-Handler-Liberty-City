@@ -386,6 +386,14 @@ function jobsBoard() {
       return this.now >= start && this.now <= end;
     },
 
+    // "Erledigt": archiviert ODER (versendeter Auftrag, dessen Zeitfenster
+    // vorbei ist). Entwuerfe (kein sent_at) bleiben "geplant", nicht erledigt.
+    isDone(m) {
+      if (!m) return false;
+      if (m.archived_at) return true;
+      return !!(m.sent_at && m.window_end && m.window_end < this.now);
+    },
+
     // ---- Countdown / Mein naechster Einsatz / Ticker ----------------------
 
     // Alle nicht archivierten Auftraege als {day, m}-Liste
