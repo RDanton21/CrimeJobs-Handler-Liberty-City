@@ -261,7 +261,12 @@ async def generate_mission(
 
     provider = await get_provider(provider_name, keys=keys, models=models)
 
-    ctx = await _load_context(session, crew, payload.extra_instructions)
+    slot = (payload.slot or "").strip()
+    extra = payload.extra_instructions or ""
+    if slot:
+        extra = (extra + f"\n\nZEITFENSTER/SLOT dieser Aktion: {slot}. "
+                 "Alle konkreten Uhrzeiten im Auftrag MÜSSEN in diesem Fenster liegen.").strip()
+    ctx = await _load_context(session, crew, extra)
     user_prompt = build_user_prompt(ctx)
     system_prompt_val = await _resolve_active_system_prompt(session)
 
@@ -281,7 +286,7 @@ async def generate_mission(
 
     # KI-Vorschlag fürs Personal-Briefing (defensiv: bei Fehler leer)
     personnel = await ai_personnel_brief(
-        provider, final_text, crew.name, crew.district or "", model=payload.model
+        provider, final_text, crew.name, crew.district or "", model=payload.model, slot=slot
     )
 
     mission = Mission(
@@ -329,7 +334,12 @@ async def rewrite_mission(
 
     provider = await get_provider(provider_name, keys=keys, models=models)
 
-    ctx = await _load_context(session, crew, payload.extra_instructions)
+    slot = (payload.slot or "").strip()
+    extra = payload.extra_instructions or ""
+    if slot:
+        extra = (extra + f"\n\nZEITFENSTER/SLOT dieser Aktion: {slot}. "
+                 "Alle konkreten Uhrzeiten im Auftrag MÜSSEN in diesem Fenster liegen.").strip()
+    ctx = await _load_context(session, crew, extra)
     user_prompt = build_rewrite_prompt(ctx, payload.raw_input)
     system_prompt_val = await _resolve_active_system_prompt(session)
 
@@ -349,7 +359,7 @@ async def rewrite_mission(
 
     # KI-Vorschlag fürs Personal-Briefing (defensiv: bei Fehler leer)
     personnel = await ai_personnel_brief(
-        provider, final_text, crew.name, crew.district or "", model=payload.model
+        provider, final_text, crew.name, crew.district or "", model=payload.model, slot=slot
     )
 
     mission = Mission(

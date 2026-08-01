@@ -80,6 +80,7 @@ class MissionGenerateRequest(BaseModel):
     append_text: str = ""
     deadline_minutes: int | None = None
     scheduled_send_at: datetime | None = None
+    slot: str = ""  # vorgegebenes Zeitfenster, z.B. "21:00–22:30" → in Auftrag + Personalbedarf übernommen
 
 
 class MissionRewriteRequest(BaseModel):
@@ -91,6 +92,7 @@ class MissionRewriteRequest(BaseModel):
     append_text: str = ""
     deadline_minutes: int | None = None
     scheduled_send_at: datetime | None = None
+    slot: str = ""
 
 
 class MissionManualRequest(BaseModel):

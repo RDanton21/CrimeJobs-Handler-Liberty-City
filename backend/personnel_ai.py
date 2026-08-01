@@ -11,7 +11,23 @@ Personal-Briefing pro Mission).
 """
 from __future__ import annotations
 
+import re
 from typing import Any
+
+
+def _force_slot(brief: str, slot: str) -> str:
+    """Ueberschreibt die '**Slot:**'-Zeile im Personal-Brief mit einem
+    vorgegebenen Zeitfenster (deterministisch, unabhaengig vom KI-Vorschlag)."""
+    slot = (slot or "").strip()
+    if not slot or not brief:
+        return brief
+    line = f"**Slot:** {slot}"
+    if re.search(r"(?mi)^\s*\*\*Slot:\*\*.*$", brief):
+        return re.sub(r"(?mi)^\s*\*\*Slot:\*\*.*$", line, brief, count=1)
+    # keine Slot-Zeile vorhanden -> vor Team-Auslastung einfuegen, sonst anhaengen
+    if re.search(r"(?mi)^\s*\*\*Team-Auslastung", brief):
+        return re.sub(r"(?mi)^(\s*\*\*Team-Auslastung)", line + r"\n\1", brief, count=1)
+    return brief.rstrip() + "\n" + line
 
 
 NPC_POOL_PROMPT_DE = """\
@@ -73,9 +89,14 @@ Regeln:
 """
 
 
-def build_personnel_prompt(mission_text: str, crew_name: str, crew_district: str) -> str:
+def build_personnel_prompt(mission_text: str, crew_name: str, crew_district: str,
+                           slot: str = "") -> str:
     """Baut den User-Prompt für die Personnel-KI."""
     district_line = f"Stadtteil der Gang: {crew_district}\n" if crew_district else ""
+    slot_line = (
+        f"VORGEGEBENER SLOT: Nutze im Feld 'Slot' EXAKT dieses Zeitfenster: {slot.strip()}\n"
+        if slot and slot.strip() else ""
+    )
     return f"""\
 {NPC_POOL_PROMPT_DE}
 
@@ -86,8 +107,7 @@ def build_personnel_prompt(mission_text: str, crew_name: str, crew_district: str
 Hier ist der Auftrag, für den du das Personal planen sollst:
 
 Gang: {crew_name}
-{district_line}
-Auftragstext:
+{district_line}{slot_line}Auftragstext:
 \"\"\"
 {mission_text.strip()}
 \"\"\"
@@ -102,16 +122,20 @@ async def generate_personnel_brief(
     crew_name: str,
     crew_district: str,
     model: str | None = None,
+    slot: str = "",
 ) -> str:
     """Ruft die KI für einen Personal-Brief-Vorschlag.
 
     Defensiv: bei jedem Fehler leerer String zurück — Mission darf nicht
     blockieren, weil Personal-Generierung Bonus, nicht Pflicht ist.
+
+    `slot`: vorgegebenes Zeitfenster — wird der KI mitgegeben UND danach
+    deterministisch in die „Slot:"-Zeile geschrieben.
     """
     if not mission_text or not mission_text.strip():
         return ""
     try:
-        prompt = build_personnel_prompt(mission_text, crew_name, crew_district)
+        prompt = build_personnel_prompt(mission_text, crew_name, crew_district, slot=slot)
         # Eigenes Mini-System-Prompt für diesen Sub-Call — überschreibt das
         # Big-Boss-Prompt, sonst kommt wieder Auftragstext statt Personal-Plan.
         system = (
@@ -122,7 +146,7 @@ async def generate_personnel_brief(
             "nur Personal-Planung."
         )
         text = await provider.generate(prompt, model=model, system_prompt=system)
-        return (text or "").strip()
+        return _force_slot((text or "").strip(), slot)
     except Exception:
         return ""
 
