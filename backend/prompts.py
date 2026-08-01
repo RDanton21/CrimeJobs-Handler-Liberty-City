@@ -40,6 +40,22 @@ class MissionContext:
     crime_business: str = ""
 
 
+def build_slot_directive(slot: str) -> str:
+    """Harte Pflicht-Anweisung fuers Zeitfenster — wird ans ENDE des Prompts
+    gehaengt (hoechstes Gewicht), damit die KI den vorgegebenen Slot einhaelt."""
+    slot = (slot or "").strip()
+    if not slot:
+        return ""
+    return (
+        "\n\n## ⏰ ZEITFENSTER — PFLICHT (überschreibt ALLE anderen Zeitregeln)\n"
+        f"Diese Aktion findet AUSSCHLIESSLICH im Fenster {slot} statt. "
+        f"JEDE Uhrzeit im Auftragstext MUSS innerhalb von {slot} liegen. "
+        f"Nenne NIEMALS eine Uhrzeit außerhalb dieses Fensters. "
+        f"Wenn du eine Uhrzeit erwähnst, wähle sie aus {slot}. "
+        "Dieses Fenster hat Vorrang vor jedem anderen genannten Zeitrahmen."
+    )
+
+
 def build_user_prompt(ctx: MissionContext) -> str:
     parts: list[str] = []
     parts.append(f"## Gang\n{ctx.crew_name}")
