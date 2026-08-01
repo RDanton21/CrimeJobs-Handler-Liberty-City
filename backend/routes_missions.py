@@ -1123,9 +1123,15 @@ async def update_mission(
     m = await session.get(Mission, mission_id)
     if not m:
         raise HTTPException(404, "Mission nicht gefunden")
-    if m.status != MissionStatus.DRAFT:
-        raise HTTPException(409, "Mission ist nicht mehr im Draft-Status")
     data = payload.model_dump(exclude_unset=True)
+    # Vor dem Versand: alle Felder aenderbar. Nach dem Versand darf nur noch der
+    # finale Auftragstext (content_final) angepasst werden — er erscheint dann auf
+    # der Personal-Boerse. Andere Felder bleiben gesperrt, archivierte gar nicht.
+    if m.status != MissionStatus.DRAFT:
+        if m.archived_at is not None:
+            raise HTTPException(409, "Mission ist archiviert — nicht mehr aenderbar")
+        if set(data.keys()) - {"content_final"}:
+            raise HTTPException(409, "Nach dem Versand ist nur der Auftragstext aenderbar")
     clear_schedule = data.pop("clear_scheduled_send_at", False)
     if clear_schedule:
         m.scheduled_send_at = None
