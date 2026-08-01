@@ -487,7 +487,7 @@ def _iso(dt) -> str | None:
 
 #: Wie lange ein archivierter Auftrag noch auf dem Board bleibt — er wird
 #: dort als "Erledigt" markiert (Stempel) und verschwindet danach von selbst.
-ARCHIVED_GRACE = timedelta(minutes=15)
+ARCHIVED_GRACE = timedelta(hours=3)
 
 
 @public_router.get("/active-missions")
