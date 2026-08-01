@@ -993,6 +993,7 @@ function crewPage() {
         const res = await api.put(`/api/missions/${m.id}/slots`, {
           slot_window: parsed.slot_window || "",
           announce: true,
+          publish: true,
           slots: parsed.slots.map(s => ({
             id: matchExistingId(s),
             npc_number: (typeof s.npc_number === "number") ? s.npc_number : null,

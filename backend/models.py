@@ -115,6 +115,9 @@ class Mission(Base):
     reacted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     deadline_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    #: Freigabe fuer die Personal-Boerse (gesetzt durch "An QG-Boerse"). Ohne
+    #: diesen Zeitstempel erscheint der Auftrag NICHT auf der Boerse.
+    jobs_published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     archived_boss_info: Mapped[str] = mapped_column(Text, default="")
     expiry_message_id: Mapped[str] = mapped_column(String(40), default="")
     expiry_text: Mapped[str] = mapped_column(Text, default="")

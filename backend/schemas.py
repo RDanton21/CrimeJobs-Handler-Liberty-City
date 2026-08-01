@@ -153,6 +153,7 @@ class MissionOut(BaseModel):
     reacted_at: datetime | None
     archived_at: datetime | None
     deadline_at: datetime | None
+    jobs_published_at: datetime | None = None
     scheduled_send_at: datetime | None = None
     archived_boss_info: str = ""
     personnel_brief: str = ""
@@ -329,6 +330,7 @@ class SlotsSaveRequest(BaseModel):
     slot_window: str = ""
     slots: list[PersonnelSlotIn]
     announce: bool = True
+    publish: bool = False  # True = auf der QG-Boerse veroeffentlichen ("An QG-Boerse")
 
 
 class SlotsSaveResponse(BaseModel):

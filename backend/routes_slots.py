@@ -341,6 +341,12 @@ async def save_slots(
     if not mission:
         raise HTTPException(404, "Mission nicht gefunden")
 
+    # "An QG-Boerse" (publish=True) gibt den Auftrag fuer die Personal-Boerse
+    # frei. Ohne Freigabe bleiben die Rollen unsichtbar (z.B. beim Vorbereiten
+    # im Rollen-Editor). Einmal gesetzt bleibt die Freigabe bestehen.
+    if payload.publish and mission.jobs_published_at is None:
+        mission.jobs_published_at = datetime.utcnow()
+
     res = await session.execute(
         select(PersonnelSlot).where(PersonnelSlot.mission_id == mission_id)
     )
@@ -530,7 +536,9 @@ async def public_active_missions(session: AsyncSession = Depends(get_session)):
         select(Mission)
         .join(PersonnelSlot, PersonnelSlot.mission_id == Mission.id)
         .where(
-            (Mission.archived_at.is_(None)) | (Mission.archived_at > cutoff)
+            # Nur auf der QG-Boerse freigegebene Auftraege ("An QG-Boerse").
+            Mission.jobs_published_at.is_not(None),
+            (Mission.archived_at.is_(None)) | (Mission.archived_at > cutoff),
         )
         .options(selectinload(Mission.crew))
         .distinct()
