@@ -958,7 +958,7 @@ function crewPage() {
     async sendToQGBoerse(m) {
       const hasSlots = (this.slotCounts[m.id] || 0) > 0;
       const frage = hasSlots
-        ? "Es sind bereits Rollen für diesen Auftrag auf der Börse.\n\nErneut senden lässt die KI den Bedarf neu auslesen und ersetzt die vorhandenen Rollen — bereits eingetragene Spieler verlieren dabei ihren Platz.\n\nTrotzdem neu senden?"
+        ? "Es sind bereits Rollen für diesen Auftrag auf der Börse.\n\nErneut senden aktualisiert die Rollen aus dem Personalbedarf. Bereits eingetragene Spieler bleiben eingetragen, solange ihre Rolle bestehen bleibt — nur weggefallene Rollen verlieren ihre Eintragung.\n\nTrotzdem neu senden?"
         : "Personalbedarf per KI in Rollen umwandeln und an die QG-Börse senden?\n\nDie Rollen erscheinen dann auf jobs.bots.sektorrp.eu, und die Spieler-Rolle wird im Discord gepingt.";
       if (!confirm(frage)) return;
       this.qgSendingId = m.id;
@@ -971,12 +971,30 @@ function crewPage() {
             : "Die KI hat im Personalbedarf keine Spieler-Rollen gefunden.");
           return;
         }
-        // 2) direkt speichern (id:null = alle neu) + Discord-Ankündigung
+        // 1b) Bestehende Slots holen → IDs wiederverwenden, damit bereits
+        // eingetragene Spieler (hängen an der Slot-ID) beim Re-Send erhalten bleiben.
+        let existing = [];
+        try { existing = (await api.get(`/api/missions/${m.id}/slots`)) || []; } catch (e) { existing = []; }
+        const usedIds = new Set();
+        const matchExistingId = (ps) => {
+          if (ps.npc_number != null) {
+            const e = existing.find(x => !usedIds.has(x.id) && x.npc_number === ps.npc_number);
+            if (e) { usedIds.add(e.id); return e.id; }
+          }
+          const nm = (ps.name || "").trim().toLowerCase();
+          if (nm) {
+            const e = existing.find(x => !usedIds.has(x.id) && (x.name || "").trim().toLowerCase() === nm);
+            if (e) { usedIds.add(e.id); return e.id; }
+          }
+          return null;
+        };
+        // 2) speichern — bestehende Rollen behalten ihre id (Eintragungen bleiben),
+        // neue Rollen id:null, weggefallene werden entfernt + Discord-Ankündigung
         const res = await api.put(`/api/missions/${m.id}/slots`, {
           slot_window: parsed.slot_window || "",
           announce: true,
           slots: parsed.slots.map(s => ({
-            id: null,
+            id: matchExistingId(s),
             npc_number: (typeof s.npc_number === "number") ? s.npc_number : null,
             name: s.name || "", function: s.function || "",
             location: s.location || "", costume: s.costume || "",
