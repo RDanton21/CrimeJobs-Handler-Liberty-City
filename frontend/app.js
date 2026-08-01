@@ -760,7 +760,7 @@ function crewPage() {
     missions: [],
     newRel: { crew_b_id: "", relation_type: "neutral", notes: "" },
     mode: "generate", // 'generate' | 'rewrite'
-    genReq: { provider: "anthropic", model: "", extra_instructions: "", append_text: "", deadline_value: "", deadline_unit: "min", scheduled_send_at: "", slotFrom: "", slotTo: "" },
+    genReq: { provider: "anthropic", model: "", extra_instructions: "", append_text: "", deadline_value: "", deadline_unit: "min", scheduled_send_at: "", slotFrom: "", slotTo: "", want_personnel: true },
     rewriteReq: { raw_input: "" },
     pendingImage: null,
     generating: false,
@@ -1412,6 +1412,7 @@ function crewPage() {
           deadline_minutes: this._deadlineMinutes(),
           scheduled_send_at: this._scheduledSendIso(),
           slot: this._slotStr(),
+          want_personnel: this.genReq.want_personnel,
         });
         await this._attachPendingImage(m && m.id);
         this.genReq.extra_instructions = "";
@@ -1469,6 +1470,7 @@ function crewPage() {
           deadline_minutes: this._deadlineMinutes(),
           scheduled_send_at: this._scheduledSendIso(),
           slot: this._slotStr(),
+          want_personnel: this.genReq.want_personnel,
         });
         await this._attachPendingImage(m && m.id);
         this.rewriteReq.raw_input = "";

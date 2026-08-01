@@ -81,6 +81,7 @@ class MissionGenerateRequest(BaseModel):
     deadline_minutes: int | None = None
     scheduled_send_at: datetime | None = None
     slot: str = ""  # vorgegebenes Zeitfenster, z.B. "21:00–22:30" → in Auftrag + Personalbedarf übernommen
+    want_personnel: bool = True  # False = normaler Auftrag ohne NPC/Questgeber-Bedarf
 
 
 class MissionRewriteRequest(BaseModel):
@@ -93,6 +94,7 @@ class MissionRewriteRequest(BaseModel):
     deadline_minutes: int | None = None
     scheduled_send_at: datetime | None = None
     slot: str = ""
+    want_personnel: bool = True
 
 
 class MissionManualRequest(BaseModel):

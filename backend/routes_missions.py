@@ -285,9 +285,11 @@ async def generate_mission(
         final_text = f"{text}\n\n---\n\n{payload.append_text.strip()}"
 
     # KI-Vorschlag fürs Personal-Briefing (defensiv: bei Fehler leer)
-    personnel = await ai_personnel_brief(
-        provider, final_text, crew.name, crew.district or "", model=payload.model, slot=slot
-    )
+    personnel = ""
+    if payload.want_personnel:
+        personnel = await ai_personnel_brief(
+            provider, final_text, crew.name, crew.district or "", model=payload.model, slot=slot
+        )
 
     mission = Mission(
         crew_id=crew.id,
@@ -358,9 +360,11 @@ async def rewrite_mission(
         final_text = f"{text}\n\n---\n\n{payload.append_text.strip()}"
 
     # KI-Vorschlag fürs Personal-Briefing (defensiv: bei Fehler leer)
-    personnel = await ai_personnel_brief(
-        provider, final_text, crew.name, crew.district or "", model=payload.model, slot=slot
-    )
+    personnel = ""
+    if payload.want_personnel:
+        personnel = await ai_personnel_brief(
+            provider, final_text, crew.name, crew.district or "", model=payload.model, slot=slot
+        )
 
     mission = Mission(
         crew_id=crew.id,
