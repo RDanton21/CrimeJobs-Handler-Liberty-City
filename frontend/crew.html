@@ -368,9 +368,17 @@
           </div>
 
           <div class="mb-3">
-            <input type="text" x-model="genReq.slot"
-                   placeholder="🎯 Slot / Zeitfenster (optional, z. B. 21:00–22:30) — wird unten im Personalbedarf übernommen"
-                   class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+            <label class="block text-xs text-zinc-400 mb-1">🎯 Slot / Zeitfenster (optional) — wird unten im Personalbedarf übernommen</label>
+            <div class="flex items-center gap-2">
+              <input type="time" x-model="genReq.slotFrom"
+                     class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+              <span class="text-zinc-500">–</span>
+              <input type="time" x-model="genReq.slotTo"
+                     class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+              <button type="button" x-show="genReq.slotFrom || genReq.slotTo"
+                      @click="genReq.slotFrom=''; genReq.slotTo=''"
+                      class="ml-1 text-xs underline text-zinc-400 hover:text-zinc-200">×</button>
+            </div>
           </div>
 
           <div class="mb-3">

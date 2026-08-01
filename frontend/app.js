@@ -760,7 +760,7 @@ function crewPage() {
     missions: [],
     newRel: { crew_b_id: "", relation_type: "neutral", notes: "" },
     mode: "generate", // 'generate' | 'rewrite'
-    genReq: { provider: "anthropic", model: "", extra_instructions: "", append_text: "", deadline_value: "", deadline_unit: "min", scheduled_send_at: "", slot: "" },
+    genReq: { provider: "anthropic", model: "", extra_instructions: "", append_text: "", deadline_value: "", deadline_unit: "min", scheduled_send_at: "", slotFrom: "", slotTo: "" },
     rewriteReq: { raw_input: "" },
     pendingImage: null,
     generating: false,
@@ -1378,6 +1378,15 @@ function crewPage() {
       if (isNaN(d.getTime())) return null;
       return d.toISOString();
     },
+    _slotStr() {
+      // Zwei time-Felder (Von/Bis) → Slot-String, z.B. "21:00–22:30"
+      const a = (this.genReq.slotFrom || "").trim();
+      const b = (this.genReq.slotTo || "").trim();
+      if (a && b) return `${a}–${b}`;
+      if (a) return `ab ${a}`;
+      if (b) return `bis ${b}`;
+      return "";
+    },
     setPendingImage(evt) {
       this.pendingImage = evt.target.files[0] || null;
     },
@@ -1402,14 +1411,15 @@ function crewPage() {
           append_text: this.genReq.append_text || "",
           deadline_minutes: this._deadlineMinutes(),
           scheduled_send_at: this._scheduledSendIso(),
-          slot: this.genReq.slot || "",
+          slot: this._slotStr(),
         });
         await this._attachPendingImage(m && m.id);
         this.genReq.extra_instructions = "";
         this.genReq.append_text = "";
         this.genReq.deadline_value = "";
         this.genReq.scheduled_send_at = "";
-        this.genReq.slot = "";
+        this.genReq.slotFrom = "";
+        this.genReq.slotTo = "";
         this.clearPendingImage();
         await this.loadMissions();
       } catch (e) { alert(e.message); }
@@ -1458,7 +1468,7 @@ function crewPage() {
           append_text: this.genReq.append_text || "",
           deadline_minutes: this._deadlineMinutes(),
           scheduled_send_at: this._scheduledSendIso(),
-          slot: this.genReq.slot || "",
+          slot: this._slotStr(),
         });
         await this._attachPendingImage(m && m.id);
         this.rewriteReq.raw_input = "";
@@ -1466,7 +1476,8 @@ function crewPage() {
         this.genReq.append_text = "";
         this.genReq.deadline_value = "";
         this.genReq.scheduled_send_at = "";
-        this.genReq.slot = "";
+        this.genReq.slotFrom = "";
+        this.genReq.slotTo = "";
         this.clearPendingImage();
         await this.loadMissions();
       } catch (e) { alert(e.message); }
