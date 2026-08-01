@@ -389,6 +389,30 @@ async def save_slots(
         await session.refresh(row)
     new_rows = result_rows
 
+    # ---- Systemfix: pro Gang nur EIN aktiver Board-Auftrag ----
+    # Wenn diese Mission jetzt Slots hat, werden die anderen nicht-archivierten
+    # Slot-Missionen derselben Gang archiviert — sonst stapeln sich alte Jobs
+    # (samt alter Spieler-Eintragungen) auf der QG-Börse.
+    if new_rows:
+        others_res = await session.execute(
+            select(Mission).where(
+                Mission.crew_id == mission.crew_id,
+                Mission.id != mission.id,
+                Mission.archived_at.is_(None),
+                Mission.id.in_(select(PersonnelSlot.mission_id)),
+            )
+        )
+        now_utc = datetime.utcnow()
+        superseded = list(others_res.scalars().all())
+        for other in superseded:
+            other.archived_at = now_utc
+        if superseded:
+            await session.commit()
+            log.info(
+                "QG-Börse: %d alte Slot-Mission(en) der Gang %s durch Mission %s ersetzt/archiviert",
+                len(superseded), mission.crew_id, mission_id,
+            )
+
     # ---- Optionaler Discord-Ankündigungs-Ping (nie blockierend) ----
     new_total = sum(row.required_count or 1 for row in new_rows)
     announce_sent = False
