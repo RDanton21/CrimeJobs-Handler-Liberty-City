@@ -275,7 +275,7 @@
             <div class="bg-blue-950/40 border border-blue-700 text-blue-200 text-xs rounded px-3 py-2">
               <strong>Vorschau</strong> — Big-Boss-Briefing für <span x-text="crew.name"></span>.
               Du kannst noch editieren, bevor's an den Channel geht.
-              <span class="text-blue-300/80" x-text="`(${cbPreviewText.length}/1990 Zeichen, ${cbProvider})`"></span>
+              <span class="text-blue-300/80" x-text="`(${cbPreviewText.length}/1990 Zeichen, ${providerLabel(cbProvider)})`"></span>
             </div>
             <textarea x-model="cbPreviewText" rows="12"
                       class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm leading-relaxed font-mono"></textarea>
@@ -325,7 +325,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
             <select x-model="genReq.provider" class="bg-zinc-950 border border-zinc-800 rounded px-2 py-2 text-sm">
-              <option value="anthropic">Claude (Anthropic)</option>
+              <option value="anthropic">Sektor-KI</option>
               <option value="openai">OpenAI</option>
             </select>
             <input x-model="genReq.model" placeholder="Modell (optional)"
@@ -486,7 +486,7 @@
                 <div class="flex items-center gap-2 text-xs flex-wrap">
                   <span class="px-2 py-0.5 rounded" :class="statusClass(m.status)" x-text="statusLabel(m.status)"></span>
                   <span class="text-zinc-500" x-text="formatDate(m.created_at)"></span>
-                  <span class="text-zinc-600" x-text="m.ai_provider"></span>
+                  <span class="text-zinc-600" x-text="providerLabel(m.ai_provider)"></span>
                   <span x-show="m.deadline_at"
                         class="px-2 py-0.5 rounded bg-zinc-800 text-amber-300"
                         :title="m.deadline_at ? formatDate(m.deadline_at) : ''">

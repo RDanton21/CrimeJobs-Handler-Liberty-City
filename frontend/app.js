@@ -1405,6 +1405,13 @@ function crewPage() {
       if (b) return `bis ${b}`;
       return "";
     },
+    providerLabel(p) {
+      // Anzeige-Label: 'anthropic' wird als 'Sektor-KI' angezeigt (Wert bleibt technisch gleich)
+      const v = (p || "").toLowerCase();
+      if (v === "anthropic" || v === "claude") return "Sektor-KI";
+      if (v === "openai") return "OpenAI";
+      return p || "";
+    },
     setPendingImage(evt) {
       this.pendingImage = evt.target.files[0] || null;
     },
