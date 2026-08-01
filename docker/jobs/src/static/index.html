@@ -16,12 +16,66 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260801a" />
-  <script defer src="/static/app.js?v=20260801a"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260801b" />
+  <script defer src="/static/app.js?v=20260801b"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
   <div x-data="jobsBoard()" x-init="init()">
+
+    <!-- Auftrag-Großansicht: Klick auf eine Karte öffnet den Auftrag mittig,
+         groß und gut lesbar. Schließen per ✕, Klick daneben oder Esc. -->
+    <div x-show="zoomMission" x-cloak
+         @keydown.escape.window="zoomMission = null"
+         @click="zoomMission = null"
+         class="mzoom-overlay">
+      <div class="mzoom-box" @click.stop>
+        <button @click="zoomMission = null" class="mzoom-close" aria-label="Schließen">&times;</button>
+        <template x-if="zoomMission">
+          <div>
+            <div class="flex items-center gap-3 flex-wrap mb-2 pr-8">
+              <h2 class="headline text-2xl font-bold tracking-wider text-zinc-50"
+                  x-text="zoomMission.crew ? zoomMission.crew.name : 'Auftrag'"></h2>
+              <span class="text-sm text-zinc-400" x-text="zoomMission.crew ? zoomMission.crew.district : ''"></span>
+              <span :class="escBadgeClass(zoomMission.escalation)">
+                <span class="ecg ecg-sm" :class="'ecg'+(zoomMission.escalation||0)"></span>
+                <span x-text="escLabel(zoomMission.escalation)"></span>
+              </span>
+              <span x-show="isRunning(zoomMission)"
+                    class="headline text-xs px-2 py-0.5 rounded border border-[#15803d] bg-[#15803d]/20 text-green-400">Läuft gerade</span>
+              <span x-show="isDone(zoomMission)"
+                    class="headline text-xs px-2 py-0.5 rounded border border-[#15803d] bg-[#15803d]/25 text-green-300">Erledigt</span>
+            </div>
+            <p class="text-sm text-[#d9ae6e] mb-4" x-show="zoomMission.slot_window"
+               x-text="'Zeitfenster: ' + zoomMission.slot_window"></p>
+
+            <template x-if="zoomMission.content || zoomMission.content_excerpt">
+              <p class="text-lg leading-relaxed text-zinc-100 whitespace-pre-line border-l-4 border-[#b98a4a]/50 pl-4 mb-5"
+                 x-text="zoomMission.content || zoomMission.content_excerpt"></p>
+            </template>
+            <template x-if="!(zoomMission.content || zoomMission.content_excerpt)">
+              <p class="text-[#b98a4a]/90 mb-5 text-base">🔒 Auftrag folgt beim Einsatz.</p>
+            </template>
+
+            <h3 class="headline text-sm uppercase tracking-[.15em] text-[#d9ae6e] mb-3 border-t border-[#3d4a4d] pt-3">Personal-Bedarf</h3>
+            <div class="space-y-4">
+              <template x-for="s in (zoomMission.slots || [])" :key="s.id">
+                <div class="border-l-2 border-[#b98a4a]/40 pl-3">
+                  <p class="text-base text-zinc-100">
+                    <span class="font-semibold" x-text="s.name || ('NPC #' + (s.npc_number || '?'))"></span>
+                    <span class="text-zinc-400 font-normal" x-show="s.function" x-text="' — ' + s.function"></span>
+                  </p>
+                  <p class="text-sm text-zinc-400 mt-0.5" x-show="s.location"><span class="text-zinc-500">Ort:</span> <span x-text="s.location"></span></p>
+                  <p class="text-sm text-zinc-400" x-show="s.costume"><span class="text-zinc-500">Kostüm:</span> <span x-text="s.costume"></span></p>
+                  <p class="text-xs text-zinc-500 mt-1" x-text="(s.assigned_count || 0) + '/' + (s.required_count || 0) + ' belegt'"></p>
+                </div>
+              </template>
+            </div>
+            <p class="text-xs text-zinc-500 mt-5">Eintragen / Austragen wie gewohnt in der Auftragsliste.</p>
+          </div>
+        </template>
+      </div>
+    </div>
 
     <!-- Ladezustand -->
     <template x-if="loading">
@@ -325,8 +379,10 @@
                  :class="currentDay().missions.length > 1 ? 'grid-cols-1 2xl:grid-cols-2' : 'grid-cols-1 max-w-3xl'">
             <template x-for="m in currentDay().missions" :key="m.id">
               <!-- id = Sprungziel aus dem "Meine Slots"-Overlay -->
-              <div class="mcard card-cine rounded-lg overflow-hidden flex transition-all duration-300 relative"
+              <div class="mcard card-cine rounded-lg overflow-hidden flex transition-all duration-300 relative cursor-pointer"
                    :id="'mission-' + m.id"
+                   title="Zum Vergrößern klicken"
+                   @click="if (!$event.target.closest('button,a,input,select,textarea,label')) zoomMission = m"
                    :style="'--crew:' + ((m.crew && m.crew.color_hex) || '#b91c1c')"
                    :class="[ jumpedTo === m.id ? 'ring-2 ring-[#b98a4a] shadow-lg shadow-[#b98a4a]/20' : '',
                              'esc-glow-' + (m.escalation || 0) ]">

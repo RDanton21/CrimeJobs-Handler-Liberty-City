@@ -291,3 +291,26 @@ body::after {
 .util-track { height: 8px; border-radius: 4px; background: #2a3236; overflow: hidden; display: inline-block; }
 .util-fill { display: block; height: 100%; border-radius: 4px; width: 0;
   transition: width .8s cubic-bezier(.2,.8,.2,1); }
+
+/* ── Auftrag-Großansicht (Klick auf Karte -> mittig, groß, lesbar) ── */
+.mzoom-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(6, 4, 8, .82); backdrop-filter: blur(6px);
+  padding: 4vh 4vw;
+}
+.mzoom-box {
+  position: relative; width: 100%; max-width: 760px; max-height: 90vh;
+  overflow-y: auto;
+  background: linear-gradient(160deg, rgba(30, 16, 20, .98), rgba(13, 9, 12, .99));
+  border: 1px solid rgba(226, 168, 75, .28);
+  border-radius: 14px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .70);
+  padding: 26px 30px 30px;
+}
+.mzoom-close {
+  position: absolute; top: 8px; right: 16px;
+  background: none; border: none; color: #cbb8ae;
+  font-size: 2rem; line-height: 1; cursor: pointer; transition: color .15s;
+}
+.mzoom-close:hover { color: #fff; }

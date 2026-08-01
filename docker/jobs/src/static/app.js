@@ -22,6 +22,7 @@ function jobsBoard() {
           || (a.name || '').localeCompare(b.name || ''));
     },
     activeDay: null,
+    zoomMission: null,  // Auftrag in der Großansicht (Klick auf Karte) oder null
     expanded: {},   // mission_id -> Auftrags-Text aufgeklappt
     briefOpen: {},  // mission_id -> Regie-Details (Personal-Brief) aufgeklappt
     busySlots: {},  // slot_id -> Request laeuft
@@ -386,12 +387,13 @@ function jobsBoard() {
       return this.now >= start && this.now <= end;
     },
 
-    // "Erledigt": archiviert ODER (versendeter Auftrag, dessen Zeitfenster
-    // vorbei ist). Entwuerfe (kein sent_at) bleiben "geplant", nicht erledigt.
+    // "Erledigt": archiviert ODER Zeitfenster vorbei — egal ob schon versendet
+    // oder noch geplant. Sobald die Uhrzeit des Fensters durch ist, gilt der
+    // Auftrag als erledigt.
     isDone(m) {
       if (!m) return false;
       if (m.archived_at) return true;
-      return !!(m.sent_at && m.window_end && m.window_end < this.now);
+      return !!(m.window_end && m.window_end < this.now);
     },
 
     // ---- Countdown / Mein naechster Einsatz / Ticker ----------------------
