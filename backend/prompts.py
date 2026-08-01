@@ -42,18 +42,40 @@ class MissionContext:
 
 def build_slot_directive(slot: str) -> str:
     """Harte Pflicht-Anweisung fuers Zeitfenster — wird ans ENDE des Prompts
-    gehaengt (hoechstes Gewicht), damit die KI den vorgegebenen Slot einhaelt."""
+    gehaengt (hoechstes Gewicht). Praeskriptiv: die KI MUSS genau die
+    vorgegebenen Uhrzeiten verwenden und darf keine anderen erfinden."""
     slot = (slot or "").strip()
     if not slot:
         return ""
-    return (
-        "\n\n## ⏰ ZEITFENSTER — PFLICHT (überschreibt ALLE anderen Zeitregeln)\n"
-        f"Diese Aktion findet AUSSCHLIESSLICH im Fenster {slot} statt. "
-        f"JEDE Uhrzeit im Auftragstext MUSS innerhalb von {slot} liegen. "
-        f"Nenne NIEMALS eine Uhrzeit außerhalb dieses Fensters. "
-        f"Wenn du eine Uhrzeit erwähnst, wähle sie aus {slot}. "
-        "Dieses Fenster hat Vorrang vor jedem anderen genannten Zeitrahmen."
-    )
+    start = end = ""
+    if "–" in slot or "-" in slot:
+        sep = "–" if "–" in slot else "-"
+        a, b = (slot.split(sep, 1) + [""])[:2]
+        start, end = a.strip(), b.strip()
+    elif slot.lower().startswith("ab "):
+        start = slot[3:].strip()
+    elif slot.lower().startswith("bis "):
+        end = slot[4:].strip()
+
+    lines = [
+        "\n\n## ⏰ ZEITFENSTER — PFLICHT (überschreibt ALLE anderen Zeitregeln)",
+        f"Das Zeitfenster dieser Aktion ist fest vorgegeben: {slot}.",
+        "Verwende im Auftragstext AUSSCHLIESSLICH diese vorgegebenen Uhrzeiten. "
+        "Erfinde KEINE andere Uhrzeit (also z.B. NICHT „15:00\", wenn das nicht "
+        "Beginn oder Ende dieses Fensters ist).",
+    ]
+    if start and end:
+        lines.append(
+            f"Beginn = {start}, Ende/Frist = {end}. Wenn du einen Startzeitpunkt "
+            f"nennst, nimm {start}; wenn du eine Frist/ein Ende nennst, nimm {end}; "
+            f"wenn du das ganze Fenster meinst, schreibe „zwischen {start} und {end}\"."
+        )
+    elif start:
+        lines.append(f"Der Einsatz beginnt {start} — nutze diese Uhrzeit.")
+    elif end:
+        lines.append(f"Die Frist / das Ende ist {end} — nutze diese Uhrzeit.")
+    lines.append("Dieses Fenster hat Vorrang vor jedem anderen genannten Zeitrahmen.")
+    return "\n".join(lines)
 
 
 def build_user_prompt(ctx: MissionContext) -> str:
