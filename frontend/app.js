@@ -799,6 +799,7 @@ function crewPage() {
     personnelAiBusyCrew: false,
     personnelPostingId: null,        // Mission die gerade gepostet wird
     qgSendingId: null,               // Mission die gerade an die QG-Börse geht
+    qgUnpublishingId: null,          // Mission die gerade von der QG-Börse genommen wird
     personnelTemplatesCrew: [],       // Quick-Pick Vorlagen (einmal geladen)
     personnelChannelConfigured: false, // gibt's eine Admin-Channel-ID in Settings?
     // 🧩 Spieler-Slots (Jobs-Dashboard) — Badge-Counts + Editor-Modal
@@ -1014,6 +1015,18 @@ function crewPage() {
         alert("An QG-Börse senden fehlgeschlagen: " + (e.message || e));
       } finally {
         this.qgSendingId = null;
+      }
+    },
+    async unpublishFromQG(m) {
+      if (!confirm("Auftrag von der Personal-Börse nehmen?\n\nRollen und Anmeldungen bleiben erhalten — der Auftrag ist nur nicht mehr sichtbar, bis du ihn per „An QG-Börse" erneut freigibst.")) return;
+      this.qgUnpublishingId = m.id;
+      try {
+        await api.post(`/api/missions/${m.id}/qg-unpublish`);
+        m.jobs_published_at = null;  // lokal sofort spiegeln (Button/Indikator)
+      } catch (e) {
+        alert("Von der Börse nehmen fehlgeschlagen: " + (e.message || e));
+      } finally {
+        this.qgUnpublishingId = null;
       }
     },
     // ---- Personal-Brief auf der Crew-Seite ----

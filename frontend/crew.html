@@ -636,6 +636,14 @@
                           title="Auf der Personal-Börse freigegeben. Ohne Freigabe erscheint der Auftrag dort nicht.">
                       ✓ Auf QG-Börse
                     </span>
+                    <button x-show="m.jobs_published_at"
+                            @click="unpublishFromQG(m)"
+                            :disabled="qgUnpublishingId === m.id"
+                            title="Auftrag wieder von der Personal-Börse nehmen. Rollen und Anmeldungen bleiben erhalten — nur nicht mehr sichtbar, bis du erneut freigibst."
+                            class="text-xs px-2 py-1 rounded border border-zinc-600 text-zinc-300 hover:bg-zinc-800 disabled:opacity-50">
+                      <span x-show="qgUnpublishingId !== m.id">Von Börse nehmen</span>
+                      <span x-show="qgUnpublishingId === m.id">…</span>
+                    </button>
                     <button x-show="(m.personnel_brief || '').trim()"
                             @click="openSlots(m)"
                             title="Personalbedarf für die Personal-Börse verwalten (KI-Parse + Editor zum Prüfen)"

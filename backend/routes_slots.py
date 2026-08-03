@@ -452,6 +452,19 @@ async def save_slots(
     )
 
 
+@router.post("/api/missions/{mission_id}/qg-unpublish")
+async def qg_unpublish(mission_id: int, session: AsyncSession = Depends(get_session)):
+    """Nimmt einen Auftrag von der QG-Boerse (Gegenstueck zu 'An QG-Boerse').
+    Rollen und Anmeldungen bleiben erhalten — der Auftrag ist nur nicht mehr
+    sichtbar, bis er per 'An QG-Boerse' erneut freigegeben wird."""
+    mission = await session.get(Mission, mission_id)
+    if not mission:
+        raise HTTPException(404, "Mission nicht gefunden")
+    mission.jobs_published_at = None
+    await session.commit()
+    return {"ok": True, "jobs_published_at": None}
+
+
 @router.delete("/api/slots/{slot_id}", status_code=204)
 async def delete_slot(slot_id: int, session: AsyncSession = Depends(get_session)):
     slot = await session.get(PersonnelSlot, slot_id)

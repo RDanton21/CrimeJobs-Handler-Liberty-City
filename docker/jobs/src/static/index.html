@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260801b" />
-  <script defer src="/static/app.js?v=20260801b"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260801c" />
+  <script defer src="/static/app.js?v=20260801c"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -68,6 +68,32 @@
                   <p class="text-sm text-zinc-400 mt-0.5" x-show="s.location"><span class="text-zinc-500">Ort:</span> <span x-text="s.location"></span></p>
                   <p class="text-sm text-zinc-400" x-show="s.costume"><span class="text-zinc-500">Kostüm:</span> <span x-text="s.costume"></span></p>
                   <p class="text-xs text-zinc-500 mt-1" x-text="(s.assigned_count || 0) + '/' + (s.required_count || 0) + ' belegt'"></p>
+                  <!-- Eintragen/Austragen direkt in der Großansicht (gleiche Logik wie in der Liste) -->
+                  <div class="mt-2 flex items-center gap-2 flex-wrap">
+                    <template x-if="isDone(zoomMission)">
+                      <span class="headline px-3 py-1.5 rounded border border-[#15803d]/60 bg-[#15803d]/15 text-green-300/80 text-xs font-medium tracking-wider cursor-default">Abgeschlossen</span>
+                    </template>
+                    <template x-if="isDone(zoomMission) && s.on_waitlist">
+                      <button @click="leaveWaitlist(s)" :disabled="!!busySlots[s.id]"
+                              class="headline px-3 py-1.5 rounded bg-[#b98a4a]/20 border border-[#b98a4a] text-[#d9ae6e] hover:bg-[#b98a4a]/35 text-xs font-medium tracking-wider disabled:opacity-50 transition-colors">Wartend ✕</button>
+                    </template>
+                    <template x-if="!isDone(zoomMission) && s.mine">
+                      <button @click="unassign(s)" :disabled="!!busySlots[s.id]"
+                              class="headline px-3 py-1.5 rounded border border-[#b91c1c] text-red-400 hover:bg-[#b91c1c]/15 text-xs font-medium tracking-wider disabled:opacity-50 transition-colors">Austragen</button>
+                    </template>
+                    <template x-if="!isDone(zoomMission) && !s.mine && s.free > 0 && !s.on_waitlist">
+                      <button @click="assign(s, zoomMission)" :disabled="!!busySlots[s.id]"
+                              class="headline px-3 py-1.5 rounded bg-[#15803d] hover:bg-[#1a9c4b] border border-white/10 text-white text-xs font-medium tracking-wider disabled:opacity-50 transition-colors">Eintragen</button>
+                    </template>
+                    <template x-if="!isDone(zoomMission) && !s.mine && s.free === 0 && !s.on_waitlist">
+                      <button @click="joinWaitlist(s, zoomMission)" :disabled="!!busySlots[s.id]"
+                              class="headline px-3 py-1.5 rounded border border-[#b98a4a] text-[#d9ae6e] hover:bg-[#b98a4a]/15 text-xs font-medium tracking-wider disabled:opacity-50 transition-colors">Warteliste</button>
+                    </template>
+                    <template x-if="!isDone(zoomMission) && !s.mine && s.on_waitlist">
+                      <button @click="leaveWaitlist(s)" :disabled="!!busySlots[s.id]"
+                              class="headline px-3 py-1.5 rounded bg-[#b98a4a]/20 border border-[#b98a4a] text-[#d9ae6e] hover:bg-[#b98a4a]/35 text-xs font-medium tracking-wider disabled:opacity-50 transition-colors">Wartend ✕</button>
+                    </template>
+                  </div>
                 </div>
               </template>
             </div>

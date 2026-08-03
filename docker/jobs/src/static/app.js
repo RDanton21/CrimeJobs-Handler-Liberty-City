@@ -212,6 +212,17 @@ function jobsBoard() {
         const prevSnap = this.board ? this._snapshotSlots() : null;
         this.board = await r.json();
         if (prevSnap) this._flashChanges(prevSnap);
+        // Großansicht (Modal) mit den frischen Daten synchron halten: nach jedem
+        // Reload denselben Auftrag neu referenzieren, damit Eintragen/Austragen
+        // im Modal sofort sichtbar wird. Ist der Auftrag weg -> Modal schließt.
+        if (this.zoomMission) {
+          let z = null;
+          for (const d of (this.board.days || [])) {
+            const hit = (d.missions || []).find(mm => mm.id === this.zoomMission.id);
+            if (hit) { z = hit; break; }
+          }
+          this.zoomMission = z;
+        }
         // Admin-Status kann sich durch den Rollen-Recheck aendern —
         // das Board liefert den aktuellen Stand mit
         if (this.board.me) this.me = { ...this.me, is_admin: !!this.board.me.is_admin };
