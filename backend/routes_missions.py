@@ -299,6 +299,7 @@ async def generate_mission(
         status=MissionStatus.DRAFT,
         deadline_at=deadline_at,
         scheduled_send_at=_normalize_naive_utc(payload.scheduled_send_at),
+        event_at=_normalize_naive_utc(payload.event_at),
         personnel_brief=personnel,
         personnel_updated_at=datetime.utcnow() if personnel else None,
     )
@@ -370,6 +371,7 @@ async def rewrite_mission(
         status=MissionStatus.DRAFT,
         deadline_at=deadline_at,
         scheduled_send_at=_normalize_naive_utc(payload.scheduled_send_at),
+        event_at=_normalize_naive_utc(payload.event_at),
         personnel_brief=personnel,
         personnel_updated_at=datetime.utcnow() if personnel else None,
     )
@@ -501,6 +503,7 @@ async def create_manual_mission(
         status=MissionStatus.DRAFT,
         deadline_at=deadline_at,
         scheduled_send_at=_normalize_naive_utc(payload.scheduled_send_at),
+        event_at=_normalize_naive_utc(payload.event_at),
         personnel_brief="",
         personnel_updated_at=None,
     )

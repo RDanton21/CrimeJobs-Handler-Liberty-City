@@ -6,7 +6,7 @@
   <title>Crime Automation — Crew</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260806l" />
+  <link rel="stylesheet" href="/static/style.css?v=20260806m" />
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
@@ -379,6 +379,17 @@
                       @click="genReq.slotFrom=''; genReq.slotTo=''"
                       class="ml-1 text-xs underline text-zinc-400 hover:text-zinc-200">×</button>
             </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="block text-xs text-zinc-400 mb-1">🗓️ Einsatz-Termin (optional) — wann die Quest LÄUFT (Jobbörse-Countdown; unabhängig vom Versand)</label>
+            <input type="datetime-local" x-model="genReq.event_at"
+                   class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+            <span x-show="genReq.event_at" class="text-xs text-zinc-500 ml-2">
+              Jobbörse zeigt diesen Zeitpunkt (z.B. „morgen") — heute senden, morgen laufen
+              <button type="button" @click="genReq.event_at = ''"
+                      class="ml-1 underline hover:text-zinc-300">×</button>
+            </span>
           </div>
 
           <div class="mb-3">
@@ -855,6 +866,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20260806l"></script>
+  <script src="/static/app.js?v=20260806m"></script>
 </body>
 </html>

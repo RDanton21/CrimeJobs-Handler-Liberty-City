@@ -122,6 +122,7 @@ class Mission(Base):
     expiry_message_id: Mapped[str] = mapped_column(String(40), default="")
     expiry_text: Mapped[str] = mapped_column(Text, default="")
     scheduled_send_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    event_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     reaction_reply_message_id: Mapped[str] = mapped_column(String(40), default="")
     reaction_reply_text: Mapped[str] = mapped_column(Text, default="")
     # Admin-internes Personal-Briefing: welche NPCs/Mittler die Mission braucht.

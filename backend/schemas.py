@@ -80,6 +80,7 @@ class MissionGenerateRequest(BaseModel):
     append_text: str = ""
     deadline_minutes: int | None = None
     scheduled_send_at: datetime | None = None
+    event_at: datetime | None = None
     slot: str = ""  # vorgegebenes Zeitfenster, z.B. "21:00–22:30" → in Auftrag + Personalbedarf übernommen
     want_personnel: bool = True  # False = normaler Auftrag ohne NPC/Questgeber-Bedarf
 
@@ -93,6 +94,7 @@ class MissionRewriteRequest(BaseModel):
     append_text: str = ""
     deadline_minutes: int | None = None
     scheduled_send_at: datetime | None = None
+    event_at: datetime | None = None
     slot: str = ""
     want_personnel: bool = True
 
@@ -102,6 +104,7 @@ class MissionManualRequest(BaseModel):
     content: str
     deadline_minutes: int | None = None
     scheduled_send_at: datetime | None = None
+    event_at: datetime | None = None
 
 
 class MissionSuggestionsRequest(BaseModel):
@@ -114,6 +117,7 @@ class BulkSendRequest(BaseModel):
     content: str
     deadline_minutes: int | None = None
     scheduled_send_at: datetime | None = None
+    event_at: datetime | None = None
 
 
 class RankingPostRequest(BaseModel):
@@ -132,6 +136,7 @@ class MissionUpdate(BaseModel):
     content_final: str | None = None
     image_path: str | None = None
     scheduled_send_at: datetime | None = None
+    event_at: datetime | None = None
     clear_scheduled_send_at: bool = False
     personnel_brief: str | None = None
 
@@ -155,6 +160,7 @@ class MissionOut(BaseModel):
     deadline_at: datetime | None
     jobs_published_at: datetime | None = None
     scheduled_send_at: datetime | None = None
+    event_at: datetime | None = None
     archived_boss_info: str = ""
     personnel_brief: str = ""
     personnel_updated_at: datetime | None = None

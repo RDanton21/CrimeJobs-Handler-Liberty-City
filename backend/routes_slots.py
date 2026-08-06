@@ -234,7 +234,8 @@ def _slot_start_unix(mission: Mission, slot_window: str) -> int | None:
     if hour > 23 or minute > 59:
         return None
 
-    base_utc = mission.scheduled_send_at or mission.sent_at or datetime.utcnow()
+    # Einsatz-Termin (event_at) hat Vorrang: erlaubt "heute senden, morgen laufen".
+    base_utc = mission.event_at or mission.scheduled_send_at or mission.sent_at or datetime.utcnow()
     # Bezugstag in Berliner Zeit bestimmen (Versand um 23:30 UTC = naechster Tag lokal)
     base_local = base_utc + _berlin_offset(base_utc)
     start_local = base_local.replace(hour=hour, minute=minute, second=0, microsecond=0)
