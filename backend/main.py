@@ -78,6 +78,13 @@ async def _revalidate_static(request, call_next):
         response.headers["Cache-Control"] = "no-store"
     elif path.startswith("/static/") or path == "/chronik":
         response.headers["Cache-Control"] = "no-cache"
+    elif not path.startswith("/api/") and \
+            response.headers.get("content-type", "").startswith("text/html"):
+        # HTML-Seiten (/, /beziehungen, /crew/... etc.) immer revalidieren.
+        # Ohne das cacht der Browser die alte Seite und referenziert veraltetes
+        # app.js?v=... -> Handler laufen ins Leere. FileResponse liefert
+        # ETag/Last-Modified, die Rueckfrage endet also meist bei 304.
+        response.headers["Cache-Control"] = "no-cache"
     return response
 
 
