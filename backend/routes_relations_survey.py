@@ -627,9 +627,8 @@ async def boss_ansage_send(
 
     embed = {
         "title": "🗣 Miguel — im Auftrag des Bosses",
-        "description": text[:4000],
+        "description": "**" + text[:3990] + "**",
         "color": 0xE62958,  # CYQORE Crimson
-        "footer": {"text": "L'Occhio del Padrino"},
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
     try:
