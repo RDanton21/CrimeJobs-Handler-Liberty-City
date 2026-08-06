@@ -343,3 +343,72 @@ async def post_personnel_to_discord(
         "channel_id": channel_id,
         "message_id": new_msg_id,
     }
+
+
+class PurgeInfoChannelsRequest(BaseModel):
+    crew_ids: list[int] | None = None
+    dry_run: bool = False
+
+
+@router.post("/purge-info-channels")
+async def purge_info_channels(
+    payload: PurgeInfoChannelsRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Leert die Zusatzinfo-/Boss-Feedback-Channels (info_channel_id) komplett —
+    löscht alle Nicht-Bot-Nachrichten, UNABHÄNGIG von aktiven Missionen. Damit
+    greift 'Alle archivieren' auch, wenn gar keine aktiven Aufträge mehr da sind.
+
+    dry_run=True zählt nur (löscht nichts). Ohne crew_ids: alle Crews mit
+    gesetztem info_channel_id.
+    """
+    q = select(Crew).where(Crew.info_channel_id.is_not(None), Crew.info_channel_id != "")
+    if payload.crew_ids:
+        q = q.where(Crew.id.in_(payload.crew_ids))
+    crews = list((await session.execute(q)).scalars().all())
+
+    results: list[dict] = []
+    async with httpx.AsyncClient(timeout=30.0) as cli:
+        for crew in crews:
+            ch = crew.info_channel_id
+            if not ch:
+                continue
+
+            if payload.dry_run:
+                try:
+                    r = await cli.post(
+                        f"{app_settings.bot_api_url}/read_channel",
+                        json={"channel_id": ch, "after_iso": None, "limit": 500},
+                    )
+                    cnt = len(r.json()) if r.status_code < 400 else -1
+                except Exception:
+                    cnt = -1
+                results.append({"crew_id": crew.id, "name": crew.name, "count": cnt})
+                continue
+
+            deleted = 0
+            error = None
+            # delete_in_range räumt pro Aufruf bis zu 200 Nicht-Bot-Nachrichten;
+            # bei mehr in mehreren Runden, bis nichts mehr gelöscht wird.
+            for _ in range(15):
+                try:
+                    r = await cli.post(
+                        f"{app_settings.bot_api_url}/delete_in_range",
+                        json={"channel_id": ch, "after_iso": None, "before_iso": None},
+                    )
+                except Exception as exc:
+                    error = f"Bot nicht erreichbar: {exc}"
+                    break
+                if r.status_code >= 400:
+                    error = f"Bot-Fehler {r.status_code}: {r.text[:120]}"
+                    break
+                d = int(r.json().get("deleted", 0))
+                deleted += d
+                if d == 0:
+                    break
+            row = {"crew_id": crew.id, "name": crew.name, "deleted": deleted}
+            if error:
+                row["error"] = error
+            results.append(row)
+
+    return {"results": results}

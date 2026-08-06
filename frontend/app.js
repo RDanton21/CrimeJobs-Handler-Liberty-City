@@ -402,11 +402,8 @@ function dashboard() {
       let missions;
       try { missions = await api.get("/api/missions?archived=false&limit=500"); }
       catch (e) { alert("Konnte aktive Aufträge nicht laden: " + e.message); return; }
-      if (!missions || missions.length === 0) {
-        alert("Keine aktiven Aufträge zum Archivieren.");
-        return;
-      }
-      if (!confirm(`${missions.length} aktive(r) Auftrag(e) archivieren? Discord-Posts werden gelöscht, Boss-Feedback wird snapshottet.`)) return;
+      const n = missions ? missions.length : 0;
+      if (!confirm(`${n} aktive(r) Auftrag(e) archivieren UND alle Zusatzinfo-Channels leeren?\n\nDiscord-Posts + Boss-Feedback werden gelöscht.`)) return;
       if (!confirm("Wirklich? Diese Aktion betrifft alle Crews gleichzeitig.")) return;
 
       this.archivingAll = true;
@@ -416,7 +413,16 @@ function dashboard() {
           try { await api.del(`/api/missions/${m.id}`); ok++; }
           catch (e) { fail++; }
         }
-        alert(`Archiviert: ${ok}` + (fail > 0 ? `, Fehler: ${fail}` : ""));
+        // Zusatzinfo-/Boss-Feedback-Channels leeren — auch wenn 0 Aufträge da waren
+        let purged = 0, purgeErr = false;
+        try {
+          const res = await api.post("/api/dashboard/purge-info-channels", { dry_run: false });
+          purged = (res.results || []).reduce((s, r) => s + (r.deleted || 0), 0);
+          purgeErr = (res.results || []).some(r => r.error);
+        } catch (e) { purgeErr = true; }
+        alert(`Archiviert: ${ok}` + (fail > 0 ? `, Fehler: ${fail}` : "")
+              + ` · Zusatzinfo-Nachrichten gelöscht: ${purged}`
+              + (purgeErr ? " (bei manchen Channels Bot-Fehler)" : ""));
         await Promise.all([this.loadCrews(), this.loadStats(), this.loadNotifications()]);
       } finally {
         this.archivingAll = false;
