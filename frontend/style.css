@@ -172,3 +172,17 @@ body.cine input, body.cine select, body.cine textarea {
 body.cine table thead { background: rgba(20, 23, 25, 0.9) !important; }
 body.cine tbody tr:hover { background: rgba(255, 255, 255, 0.07) !important; }
 body.cine .text-red-700, body.cine .text-red-600 { color: #d9ae6e !important; }
+
+/* Dropdown-Optionen immer lesbar: <option>s erben sonst die (teils sehr dunkle)
+   Chip-Textfarbe des <select> (z. B. text-zinc-600 bei "— keiner —") und sind
+   dann im geöffneten Dropdown auf dunklem Grund kaum sichtbar. */
+select { color-scheme: dark; }
+select option,
+body.cine select option {
+  background-color: #18181b !important;   /* zinc-900 */
+  color: #f4f4f5 !important;              /* zinc-100 */
+}
+select option:disabled,
+body.cine select option:disabled {
+  color: #8a8a92 !important;
+}
