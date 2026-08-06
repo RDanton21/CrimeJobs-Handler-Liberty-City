@@ -708,6 +708,7 @@ async def gang_analysis(
         "titel": str(parsed["titel"]).strip(),
         "bewertung": str(parsed.get("bewertung", "")).strip(),
         "zusammenfassung": str(parsed.get("zusammenfassung", "")).strip(),
+        "wortlaut": str(parsed.get("wortlaut", "")).strip(),
         "anzahl": profile["anzahl"],
         "provider": provider.name,
     }
