@@ -1018,7 +1018,7 @@ function crewPage() {
       }
     },
     async unpublishFromQG(m) {
-      if (!confirm("Auftrag von der Personal-Börse nehmen?\n\nRollen und Anmeldungen bleiben erhalten — der Auftrag ist nur nicht mehr sichtbar, bis du ihn per „An QG-Börse" erneut freigibst.")) return;
+      if (!confirm("Auftrag von der Personal-Börse nehmen?\n\nRollen und Anmeldungen bleiben erhalten — der Auftrag ist nur nicht mehr sichtbar, bis du ihn per „An QG-Börse“ erneut freigibst.")) return;
       this.qgUnpublishingId = m.id;
       try {
         await api.post(`/api/missions/${m.id}/qg-unpublish`);
