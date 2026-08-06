@@ -629,7 +629,7 @@ async def boss_ansage_send(
         "title": "🗣 Miguel — im Auftrag des Bosses",
         "description": text[:4000],
         "color": 0xE62958,  # CYQORE Crimson
-        "footer": {"text": "SEKTOR · L'Occhio del Padrino"},
+        "footer": {"text": "L'Occhio del Padrino"},
     }
     try:
         async with httpx.AsyncClient(timeout=20.0) as cli:
