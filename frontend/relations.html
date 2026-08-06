@@ -6,7 +6,7 @@
   <title>Crime Automation — Beziehungs-Erhebung</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260806k" />
+  <link rel="stylesheet" href="/static/style.css?v=20260806l" />
 </head>
 <body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
   <div x-data="relationsSurvey()" x-init="init()" class="max-w-screen-2xl mx-auto p-6">
@@ -260,7 +260,7 @@
                 </td>
                 <td class="px-4 py-2 text-right whitespace-nowrap">
                   <button @click="aiSuggest(p)"
-                          :disabled="aiBusy[`${p.a_id}-${p.b_id}`]"
+                          :disabled="!!aiBusy[`${p.a_id}-${p.b_id}`]"
                           title="KI liest beide Storys und schlägt die geltende Beziehung vor"
                           class="text-xs px-2 py-1 rounded border border-zinc-800 text-purple-400 hover:border-purple-700 hover:text-purple-300 disabled:opacity-40">
                     <span x-show="!aiBusy[`${p.a_id}-${p.b_id}`]">🪄 KI</span>
@@ -531,6 +531,6 @@
     </section>
   </div>
 
-  <script src="/static/app.js?v=20260806k"></script>
+  <script src="/static/app.js?v=20260806l"></script>
 </body>
 </html>
