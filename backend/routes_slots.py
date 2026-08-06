@@ -581,7 +581,11 @@ async def public_active_missions(session: AsyncSession = Depends(get_session)):
         # (sent_at gesetzt). Vorher steht der Personalbedarf schon auf dem
         # Board, damit die Leute sich melden koennen — aber der kryptische
         # Auftrag bleibt verborgen, sonst waere die Spannung weg.
-        released = m.sent_at is not None
+        # AUSNAHME: interne Crews (personnel_own_channel, z.B. Questgeber)
+        # bereiten den Einsatz selbst vor -> Auftrag sofort komplett sichtbar.
+        released = (m.sent_at is not None) or bool(
+            getattr(m.crew, "personnel_own_channel", False)
+        )
         content = (m.content_final or m.content_generated or "") if released else ""
         # Mission-weites Slot-Fenster: erstes nicht-leeres slot_window der Slots
         slot_window = next((s.slot_window for s in slots if s.slot_window), "")
