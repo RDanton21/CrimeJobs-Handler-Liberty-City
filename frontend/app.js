@@ -3192,6 +3192,7 @@ function relationsSurvey() {
     anaOpen: {},
     anaFacts: {},
     bossSending: {},
+    bossSent: {},
     // ALLE Gangs, mit ihren Reibungspunkten (abweichend + Widerspruch),
     // absteigend nach Reibungs-Anzahl. Aus der Matrix berechnet.
     get gangConflicts() {
@@ -3290,8 +3291,9 @@ function relationsSurvey() {
       try {
         await api.post(`/api/relations/survey/boss-ansage/${g.crew_id}/send`,
           { wortlaut: a.wortlaut, titel: a.titel || "" });
-        alert(`✓ Boss-Ansage an ${g.name} gesendet.`);
+        this.bossSent[g.crew_id] = true;
       } catch (e) {
+        this.bossSent[g.crew_id] = false;
         alert(`Senden fehlgeschlagen: ${e.message || e}`);
       } finally {
         this.bossSending[g.crew_id] = false;

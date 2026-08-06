@@ -6,7 +6,7 @@
   <title>Crime Automation — Beziehungs-Erhebung</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260806i" />
+  <link rel="stylesheet" href="/static/style.css?v=20260806j" />
 </head>
 <body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
   <div x-data="relationsSurvey()" x-init="init()" class="max-w-screen-2xl mx-auto p-6">
@@ -397,20 +397,25 @@
                    x-text="analysis[g.crew_id]?.zusammenfassung"></p>
 
                 <!-- Wortlaut des Bosses (Il Padrino) -->
-                <div x-show="analysis[g.crew_id]?.wortlaut" class="mb-3 pl-3 border-l-2 border-rose-700/70">
+                <template x-if="analysis[g.crew_id]?.wortlaut">
+                <div class="mb-3 pl-3 border-l-2 border-rose-700/70">
                   <div class="text-[11px] uppercase tracking-wide text-rose-400/80 mb-1">🗣 Miguel — im Auftrag des Bosses <span class="text-zinc-600 normal-case tracking-normal">· editierbar</span></div>
                   <textarea x-model="analysis[g.crew_id].wortlaut"
-                            @input="$el.style.height='auto'; $el.style.height=$el.scrollHeight+'px'; _saveAnalysis()"
+                            @input="bossSent[g.crew_id]=false; $el.style.height='auto'; $el.style.height=$el.scrollHeight+'px'; _saveAnalysis()"
                             x-init="$nextTick(() => { $el.style.height='auto'; $el.style.height=$el.scrollHeight+'px'; })"
                             class="w-full bg-zinc-950/40 border border-rose-900/40 rounded px-2 py-1.5 text-sm text-zinc-200 italic leading-relaxed focus:outline-none focus:border-rose-700 resize-y overflow-hidden"
                             rows="3"></textarea>
-                  <button @click="sendBossAnsage(g)" :disabled="bossSending[g.crew_id]"
-                          :title="`Als Embed in den Crime-Business-Channel von ${g.name} posten (bleibt beim Archivieren erhalten)`"
-                          class="mt-2 text-[11px] px-2 py-0.5 rounded border border-rose-800/70 text-rose-300 hover:bg-rose-900/30 disabled:opacity-40">
-                    <span x-show="!bossSending[g.crew_id]">📨 Als Embed in den Channel senden</span>
-                    <span x-show="bossSending[g.crew_id]">sendet…</span>
-                  </button>
+                  <div class="mt-2 flex items-center gap-2">
+                    <button @click="sendBossAnsage(g)" :disabled="bossSending[g.crew_id]"
+                            :title="`Als Embed in den Crime-Business-Channel von ${g.name} posten (bleibt beim Archivieren erhalten)`"
+                            class="text-[11px] px-2 py-0.5 rounded border border-rose-800/70 text-rose-300 hover:bg-rose-900/30 disabled:opacity-40">
+                      <span x-show="!bossSending[g.crew_id]">📨 Als Embed in den Channel senden</span>
+                      <span x-show="bossSending[g.crew_id]">sendet…</span>
+                    </button>
+                    <span x-show="bossSent[g.crew_id]" x-cloak class="text-green-400 text-sm font-medium">✓ gesendet</span>
+                  </div>
                 </div>
+                </template>
 
                 <!-- Beziehungs-Aufschlüsselung aus der finalen Matrix -->
                 <div class="mb-3">
@@ -526,6 +531,6 @@
     </section>
   </div>
 
-  <script src="/static/app.js?v=20260806i"></script>
+  <script src="/static/app.js?v=20260806j"></script>
 </body>
 </html>
