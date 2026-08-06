@@ -602,6 +602,51 @@ async def summary_send(
     return {"ok": True, "gesendet": sent, "uebersprungen": skipped}
 
 
+class BossAnsageSendRequest(BaseModel):
+    wortlaut: str
+    titel: str | None = None
+
+
+@router.post("/boss-ansage/{crew_id}/send")
+async def boss_ansage_send(
+    crew_id: int, payload: BossAnsageSendRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Postet die Miguel-Boss-Ansage einer Gruppierung als Discord-Embed
+    (crimson Farb-Leiste) in ihren Auftrags-Channel."""
+    crew = await session.get(Crew, crew_id)
+    if not crew:
+        raise HTTPException(404, "Gruppierung nicht gefunden")
+    channel = (crew.discord_channel_id or "").strip()
+    if not channel:
+        raise HTTPException(400, "Keine Auftrags-Channel-ID für diese Gruppierung")
+    text = (payload.wortlaut or "").strip()
+    if not text:
+        raise HTTPException(400, "Kein Wortlaut übergeben")
+
+    embed = {
+        "title": "🗣 Miguel — im Auftrag des Bosses",
+        "description": text[:4000],
+        "color": 0xE62958,  # CYQORE Crimson
+        "footer": {"text": "SEKTOR · L'Occhio del Padrino"},
+    }
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as cli:
+            r = await cli.post(
+                f"{settings.bot_api_url}/send_embed",
+                json={"channel_id": channel, "embed": embed},
+            )
+            r.raise_for_status()
+            data = r.json()
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(502, f"Bot-Fehler: {exc.response.text[:150]}") from exc
+    except Exception as exc:
+        raise HTTPException(502, f"Bot nicht erreichbar: {exc}") from exc
+
+    return {"ok": True, "crew": crew.name, "channel_id": channel,
+            "message_id": data.get("message_id")}
+
+
 def _gang_profile(crew_id: int, prop: dict) -> dict:
     """Volles Beziehungsprofil einer Gruppierung fuer die Bewertung:
     - sieht_andere: {label: anzahl} — wie sie die anderen einschaetzt

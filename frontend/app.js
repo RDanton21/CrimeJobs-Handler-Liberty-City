@@ -3191,6 +3191,7 @@ function relationsSurvey() {
     analysisBusy: {},
     anaOpen: {},
     anaFacts: {},
+    bossSending: {},
     // ALLE Gangs, mit ihren Reibungspunkten (abweichend + Widerspruch),
     // absteigend nach Reibungs-Anzahl. Aus der Matrix berechnet.
     get gangConflicts() {
@@ -3253,6 +3254,23 @@ function relationsSurvey() {
       return this.relOptions
         .filter(o => groups[o.v])
         .map(o => ({ type: o.v, label: o.label, others: groups[o.v].slice().sort() }));
+    },
+    // Miguel-Boss-Ansage einer Gruppierung als Discord-Embed in ihren
+    // Auftrags-Channel posten (nutzt den bereits generierten Wortlaut).
+    async sendBossAnsage(g) {
+      const a = this.analysis[g.crew_id];
+      if (!a || !a.wortlaut) { alert("Erst die Analyse generieren (🪄 KI / ↻ neu)."); return; }
+      if (!confirm(`Boss-Ansage (Miguel) als Embed in den Auftrags-Channel von ${g.name} posten?`)) return;
+      this.bossSending[g.crew_id] = true;
+      try {
+        await api.post(`/api/relations/survey/boss-ansage/${g.crew_id}/send`,
+          { wortlaut: a.wortlaut, titel: a.titel || "" });
+        alert(`✓ Boss-Ansage an ${g.name} gesendet.`);
+      } catch (e) {
+        alert(`Senden fehlgeschlagen: ${e.message || e}`);
+      } finally {
+        this.bossSending[g.crew_id] = false;
+      }
     },
     // Kuchendiagramm (Donut) der Befund-Verteilung als SVG-Segmente.
     get donut() {
