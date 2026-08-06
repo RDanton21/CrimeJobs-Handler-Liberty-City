@@ -710,11 +710,14 @@ GANG_ANALYSIS_SYSTEM_PROMPT = (
     "aggressiv, kooperativ, isoliert, paranoid, ueberheblich, vermittelnd? "
     "Ueberschaetzt sie ihre Bedeutung oder Allianzen? Deckt sich ihr Selbstbild "
     "mit dem Fremdbild oder klafft es auseinander?\n\n"
-    "WICHTIG — Anonymitaet: Nenne NIEMALS, welche konkrete andere Gruppierung "
-    "wie abgestimmt hat. Es darf NICHT nachvollziehbar sein, wer wen wie "
-    "eingeschaetzt hat. Schreibe ueber die BEWERTETE Gruppierung selbst — nutze "
-    "'die meisten', 'mehrere', 'die Stadt' statt fremde Namen mit ihrer "
-    "Bewertung.\n\n"
+    "WICHTIG — Anonymitaet der UMFRAGE: Nenne NIEMALS, welche konkrete "
+    "Gruppierung in der Umfrage wie abgestimmt hat (Reibungspunkte / Fremdbild). "
+    "In 'zusammenfassung' und 'bewertung' schreibst du ueber die BEWERTETE "
+    "Gruppierung selbst — nutze 'die meisten', 'mehrere', 'die Stadt' statt "
+    "fremde Namen mit ihrer Umfrage-Bewertung. AUSNAHME: Die unter '## "
+    "Etablierte Beziehungen' gelisteten Beziehungen sind KANON (die geltende "
+    "Matrix) und DUERFEN im 'wortlaut' namentlich genannt werden — das ist kein "
+    "Bruch der Umfrage-Anonymitaet.\n\n"
     "Antworte mit NUR einem JSON-Objekt, keine Markdown-Fences, kein Text "
     "davor oder danach:\n"
     '{"titel": "<prägnante Charakter-Schlagzeile, max 8 Wörter>", '
@@ -722,25 +725,33 @@ GANG_ANALYSIS_SYSTEM_PROMPT = (
     '\'Konfrontativ, überschätzt sich\' oder \'Kooperativ und vernetzt\'>", '
     '"zusammenfassung": "<2-4 Sätze: wie die Gruppierung zur Stadt steht, ob '
     'Selbst- und Fremdbild zusammenpassen, plus eine kurze Empfehlung>", '
-    '"wortlaut": "<2-4 Sätze: DIESELBE Einschätzung, aber gesprochen als '
-    "MIGUEL — die rechte Hand des Big Boss. Miguel hat vom Boss dessen Urteil "
-    "ueber DIESE Gruppierung bekommen UND den Auftrag, es ihr auszurichten. Er "
-    "spricht die Gruppierung direkt an ('ihr') und ueberbringt das Wort des "
-    "Bosses — loyal, ruhig, bestimmt, mit der Autoritaet dessen im Ruecken, der "
-    "ihn schickt, aber ohne selbst der Boss zu sein. Formulierungen wie 'Der "
-    "Boss laesst euch ausrichten ...', 'Ich bring euch nur seine Worte ...', "
-    "'Er hat ein Auge auf euch'. Kalt, knapp, Respekt einfordernd. Keine "
-    'Vulgaritaet, keine Emojis, keine fremden Gruppierungs-Namen.>"}\n\n'
-    "Deutsch, knapp, ohne Floskeln. Der titel ist eine Charakterisierung, "
-    "keine blosse Wiederholung des Namens. 'wortlaut' ist die Stimme von "
-    "Miguel, der das Wort des Bosses an die Gruppierung ueberbringt — kein "
-    "Analyse-Jargon, sondern eine direkte Ansage im Auftrag des Bosses."
+    '"wortlaut": "<4-7 Sätze, gesprochen als MIGUEL — die rechte Hand des Big '
+    "Boss, der der Gruppierung das Wort des Bosses ausrichtet. AUFBAU: (1) "
+    "Beginne mit einem ominoesen Einstieg im Sinne von 'Die Uhr tickt. Der Boss "
+    "ist bereits in der Stadt und ich soll euch Folgendes ausrichten ... Er hat "
+    "euch studiert, er weiss, wo eure Staerken und Schwaechen liegen.' — den "
+    "Wortlaut leicht variieren, nicht 1:1 kopieren. (2) Dann geh KONKRET auf die "
+    "Beziehungen ein: nenne die wichtigsten anderen Gruppierungen aus '## "
+    "Etablierte Beziehungen' beim NAMEN und sag der Gruppierung, wie sie zu "
+    "ihnen steht (Verbuendete pflegen, Geschaeftspartner halten, vor Rivalen und "
+    "Feinden in Acht nehmen). (3) Schliesse mit einer knappen Mahnung des "
+    "Bosses. Miguel redet die Gruppierung direkt an ('ihr'), loyal, ruhig, kalt, "
+    "bestimmt, mit der Autoritaet des Bosses im Ruecken, aber ohne selbst der "
+    "Boss zu sein. Keine Vulgaritaet, keine Emojis. Erfinde KEINE Beziehungen "
+    "und keine Gruppierungen ausserhalb der Liste '## Etablierte Beziehungen' — "
+    "nutze exakt die dort genannten Namen. NENNE NICHT, wer in der "
+    'Umfrage wie abgestimmt hat.>"}\n\n'
+    "Deutsch, atmosphaerisch aber knapp, ohne leere Floskeln. Der titel ist "
+    "eine Charakterisierung, keine blosse Wiederholung des Namens. 'wortlaut' "
+    "ist die Stimme von Miguel — eine direkte Ansage im Auftrag des Bosses, die "
+    "konkret auf die etablierten Beziehungen eingeht."
 )
 
 
 def build_gang_analysis_prompt(
     gang_name: str, gang_story: str,
     sieht_andere: dict, wird_gesehen: dict, reibungen: list[dict],
+    beziehungen_final: list[dict] | None = None,
 ) -> str:
     """User-Prompt fuer die Gang-Bewertung.
 
@@ -748,6 +759,9 @@ def build_gang_analysis_prompt(
     abgegebenen bzw. empfangenen Bewertungen (deutsche Labels).
     reibungen: Liste {mine, theirs} — Paare, wo Selbst- und Fremdsicht
     auseinandergehen (anonym, ohne Namen der Gegenueber).
+    beziehungen_final: Liste {other, type} — die etablierten (finalen)
+    Beziehungen dieser Gruppierung aus der Matrix. KANON — duerfen im
+    Miguel-Wortlaut namentlich genannt werden.
     """
     def verteilung(d: dict) -> str:
         if not d:
@@ -767,8 +781,31 @@ def build_gang_analysis_prompt(
             lines.append(f"- wir: {r['mine']} / sie: {r['theirs']}")
     else:
         lines.append("\n## Reibungspunkte\n  Keine — Selbst- und Fremdbild decken sich.")
+
+    # Etablierte Beziehungen (Kanon) — nach Typ gruppiert, mit Namen.
+    if beziehungen_final:
+        order = ["verbündet", "geschäftlich", "neutral", "rivalisierend", "feindlich"]
+        grouped: dict[str, list[str]] = {}
+        for b in beziehungen_final:
+            grouped.setdefault(b.get("type", "neutral"), []).append(b.get("other", "?"))
+        lines.append(
+            "\n## Etablierte Beziehungen (KANON aus der Matrix — im 'wortlaut' "
+            "namentlich nennbar)"
+        )
+        for t in order:
+            if grouped.get(t):
+                lines.append(f"- {t}: " + ", ".join(sorted(grouped[t])))
+    else:
+        lines.append(
+            "\n## Etablierte Beziehungen\n  (noch keine finalen Beziehungen in "
+            "der Matrix)"
+        )
+
     lines.append(
         "\n## Aufgabe\nBewerte das Gesamtbild dieser Gruppierung. "
-        "Titel + Bewertung + Zusammenfassung."
+        "Titel + Bewertung + Zusammenfassung. Fuer 'wortlaut': Miguel richtet "
+        "der Gruppierung das Wort des Bosses aus und geht dabei KONKRET auf die "
+        "oben gelisteten etablierten Beziehungen ein (die wichtigsten "
+        "namentlich)."
     )
     return "\n".join(lines)

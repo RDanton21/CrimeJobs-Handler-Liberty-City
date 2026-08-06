@@ -678,9 +678,32 @@ async def gang_analysis(
     )
     provider = await get_provider(provider_name, keys=keys, models=models)
 
+    # Etablierte (finale) Beziehungen dieser Gruppierung — Kanon aus der Matrix.
+    # Diese DÜRFEN im Miguel-Wortlaut namentlich genannt werden (anders als die
+    # anonymen Umfrage-Stimmen).
+    _REL_LABELS = {
+        "ALLIED": "verbündet", "BUSINESS": "geschäftlich", "NEUTRAL": "neutral",
+        "RIVAL": "rivalisierend", "HOSTILE": "feindlich",
+    }
+    crel_rows = (await session.execute(
+        select(CrewRelation).where(
+            (CrewRelation.crew_a_id == crew_id) | (CrewRelation.crew_b_id == crew_id)
+        )
+    )).scalars().all()
+    name_map = {c.id: c.name for c in (await session.execute(select(Crew))).scalars().all()}
+    beziehungen_final: list[dict] = []
+    for r in crel_rows:
+        other_id = r.crew_b_id if r.crew_a_id == crew_id else r.crew_a_id
+        raw_type = getattr(r.relation_type, "value", r.relation_type)
+        beziehungen_final.append({
+            "other": name_map.get(other_id, f"#{other_id}"),
+            "type": _REL_LABELS.get(str(raw_type), str(raw_type or "neutral")),
+        })
+
     user_prompt = build_gang_analysis_prompt(
         crew.name, crew.story_background or "",
         profile["sieht_andere"], profile["wird_gesehen"], profile["reibungen"],
+        beziehungen_final,
     )
     try:
         text = await provider.generate(
