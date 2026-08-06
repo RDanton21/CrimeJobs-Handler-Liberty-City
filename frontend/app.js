@@ -3012,7 +3012,7 @@ function relationsSurvey() {
       { key: "offen", label: "Offen", active: "bg-zinc-800 border-zinc-600 text-zinc-200" },
     ],
 
-    async init() { await this.loadAll(); },
+    async init() { this._loadAnalysis(); await this.loadAll(); },
 
     async loadAll() {
       this.loading = true;
@@ -3222,6 +3222,7 @@ function relationsSurvey() {
         const r = await api.post(`/api/relations/survey/analysis/${g.crew_id}`, {});
         this.analysis[g.crew_id] = r;
         this.anaOpen[g.crew_id] = true;
+        this._saveAnalysis();
       } catch (e) {
         this.error = `KI-Analyse für ${g.name} fehlgeschlagen: ` + (e.message || e);
       } finally {
@@ -3232,6 +3233,30 @@ function relationsSurvey() {
       for (const g of this.gangConflicts) {
         if (!this.analysis[g.crew_id]) await this.analyzeGang(g);
       }
+    },
+    // Generierte Analysen lokal sichern, damit sie einen Refresh überleben.
+    _ANALYSIS_KEY: "sektor_gang_analysis_v1",
+    _saveAnalysis() {
+      try {
+        localStorage.setItem(this._ANALYSIS_KEY, JSON.stringify({
+          analysis: this.analysis, anaOpen: this.anaOpen,
+        }));
+      } catch (e) { /* Speicher voll / privater Modus — ignorieren */ }
+    },
+    _loadAnalysis() {
+      try {
+        const raw = localStorage.getItem(this._ANALYSIS_KEY);
+        if (!raw) return;
+        const d = JSON.parse(raw);
+        if (d && d.analysis) this.analysis = d.analysis;
+        if (d && d.anaOpen) this.anaOpen = d.anaOpen;
+      } catch (e) { /* defekt / ignorieren */ }
+    },
+    // Lokal gespeicherte Analysen verwerfen (falls die Matrix sich geändert hat).
+    clearSavedAnalysis() {
+      if (!confirm("Alle lokal gespeicherten Analyse-Texte verwerfen? (Die Matrix bleibt unberührt.)")) return;
+      this.analysis = {}; this.anaOpen = {};
+      try { localStorage.removeItem(this._ANALYSIS_KEY); } catch (e) {}
     },
     // deutsches Label -> Typ-Key (für die Chip-Farbe in der Analyse)
     relKeyOf(label) {
