@@ -273,20 +273,33 @@ async def post_personnel_to_discord(
     # gesetzt ist, bleibt der vorhandene Embed unangetastet — erst Archivieren
     # löscht ihn. Re-Posting nach manuellen Discord-Aenderungen vermeidet
     # ungewollte Dopplungen im Admin-Channel.
-    if m.personnel_discord_message_id:
-        raise HTTPException(
-            409,
-            "Personal-Bedarf für diese Mission wurde bereits gepostet. "
-            "Erst Auftrag archivieren wenn ein neuer Stand gepostet werden soll."
-        )
-
-    channel_id = (await settings_get(session, "personnel_admin_channel_id", "")).strip()
+    # Zielchannel: Crews mit personnel_own_channel (z.B. Questgeber) bekommen
+    # den Personal-Bedarf in ihren EIGENEN Auftrags-Channel; sonst globaler
+    # Admin-Channel.
+    admin_channel = (await settings_get(session, "personnel_admin_channel_id", "")).strip()
+    if getattr(crew, "personnel_own_channel", False) and (crew.discord_channel_id or "").strip():
+        channel_id = (crew.discord_channel_id or "").strip()
+    else:
+        channel_id = admin_channel
     if not channel_id:
         raise HTTPException(
             400,
-            "Kein Admin-Channel für Personal-Posts gesetzt. "
-            "Bitte in den Settings 'personnel_admin_channel_id' eintragen."
+            "Kein Ziel-Channel für Personal-Posts. Admin-Channel in den Settings "
+            "setzen — oder die Crew auf einen eigenen Channel stellen.",
         )
+
+    # Re-Send erlaubt (Replace-Pattern): vorhandenen Embed zuerst löschen,
+    # damit immer nur der aktuellste Stand im Ziel-Channel steht.
+    if m.personnel_discord_message_id:
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as cli:
+                await cli.post(
+                    f"{app_settings.bot_api_url}/delete_message",
+                    json={"channel_id": channel_id, "message_id": m.personnel_discord_message_id},
+                )
+        except Exception:
+            pass  # best-effort — alte Nachricht evtl. schon weg
+        m.personnel_discord_message_id = ""
 
     slot = _slot_for(m)
     status_label = {

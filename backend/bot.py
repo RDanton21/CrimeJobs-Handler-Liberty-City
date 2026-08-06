@@ -679,6 +679,11 @@ async def _auto_post_personnel(session, mission: Mission) -> None:
     if crew is None:
         return
 
+    # Crews mit personnel_own_channel (z.B. Questgeber) bekommen den Personal-
+    # Bedarf in ihren EIGENEN Auftrags-Channel statt in den Admin-Channel.
+    if getattr(crew, "personnel_own_channel", False) and (crew.discord_channel_id or "").strip():
+        channel_id = (crew.discord_channel_id or "").strip()
+
     # Neuen Embed senden
     try:
         ch = client.get_channel(int(channel_id)) or await client.fetch_channel(int(channel_id))

@@ -49,6 +49,7 @@ async def init_db() -> None:
         await _migrate_add_column_if_missing(
             conn, "crews", "crime_business_channel_id", "VARCHAR(40) NOT NULL DEFAULT ''"
         )
+        await _migrate_add_column_if_missing(conn, "crews", "personnel_own_channel", "BOOLEAN NOT NULL DEFAULT 0")
         await _migrate_add_column_if_missing(
             conn, "crews", "bonus_points", "INTEGER NOT NULL DEFAULT 0"
         )
