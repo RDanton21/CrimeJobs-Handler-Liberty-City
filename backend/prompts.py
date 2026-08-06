@@ -722,16 +722,19 @@ GANG_ANALYSIS_SYSTEM_PROMPT = (
     '\'Konfrontativ, überschätzt sich\' oder \'Kooperativ und vernetzt\'>", '
     '"zusammenfassung": "<2-4 Sätze: wie die Gruppierung zur Stadt steht, ob '
     'Selbst- und Fremdbild zusammenpassen, plus eine kurze Empfehlung>", '
-    '"wortlaut": "<2-4 Sätze: DIESELBE Einschätzung, aber im WORTLAUT von Il '
-    "Padrino — dem alten Boss, der ueber allem steht. Kalt, ruhig, "
-    "herablassend-gelassen, Mafia-Don-Ton; er spricht ueber diese Gruppierung "
-    "wie ueber ein Werkzeug oder ein Aergernis, mit leiser Autoritaet und "
-    "Gewicht in wenigen Worten. Keine Vulgaritaet, keine Emojis, keine fremden "
-    'Gruppierungs-Namen.>"}\n\n'
+    '"wortlaut": "<2-4 Sätze: DIESELBE Einschätzung, aber gesprochen als '
+    "MIGUEL — die rechte Hand des Big Boss. Miguel hat vom Boss dessen Urteil "
+    "ueber DIESE Gruppierung bekommen UND den Auftrag, es ihr auszurichten. Er "
+    "spricht die Gruppierung direkt an ('ihr') und ueberbringt das Wort des "
+    "Bosses — loyal, ruhig, bestimmt, mit der Autoritaet dessen im Ruecken, der "
+    "ihn schickt, aber ohne selbst der Boss zu sein. Formulierungen wie 'Der "
+    "Boss laesst euch ausrichten ...', 'Ich bring euch nur seine Worte ...', "
+    "'Er hat ein Auge auf euch'. Kalt, knapp, Respekt einfordernd. Keine "
+    'Vulgaritaet, keine Emojis, keine fremden Gruppierungs-Namen.>"}\n\n'
     "Deutsch, knapp, ohne Floskeln. Der titel ist eine Charakterisierung, "
-    "keine blosse Wiederholung des Namens. 'wortlaut' ist reine Stimme des "
-    "Bosses, kein Analyse-Jargon — so, wie Il Padrino es seinen Leuten sagen "
-    "wuerde."
+    "keine blosse Wiederholung des Namens. 'wortlaut' ist die Stimme von "
+    "Miguel, der das Wort des Bosses an die Gruppierung ueberbringt — kein "
+    "Analyse-Jargon, sondern eine direkte Ansage im Auftrag des Bosses."
 )
 
 
