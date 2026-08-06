@@ -3237,6 +3237,23 @@ function relationsSurvey() {
       return ({ "verbündet": "ALLIED", "geschäftlich": "BUSINESS", "neutral": "NEUTRAL",
                 "rivalisierend": "RIVAL", "feindlich": "HOSTILE" })[label] || "";
     },
+    // Alle finalen Beziehungen einer Gruppierung aus der Matrix, nach Typ gruppiert
+    // (für die Aufschlüsselung unter der Analyse). Nutzt denselben finalValue wie
+    // die Matrix oben, damit Entwurf und übernommener Stand konsistent sind.
+    finalRelationsFor(crewId) {
+      const items = this.matrix.items || [];
+      const groups = {};
+      for (const p of items) {
+        if (p.a_id !== crewId && p.b_id !== crewId) continue;
+        const val = this.finalValue(p);
+        if (!val) continue;
+        const other = p.a_id === crewId ? p.b_name : p.a_name;
+        (groups[val] = groups[val] || []).push(other);
+      }
+      return this.relOptions
+        .filter(o => groups[o.v])
+        .map(o => ({ type: o.v, label: o.label, others: groups[o.v].slice().sort() }));
+    },
     // Kuchendiagramm (Donut) der Befund-Verteilung als SVG-Segmente.
     get donut() {
       const z = this.matrix.zusammenfassung || {};

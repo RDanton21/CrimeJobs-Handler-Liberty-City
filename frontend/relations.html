@@ -6,7 +6,7 @@
   <title>Crime Automation — Beziehungs-Erhebung</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260806b" />
+  <link rel="stylesheet" href="/static/style.css?v=20260806c" />
 </head>
 <body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
   <div x-data="relationsSurvey()" x-init="init()" class="max-w-screen-2xl mx-auto p-6">
@@ -388,6 +388,25 @@
               <div x-show="anaOpen[g.crew_id]" x-cloak class="px-4 pb-3 border-t border-zinc-800/70 pt-3">
                 <p x-show="analysis[g.crew_id]?.zusammenfassung" class="text-sm text-purple-200/90 mb-3 leading-relaxed"
                    x-text="analysis[g.crew_id]?.zusammenfassung"></p>
+
+                <!-- Beziehungs-Aufschlüsselung aus der finalen Matrix -->
+                <div class="mb-3">
+                  <div class="text-[11px] uppercase tracking-wide text-zinc-500 mb-1.5">Beziehungen laut finaler Matrix</div>
+                  <template x-if="finalRelationsFor(g.crew_id).length">
+                    <div class="space-y-1">
+                      <template x-for="grp in finalRelationsFor(g.crew_id)" :key="grp.type">
+                        <div class="text-xs flex items-start gap-2 flex-wrap">
+                          <span :class="chip(grp.type)" class="px-1.5 py-0.5 rounded shrink-0" x-text="`${grp.label} (${grp.others.length})`"></span>
+                          <span class="text-zinc-300 leading-relaxed" x-text="grp.others.join(', ')"></span>
+                        </div>
+                      </template>
+                    </div>
+                  </template>
+                  <p x-show="!finalRelationsFor(g.crew_id).length" class="text-xs text-zinc-600">
+                    Noch keine finalen Beziehungen in der Matrix — oben Werte übernehmen.
+                  </p>
+                </div>
+
                 <p x-show="analysis[g.crew_id] && !g.konflikte.length" class="text-xs text-zinc-500 mb-2">
                   Keine Reibungspunkte — diese Gruppierung wird von allen so gesehen, wie sie sich selbst sieht.
                 </p>
@@ -484,6 +503,6 @@
     </section>
   </div>
 
-  <script src="/static/app.js?v=20260806b"></script>
+  <script src="/static/app.js?v=20260806c"></script>
 </body>
 </html>
