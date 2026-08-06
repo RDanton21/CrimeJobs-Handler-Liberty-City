@@ -12,6 +12,7 @@ class CrewBase(BaseModel):
     crime_business_channel_id: str = ""
     discord_channel_id: str = ""
     info_channel_id: str = ""
+    personnel_own_channel: bool = False
     district: str = ""
     color_hex: str = "#b91c1c"
     bonus_points: int = 0
@@ -29,6 +30,7 @@ class CrewUpdate(BaseModel):
     crime_business_channel_id: str | None = None
     discord_channel_id: str | None = None
     info_channel_id: str | None = None
+    personnel_own_channel: bool | None = None
     district: str | None = None
     color_hex: str | None = None
     bonus_points: int | None = None  # absolute Setzung — für Reset auf 0

@@ -758,7 +758,7 @@ function crewPage() {
   const id = parseInt(location.pathname.split("/").pop(), 10);
   return {
     crewId: id,
-    crew: { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", district: "", color_hex: "#b91c1c", bonus_points: 0 },
+    crew: { name: "", story_background: "", crime_business: "", crime_business_channel_id: "", discord_channel_id: "", info_channel_id: "", personnel_own_channel: false, district: "", color_hex: "#b91c1c", bonus_points: 0 },
     bonusFreeValue: null,
     DISTRICTS,
     allCrews: [],
@@ -1162,6 +1162,7 @@ function crewPage() {
           crime_business_channel_id: this.crew.crime_business_channel_id || "",
           discord_channel_id: this.crew.discord_channel_id,
           info_channel_id: this.crew.info_channel_id,
+          personnel_own_channel: !!this.crew.personnel_own_channel,
           district: this.crew.district || "",
           color_hex: this.crew.color_hex,
         });

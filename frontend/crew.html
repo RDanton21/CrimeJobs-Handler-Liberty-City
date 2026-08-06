@@ -6,7 +6,7 @@
   <title>Crime Automation — Crew</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260806n" />
+  <link rel="stylesheet" href="/static/style.css?v=20260806o" />
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
@@ -44,6 +44,10 @@
           <input x-model="crew.discord_channel_id" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3" />
           <label class="block text-xs text-zinc-400 mb-1">Zusatzinfo-Channel-ID (Boss-Feedback)</label>
           <input x-model="crew.info_channel_id" class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3" />
+          <label class="flex items-start gap-2 mb-3 cursor-pointer text-xs text-zinc-300">
+            <input type="checkbox" x-model="crew.personnel_own_channel" class="w-4 h-4 mt-0.5 accent-red-500" />
+            <span>🧩 Personalbedarf in den <strong>Auftrags-Channel</strong> posten (statt in den globalen Admin-Channel) — z. B. für Questgeber</span>
+          </label>
           <label class="block text-xs text-zinc-400 mb-1">Stadtteil</label>
           <select x-model="crew.district"
                   class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 mb-3">
@@ -868,6 +872,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20260806n"></script>
+  <script src="/static/app.js?v=20260806o"></script>
 </body>
 </html>
