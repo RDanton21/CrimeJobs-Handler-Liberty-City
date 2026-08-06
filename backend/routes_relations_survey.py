@@ -630,6 +630,7 @@ async def boss_ansage_send(
         "description": text[:4000],
         "color": 0xE62958,  # CYQORE Crimson
         "footer": {"text": "L'Occhio del Padrino"},
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
     try:
         async with httpx.AsyncClient(timeout=20.0) as cli:
