@@ -613,13 +613,14 @@ async def boss_ansage_send(
     session: AsyncSession = Depends(get_session),
 ):
     """Postet die Miguel-Boss-Ansage einer Gruppierung als Discord-Embed
-    (crimson Farb-Leiste) in ihren Auftrags-Channel."""
+    (crimson Farb-Leiste) in ihren CRIME-BUSINESS-Channel — der wird beim
+    Archivieren NICHT geleert, die Ansage bleibt also dauerhaft erhalten."""
     crew = await session.get(Crew, crew_id)
     if not crew:
         raise HTTPException(404, "Gruppierung nicht gefunden")
-    channel = (crew.discord_channel_id or "").strip()
+    channel = (crew.crime_business_channel_id or "").strip()
     if not channel:
-        raise HTTPException(400, "Keine Auftrags-Channel-ID für diese Gruppierung")
+        raise HTTPException(400, "Keine Crime-Business-Channel-ID für diese Gruppierung")
     text = (payload.wortlaut or "").strip()
     if not text:
         raise HTTPException(400, "Kein Wortlaut übergeben")

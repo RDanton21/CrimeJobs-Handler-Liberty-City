@@ -3285,7 +3285,7 @@ function relationsSurvey() {
     async sendBossAnsage(g) {
       const a = this.analysis[g.crew_id];
       if (!a || !a.wortlaut) { alert("Erst die Analyse generieren (🪄 KI / ↻ neu)."); return; }
-      if (!confirm(`Boss-Ansage (Miguel) als Embed in den Auftrags-Channel von ${g.name} posten?`)) return;
+      if (!confirm(`Boss-Ansage (Miguel) als Embed in den Crime-Business-Channel von ${g.name} posten?\n\n(Bleibt beim Archivieren erhalten.)`)) return;
       this.bossSending[g.crew_id] = true;
       try {
         await api.post(`/api/relations/survey/boss-ansage/${g.crew_id}/send`,
