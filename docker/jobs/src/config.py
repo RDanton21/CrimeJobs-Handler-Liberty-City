@@ -82,7 +82,6 @@ def _parse_event_dt(value: str | None, fallback: str) -> datetime:
 # Ohne EVENT_PERIODS greifen die Defaults unten; EVENT_START/EVENT_END werden
 # weiterhin unterstuetzt und ueberschreiben dann den ersten Zeitraum.
 _DEFAULT_PERIODS = (
-    "2026-07-31T00:00~2026-08-06T23:59:Testphase,"
     "2026-08-07T18:00~2026-08-16T23:50:Liberty erwacht..."
 )
 
