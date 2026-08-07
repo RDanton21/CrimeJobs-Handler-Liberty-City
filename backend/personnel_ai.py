@@ -92,6 +92,7 @@ Regeln:
   Im Feld „Slot" IMMER Uhrzeiten aus diesem Fenster nennen, z.B. „22:00–23:30",
   „ab 19:00", „00:30–01:45". NIE Uhrzeiten wie „04:00", „08:00", „14:00".
 - Zahlen IMMER als Ziffern, nie ausgeschrieben („2 Questgeber" statt „zwei").
+- Rollen-Zeile IMMER mit „×" direkt nach der Anzahl: „3× Tankwart", NIE „3 Tankwart".
 """
 
 
@@ -166,120 +167,111 @@ TEMPLATES: list[dict] = [
         "id": "tag2_tribut",
         "label": "Tag 2 — Der Tribut (Schutzgeld)",
         "content": """\
-**Mittler:** Miguel (formell, kalt — „die Stimme")
-
 **Sektor Questgeber**
-- 3–5× Tribut-Pflichtige aus den **13 Zivil-Firmen**
-  → Funktion: zahlen Schutzgeld, sind feste RP-Spieler
-  → Location: deren jeweilige Firmen-Standorte
-  → Kostüm: bereits eigene Charaktere
 
-- 1× #5 Bar-/Restaurantchef ODER #6 Tankwart als „Widerständler"
-  → Funktion: zahlt NICHT freiwillig — Eskalations-Spielraum
-  → Location: an einem zentralen Ort im Gang-Revier
-  → Kostüm: Schürze/Lokal-Logo bzw. Arbeitskleidung
+**3× Tribut-Pflichtige** (aus den 13 Zivil-Firmen)
+• Funktion: zahlen Schutzgeld, feste RP-Spieler
+• Location: eigene Firmen-Standorte
+• Kostüm: eigene Charaktere
 
-- Optional: 1× #2 Korrupter LCPD
-  → Funktion: erscheint als Drohbacking, wenn Widerständler hart wird
+**1× Widerständler**
+• Funktion: zahlt NICHT freiwillig — Eskalations-Spielraum
+• Location: zentraler Ort im Gang-Revier
+• Kostüm: Schürze/Lokal-Logo oder Arbeitskleidung
 
-**Slot:** 60–90 Min, fließend zwischen 17:00 und 02:00 verteilt (1 Server-Abend)
-**Team-Auslastung:** Miguel + 1 Questgeber in Rotation (Widerständler + LCPD)\
+**1× Korrupter Cop** (optional)
+• Funktion: Drohbacking, wenn der Widerständler hart wird
+• Location: taucht bei Eskalation auf
+• Kostüm: LCPD-Uniform
+
+**Slot:** 60–90 Min, fließend zwischen 17:00 und 02:00
+**Team-Auslastung:** 2 Questgeber in Rotation\
 """
     },
     {
         "id": "tag4_stille",
         "label": "Tag 4 — Die Stille (Stealth)",
         "content": """\
-**Mittler:** Der Fixer (pragmatisch, schnoddrig)
+**Sektor Questgeber** (3 Lieferungen)
 
-**Sektor Questgeber (3 Lieferungen)**
-- 1× #11 Lieferant ODER #4 Bankleiter ODER #10 Anwalt als Empfänger
-  → Funktion: nimmt Lieferung still entgegen
-  → Location: variiert pro Lieferung
-  → Kostüm: passend zum Archetype
+**1× Empfänger**
+• Funktion: nimmt die Lieferung still entgegen
+• Location: variiert pro Lieferung
+• Kostüm: unauffällig, zivil
 
-- 1× #12 Wachmann ODER #1 Hafenmeister als Hindernis
-  → Funktion: Stealth-Patrouille, kein direkter Konflikt
-  → Location: am Übergabe-Ort
-  → Kostüm: Security-Uniform / Hi-Viz
+**1× Wache**
+• Funktion: Stealth-Patrouille, kein direkter Konflikt
+• Location: am Übergabe-Ort
+• Kostüm: Security-Uniform / Hi-Viz
 
-- Optional: 1× #13 Snitch ODER #6 Tankwart als Augenzeuge
-  → Funktion: könnte sehen, wäre Risiko-Vektor (für RP-Drama)
+**1× Augenzeuge** (optional)
+• Funktion: könnte etwas sehen — Risiko-Vektor fürs RP
+• Location: in der Nähe des Übergabe-Orts
+• Kostüm: zivil
 
-**Slot:** 45–60 Min pro Lieferung, gestaffelt über 2 Server-Abende (jeweils 17:00–02:00)
-**Team-Auslastung:** Fixer + 2 Questgeber in Rotation
-**Hinweis:** Bei 21 Gangs × 3 Lieferungen nur 30 % Live-RP, Rest schriftlich + Gang-Eigen-NPCs\
+**Slot:** 45–60 Min pro Lieferung, gestaffelt über 2 Abende (17:00–02:00)
+**Team-Auslastung:** 2 Questgeber in Rotation\
 """
     },
     {
         "id": "tag7_verrat",
         "label": "Tag 7 — Der Verrat (privat an Top 3)",
         "content": """\
-**Mittler:** Der Skrupellose (brutal-direkt, privat)
+**Sektor Questgeber** — KEINE.
+Reiner Gang-vs-Gang-Auftrag: Ziel ist eine andere Spieler-Gang, kein NPC-Personal nötig.
 
-**Sektor Questgeber** KEINE — Ziel ist eine andere Spieler-Gang.
-Das ist ein reiner Gang-vs-Gang-Auftrag, das Personal-Setup besteht
-aus dem Mittler allein.
+**1× Snitch** (optional)
+• Funktion: „Wer hat geredet?"-Hebel, falls die Gegenseite mauert
+• Location: später, nur bei Eskalation
+• Kostüm: zivil
 
-- Optional: 1× #13 Snitch
-  → Funktion: „Wer hat geredet?"-Hebel falls die Top-3-Gang mauert
-  → Location: später, falls Eskalation nötig
-
-**Slot:** 3× ~20 Min Mittler-Einzelgespräch mit jeweils einer Top-3-Gang, im Server-Fenster 17:00–02:00
-**Team-Auslastung:** **nur 1 Person** (Skrupellose). Geringster Personal-Tag.\
+**Slot:** 3× ~20 Min Einzelgespräche mit je einer Top-3-Gang, im Fenster 17:00–02:00
+**Team-Auslastung:** minimal — nur bei Bedarf 1 Questgeber (Snitch)\
 """
     },
     {
         "id": "tag9_probe",
         "label": "Tag 9 — Die Probe (Rivalitäts-Eskalation)",
         "content": """\
-**Mittler:** Miguel + Gang-Mittler (Rotation)
+**Sektor Questgeber** — KEINE.
+Spieler vs. Spieler: jede Gang bekommt privat ihre Rivalen-Gang zugewiesen.
 
-**Sektor Questgeber** KEINE — Spieler vs. Spieler.
-Jede Gang bekommt privat ihre zugewiesene Rivalen-Gang aus
-CREW_RELATIONS.md. Akteure sind ausschließlich Spieler-Gangs.
+**1× LCPD-Detective** (optional)
+• Funktion: Hintergrund-Ermittler — erhöht den Druck
+• Location: streift sichtbar durch die Revier-Konflikte
+• Kostüm: ziviler Ermittler / LCPD
 
-- Optional: 1× #3 LCPD-Detective
-  → Funktion: „Hintergrund-Ermittler" — erhöht Druck
-  → Location: streift sichtbar durch Revier-Konflikte
-
-**Slot:** Übergaben in der ersten Server-Hälfte (17:00–21:00), Abschluss bis 02:00 des Folgetags
-**Team-Auslastung:** Miguel + 1 Questgeber für Schicht-Übergaben\
+**Slot:** Übergaben in der ersten Server-Hälfte (17:00–21:00), Abschluss bis 02:00
+**Team-Auslastung:** 1 Questgeber für Schicht-Übergaben\
 """
     },
     {
         "id": "tag10_krone",
         "label": "Tag 10 — Die Krone (individueller Coup)",
         "content": """\
-**Mittler:** Big Boss DIREKT (Voice-Over) + Gang-Mittler für Coup-Übergabe
+**Sektor Questgeber** — abhängig vom zugewiesenen Coup-Typ (unten konkretisieren):
 
-**Sektor Questgeber** abhängig vom zugewiesenen Coup-Typ:
-
-- **Bank-Heist:** #4 Kassierer + #4 Bankleiter + #15 Geisel + #2/#3 LCPD-Reaktion
-- **Polit-Mord:** #9 Politiker + #12 Bodyguard + #8 Reporter
-- **Großentführung:** #15 Opfer + #12 Wachmann
-- **Geldwäsche-Schlag:** #10 Anwalt + #4 Bankier + #11 Geld-Kurier
-- **Hafen-Heist:** #1 Hafenmeister + #12 Hafenwache + #11 Trucker
-- **Drogen-Großschlag:** #14 „Doc" + #11 Lieferant + #13 Informant
+• **Bank-Heist:** 2× Kassierer/Bankleiter · 1× Geisel · LCPD-Reaktion
+• **Polit-Mord:** 1× Politiker · 1× Bodyguard · 1× Reporter
+• **Großentführung:** 1× Opfer · 1× Wachmann
+• **Geldwäsche-Schlag:** 1× Anwalt · 1× Bankier · 1× Geld-Kurier
+• **Hafen-Heist:** 1× Hafenmeister · 1× Hafenwache · 1× Trucker
+• **Drogen-Großschlag:** 1× „Doc" · 1× Lieferant · 1× Informant
 
 **Slot:** 60–120 Min pro Gang, gestaffelt zwischen 19:00 und 02:00
-**Team-Auslastung:** **maximum** — 4–6 Personen, jede in 2–3 Rollen rotierend
-**Wichtig:** Coup-Typen pro Gang vorab festlegen (Rotation), damit nicht 21× Bank-Heist parallel läuft.
-
-→ Konkreten Coup-Typ + NPCs in diesem Brief unten ergänzen.\
+**Team-Auslastung:** hoch — 4–6 Personen, je in 2–3 Rollen rotierend\
 """
     },
     {
         "id": "empty",
         "label": "Leer (Custom)",
         "content": """\
-**Mittler:**
-
 **Sektor Questgeber**
-- 1× #<Nr> <Archetype>
-  → Funktion:
-  → Location:
-  → Kostüm:
+
+**N× <Rollen-Titel>**
+• Funktion:
+• Location:
+• Kostüm:
 
 **Slot:**
 **Team-Auslastung:**\
