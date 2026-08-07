@@ -129,6 +129,7 @@ function dashboard() {
     notifications: {},
     seenAt: JSON.parse(localStorage.getItem("crewSeenAt") || "{}"),
     archivingAll: false,
+    archivingCrew: {},
     // Personal-Bedarf Live-Feed
     personnelMode: localStorage.getItem("personnelMode") || "active",  // 'active' | '24h' | '7d' | '30d'
     personnel: { items: [], count: 0, etag: "", generated_at: "" },
@@ -426,6 +427,28 @@ function dashboard() {
         await Promise.all([this.loadCrews(), this.loadStats(), this.loadNotifications()]);
       } finally {
         this.archivingAll = false;
+      }
+    },
+    // Nur den/die aktiven Auftrag(e) EINER Gang archivieren — direkt von der Karte.
+    async archiveCrew(c) {
+      if (this.archivingCrew[c.id]) return;
+      if (!confirm(`Aktiven Auftrag von „${c.name}" archivieren?\n\nDiscord-Posts werden gelöscht, Boss-Feedback wird ins Archiv gesnapshottet.`)) return;
+      this.archivingCrew[c.id] = true;
+      try {
+        const missions = await api.get("/api/missions?archived=false&limit=500");
+        const mine = (missions || []).filter(m => m.crew_id === c.id);
+        if (!mine.length) { alert(`„${c.name}" hat gerade keinen aktiven Auftrag.`); return; }
+        let ok = 0, fail = 0;
+        for (const m of mine) {
+          try { await api.del(`/api/missions/${m.id}`); ok++; }
+          catch (e) { fail++; }
+        }
+        alert(`„${c.name}": ${ok} archiviert` + (fail > 0 ? `, ${fail} Fehler` : "") + ".");
+        await Promise.all([this.loadCrews(), this.loadStats(), this.loadNotifications()]);
+      } catch (e) {
+        alert("Archivieren fehlgeschlagen: " + (e.message || e));
+      } finally {
+        this.archivingCrew[c.id] = false;
       }
     },
     async loadNotifications() {
