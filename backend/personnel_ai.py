@@ -61,27 +61,33 @@ Quest-NPC-Archetypen (15 — nummeriert, immer mit Nummer referenzieren):
 
 
 PERSONNEL_BRIEF_FORMAT_DE = """\
-Format des Briefings (Markdown, deutsch, prägnant):
-
-**Mittler:** <Mittler-Name> (passend zum Ton des Auftrags)
+Format des Briefings (Markdown, deutsch, ÜBERSICHTLICH & knapp):
 
 **Sektor Questgeber**
-- N× #<Nr> <Archetype>
-  → Funktion: <was die Rolle im Auftrag tut>
-  → Location: <Ort/Stadtteil, passend zur Gang>
-  → Kostüm: <Trigger>
 
-**Slot:** <ungefähre Dauer + Zeitfenster>
-**Team-Auslastung:** <Mittler + N Questgeber in Rotation>
+**N× <kurzer Rollen-Titel>**
+• Funktion: <ein knapper Satz>
+• Location: <Ort/Stadtteil>
+• Kostüm: <Trigger>
+
+*(weitere Rollen nach demselben Muster, je durch EINE Leerzeile getrennt)*
+
+**Slot:** <Zeitfenster>
+**Team-Auslastung:** <N Questgeber in Rotation>
 
 Regeln:
-- Maximal 4 NPC-Rollen pro Mission, sonst wird's unspielbar
-- Nutze NUR Archetypen aus dem Pool (mit Nummer)
-- Locations sollen zur Gang (Stadtteil) passen, wenn bekannt
-- Wenn der Auftrag rein Gang-vs-Gang ist (z. B. Verrats- oder Rivalitäts-Auftrag),
-  KEINE NPCs erfinden — nur Mittler nennen und kurz begründen warum keine NPCs
-- Keine Story-Wiederholung des Auftrags, NUR Personal-Planung
-- Antwort ist NUR der Markdown-Brief, kein Vor- oder Nachtext
+- KEINE „Mittler"-Zeile, keine Charakter-Beschreibungen, keine Story, keine
+  Auftragsbeschreibung — NUR die Personal-Planung.
+- Maximal 4 NPC-Rollen pro Mission, sonst wird's unspielbar.
+- Rollen-Titel KURZ und konkret — EIN Begriff (z.B. „Tankwart", „Informant"),
+  KEINE Schrägstrich-Listen wie „Tankwart / 24/7 Shops / Taco Wagen" und KEINE
+  Archetyp-Nummer (#6 o.ä.) im Titel.
+- Nutze intern nur Rollen aus dem Archetyp-Pool, gib sie aber sauber benannt aus.
+- Genau drei Bullets pro Rolle (Funktion, Location, Kostüm) — je EINE knappe Zeile.
+- Locations sollen zur Gang (Stadtteil) passen, wenn bekannt.
+- Wenn der Auftrag rein Gang-vs-Gang ist (Verrat/Rivalität): KEINE NPCs — nur eine
+  kurze Zeile, warum keine NPCs nötig sind.
+- Antwort ist NUR der Markdown-Brief, kein Vor- oder Nachtext.
 - AKTIONS-ZEITFENSTER für Slot: zwischen 17:00 und 02:00 (Server-Zeiten).
   Im Feld „Slot" IMMER Uhrzeiten aus diesem Fenster nennen, z.B. „22:00–23:30",
   „ab 19:00", „00:30–01:45". NIE Uhrzeiten wie „04:00", „08:00", „14:00".
@@ -140,10 +146,10 @@ async def generate_personnel_brief(
         # Big-Boss-Prompt, sonst kommt wieder Auftragstext statt Personal-Plan.
         system = (
             "Du bist ein Spielleiter-Assistent für ein GTA-RP-Event. "
-            "Du planst Personal (Mittler + NPCs) für Quest-Aufträge. "
-            "Du schreibst ausschließlich kompakte Markdown-Briefings im "
-            "vorgegebenen Format — keine Story, keine Auftragsbeschreibung, "
-            "nur Personal-Planung."
+            "Du planst das NPC-/Questgeber-Personal für Quest-Aufträge. "
+            "Du schreibst ausschließlich kompakte, übersichtliche Markdown-"
+            "Briefings im vorgegebenen Format — keine Mittler-Zeile, keine "
+            "Story, keine Auftragsbeschreibung, nur Personal-Planung."
         )
         text = await provider.generate(prompt, model=model, system_prompt=system)
         return _force_slot((text or "").strip(), slot)
