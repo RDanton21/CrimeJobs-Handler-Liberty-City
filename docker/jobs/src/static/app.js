@@ -96,9 +96,24 @@ function jobsBoard() {
       for (let line of t.split('\n')) {
         line = line.trim();
         if (!line) continue;
-        if (line === '---') { out.push('<hr class="my-2 border-[#3d4a4d]/50">'); continue; }
-        // **fett**
-        line = line.replace(/\*\*(.+?)\*\*/g, '<strong class="text-zinc-200">$1</strong>');
+        // Trenner: --- oder eine Linie aus ━ ─ — (Discord-Divider)
+        if (line === '---' || /^[━─—-]{3,}$/.test(line)) {
+          out.push('<hr class="my-2 border-[#3d4a4d]/50">'); continue;
+        }
+        // Discord-Header: ### / ## / #  (Markdown-Zeichen im Text danach entfernt)
+        const h = line.match(/^(#{1,3})\s+(.*)$/);
+        if (h) {
+          const txt = h[2].replace(/\*\*(.+?)\*\*/g, '$1').replace(/\*(.+?)\*/g, '$1');
+          const cls = h[1].length === 1 ? 'text-sm font-bold text-zinc-100 mt-2'
+                    : h[1].length === 2 ? 'text-[13px] font-semibold text-zinc-200 mt-2'
+                    : 'text-xs font-semibold text-[#d9ae6e] mt-1.5';
+          out.push('<div class="' + cls + '">' + txt + '</div>');
+          continue;
+        }
+        // **fett** zuerst, dann *kursiv*
+        line = line
+          .replace(/\*\*(.+?)\*\*/g, '<strong class="text-zinc-200">$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em class="text-zinc-400">$1</em>');
         if (line.startsWith('→ ')) {
           const rest = line.slice(2);
           const m = rest.match(/^([^:]{1,20}):\s*(.*)$/);
@@ -106,7 +121,7 @@ function jobsBoard() {
             ? '<span class="text-[#d9ae6e]">' + m[1] + ':</span> ' + m[2]
             : rest;
           out.push('<div class="pl-4 text-zinc-400">' + body + '</div>');
-        } else if (line.startsWith('- ')) {
+        } else if (line.startsWith('- ') || line.startsWith('• ')) {
           out.push('<div class="mt-1.5 font-medium text-zinc-300">' + line.slice(2) + '</div>');
         } else {
           out.push('<div class="mt-1">' + line + '</div>');
