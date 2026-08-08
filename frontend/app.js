@@ -906,6 +906,15 @@ function crewPage() {
     async parseSlots() {
       const ed = this.slotsEditor;
       if (!ed.missionId || ed.parsing || ed.saving) return;
+      // Ist für DIESE Mission gerade ein ungespeicherter Personal-Brief-Edit
+      // offen? Dann erst speichern — sonst würde der Parse den ALTEN Bedarf
+      // aus der DB nehmen statt des soeben geänderten.
+      if (this.personnelEditingId === ed.missionId && (this.personnelDraftCrew || "").trim()) {
+        try {
+          const m = (this.missions || []).find(x => x.id === ed.missionId);
+          if (m) await this.savePersonnelCrew(m);
+        } catch (e) { /* weiter — notfalls mit DB-Stand parsen */ }
+      }
       const hasSaved = ed.rows.some(r => r.id);
       const warn = hasSaved
         ? "KI-Parse ersetzt ALLE Zeilen durch neue.\n\nAchtung: Beim anschließenden Speichern werden die bisherigen Slots gelöscht und neu angelegt — bereits eingetragene Spieler verlieren dabei ihren Platz.\n\nFortfahren?"
