@@ -71,6 +71,17 @@ function jobsBoard() {
       return rows;
     },
 
+    // Auftrags-Prosa (Post A etc.): nur Inline-Markdown (**fett** / *kursiv*),
+    // Zeilenumbrueche bleiben dem umgebenden whitespace-pre-line ueberlassen.
+    // WICHTIG: erst HTML escapen, dann formatieren (Text aus der DB, nie als Markup).
+    formatText(raw) {
+      if (!raw) return '';
+      return String(raw)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+        .replace(/\*\*([^*]+?)\*\*/g, '<strong class="text-zinc-100">$1</strong>')
+        .replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+    },
+
     // Personal-Brief lesbar machen. Der Text kommt als Markdown-artiger
     // Fliesstext aus der KI ("**Mittler:** ... - 1x #6 Tankwart -> Funktion: ...").
     // WICHTIG: erst HTML escapen, dann formatieren — der Text stammt aus

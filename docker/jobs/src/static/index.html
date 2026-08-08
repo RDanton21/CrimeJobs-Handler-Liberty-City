@@ -16,8 +16,8 @@
        Oswald        = Variable Font (latin/latin-ext), @font-face in tailwind.css -->
   <!-- ?v= bei jeder Asset-AEnderung hochzaehlen: bricht den Browser-Cache
        (max-age 3600), damit neue Layouts sofort ankommen -->
-  <link rel="stylesheet" href="/static/tailwind.css?v=20260808a" />
-  <script defer src="/static/app.js?v=20260808a"></script>
+  <link rel="stylesheet" href="/static/tailwind.css?v=20260808b" />
+  <script defer src="/static/app.js?v=20260808b"></script>
   <script defer src="/static/alpine.min.js"></script>
 </head>
 <body class="text-zinc-100 min-h-screen">
@@ -51,7 +51,7 @@
 
             <template x-if="zoomMission.content || zoomMission.content_excerpt">
               <p class="text-lg leading-relaxed text-zinc-100 whitespace-pre-line border-l-4 border-[#b98a4a]/50 pl-4 mb-5"
-                 x-text="zoomMission.content || zoomMission.content_excerpt"></p>
+                 x-html="formatText(zoomMission.content || zoomMission.content_excerpt)"></p>
             </template>
             <template x-if="!(zoomMission.content || zoomMission.content_excerpt)">
               <p class="text-[#b98a4a]/90 mb-5 text-base">🔒 Auftrag folgt beim Einsatz.</p>
@@ -480,7 +480,7 @@
                        falls das Backend noch die alte Kurzform liefert. -->
                   <p x-show="expanded[m.id]" x-cloak
                      class="text-sm text-zinc-300 mt-2 whitespace-pre-line border-l-2 border-[#3d4a4d] pl-3"
-                     x-text="m.content || m.content_excerpt"></p>
+                     x-html="formatText(m.content || m.content_excerpt)"></p>
 
                   <!-- Regie-Details: formatierter Personal-Brief (einklappbar) -->
                   <div x-show="briefOpen[m.id]" x-cloak
