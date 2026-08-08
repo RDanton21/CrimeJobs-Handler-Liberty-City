@@ -152,7 +152,7 @@ async def generate_personnel_brief(
             "Briefings im vorgegebenen Format — keine Mittler-Zeile, keine "
             "Story, keine Auftragsbeschreibung, nur Personal-Planung."
         )
-        text = await provider.generate(prompt, model=model, system_prompt=system)
+        text = await provider.generate(prompt, model=model, system_prompt=system, max_tokens=1800)
         return _force_slot((text or "").strip(), slot)
     except Exception:
         return ""

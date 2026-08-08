@@ -77,8 +77,10 @@ async def parse_slots(mission_id: int, session: AsyncSession = Depends(get_sessi
 
     user_prompt = build_personnel_slot_parse_prompt(brief)
     try:
+        # Höheres Limit: bei vielen Rollen (z.B. Konvois mit 8+8 Wachen) wird die
+        # Slot-JSON lang — mit dem 600er-Default wurde sie abgeschnitten (invalides JSON).
         text = await provider.generate(
-            user_prompt, system_prompt=PERSONNEL_SLOT_PARSE_SYSTEM_PROMPT
+            user_prompt, system_prompt=PERSONNEL_SLOT_PARSE_SYSTEM_PROMPT, max_tokens=3000
         )
     except Exception as exc:
         raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
