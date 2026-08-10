@@ -80,6 +80,7 @@ class MissionGenerateRequest(BaseModel):
     model: str | None = None
     extra_instructions: str = ""
     append_text: str = ""
+    boss_message_raw: str = ""  # optional: Klartext -> Il-Padrino-Stil, wird in den Boss-Feedback-Channel gepostet
     deadline_minutes: int | None = None
     scheduled_send_at: datetime | None = None
     event_at: datetime | None = None
@@ -94,6 +95,7 @@ class MissionRewriteRequest(BaseModel):
     model: str | None = None
     extra_instructions: str = ""
     append_text: str = ""
+    boss_message_raw: str = ""  # optional: Klartext -> Il-Padrino-Stil, wird in den Boss-Feedback-Channel gepostet
     deadline_minutes: int | None = None
     scheduled_send_at: datetime | None = None
     event_at: datetime | None = None

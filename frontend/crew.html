@@ -6,7 +6,7 @@
   <title>Crime Automation — Crew</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260808a" />
+  <link rel="stylesheet" href="/static/style.css?v=20260810a" />
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
@@ -358,6 +358,10 @@
               <span x-show="generating">Sende…</span>
             </button>
           </div>
+
+          <textarea x-model="genReq.boss_message_raw" rows="2"
+                    placeholder="🎩 Boss-Nachricht — Klartext eingeben, wird im Il-Padrino-Stil erzeugt und beim Generieren in den Boss-Feedback-Channel gepostet (optional)"
+                    class="w-full bg-zinc-950 border border-amber-900/50 rounded px-3 py-2 mb-3 text-sm"></textarea>
 
           <div class="mb-3 grid grid-cols-3 gap-2">
             <input type="number" min="0" x-model.number="genReq.deadline_value"
@@ -872,6 +876,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20260808a"></script>
+  <script src="/static/app.js?v=20260810a"></script>
 </body>
 </html>

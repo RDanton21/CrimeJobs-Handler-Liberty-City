@@ -789,7 +789,7 @@ function crewPage() {
     missions: [],
     newRel: { crew_b_id: "", relation_type: "neutral", notes: "" },
     mode: "generate", // 'generate' | 'rewrite'
-    genReq: { provider: "anthropic", model: "", extra_instructions: "", append_text: "", deadline_value: "", deadline_unit: "min", scheduled_send_at: "", event_at: "", slotFrom: "", slotTo: "", want_personnel: true },
+    genReq: { provider: "anthropic", model: "", extra_instructions: "", append_text: "", boss_message_raw: "", deadline_value: "", deadline_unit: "min", scheduled_send_at: "", event_at: "", slotFrom: "", slotTo: "", want_personnel: true },
     rewriteReq: { raw_input: "" },
     pendingImage: null,
     generating: false,
@@ -1495,6 +1495,7 @@ function crewPage() {
           model: this.genReq.model || null,
           extra_instructions: this.genReq.extra_instructions || "",
           append_text: this.genReq.append_text || "",
+          boss_message_raw: this.genReq.boss_message_raw || "",
           deadline_minutes: this._deadlineMinutes(),
           scheduled_send_at: this._scheduledSendIso(),
           event_at: this._eventAtIso(),
@@ -1504,6 +1505,7 @@ function crewPage() {
         await this._attachPendingImage(m && m.id);
         this.genReq.extra_instructions = "";
         this.genReq.append_text = "";
+        this.genReq.boss_message_raw = "";
         this.genReq.deadline_value = "";
         this.genReq.scheduled_send_at = "";
         this.genReq.event_at = "";
@@ -1557,6 +1559,7 @@ function crewPage() {
           model: this.genReq.model || null,
           extra_instructions: this.genReq.extra_instructions || "",
           append_text: this.genReq.append_text || "",
+          boss_message_raw: this.genReq.boss_message_raw || "",
           deadline_minutes: this._deadlineMinutes(),
           scheduled_send_at: this._scheduledSendIso(),
           event_at: this._eventAtIso(),
@@ -1567,6 +1570,7 @@ function crewPage() {
         this.rewriteReq.raw_input = "";
         this.genReq.extra_instructions = "";
         this.genReq.append_text = "";
+        this.genReq.boss_message_raw = "";
         this.genReq.deadline_value = "";
         this.genReq.scheduled_send_at = "";
         this.genReq.event_at = "";

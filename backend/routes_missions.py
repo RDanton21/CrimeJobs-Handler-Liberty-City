@@ -86,6 +86,44 @@ def _clean_ai_output(text: str) -> str:
     )
 
 
+async def _emit_boss_message_safe(provider, raw: str, crew, model: str) -> None:
+    """Optional: Klartext -> Il-Padrino-Stil -> in den Boss-Feedback-Channel
+    (crew.info_channel_id) posten. STRIKT additiv & fehlertolerant — jeder
+    Fehler hier wird verschluckt und darf die Auftragserstellung NIE beeinflussen.
+    Tut nur etwas, wenn raw befuellt UND ein info_channel_id gesetzt ist."""
+    try:
+        raw = (raw or "").strip()
+        if not raw:
+            return
+        channel = (getattr(crew, "info_channel_id", "") or "").strip()
+        if not channel:
+            return
+        try:
+            text = await provider.generate(
+                raw, model=model or None,
+                system_prompt=PADRINO_BOSS_SYSTEM_PROMPT,
+                max_tokens=900,
+            )
+        except Exception:
+            return
+        text = (text or "").strip()
+        if not text:
+            return
+        embed = {
+            "title": "🎩 Il Padrino",
+            "description": text[:3990],
+            "color": 0xE62958,  # CYQORE Crimson
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        async with httpx.AsyncClient(timeout=20.0) as cli:
+            await cli.post(
+                f"{settings.bot_api_url}/send_embed",
+                json={"channel_id": channel, "embed": embed},
+            )
+    except Exception:
+        pass  # niemals die Mission-Erstellung stoeren
+
+
 # Deutsche Zahlwörter → Ziffern. Wird auf jeden KI-Output angewandt, weil
 # die KI gerne literarisch ausschreibt („acht Minuten") auch wenn der
 # System-Prompt es verbietet. Defensive Linie 2.
@@ -168,6 +206,7 @@ async def _generate_personnel_safe(session: AsyncSession, mission_text: str,
     return await ai_personnel_brief(provider, mission_text, crew_name, crew_district)
 from .prompts import (
     MissionContext,
+    PADRINO_BOSS_SYSTEM_PROMPT,
     build_mission_suggestions_prompt,
     build_rewrite_prompt,
     build_slot_directive,
@@ -306,6 +345,8 @@ async def generate_mission(
     session.add(mission)
     await session.commit()
     await session.refresh(mission)
+    # Optional: Boss-Nachricht (Klartext -> Padrino-Stil) in den Boss-Feedback-Channel
+    await _emit_boss_message_safe(provider, payload.boss_message_raw, crew, payload.model or "")
     return mission
 
 
@@ -378,6 +419,8 @@ async def rewrite_mission(
     session.add(mission)
     await session.commit()
     await session.refresh(mission)
+    # Optional: Boss-Nachricht (Klartext -> Padrino-Stil) in den Boss-Feedback-Channel
+    await _emit_boss_message_safe(provider, payload.boss_message_raw, crew, payload.model or "")
     return mission
 
 
