@@ -790,6 +790,8 @@ function crewPage() {
     newRel: { crew_b_id: "", relation_type: "neutral", notes: "" },
     mode: "generate", // 'generate' | 'rewrite'
     genReq: { provider: "anthropic", model: "", extra_instructions: "", append_text: "", boss_message_raw: "", deadline_value: "", deadline_unit: "min", scheduled_send_at: "", event_at: "", slotFrom: "", slotTo: "", want_personnel: true },
+    bossMsgPreview: "",   // erzeugter Padrino-Text (Vorschau, editierbar)
+    bossMsgBusy: false,
     rewriteReq: { raw_input: "" },
     pendingImage: null,
     generating: false,
@@ -1486,6 +1488,37 @@ function crewPage() {
       catch (e) { alert("Bild-Upload fehlgeschlagen: " + e.message); }
     },
 
+    // Boss-Nachricht: Klartext -> Padrino-Stil erzeugen (Vorschau, kein Senden)
+    async genBossMessage() {
+      const raw = (this.genReq.boss_message_raw || "").trim();
+      if (!raw) { alert("Bitte Klartext für die Boss-Nachricht eingeben."); return; }
+      this.bossMsgBusy = true;
+      try {
+        const r = await api.post("/api/missions/boss-message/preview", {
+          crew_id: this.crewId,
+          raw,
+          provider: this.genReq.provider || null,
+          model: this.genReq.model || null,
+        });
+        this.bossMsgPreview = (r && r.text) || "";
+      } catch (e) { alert("Erzeugen fehlgeschlagen: " + (e.message || e)); }
+      finally { this.bossMsgBusy = false; }
+    },
+    // Fertigen (ggf. editierten) Boss-Text in den Boss-Feedback-Channel senden
+    async sendBossMessage() {
+      const text = (this.bossMsgPreview || "").trim();
+      if (!text) { alert("Kein Text zum Senden."); return; }
+      if (!confirm("Diese Boss-Nachricht in den Boss-Feedback-Channel senden?")) return;
+      this.bossMsgBusy = true;
+      try {
+        await api.post("/api/missions/boss-message/send", { crew_id: this.crewId, text });
+        this.bossMsgPreview = "";
+        this.genReq.boss_message_raw = "";
+        alert("Boss-Nachricht gesendet ✓");
+      } catch (e) { alert("Senden fehlgeschlagen: " + (e.message || e)); }
+      finally { this.bossMsgBusy = false; }
+    },
+
     async generate() {
       this.generating = true;
       try {
@@ -1495,7 +1528,6 @@ function crewPage() {
           model: this.genReq.model || null,
           extra_instructions: this.genReq.extra_instructions || "",
           append_text: this.genReq.append_text || "",
-          boss_message_raw: this.genReq.boss_message_raw || "",
           deadline_minutes: this._deadlineMinutes(),
           scheduled_send_at: this._scheduledSendIso(),
           event_at: this._eventAtIso(),
@@ -1505,7 +1537,6 @@ function crewPage() {
         await this._attachPendingImage(m && m.id);
         this.genReq.extra_instructions = "";
         this.genReq.append_text = "";
-        this.genReq.boss_message_raw = "";
         this.genReq.deadline_value = "";
         this.genReq.scheduled_send_at = "";
         this.genReq.event_at = "";
@@ -1559,7 +1590,6 @@ function crewPage() {
           model: this.genReq.model || null,
           extra_instructions: this.genReq.extra_instructions || "",
           append_text: this.genReq.append_text || "",
-          boss_message_raw: this.genReq.boss_message_raw || "",
           deadline_minutes: this._deadlineMinutes(),
           scheduled_send_at: this._scheduledSendIso(),
           event_at: this._eventAtIso(),
@@ -1570,7 +1600,6 @@ function crewPage() {
         this.rewriteReq.raw_input = "";
         this.genReq.extra_instructions = "";
         this.genReq.append_text = "";
-        this.genReq.boss_message_raw = "";
         this.genReq.deadline_value = "";
         this.genReq.scheduled_send_at = "";
         this.genReq.event_at = "";

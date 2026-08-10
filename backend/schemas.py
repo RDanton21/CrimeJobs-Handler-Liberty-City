@@ -111,6 +111,20 @@ class MissionManualRequest(BaseModel):
     event_at: datetime | None = None
 
 
+class BossMessagePreviewRequest(BaseModel):
+    """Klartext -> Il-Padrino-Stil erzeugen (Vorschau, noch nicht senden)."""
+    crew_id: int
+    raw: str
+    provider: str | None = None
+    model: str | None = None
+
+
+class BossMessageSendRequest(BaseModel):
+    """Fertigen (ggf. editierten) Boss-Text in den Boss-Feedback-Channel senden."""
+    crew_id: int
+    text: str
+
+
 class MissionSuggestionsRequest(BaseModel):
     provider: str | None = None
     model: str | None = None
