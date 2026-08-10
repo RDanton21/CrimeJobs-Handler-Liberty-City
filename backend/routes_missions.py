@@ -202,6 +202,79 @@ from .settings_store import get as settings_get
 router = APIRouter(prefix="/api/missions", tags=["missions"], dependencies=[Depends(require_admin)])
 
 
+# WICHTIG: Diese beiden literalen Routen MUESSEN vor den parametrisierten
+# "/{mission_id}/..."-Routen stehen, sonst faengt "/{mission_id}/send" den
+# Pfad "/boss-message/send" ab (mission_id="boss-message" -> 422 int_parsing).
+@router.post("/boss-message/preview")
+async def boss_message_preview(
+    payload: BossMessagePreviewRequest, session: AsyncSession = Depends(get_session)
+):
+    """Klartext -> Il-Padrino-Stil erzeugen (NUR Vorschau, kein Discord-Send)."""
+    crew = await session.get(Crew, payload.crew_id)
+    if not crew:
+        raise HTTPException(404, "Crew nicht gefunden")
+    raw = (payload.raw or "").strip()
+    if not raw:
+        raise HTTPException(400, "Kein Text eingegeben")
+
+    keys = {
+        "anthropic": await settings_get(session, "anthropic_api_key", settings.anthropic_api_key),
+        "openai": await settings_get(session, "openai_api_key", settings.openai_api_key),
+    }
+    models = {
+        "claude": await settings_get(session, "default_claude_model", settings.default_claude_model),
+        "openai": await settings_get(session, "default_openai_model", settings.default_openai_model),
+    }
+    provider_name = payload.provider or await settings_get(
+        session, "default_provider", settings.default_ai_provider
+    )
+    provider = await get_provider(provider_name, keys=keys, models=models)
+
+    try:
+        text = await provider.generate(
+            raw, model=payload.model or None,
+            system_prompt=PADRINO_BOSS_SYSTEM_PROMPT, max_tokens=900,
+        )
+    except Exception as exc:
+        raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
+    text = (text or "").strip()
+    if not text:
+        raise HTTPException(502, "KI lieferte keinen Text")
+    return {"text": text}
+
+
+@router.post("/boss-message/send")
+async def boss_message_send(
+    payload: BossMessageSendRequest, session: AsyncSession = Depends(get_session)
+):
+    """Fertigen (ggf. editierten) Boss-Text in den Boss-Feedback-Channel
+    (crew.info_channel_id) senden."""
+    crew = await session.get(Crew, payload.crew_id)
+    if not crew:
+        raise HTTPException(404, "Crew nicht gefunden")
+    text = (payload.text or "").strip()
+    if not text:
+        raise HTTPException(400, "Kein Text")
+    channel = (crew.info_channel_id or "").strip()
+    if not channel:
+        raise HTTPException(400, "Diese Gang hat keinen Boss-Feedback-Channel (Zusatzinfo-Channel-ID) hinterlegt")
+
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as cli:
+            r = await cli.post(
+                f"{settings.bot_api_url}/send_embed",
+                json={"channel_id": channel, "embed": _boss_embed(text)},
+            )
+            r.raise_for_status()
+            data = r.json()
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(502, f"Bot-Fehler: {exc.response.text[:150]}") from exc
+    except Exception as exc:
+        raise HTTPException(502, f"Bot nicht erreichbar: {exc}") from exc
+
+    return {"ok": True, "channel_id": channel, "message_id": data.get("message_id")}
+
+
 async def _load_context(session: AsyncSession, crew: Crew, extra: str) -> MissionContext:
     rel_q = await session.execute(
         select(CrewRelation).where(
@@ -1284,76 +1357,6 @@ async def send_to_discord(mission_id: int, session: AsyncSession = Depends(get_s
 
     await session.refresh(m)
     return m
-
-
-@router.post("/boss-message/preview")
-async def boss_message_preview(
-    payload: BossMessagePreviewRequest, session: AsyncSession = Depends(get_session)
-):
-    """Klartext -> Il-Padrino-Stil erzeugen (NUR Vorschau, kein Discord-Send)."""
-    crew = await session.get(Crew, payload.crew_id)
-    if not crew:
-        raise HTTPException(404, "Crew nicht gefunden")
-    raw = (payload.raw or "").strip()
-    if not raw:
-        raise HTTPException(400, "Kein Text eingegeben")
-
-    keys = {
-        "anthropic": await settings_get(session, "anthropic_api_key", settings.anthropic_api_key),
-        "openai": await settings_get(session, "openai_api_key", settings.openai_api_key),
-    }
-    models = {
-        "claude": await settings_get(session, "default_claude_model", settings.default_claude_model),
-        "openai": await settings_get(session, "default_openai_model", settings.default_openai_model),
-    }
-    provider_name = payload.provider or await settings_get(
-        session, "default_provider", settings.default_ai_provider
-    )
-    provider = await get_provider(provider_name, keys=keys, models=models)
-
-    try:
-        text = await provider.generate(
-            raw, model=payload.model or None,
-            system_prompt=PADRINO_BOSS_SYSTEM_PROMPT, max_tokens=900,
-        )
-    except Exception as exc:
-        raise HTTPException(502, f"AI-Provider Fehler: {exc}") from exc
-    text = (text or "").strip()
-    if not text:
-        raise HTTPException(502, "KI lieferte keinen Text")
-    return {"text": text}
-
-
-@router.post("/boss-message/send")
-async def boss_message_send(
-    payload: BossMessageSendRequest, session: AsyncSession = Depends(get_session)
-):
-    """Fertigen (ggf. editierten) Boss-Text in den Boss-Feedback-Channel
-    (crew.info_channel_id) senden."""
-    crew = await session.get(Crew, payload.crew_id)
-    if not crew:
-        raise HTTPException(404, "Crew nicht gefunden")
-    text = (payload.text or "").strip()
-    if not text:
-        raise HTTPException(400, "Kein Text")
-    channel = (crew.info_channel_id or "").strip()
-    if not channel:
-        raise HTTPException(400, "Diese Gang hat keinen Boss-Feedback-Channel (Zusatzinfo-Channel-ID) hinterlegt")
-
-    try:
-        async with httpx.AsyncClient(timeout=20.0) as cli:
-            r = await cli.post(
-                f"{settings.bot_api_url}/send_embed",
-                json={"channel_id": channel, "embed": _boss_embed(text)},
-            )
-            r.raise_for_status()
-            data = r.json()
-    except httpx.HTTPStatusError as exc:
-        raise HTTPException(502, f"Bot-Fehler: {exc.response.text[:150]}") from exc
-    except Exception as exc:
-        raise HTTPException(502, f"Bot nicht erreichbar: {exc}") from exc
-
-    return {"ok": True, "channel_id": channel, "message_id": data.get("message_id")}
 
 
 @router.post("/{mission_id}/override", response_model=MissionOut)

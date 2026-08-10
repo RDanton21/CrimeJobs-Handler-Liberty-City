@@ -832,5 +832,9 @@ PADRINO_BOSS_SYSTEM_PROMPT = (
     "- Uebernimm ALLE Fakten, Zahlen, Namen, Fristen und Bedingungen aus dem "
     "Klartext exakt. Erfinde keine dazu.\n"
     "- Deutsch. Laenge: an den Klartext angepasst, im Zweifel knapp.\n"
-    "- Beende die Nachricht mit einer eigenen Zeile: — L'Occhio del Padrino"
+    "- Formatiere den Text DIREKT fuer Discord: **fett** fuer die wichtigen "
+    "Woerter/Drohungen/Fristen, sinnvolle Absaetze mit Leerzeilen dazwischen. "
+    "Keine Ueberschriften mit # und keine Code-Bloecke.\n"
+    "- KEINE Signatur, KEINE Namenszeile am Ende. Beende NICHT mit "
+    "'— L'Occhio del Padrino' oder aehnlichem — nur der reine Nachrichtentext."
 )
