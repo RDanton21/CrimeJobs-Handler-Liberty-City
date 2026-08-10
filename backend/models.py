@@ -120,6 +120,10 @@ class Mission(Base):
     #: diesen Zeitstempel erscheint der Auftrag NICHT auf der Boerse.
     jobs_published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     archived_boss_info: Mapped[str] = mapped_column(Text, default="")
+    #: Manuell gesendete Il-Padrino-Boss-Nachrichten (Bot-Posts im Boss-Feedback-
+    #: Channel), als JSON-Liste [{message_id, author, content, posted_at}]. Werden
+    #: im Verlauf angezeigt und beim Archivieren gesnapshottet + geloescht.
+    manual_boss_messages: Mapped[str] = mapped_column(Text, default="[]")
     expiry_message_id: Mapped[str] = mapped_column(String(40), default="")
     expiry_text: Mapped[str] = mapped_column(Text, default="")
     scheduled_send_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

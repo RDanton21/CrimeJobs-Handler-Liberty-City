@@ -259,11 +259,12 @@ async def boss_message_send(
     if not channel:
         raise HTTPException(400, "Diese Gang hat keinen Boss-Feedback-Channel (Zusatzinfo-Channel-ID) hinterlegt")
 
+    # Als REINE Textnachricht senden (kein Embed) — content, embed weggelassen.
     try:
         async with httpx.AsyncClient(timeout=20.0) as cli:
             r = await cli.post(
                 f"{settings.bot_api_url}/send_embed",
-                json={"channel_id": channel, "embed": _boss_embed(text)},
+                json={"channel_id": channel, "content": text[:2000]},
             )
             r.raise_for_status()
             data = r.json()
@@ -272,7 +273,39 @@ async def boss_message_send(
     except Exception as exc:
         raise HTTPException(502, f"Bot nicht erreichbar: {exc}") from exc
 
-    return {"ok": True, "channel_id": channel, "message_id": data.get("message_id")}
+    message_id = str(data.get("message_id") or "")
+
+    # An die aktive Mission koppeln (neueste nicht-archivierte, gesendete Mission),
+    # damit die Nachricht im Verlauf erscheint UND beim Archivieren mitgeloescht wird.
+    active_q = await session.execute(
+        select(Mission)
+        .where(
+            Mission.crew_id == crew.id,
+            Mission.archived_at.is_(None),
+            Mission.sent_at.is_not(None),
+        )
+        .order_by(desc(Mission.sent_at))
+        .limit(1)
+    )
+    active = active_q.scalar_one_or_none()
+    if active is not None and message_id:
+        try:
+            existing = json.loads(active.manual_boss_messages or "[]")
+            if not isinstance(existing, list):
+                existing = []
+        except (ValueError, TypeError):
+            existing = []
+        existing.append({
+            "message_id": message_id,
+            "author": "🎩 Il Padrino",
+            "content": text,
+            "posted_at": datetime.utcnow().isoformat(),
+        })
+        active.manual_boss_messages = json.dumps(existing, ensure_ascii=False)
+        await session.commit()
+
+    return {"ok": True, "channel_id": channel, "message_id": message_id,
+            "attached_mission_id": active.id if active else None}
 
 
 async def _load_context(session: AsyncSession, crew: Crew, extra: str) -> MissionContext:
@@ -1562,6 +1595,21 @@ async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_s
             "message_id": m.reaction_reply_message_id or "",
         })
 
+    # Manuell gesendete Il-Padrino-Boss-Nachrichten (Bot-Posts) mit ins Archiv
+    try:
+        manual_boss = json.loads(m.manual_boss_messages or "[]")
+        if not isinstance(manual_boss, list):
+            manual_boss = []
+    except (ValueError, TypeError):
+        manual_boss = []
+    for mb in manual_boss:
+        kept.append({
+            "author": mb.get("author") or "🎩 Il Padrino",
+            "content": mb.get("content") or "",
+            "posted_at": mb.get("posted_at") or datetime.utcnow().isoformat(),
+            "message_id": mb.get("message_id") or "",
+        })
+
     if kept:
         m.archived_boss_info = json.dumps(kept, ensure_ascii=False)
 
@@ -1579,6 +1627,22 @@ async def archive_mission(mission_id: int, session: AsyncSession = Depends(get_s
                 )
         except Exception:
             pass  # Bot offline -> weiter
+
+    # Manuelle Boss-Nachrichten (Bot-Posts) gezielt loeschen — delete_in_range
+    # ueberspringt Bot-Nachrichten, daher hier per message_id.
+    if crew and crew.info_channel_id:
+        for mb in manual_boss:
+            mid = mb.get("message_id")
+            if not mid:
+                continue
+            try:
+                async with httpx.AsyncClient(timeout=15.0) as cli:
+                    await cli.post(
+                        f"{settings.bot_api_url}/delete_message",
+                        json={"channel_id": crew.info_channel_id, "message_id": mid},
+                    )
+            except Exception:
+                pass  # Bot offline -> DB-Snapshot bleibt
 
     # Original-Auftrags-Message + Versager-Reply + Reaktions-Antwort löschen
     if m.discord_channel_id:

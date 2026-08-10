@@ -287,6 +287,16 @@ async def get_crew_boss_info(crew_id: int, session: AsyncSession = Depends(get_s
             if end and ts >= end:
                 continue
             bucket.append(bm)
+        # Manuell gesendete Il-Padrino-Boss-Nachrichten (Bot-Posts) dazumischen —
+        # die werden von /read_channel uebersprungen, sind aber am Mission-Objekt
+        # gespeichert. Nach posted_at sortieren, damit alles chronologisch steht.
+        try:
+            manual = json.loads(m.manual_boss_messages or "[]")
+            if isinstance(manual, list):
+                bucket.extend(manual)
+        except (ValueError, TypeError):
+            pass
+        bucket.sort(key=lambda x: x.get("posted_at") or "")
         out.append({"mission_id": m.id, "messages": bucket})
 
     return out

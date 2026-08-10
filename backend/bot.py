@@ -970,28 +970,33 @@ async def http_send_embed(request: web.Request) -> web.Response:
     except Exception as exc:
         return web.json_response({"error": f"channel: {exc}"}, status=500)
 
-    embed = discord.Embed(
-        title=embed_data.get("title") or None,
-        description=embed_data.get("description") or None,
-        color=embed_data.get("color") or 0xB91C1C,
-    )
-    footer = embed_data.get("footer") or {}
-    if footer.get("text"):
-        embed.set_footer(text=footer["text"], icon_url=footer.get("icon_url") or None)
-    ts_iso = embed_data.get("timestamp")
-    if ts_iso:
-        try:
-            embed.timestamp = datetime.fromisoformat(ts_iso)
-        except (ValueError, TypeError):
-            pass
-    if embed_data.get("thumbnail_url"):
-        embed.set_thumbnail(url=embed_data["thumbnail_url"])
-    if embed_data.get("image_url"):
-        embed.set_image(url=embed_data["image_url"])
-    for field in embed_data.get("fields") or []:
-        name = field.get("name") or "​"
-        value = field.get("value") or "​"
-        embed.add_field(name=name, value=value, inline=bool(field.get("inline", False)))
+    # Embed nur bauen, wenn embed-Daten mitgeschickt wurden — sonst reine
+    # Textnachricht (content). Rueckwaertskompatibel: bestehende Aufrufer
+    # schicken weiterhin ihr embed und bekommen es unveraendert.
+    embed = None
+    if embed_data:
+        embed = discord.Embed(
+            title=embed_data.get("title") or None,
+            description=embed_data.get("description") or None,
+            color=embed_data.get("color") or 0xB91C1C,
+        )
+        footer = embed_data.get("footer") or {}
+        if footer.get("text"):
+            embed.set_footer(text=footer["text"], icon_url=footer.get("icon_url") or None)
+        ts_iso = embed_data.get("timestamp")
+        if ts_iso:
+            try:
+                embed.timestamp = datetime.fromisoformat(ts_iso)
+            except (ValueError, TypeError):
+                pass
+        if embed_data.get("thumbnail_url"):
+            embed.set_thumbnail(url=embed_data["thumbnail_url"])
+        if embed_data.get("image_url"):
+            embed.set_image(url=embed_data["image_url"])
+        for field in embed_data.get("fields") or []:
+            name = field.get("name") or "​"
+            value = field.get("value") or "​"
+            embed.add_field(name=name, value=value, inline=bool(field.get("inline", False)))
 
     try:
         msg = await channel.send(content=content or None, embed=embed)

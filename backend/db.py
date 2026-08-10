@@ -30,6 +30,9 @@ async def init_db() -> None:
             conn, "missions", "archived_boss_info", "TEXT NOT NULL DEFAULT ''"
         )
         await _migrate_add_column_if_missing(
+            conn, "missions", "manual_boss_messages", "TEXT NOT NULL DEFAULT '[]'"
+        )
+        await _migrate_add_column_if_missing(
             conn, "missions", "expiry_message_id", "VARCHAR(40) NOT NULL DEFAULT ''"
         )
         await _migrate_add_column_if_missing(
