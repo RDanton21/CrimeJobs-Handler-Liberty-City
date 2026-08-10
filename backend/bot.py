@@ -1008,9 +1008,9 @@ async def http_send_embed(request: web.Request) -> web.Response:
 
 
 async def http_send_file(request: web.Request) -> web.Response:
-    """POST /send_file  body: {channel_id: str, content?: str, file_path: str}
-    Sendet eine reine Textnachricht MIT angehaengter Datei (z.B. Boss-Bild).
-    Liefert message_id + attachments (url/content_type/filename) zurueck."""
+    """POST /send_file  body: {channel_id: str, content?: str, file_path?: str, file_paths?: [str]}
+    Sendet eine reine Textnachricht MIT einer oder MEHREREN angehaengten Dateien
+    (z.B. Boss-Bilder). Liefert message_id + attachments zurueck."""
     data = await request.json()
     try:
         channel_id = int(data["channel_id"])
@@ -1018,9 +1018,16 @@ async def http_send_file(request: web.Request) -> web.Response:
         return web.json_response({"error": "channel_id ungültig"}, status=400)
 
     content = data.get("content", "") or ""
-    file_path = (data.get("file_path") or "").strip()
-    if not file_path or not Path(file_path).exists():
-        return web.json_response({"error": "file_path nicht gefunden"}, status=400)
+    # file_paths (Liste) bevorzugt, file_path (Einzeln) als Rueckfall
+    raw_paths = data.get("file_paths")
+    if not raw_paths:
+        single = (data.get("file_path") or "").strip()
+        raw_paths = [single] if single else []
+    paths = [Path(p) for p in raw_paths if p and Path(p).exists()]
+    # Discord erlaubt max. 10 Anhaenge pro Nachricht
+    paths = paths[:10]
+    if not paths:
+        return web.json_response({"error": "keine gültige Datei gefunden"}, status=400)
 
     try:
         channel = client.get_channel(channel_id) or await client.fetch_channel(channel_id)
@@ -1032,8 +1039,8 @@ async def http_send_file(request: web.Request) -> web.Response:
         return web.json_response({"error": f"channel: {exc}"}, status=500)
 
     try:
-        p = Path(file_path)
-        msg = await channel.send(content=content or None, file=discord.File(str(p), filename=p.name))
+        files = [discord.File(str(p), filename=p.name) for p in paths]
+        msg = await channel.send(content=content or None, files=files)
     except Exception as exc:
         log.exception("send_file failed")
         return web.json_response({"error": str(exc)}, status=500)

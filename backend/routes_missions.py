@@ -247,12 +247,12 @@ async def boss_message_preview(
 async def boss_message_send(
     crew_id: int = Form(...),
     text: str = Form(...),
-    image: UploadFile | None = File(None),
+    images: list[UploadFile] = File(default=[]),
     session: AsyncSession = Depends(get_session),
 ):
-    """Fertigen (ggf. editierten) Boss-Text — optional mit Bild — als REINE
-    Textnachricht in den Boss-Feedback-Channel (crew.info_channel_id) senden.
-    Multipart, damit ein Bild direkt mitgeschickt werden kann."""
+    """Fertigen (ggf. editierten) Boss-Text — optional mit einem oder MEHREREN
+    Bildern — als REINE Textnachricht in den Boss-Feedback-Channel
+    (crew.info_channel_id) senden. Multipart."""
     crew = await session.get(Crew, crew_id)
     if not crew:
         raise HTTPException(404, "Crew nicht gefunden")
@@ -263,25 +263,27 @@ async def boss_message_send(
     if not channel:
         raise HTTPException(400, "Diese Gang hat keinen Boss-Feedback-Channel (Zusatzinfo-Channel-ID) hinterlegt")
 
-    # optionales Bild in den geteilten Media-Ordner speichern (Bot liest von dort)
-    image_path = None
-    if image is not None and (image.filename or "").strip():
-        ext = Path(image.filename).suffix.lower() or ".png"
+    # optionale Bilder in den geteilten Media-Ordner speichern (Bot liest von dort)
+    image_paths: list[str] = []
+    for img in (images or [])[:10]:  # Discord: max. 10 Anhaenge
+        if img is None or not (img.filename or "").strip():
+            continue
+        ext = Path(img.filename).suffix.lower() or ".png"
         if ext not in {".png", ".jpg", ".jpeg", ".gif", ".webp"}:
-            raise HTTPException(400, "Bild-Format nicht unterstützt")
+            raise HTTPException(400, f"Bild-Format nicht unterstützt: {img.filename}")
         target_dir = Path(settings.image_dir)
         target_dir.mkdir(parents=True, exist_ok=True)
         target = target_dir / f"boss_{crew_id}_{uuid4().hex}{ext}"
         async with aiofiles.open(target, "wb") as f:
-            await f.write(await image.read())
-        image_path = str(target)
+            await f.write(await img.read())
+        image_paths.append(str(target))
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as cli:
-            if image_path:
+            if image_paths:
                 r = await cli.post(
                     f"{settings.bot_api_url}/send_file",
-                    json={"channel_id": channel, "content": text[:2000], "file_path": image_path},
+                    json={"channel_id": channel, "content": text[:2000], "file_paths": image_paths},
                 )
             else:
                 r = await cli.post(

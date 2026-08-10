@@ -792,7 +792,7 @@ function crewPage() {
     genReq: { provider: "anthropic", model: "", extra_instructions: "", append_text: "", boss_message_raw: "", deadline_value: "", deadline_unit: "min", scheduled_send_at: "", event_at: "", slotFrom: "", slotTo: "", want_personnel: true },
     bossMsgPreview: "",   // erzeugter Padrino-Text (Vorschau, editierbar)
     bossMsgBusy: false,
-    bossMsgImage: null,   // optional angehängtes Bild (File)
+    bossMsgImages: [],    // optional angehängte Bilder (File[])
     rewriteReq: { raw_input: "" },
     pendingImage: null,
     generating: false,
@@ -1506,11 +1506,10 @@ function crewPage() {
       finally { this.bossMsgBusy = false; }
     },
     pickBossImage(evt) {
-      const f = evt.target.files && evt.target.files[0];
-      this.bossMsgImage = f || null;
+      this.bossMsgImages = Array.from((evt.target && evt.target.files) || []);
     },
     clearBossImage() {
-      this.bossMsgImage = null;
+      this.bossMsgImages = [];
       if (this.$refs.bossImgInput) this.$refs.bossImgInput.value = "";
     },
     // Fertigen (ggf. editierten) Boss-Text — optional mit Bild — in den
@@ -1524,7 +1523,7 @@ function crewPage() {
         const fd = new FormData();
         fd.append("crew_id", this.crewId);
         fd.append("text", text);
-        if (this.bossMsgImage) fd.append("image", this.bossMsgImage);
+        for (const img of this.bossMsgImages) fd.append("images", img);
         const r = await fetch("/api/missions/boss-message/send",
                               { method: "POST", body: fd, credentials: "include" });
         if (!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
