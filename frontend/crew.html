@@ -6,7 +6,7 @@
   <title>Crime Automation — Crew</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260810b" />
+  <link rel="stylesheet" href="/static/style.css?v=20260810c" />
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
@@ -379,6 +379,14 @@
               <label class="block text-xs text-zinc-400 mb-1">Vorschau — vor dem Senden frei bearbeitbar:</label>
               <textarea x-model="bossMsgPreview" rows="7"
                         class="w-full bg-zinc-950 border border-amber-800/60 rounded px-3 py-2 text-sm"></textarea>
+              <div class="mt-2 flex items-center gap-2 text-xs text-zinc-400">
+                <span>📎 Bild anhängen (optional):</span>
+                <input type="file" accept="image/*" x-ref="bossImgInput" @change="pickBossImage($event)"
+                       class="text-xs text-zinc-400" />
+                <span x-show="bossMsgImage" class="text-amber-300" x-text="bossMsgImage ? bossMsgImage.name : ''"></span>
+                <button x-show="bossMsgImage" @click="clearBossImage()"
+                        class="text-zinc-500 hover:text-zinc-300">✕</button>
+              </div>
               <div class="mt-2 flex gap-2">
                 <button @click="sendBossMessage()"
                         :disabled="bossMsgBusy"
@@ -907,6 +915,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20260810b"></script>
+  <script src="/static/app.js?v=20260810c"></script>
 </body>
 </html>

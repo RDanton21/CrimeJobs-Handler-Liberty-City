@@ -792,6 +792,7 @@ function crewPage() {
     genReq: { provider: "anthropic", model: "", extra_instructions: "", append_text: "", boss_message_raw: "", deadline_value: "", deadline_unit: "min", scheduled_send_at: "", event_at: "", slotFrom: "", slotTo: "", want_personnel: true },
     bossMsgPreview: "",   // erzeugter Padrino-Text (Vorschau, editierbar)
     bossMsgBusy: false,
+    bossMsgImage: null,   // optional angehängtes Bild (File)
     rewriteReq: { raw_input: "" },
     pendingImage: null,
     generating: false,
@@ -1504,17 +1505,39 @@ function crewPage() {
       } catch (e) { alert("Erzeugen fehlgeschlagen: " + (e.message || e)); }
       finally { this.bossMsgBusy = false; }
     },
-    // Fertigen (ggf. editierten) Boss-Text in den Boss-Feedback-Channel senden
+    pickBossImage(evt) {
+      const f = evt.target.files && evt.target.files[0];
+      this.bossMsgImage = f || null;
+    },
+    clearBossImage() {
+      this.bossMsgImage = null;
+      if (this.$refs.bossImgInput) this.$refs.bossImgInput.value = "";
+    },
+    // Fertigen (ggf. editierten) Boss-Text — optional mit Bild — in den
+    // Boss-Feedback-Channel senden (Multipart).
     async sendBossMessage() {
       const text = (this.bossMsgPreview || "").trim();
       if (!text) { alert("Kein Text zum Senden."); return; }
       if (!confirm("Diese Boss-Nachricht in den Boss-Feedback-Channel senden?")) return;
       this.bossMsgBusy = true;
       try {
-        await api.post("/api/missions/boss-message/send", { crew_id: this.crewId, text });
+        const fd = new FormData();
+        fd.append("crew_id", this.crewId);
+        fd.append("text", text);
+        if (this.bossMsgImage) fd.append("image", this.bossMsgImage);
+        const r = await fetch("/api/missions/boss-message/send",
+                              { method: "POST", body: fd, credentials: "include" });
+        if (!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
+        const res = await r.json();
         this.bossMsgPreview = "";
         this.genReq.boss_message_raw = "";
-        alert("Boss-Nachricht gesendet ✓");
+        this.clearBossImage();
+        await this.loadBossInfo();
+        if (res && res.attached_mission_id) {
+          alert("Boss-Nachricht gesendet ✓");
+        } else {
+          alert("Boss-Nachricht gesendet ✓\n\nHinweis: keiner aktiven Mission zugeordnet — sie erscheint erst im Verlauf, sobald ein (nicht archivierter) Auftrag existiert.");
+        }
       } catch (e) { alert("Senden fehlgeschlagen: " + (e.message || e)); }
       finally { this.bossMsgBusy = false; }
     },

@@ -239,54 +239,63 @@ async def get_crew_boss_info(crew_id: int, session: AsyncSession = Depends(get_s
     if not crew.info_channel_id:
         return []
 
+    # ALLE nicht-archivierten Missionen (auch Drafts ohne sent_at) — damit auch
+    # manuell gesendete Boss-Nachrichten an noch-nicht-gesendeten Auftraegen
+    # im Verlauf erscheinen.
     res = await session.execute(
         select(Mission)
         .where(
             Mission.crew_id == crew_id,
             Mission.archived_at.is_(None),
-            Mission.sent_at.is_not(None),
         )
-        .order_by(Mission.sent_at)
+        .order_by(Mission.id)
     )
     missions = list(res.scalars().all())
     if not missions:
         return []
 
-    earliest = missions[0].sent_at
-
-    async with httpx.AsyncClient(timeout=15.0) as cli:
-        try:
-            r = await cli.post(
-                f"{settings.bot_api_url}/read_channel",
-                json={
-                    "channel_id": crew.info_channel_id,
-                    "after_iso": earliest.isoformat(),
-                    "limit": 100,
-                },
-            )
-        except Exception as exc:
-            raise HTTPException(503, f"Bot nicht erreichbar: {exc}") from exc
-
-    if r.status_code >= 400:
-        raise HTTPException(502, f"Bot Fehler: {r.text}")
-
-    bot_msgs = r.json()
+    # read_channel nur, wenn es gesendete Missionen gibt (Fenster brauchen sent_at)
+    sent_sorted = sorted(
+        [m for m in missions if m.sent_at], key=lambda m: m.sent_at
+    )
+    bot_msgs: list[dict] = []
+    if sent_sorted:
+        earliest = sent_sorted[0].sent_at
+        async with httpx.AsyncClient(timeout=15.0) as cli:
+            try:
+                r = await cli.post(
+                    f"{settings.bot_api_url}/read_channel",
+                    json={
+                        "channel_id": crew.info_channel_id,
+                        "after_iso": earliest.isoformat(),
+                        "limit": 100,
+                    },
+                )
+            except Exception as exc:
+                raise HTTPException(503, f"Bot nicht erreichbar: {exc}") from exc
+        if r.status_code >= 400:
+            raise HTTPException(502, f"Bot Fehler: {r.text}")
+        bot_msgs = r.json()
 
     out: list[dict] = []
-    for i, m in enumerate(missions):
-        start = m.sent_at
-        end = missions[i + 1].sent_at if i + 1 < len(missions) else None
+    for m in missions:
         bucket: list[dict] = []
-        for bm in bot_msgs:
-            try:
-                ts = datetime.fromisoformat(bm["posted_at"])
-            except (KeyError, ValueError):
-                continue
-            if ts < start:
-                continue
-            if end and ts >= end:
-                continue
-            bucket.append(bm)
+        # read_channel-Nachrichten (menschliche Boss-Feedbacks) nur bei gesendeten
+        # Missionen ins Fenster [sent_at, naechste sent_at) einsortieren.
+        if m.sent_at and bot_msgs:
+            idx = sent_sorted.index(m)
+            start = m.sent_at
+            end = sent_sorted[idx + 1].sent_at if idx + 1 < len(sent_sorted) else None
+            for bm in bot_msgs:
+                try:
+                    ts = datetime.fromisoformat(bm["posted_at"])
+                except (KeyError, ValueError):
+                    continue
+                if ts < start:
+                    continue
+                if end and ts >= end:
+                    continue
+                bucket.append(bm)
         # Manuell gesendete Il-Padrino-Boss-Nachrichten (Bot-Posts) dazumischen —
         # die werden von /read_channel uebersprungen, sind aber am Mission-Objekt
         # gespeichert. Nach posted_at sortieren, damit alles chronologisch steht.

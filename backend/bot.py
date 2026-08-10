@@ -1007,6 +1007,45 @@ async def http_send_embed(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "message_id": str(msg.id)})
 
 
+async def http_send_file(request: web.Request) -> web.Response:
+    """POST /send_file  body: {channel_id: str, content?: str, file_path: str}
+    Sendet eine reine Textnachricht MIT angehaengter Datei (z.B. Boss-Bild).
+    Liefert message_id + attachments (url/content_type/filename) zurueck."""
+    data = await request.json()
+    try:
+        channel_id = int(data["channel_id"])
+    except (KeyError, ValueError, TypeError):
+        return web.json_response({"error": "channel_id ungültig"}, status=400)
+
+    content = data.get("content", "") or ""
+    file_path = (data.get("file_path") or "").strip()
+    if not file_path or not Path(file_path).exists():
+        return web.json_response({"error": "file_path nicht gefunden"}, status=400)
+
+    try:
+        channel = client.get_channel(channel_id) or await client.fetch_channel(channel_id)
+    except discord.NotFound:
+        return web.json_response({"error": "channel not found"}, status=404)
+    except discord.Forbidden:
+        return web.json_response({"error": "forbidden - channel access?"}, status=403)
+    except Exception as exc:
+        return web.json_response({"error": f"channel: {exc}"}, status=500)
+
+    try:
+        p = Path(file_path)
+        msg = await channel.send(content=content or None, file=discord.File(str(p), filename=p.name))
+    except Exception as exc:
+        log.exception("send_file failed")
+        return web.json_response({"error": str(exc)}, status=500)
+
+    atts = [{
+        "url": a.url,
+        "content_type": a.content_type or "",
+        "filename": a.filename,
+    } for a in msg.attachments]
+    return web.json_response({"ok": True, "message_id": str(msg.id), "attachments": atts})
+
+
 async def http_health(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "ready": client.is_ready()})
 
@@ -1169,6 +1208,7 @@ def build_http_app() -> web.Application:
         web.post("/delete_in_range", http_delete_in_range),
         web.post("/read_channel", http_read_channel),
         web.post("/send_embed", http_send_embed),
+        web.post("/send_file", http_send_file),
         web.post("/post_chronik_now", http_post_chronik_now),
         web.post("/post_chronik_card", http_post_chronik_card),
         web.get("/health", http_health),

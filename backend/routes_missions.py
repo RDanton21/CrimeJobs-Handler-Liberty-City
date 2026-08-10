@@ -245,27 +245,49 @@ async def boss_message_preview(
 
 @router.post("/boss-message/send")
 async def boss_message_send(
-    payload: BossMessageSendRequest, session: AsyncSession = Depends(get_session)
+    crew_id: int = Form(...),
+    text: str = Form(...),
+    image: UploadFile | None = File(None),
+    session: AsyncSession = Depends(get_session),
 ):
-    """Fertigen (ggf. editierten) Boss-Text in den Boss-Feedback-Channel
-    (crew.info_channel_id) senden."""
-    crew = await session.get(Crew, payload.crew_id)
+    """Fertigen (ggf. editierten) Boss-Text — optional mit Bild — als REINE
+    Textnachricht in den Boss-Feedback-Channel (crew.info_channel_id) senden.
+    Multipart, damit ein Bild direkt mitgeschickt werden kann."""
+    crew = await session.get(Crew, crew_id)
     if not crew:
         raise HTTPException(404, "Crew nicht gefunden")
-    text = (payload.text or "").strip()
+    text = (text or "").strip()
     if not text:
         raise HTTPException(400, "Kein Text")
     channel = (crew.info_channel_id or "").strip()
     if not channel:
         raise HTTPException(400, "Diese Gang hat keinen Boss-Feedback-Channel (Zusatzinfo-Channel-ID) hinterlegt")
 
-    # Als REINE Textnachricht senden (kein Embed) — content, embed weggelassen.
+    # optionales Bild in den geteilten Media-Ordner speichern (Bot liest von dort)
+    image_path = None
+    if image is not None and (image.filename or "").strip():
+        ext = Path(image.filename).suffix.lower() or ".png"
+        if ext not in {".png", ".jpg", ".jpeg", ".gif", ".webp"}:
+            raise HTTPException(400, "Bild-Format nicht unterstützt")
+        target_dir = Path(settings.image_dir)
+        target_dir.mkdir(parents=True, exist_ok=True)
+        target = target_dir / f"boss_{crew_id}_{uuid4().hex}{ext}"
+        async with aiofiles.open(target, "wb") as f:
+            await f.write(await image.read())
+        image_path = str(target)
+
     try:
-        async with httpx.AsyncClient(timeout=20.0) as cli:
-            r = await cli.post(
-                f"{settings.bot_api_url}/send_embed",
-                json={"channel_id": channel, "content": text[:2000]},
-            )
+        async with httpx.AsyncClient(timeout=30.0) as cli:
+            if image_path:
+                r = await cli.post(
+                    f"{settings.bot_api_url}/send_file",
+                    json={"channel_id": channel, "content": text[:2000], "file_path": image_path},
+                )
+            else:
+                r = await cli.post(
+                    f"{settings.bot_api_url}/send_embed",
+                    json={"channel_id": channel, "content": text[:2000]},
+                )
             r.raise_for_status()
             data = r.json()
     except httpx.HTTPStatusError as exc:
@@ -274,17 +296,14 @@ async def boss_message_send(
         raise HTTPException(502, f"Bot nicht erreichbar: {exc}") from exc
 
     message_id = str(data.get("message_id") or "")
+    attachments_meta = data.get("attachments") or []
 
-    # An die aktive Mission koppeln (neueste nicht-archivierte, gesendete Mission),
-    # damit die Nachricht im Verlauf erscheint UND beim Archivieren mitgeloescht wird.
+    # An die neueste NICHT-archivierte Mission koppeln (sent ODER Draft), damit die
+    # Nachricht im Verlauf erscheint UND beim Archivieren mitgeloescht wird.
     active_q = await session.execute(
         select(Mission)
-        .where(
-            Mission.crew_id == crew.id,
-            Mission.archived_at.is_(None),
-            Mission.sent_at.is_not(None),
-        )
-        .order_by(desc(Mission.sent_at))
+        .where(Mission.crew_id == crew.id, Mission.archived_at.is_(None))
+        .order_by(desc(Mission.id))
         .limit(1)
     )
     active = active_q.scalar_one_or_none()
@@ -300,6 +319,7 @@ async def boss_message_send(
             "author": "🎩 Il Padrino",
             "content": text,
             "posted_at": datetime.utcnow().isoformat(),
+            "attachments": attachments_meta,
         })
         active.manual_boss_messages = json.dumps(existing, ensure_ascii=False)
         await session.commit()
