@@ -798,6 +798,7 @@ function crewPage() {
     generating: false,
     showArchive: false,
     bossInfoByMission: {},
+    bossFeedbackRecent: [],  // alle Nachrichten aus dem Boss-Feedback-Channel
     rewritingMissionId: null,
     editingMissionId: null,
     // Crime-Business-Workflow: idle -> preview -> (post | discard)
@@ -851,6 +852,7 @@ function crewPage() {
     async init() {
       await Promise.all([this.loadCrew(), this.loadAllCrews(), this.loadRelations(), this.loadMissions()]);
       await this.loadBossInfo();
+      this.loadBossFeedbackRecent().catch(() => {});
       // Personal-Brief-Templates einmalig laden (für Quick-Pick im Edit-Modus)
       try {
         const r = await api.get("/api/dashboard/personnel/templates");
@@ -867,6 +869,7 @@ function crewPage() {
       setInterval(() => {
         this.loadMissions().catch(() => {});
         this.loadBossInfo().catch(() => {});
+        this.loadBossFeedbackRecent().catch(() => {});
         this.loadSlotCounts().catch(() => {});
       }, 5000);
     },
@@ -1166,6 +1169,16 @@ function crewPage() {
         this.bossInfoByMission = map;
       } catch (e) {
         // Bot evtl. offline oder Permission-Issue — silent
+      }
+    },
+    // Alle Nachrichten aus dem Boss-Feedback-Channel — unabhaengig von Missionen
+    async loadBossFeedbackRecent() {
+      if (!this.crew || !this.crew.info_channel_id) { this.bossFeedbackRecent = []; return; }
+      try {
+        const data = await api.get(`/api/crews/${this.crewId}/boss_feedback_recent?limit=25`);
+        this.bossFeedbackRecent = Array.isArray(data) ? data : [];
+      } catch (e) {
+        // Bot offline / Permission — alten Stand behalten, kein Fehler-Popup
       }
     },
     bossInfoFor(m) {

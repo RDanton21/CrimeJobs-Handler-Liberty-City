@@ -311,6 +311,40 @@ async def get_crew_boss_info(crew_id: int, session: AsyncSession = Depends(get_s
     return out
 
 
+@router.get("/{crew_id}/boss_feedback_recent")
+async def get_crew_boss_feedback_recent(
+    crew_id: int, limit: int = 25, session: AsyncSession = Depends(get_session)
+):
+    """Letzte Nachrichten aus dem Boss-Feedback-Channel der Crew — UNABHAENGIG
+    von Missionen. So sieht man alles, was im Channel gepostet wird, auch wenn
+    gerade keine Quest laeuft (chronologisch, aeltest zuerst)."""
+    crew = await session.get(Crew, crew_id)
+    if not crew:
+        raise HTTPException(404, "Crew nicht gefunden")
+    if not crew.info_channel_id:
+        return []
+    async with httpx.AsyncClient(timeout=15.0) as cli:
+        try:
+            r = await cli.post(
+                f"{settings.bot_api_url}/read_channel",
+                json={
+                    "channel_id": crew.info_channel_id,
+                    "after_iso": None,
+                    "limit": max(1, min(limit, 50)),
+                    "oldest_first": False,  # neueste zuerst holen
+                },
+            )
+        except Exception as exc:
+            raise HTTPException(503, f"Bot nicht erreichbar: {exc}") from exc
+    if r.status_code >= 400:
+        raise HTTPException(502, f"Bot Fehler: {r.text}")
+    msgs = r.json()
+    if isinstance(msgs, list):
+        msgs.sort(key=lambda x: x.get("posted_at") or "")  # chronologisch anzeigen
+        return msgs
+    return []
+
+
 # ---- Crime-Business: KI-Vorschau + Senden an separaten Channel ----
 
 @router.post("/{crew_id}/crime-business/preview")
