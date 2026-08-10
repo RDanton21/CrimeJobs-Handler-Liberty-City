@@ -493,7 +493,7 @@
 
               <!-- Archiv-Button (Geschwister des <a>, wie der Power-Button) -->
               <button type="button" x-show="c.last_mission_status" @click="archiveCrew(c)"
-                      :disabled="archivingCrew[c.id]"
+                      :disabled="!!archivingCrew[c.id]"
                       :title="`Aktiven Auftrag von ${c.name} archivieren (Discord-Posts löschen)`"
                       class="absolute top-4 right-16 z-10 w-9 h-9 grid place-items-center rounded-lg border
                              transition active:scale-95 cursor-pointer bg-zinc-800 border-zinc-700 text-amber-400
