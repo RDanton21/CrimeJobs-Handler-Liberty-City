@@ -340,7 +340,7 @@ async def get_crew_boss_feedback_recent(
         raise HTTPException(502, f"Bot Fehler: {r.text}")
     msgs = r.json()
     if isinstance(msgs, list):
-        msgs.sort(key=lambda x: x.get("posted_at") or "")  # chronologisch anzeigen
+        msgs.sort(key=lambda x: x.get("posted_at") or "", reverse=True)  # neueste zuerst
         return msgs
     return []
 
