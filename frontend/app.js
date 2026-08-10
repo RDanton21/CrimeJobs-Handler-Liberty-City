@@ -1505,6 +1505,10 @@ function crewPage() {
       } catch (e) { alert("Erzeugen fehlgeschlagen: " + (e.message || e)); }
       finally { this.bossMsgBusy = false; }
     },
+    bossAtts(m) {
+      try { const a = JSON.parse(m.boss_attachments || "[]"); return Array.isArray(a) ? a : []; }
+      catch (e) { return []; }
+    },
     pickBossImage(evt) {
       this.bossMsgImages = Array.from((evt.target && evt.target.files) || []);
     },
@@ -1527,16 +1531,12 @@ function crewPage() {
         const r = await fetch("/api/missions/boss-message/send",
                               { method: "POST", body: fd, credentials: "include" });
         if (!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
-        const res = await r.json();
+        await r.json();
         this.bossMsgPreview = "";
         this.genReq.boss_message_raw = "";
         this.clearBossImage();
-        await this.loadBossInfo();
-        if (res && res.attached_mission_id) {
-          alert("Boss-Nachricht gesendet ✓");
-        } else {
-          alert("Boss-Nachricht gesendet ✓\n\nHinweis: keiner aktiven Mission zugeordnet — sie erscheint erst im Verlauf, sobald ein (nicht archivierter) Auftrag existiert.");
-        }
+        await this.loadMissions();
+        alert("Boss-Nachricht gesendet ✓ — erscheint als eigene Karte oben.");
       } catch (e) { alert("Senden fehlgeschlagen: " + (e.message || e)); }
       finally { this.bossMsgBusy = false; }
     },

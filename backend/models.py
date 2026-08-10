@@ -124,6 +124,9 @@ class Mission(Base):
     #: Channel), als JSON-Liste [{message_id, author, content, posted_at}]. Werden
     #: im Verlauf angezeigt und beim Archivieren gesnapshottet + geloescht.
     manual_boss_messages: Mapped[str] = mapped_column(Text, default="[]")
+    #: Bild-Anhaenge einer Boss-Nachricht-Karte (ai_provider="boss"), JSON-Liste
+    #: [{url, content_type, filename}] — zur Anzeige der Thumbnails auf der Karte.
+    boss_attachments: Mapped[str] = mapped_column(Text, default="[]")
     expiry_message_id: Mapped[str] = mapped_column(String(40), default="")
     expiry_text: Mapped[str] = mapped_column(Text, default="")
     scheduled_send_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

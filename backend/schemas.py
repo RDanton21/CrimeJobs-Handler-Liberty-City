@@ -180,6 +180,7 @@ class MissionOut(BaseModel):
     scheduled_send_at: datetime | None = None
     event_at: datetime | None = None
     archived_boss_info: str = ""
+    boss_attachments: str = "[]"
     personnel_brief: str = ""
     personnel_updated_at: datetime | None = None
     personnel_discord_message_id: str = ""

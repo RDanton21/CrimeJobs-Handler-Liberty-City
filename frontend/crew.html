@@ -6,7 +6,7 @@
   <title>Crime Automation — Crew</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260810d" />
+  <link rel="stylesheet" href="/static/style.css?v=20260810e" />
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
@@ -541,11 +541,13 @@
 
         <div class="space-y-3">
           <template x-for="m in missions" :key="m.id">
-            <article class="bg-zinc-900 border border-zinc-800 rounded-lg p-5"
-                     :class="m.status === 'pending' ? 'border-amber-600' : (m.archived_at ? 'border-zinc-700 opacity-75' : '')">
+            <article class="bg-zinc-900 border rounded-lg p-5"
+                     :class="m.archived_at ? 'border-zinc-700 opacity-75' : (m.ai_provider === 'boss' ? 'border-2 border-amber-500' : (m.status === 'pending' ? 'border-amber-600' : 'border-zinc-800'))">
               <header class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2 text-xs flex-wrap">
-                  <span class="px-2 py-0.5 rounded" :class="statusClass(m.status)" x-text="statusLabel(m.status)"></span>
+                  <span class="px-2 py-0.5 rounded"
+                        :class="m.ai_provider === 'boss' ? 'bg-amber-800 text-amber-100' : statusClass(m.status)"
+                        x-text="m.ai_provider === 'boss' ? '🎩 Boss-Nachricht' : statusLabel(m.status)"></span>
                   <span class="text-zinc-500" x-text="formatDate(m.created_at)"></span>
                   <span class="text-zinc-600" x-text="providerLabel(m.ai_provider)"></span>
                   <span x-show="m.deadline_at"
@@ -645,6 +647,16 @@
                 <div x-show="editingMissionId !== m.id"
                      class="whitespace-pre-wrap text-zinc-200 leading-relaxed"
                      x-text="m.content_final || m.content_generated"></div>
+                <!-- Boss-Nachricht: angehängte Bilder als Thumbnails -->
+                <div x-show="m.ai_provider === 'boss' && bossAtts(m).length"
+                     class="mt-2 flex flex-wrap gap-2">
+                  <template x-for="att in bossAtts(m)" :key="att.url">
+                    <a :href="att.url" target="_blank" class="block">
+                      <img :src="att.url" :alt="att.filename"
+                           class="max-h-40 max-w-xs rounded border border-amber-800/50" />
+                    </a>
+                  </template>
+                </div>
                 <textarea x-show="editingMissionId === m.id" x-model="m.content_final" rows="6"
                           class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm"></textarea>
                 <div class="mt-2 flex items-center gap-2 flex-wrap">
@@ -916,6 +928,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20260810d"></script>
+  <script src="/static/app.js?v=20260810e"></script>
 </body>
 </html>

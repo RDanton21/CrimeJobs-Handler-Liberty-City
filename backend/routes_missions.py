@@ -300,34 +300,30 @@ async def boss_message_send(
     message_id = str(data.get("message_id") or "")
     attachments_meta = data.get("attachments") or []
 
-    # An die neueste NICHT-archivierte Mission koppeln (sent ODER Draft), damit die
-    # Nachricht im Verlauf erscheint UND beim Archivieren mitgeloescht wird.
-    active_q = await session.execute(
-        select(Mission)
-        .where(Mission.crew_id == crew.id, Mission.archived_at.is_(None))
-        .order_by(desc(Mission.id))
-        .limit(1)
+    # Eigene "Boss-Nachricht"-Karte anlegen (ai_provider="boss") — erscheint ganz
+    # oben bei den aktiven Auftraegen, orange umrandet. Beim Archivieren wird die
+    # Discord-Nachricht ueber discord_message_id mitgeloescht (Standard-Archiv).
+    mission = Mission(
+        crew_id=crew.id,
+        ai_provider="boss",
+        ai_model="",
+        prompt_used="",
+        content_generated=text,
+        content_final=text,
+        discord_channel_id=channel,
+        discord_message_id=message_id,
+        status=MissionStatus.INFO,
+        sent_at=datetime.utcnow(),
+        boss_attachments=json.dumps(attachments_meta, ensure_ascii=False),
+        personnel_brief="",
+        personnel_updated_at=None,
     )
-    active = active_q.scalar_one_or_none()
-    if active is not None and message_id:
-        try:
-            existing = json.loads(active.manual_boss_messages or "[]")
-            if not isinstance(existing, list):
-                existing = []
-        except (ValueError, TypeError):
-            existing = []
-        existing.append({
-            "message_id": message_id,
-            "author": "🎩 Il Padrino",
-            "content": text,
-            "posted_at": datetime.utcnow().isoformat(),
-            "attachments": attachments_meta,
-        })
-        active.manual_boss_messages = json.dumps(existing, ensure_ascii=False)
-        await session.commit()
+    session.add(mission)
+    await session.commit()
+    await session.refresh(mission)
 
     return {"ok": True, "channel_id": channel, "message_id": message_id,
-            "attached_mission_id": active.id if active else None}
+            "mission_id": mission.id}
 
 
 async def _load_context(session: AsyncSession, crew: Crew, extra: str) -> MissionContext:
