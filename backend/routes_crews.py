@@ -339,10 +339,40 @@ async def get_crew_boss_feedback_recent(
     if r.status_code >= 400:
         raise HTTPException(502, f"Bot Fehler: {r.text}")
     msgs = r.json()
-    if isinstance(msgs, list):
-        msgs.sort(key=lambda x: x.get("posted_at") or "", reverse=True)  # neueste zuerst
-        return msgs
-    return []
+    if not isinstance(msgs, list):
+        msgs = []
+
+    # Eigene Boss-Nachrichten (Bot-Posts, ai_provider="boss") dazumischen —
+    # /read_channel ueberspringt Bot-Posts, daher aus der DB ergaenzen, damit
+    # auch die von uns gesendeten Texte/Bilder im Verlauf auftauchen.
+    bres = await session.execute(
+        select(Mission)
+        .where(
+            Mission.crew_id == crew_id,
+            Mission.ai_provider == "boss",
+            Mission.archived_at.is_(None),
+        )
+        .order_by(Mission.id.desc())
+        .limit(max(1, min(limit, 50)))
+    )
+    for bm in bres.scalars().all():
+        try:
+            atts = json.loads(bm.boss_attachments or "[]")
+            if not isinstance(atts, list):
+                atts = []
+        except (ValueError, TypeError):
+            atts = []
+        when = bm.sent_at or bm.created_at
+        msgs.append({
+            "message_id": bm.discord_message_id or f"boss-{bm.id}",
+            "author": "🎩 Il Padrino",
+            "content": bm.content_final or "",
+            "posted_at": when.isoformat() if when else "",
+            "attachments": atts,
+        })
+
+    msgs.sort(key=lambda x: x.get("posted_at") or "", reverse=True)  # neueste zuerst
+    return msgs
 
 
 # ---- Crime-Business: KI-Vorschau + Senden an separaten Channel ----
