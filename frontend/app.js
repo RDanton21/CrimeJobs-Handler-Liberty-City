@@ -793,6 +793,7 @@ function crewPage() {
     bossMsgPreview: "",   // erzeugter Padrino-Text (Vorschau, editierbar)
     bossMsgBusy: false,
     bossMsgImages: [],    // optional angehängte Bilder (File[])
+    bossImagesOnly: [],   // Bilder ohne Text (eigener Sende-Button)
     rewriteReq: { raw_input: "" },
     pendingImage: null,
     generating: false,
@@ -1528,6 +1529,33 @@ function crewPage() {
     clearBossImage() {
       this.bossMsgImages = [];
       if (this.$refs.bossImgInput) this.$refs.bossImgInput.value = "";
+    },
+    pickBossImageOnly(evt) {
+      this.bossImagesOnly = Array.from((evt.target && evt.target.files) || []);
+    },
+    clearBossImagesOnly() {
+      this.bossImagesOnly = [];
+      if (this.$refs.bossImgOnlyInput) this.$refs.bossImgOnlyInput.value = "";
+    },
+    // Nur Bild(er) ohne Text in den Boss-Feedback-Channel senden
+    async sendBossImagesOnly() {
+      if (!this.bossImagesOnly.length) { alert("Bitte mindestens ein Bild wählen."); return; }
+      if (!confirm("Nur die Bild(er) in den Boss-Feedback-Channel senden?")) return;
+      this.bossMsgBusy = true;
+      try {
+        const fd = new FormData();
+        fd.append("crew_id", this.crewId);
+        fd.append("text", "");
+        for (const img of this.bossImagesOnly) fd.append("images", img);
+        const r = await fetch("/api/missions/boss-message/send",
+                              { method: "POST", body: fd, credentials: "include" });
+        if (!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
+        await r.json();
+        this.clearBossImagesOnly();
+        await this.loadMissions();
+        alert("Bild(er) gesendet ✓ — als Karte oben.");
+      } catch (e) { alert("Senden fehlgeschlagen: " + (e.message || e)); }
+      finally { this.bossMsgBusy = false; }
     },
     // Fertigen (ggf. editierten) Boss-Text — optional mit Bild — in den
     // Boss-Feedback-Channel senden (Multipart).

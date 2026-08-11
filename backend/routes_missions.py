@@ -257,8 +257,6 @@ async def boss_message_send(
     if not crew:
         raise HTTPException(404, "Crew nicht gefunden")
     text = (text or "").strip()
-    if not text:
-        raise HTTPException(400, "Kein Text")
     channel = (crew.info_channel_id or "").strip()
     if not channel:
         raise HTTPException(400, "Diese Gang hat keinen Boss-Feedback-Channel (Zusatzinfo-Channel-ID) hinterlegt")
@@ -277,6 +275,10 @@ async def boss_message_send(
         async with aiofiles.open(target, "wb") as f:
             await f.write(await img.read())
         image_paths.append(str(target))
+
+    # Text ODER mindestens ein Bild muss vorhanden sein
+    if not text and not image_paths:
+        raise HTTPException(400, "Text oder mindestens ein Bild erforderlich")
 
     try:
         async with httpx.AsyncClient(timeout=30.0) as cli:
