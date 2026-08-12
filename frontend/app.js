@@ -435,7 +435,8 @@ function dashboard() {
       if (!confirm(`Aktiven Auftrag von „${c.name}" archivieren?\n\nDiscord-Posts werden gelöscht, Boss-Feedback wird ins Archiv gesnapshottet.`)) return;
       this.archivingCrew[c.id] = true;
       try {
-        const missions = await api.get("/api/missions?archived=false&limit=500");
+        // gezielt nur die Missions DIESER Gang laden (statt alle + client-Filter)
+        const missions = await api.get(`/api/missions?crew_id=${c.id}&archived=false&limit=500`);
         const mine = (missions || []).filter(m => m.crew_id === c.id);
         if (!mine.length) { alert(`„${c.name}" hat gerade keinen aktiven Auftrag.`); return; }
         let ok = 0, fail = 0;

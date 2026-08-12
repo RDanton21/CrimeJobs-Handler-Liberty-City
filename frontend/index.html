@@ -6,47 +6,39 @@
   <title>Crime Automation — Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260808a" />
+  <link rel="stylesheet" href="/static/style.css?v=20260812a" />
 </head>
 <body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
   <div x-data="dashboard()" x-init="init()" class="max-w-screen-2xl mx-auto p-6">
-    <header class="flex items-center justify-between mb-8 flex-wrap gap-3">
-      <h1>
-        <img src="/static/logo.png" alt="SEKT6R" class="h-12 w-auto" />
-      </h1>
-      <nav class="flex gap-2 text-sm flex-wrap items-center">
-        <a href="/" class="px-3 py-1.5 rounded bg-red-700 text-white">Dashboard</a>
-        <a href="/archive" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Archiv</a>
-        <a href="/lore" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Lore</a>
-        <a href="/story" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Story</a>
-        <a href="/chronik" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Chronik</a>
-        <a href="/konflikte" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Beef</a>
-        <a href="/mittler" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Mittler</a>
-        <a href="/personnel" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700 relative"
-           title="Personal-Bedarf — Übersicht & Edit">
-          Personal
-          <span x-show="personnelUnseen > 0"
-                x-text="personnelUnseen"
-                class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center"></span>
+    <!-- Sticky Header: nur Navigation. Aktions-Buttons (Archivieren/Wizard/Neue
+         Gang) sitzen jetzt kontextnah in der Gangs-Toolbar weiter unten. -->
+    <header class="sticky top-0 z-40 -mx-6 px-6 py-3 mb-8 bg-zinc-950/90 backdrop-blur border-b border-zinc-800/70">
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <a href="/" class="shrink-0">
+          <img src="/static/logo.png" alt="SEKT6R" class="h-10 w-auto" />
         </a>
-        <a href="/ranking" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Ranking</a>
-        <a href="/beziehungen" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Beziehungen</a>
-        <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
-        <button @click="archiveAllActive()" :disabled="archivingAll"
-                class="px-3 py-1.5 rounded bg-amber-700 hover:bg-amber-600 disabled:opacity-50 font-medium">
-          <span x-show="!archivingAll">📦 Alle archivieren</span>
-          <span x-show="archivingAll">Archiviere…</span>
-        </button>
-        <button @click="openWizard()"
-                class="px-3 py-1.5 rounded bg-purple-600 hover:bg-purple-500 font-medium"
-                title="KI generiert Story, Business, Rivalitäten für eine neue Crew">
-          🪄 KI-Wizard
-        </button>
-        <button @click="showNew = !showNew"
-                class="px-3 py-1.5 rounded bg-red-600 hover:bg-red-500 font-medium">
-          + Neue Gang
-        </button>
-      </nav>
+        <nav class="flex items-center gap-1 text-sm flex-wrap">
+          <a href="/" class="px-3 py-1.5 rounded-lg bg-red-700/90 text-white font-medium">Dashboard</a>
+          <a href="/archive" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Archiv</a>
+          <a href="/personnel" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition relative"
+             title="Personal-Bedarf — Übersicht & Edit">
+            Personal
+            <span x-show="personnelUnseen > 0"
+                  x-text="personnelUnseen"
+                  class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center"></span>
+          </a>
+          <a href="/ranking" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Ranking</a>
+          <span class="w-px h-5 bg-zinc-800 mx-1 hidden md:inline-block"></span>
+          <a href="/lore" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Lore</a>
+          <a href="/story" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Story</a>
+          <a href="/chronik" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Chronik</a>
+          <a href="/konflikte" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Beef</a>
+          <a href="/mittler" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Mittler</a>
+          <a href="/beziehungen" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Beziehungen</a>
+          <span class="w-px h-5 bg-zinc-800 mx-1 hidden md:inline-block"></span>
+          <a href="/settings" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">⚙</a>
+        </nav>
+      </div>
     </header>
 
     <!-- KI-Wizard Modal -->
@@ -174,9 +166,9 @@
       </div>
     </div>
 
-    <section class="mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+    <section class="mb-6 bg-zinc-900/60 border border-zinc-800/70 rounded-xl p-5">
       <div class="flex items-end gap-3 mb-4 flex-wrap">
-        <h2 class="text-lg font-semibold mr-2">Reaktions-Statistik</h2>
+        <h2 class="text-lg font-semibold mr-2">📊 Reaktions-Statistik</h2>
         <div>
           <label class="text-xs text-zinc-400 block mb-1">Stadtteil</label>
           <select x-model="districtFilter" @change="loadStats()"
@@ -192,7 +184,9 @@
           <select x-model="statsFilter.crew_id" @change="loadStats()"
                   class="bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-sm">
             <option value="">Alle Gangs</option>
-            <template x-for="c in filteredCrews" :key="c.id">
+            <!-- volle Liste (crews), NICHT filteredCrews — sonst verschwindet die
+                 gewaehlte Gang aus dem Dropdown sobald ein Status-Filter aktiv ist -->
+            <template x-for="c in crews" :key="c.id">
               <option :value="c.id" x-text="c.name"></option>
             </template>
           </select>
@@ -220,40 +214,52 @@
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <button @click="toggleStatusFilter('approved')"
-                :class="statusFilter === 'approved' ? 'ring-2 ring-green-400 bg-green-900/60' : 'bg-green-900/30'"
-                class="border border-green-700 rounded p-3 text-center transition hover:bg-green-900/50">
-          <div class="text-2xl font-bold text-green-300" x-text="stats.approved || 0"></div>
-          <div class="text-xs text-green-400 mt-1">👍 Erledigt</div>
+                :class="statusFilter === 'approved' ? 'ring-2 ring-green-400 bg-green-900/50 border-green-500/60' : 'bg-green-950/40 border-green-800/40 hover:bg-green-900/40'"
+                class="border rounded-xl p-4 text-center transition"
+                title="Klick = Gang-Liste auf diesen Status filtern">
+          <div class="text-3xl font-bold text-green-300 tabular-nums" x-text="stats.approved || 0"></div>
+          <div class="text-xs text-green-400/90 mt-1">👍 Erledigt</div>
         </button>
         <button @click="toggleStatusFilter('rejected')"
-                :class="statusFilter === 'rejected' ? 'ring-2 ring-red-400 bg-red-900/60' : 'bg-red-900/30'"
-                class="border border-red-700 rounded p-3 text-center transition hover:bg-red-900/50">
-          <div class="text-2xl font-bold text-red-300" x-text="stats.rejected || 0"></div>
-          <div class="text-xs text-red-400 mt-1">👎 Fehlgeschlagen</div>
+                :class="statusFilter === 'rejected' ? 'ring-2 ring-red-400 bg-red-900/50 border-red-500/60' : 'bg-red-950/40 border-red-800/40 hover:bg-red-900/40'"
+                class="border rounded-xl p-4 text-center transition"
+                title="Klick = Gang-Liste auf diesen Status filtern">
+          <div class="text-3xl font-bold text-red-300 tabular-nums" x-text="stats.rejected || 0"></div>
+          <div class="text-xs text-red-400/90 mt-1">👎 Fehlgeschlagen</div>
         </button>
         <button @click="toggleStatusFilter('cancelled')"
-                :class="statusFilter === 'cancelled' ? 'ring-2 ring-yellow-400 bg-yellow-900/60' : 'bg-yellow-900/30'"
-                class="border border-yellow-700 rounded p-3 text-center transition hover:bg-yellow-900/50">
-          <div class="text-2xl font-bold text-yellow-300" x-text="stats.cancelled || 0"></div>
-          <div class="text-xs text-yellow-400 mt-1">❌ Nicht durchführbar</div>
+                :class="statusFilter === 'cancelled' ? 'ring-2 ring-yellow-400 bg-yellow-900/50 border-yellow-500/60' : 'bg-yellow-950/40 border-yellow-800/40 hover:bg-yellow-900/40'"
+                class="border rounded-xl p-4 text-center transition"
+                title="Klick = Gang-Liste auf diesen Status filtern">
+          <div class="text-3xl font-bold text-yellow-300 tabular-nums" x-text="stats.cancelled || 0"></div>
+          <div class="text-xs text-yellow-400/90 mt-1">❌ Nicht durchführbar</div>
         </button>
         <button @click="toggleStatusFilter('pending')"
-                :class="statusFilter === 'pending' ? 'ring-2 ring-amber-400 bg-amber-900/60' : 'bg-amber-900/30'"
-                class="border border-amber-700 rounded p-3 text-center transition hover:bg-amber-900/50">
-          <div class="text-2xl font-bold text-amber-300" x-text="stats.pending || 0"></div>
-          <div class="text-xs text-amber-400 mt-1">⏳ Wartet</div>
+                :class="statusFilter === 'pending' ? 'ring-2 ring-amber-400 bg-amber-900/50 border-amber-500/60' : 'bg-amber-950/40 border-amber-800/40 hover:bg-amber-900/40'"
+                class="border rounded-xl p-4 text-center transition"
+                title="Klick = Gang-Liste auf diesen Status filtern">
+          <div class="text-3xl font-bold text-amber-300 tabular-nums" x-text="stats.pending || 0"></div>
+          <div class="text-xs text-amber-400/90 mt-1">⏳ Wartet</div>
         </button>
       </div>
-      <p x-show="statusFilter" class="text-xs text-zinc-400 mt-3">
-        Card-Liste gefiltert auf: <span x-text="statusLabel(statusFilter)"></span>
-        <button @click="statusFilter = ''" class="ml-2 underline hover:text-zinc-200">zurücksetzen</button>
+      <!-- Aktive Filter gesammelt an EINER Stelle sichtbar -->
+      <p x-show="statusFilter || districtFilter || searchQuery" class="text-xs text-zinc-400 mt-3 flex items-center gap-2 flex-wrap">
+        <span class="text-zinc-500">Aktive Filter:</span>
+        <span x-show="statusFilter" class="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700" x-text="'Status: ' + statusLabel(statusFilter)"></span>
+        <span x-show="districtFilter" class="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700" x-text="'Stadtteil: ' + districtFilter"></span>
+        <span x-show="searchQuery" class="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700" x-text="'Suche: ' + searchQuery"></span>
+        <button @click="statusFilter = ''; districtFilter = ''; searchQuery = ''; loadStats()"
+                class="underline hover:text-zinc-200">alle zurücksetzen</button>
       </p>
     </section>
 
-    <section class="mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-      <button @click="showBulk = !showBulk" class="text-left w-full flex items-center justify-between">
-        <h2 class="text-lg font-semibold">📢 Massen-Auftrag senden</h2>
-        <span class="text-zinc-400 text-sm" x-text="showBulk ? '▲ schließen' : '▼ aufklappen'"></span>
+    <section class="mb-6 bg-zinc-900/60 border border-zinc-800/70 rounded-xl p-5">
+      <button @click="showBulk = !showBulk" class="text-left w-full flex items-center justify-between group">
+        <div class="flex items-baseline gap-3">
+          <h2 class="text-lg font-semibold">📢 Massen-Auftrag senden</h2>
+          <span class="text-xs text-zinc-500 hidden sm:inline">ein Text an mehrere Gangs — 1:1 oder per KI</span>
+        </div>
+        <span class="text-zinc-500 group-hover:text-zinc-300 text-sm transition" x-text="showBulk ? '▲ schließen' : '▼ aufklappen'"></span>
       </button>
 
       <div x-show="showBulk" x-transition class="mt-3 space-y-3">
@@ -378,28 +384,51 @@
       </div><!-- /showBulk -->
     </section>
 
+    <!-- Gangs-Toolbar: Suche/Filter links der Aktionen — die drei Aktions-
+         Buttons (frueher in der Nav) sitzen jetzt hier, wo sie hingehoeren. -->
     <section class="mb-4 flex items-center justify-between flex-wrap gap-3">
-      <h2 class="text-xl font-semibold">Gangs</h2>
-      <div class="flex items-center gap-2">
+      <div class="flex items-baseline gap-3">
+        <h2 class="text-xl font-semibold">Gangs</h2>
+        <span class="text-xs text-zinc-500" x-text="`${filteredCrews.length} von ${crews.length}`"></span>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
         <button x-show="inactiveCount > 0" @click="toggleShowInactive()"
                 :title="showInactive ? 'Inaktive Gangs ausblenden' : 'Inaktive Gangs einblenden'"
-                class="px-3 py-2 rounded text-sm border whitespace-nowrap"
+                class="px-3 py-2 rounded-lg text-sm border whitespace-nowrap transition"
                 :class="showInactive
                   ? 'bg-zinc-800 border-zinc-700 text-zinc-300 hover:bg-zinc-700'
                   : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'">
           <span x-text="showInactive ? '👁 Inaktive' : '🚫 Inaktive'"></span>
           <span class="text-xs opacity-70" x-text="`(${inactiveCount})`"></span>
         </button>
-        <input type="text" x-model="searchQuery"
-               placeholder="🔍 Gang-Name suchen…"
-               class="bg-zinc-900 border border-zinc-800 rounded px-3 py-2 text-sm w-full md:w-72 focus:border-red-600 focus:outline-none" />
-        <button x-show="searchQuery" @click="searchQuery = ''"
-                title="Suche zurücksetzen"
-                class="text-zinc-400 hover:text-zinc-200 text-sm">×</button>
+        <div class="relative">
+          <input type="text" x-model="searchQuery"
+                 placeholder="🔍 Gang suchen…"
+                 class="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm w-full md:w-64 focus:border-red-600 focus:outline-none pr-7" />
+          <button x-show="searchQuery" @click="searchQuery = ''"
+                  title="Suche zurücksetzen"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200 text-sm">×</button>
+        </div>
+        <span class="w-px h-6 bg-zinc-800 mx-1 hidden md:inline-block"></span>
+        <button @click="archiveAllActive()" :disabled="archivingAll"
+                title="Alle aktiven Aufträge archivieren + Zusatzinfo-Channels leeren"
+                class="px-3 py-2 rounded-lg text-sm border border-amber-800/60 text-amber-300 hover:bg-amber-900/40 disabled:opacity-50 transition whitespace-nowrap">
+          <span x-show="!archivingAll">📦 Alle archivieren</span>
+          <span x-show="archivingAll">Archiviere…</span>
+        </button>
+        <button @click="openWizard()"
+                title="KI generiert Story, Business, Rivalitäten für eine neue Crew"
+                class="px-3 py-2 rounded-lg text-sm border border-purple-800/60 text-purple-300 hover:bg-purple-900/40 transition whitespace-nowrap">
+          🪄 KI-Wizard
+        </button>
+        <button @click="showNew = !showNew"
+                class="px-3 py-2 rounded-lg text-sm bg-red-600 hover:bg-red-500 font-medium transition whitespace-nowrap">
+          + Neue Gang
+        </button>
       </div>
     </section>
 
-    <div x-show="showNew" x-transition class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mb-6">
+    <div x-show="showNew" x-transition class="bg-zinc-900/60 border border-zinc-800/70 rounded-xl p-5 mb-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input x-model="draft.name" placeholder="Gang-Name"
                class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2" />
@@ -442,20 +471,22 @@
           <template x-for="c in group.crews" :key="c.id">
             <div class="relative">
               <a :href="`/crew/${c.id}`" @click="markCrewSeen(c)"
-                 class="block bg-zinc-900 border-2 rounded-lg p-5 transition hover:bg-zinc-800/60"
+                 class="block bg-zinc-900/80 border-2 rounded-xl p-5 transition duration-150 hover:bg-zinc-800/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/40"
                  :class="[cardBorder(c.last_mission_status),
                           hasUnread(c) ? 'animate-pulse ring-2 ring-amber-400' : '',
                           c.is_active === false ? 'opacity-70 hover:opacity-100' : '']">
                 <div class="flex items-center gap-3 mb-3 pr-24">
-                  <div class="w-3 h-3 rounded-full shrink-0" :style="`background:${c.color_hex}`"></div>
+                  <div class="w-3 h-3 rounded-full shrink-0 ring-2 ring-zinc-700/60" :style="`background:${c.color_hex}`"></div>
                   <h3 class="text-lg font-semibold truncate" x-text="c.name"></h3>
                   <span x-show="c.is_active === false"
                         class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 shrink-0">inaktiv</span>
                 </div>
-                <p class="text-sm text-zinc-400 line-clamp-3" x-text="c.story_background || 'Keine Story.'"></p>
+                <p class="text-sm text-zinc-400 line-clamp-3 leading-relaxed" x-text="c.story_background || 'Keine Story.'"></p>
                 <div class="mt-3 flex items-center justify-between gap-2">
-                  <span class="text-xs text-zinc-500 truncate">
-                    Channel: <span x-text="c.discord_channel_id || '—'"></span>
+                  <span class="text-[11px] text-zinc-600 truncate"
+                        :title="c.discord_channel_id ? 'Discord-Channel: ' + c.discord_channel_id : 'kein Discord-Channel hinterlegt'">
+                    <span x-show="c.discord_channel_id">💬 verbunden</span>
+                    <span x-show="!c.discord_channel_id" class="text-amber-500/80">⚠ kein Channel</span>
                   </span>
                   <span x-show="c.last_mission_status"
                         :class="statusClass(c.last_mission_status)"
@@ -511,8 +542,11 @@
     <p x-show="crews.length === 0" class="text-zinc-500 mt-6">
       Noch keine Gangs angelegt. Klicke oben auf "Neue Gang".
     </p>
+    <!-- generisch: die Liste kann auch durch Suche/Status-Filter leer sein, nicht nur Stadtteil -->
     <p x-show="crews.length > 0 && filteredCrews.length === 0" class="text-zinc-500 mt-6">
-      Keine Gang in <span x-text="districtFilter"></span>.
+      Keine Gang gefunden — Filter oder Suche aktiv.
+      <button @click="statusFilter = ''; districtFilter = ''; searchQuery = ''; loadStats()"
+              class="ml-1 underline hover:text-zinc-200">alle Filter zurücksetzen</button>
     </p>
 
     <!-- Toast (Personal-Bedarf-Update) -->
@@ -529,6 +563,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20260808a"></script>
+  <script src="/static/app.js?v=20260812a"></script>
 </body>
 </html>
