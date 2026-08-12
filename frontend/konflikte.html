@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SEKT6R — Beef / Konflikte</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css?v=20260810g" />
+  <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
+  <div x-data="konfliktePage()" x-init="init()" x-cloak class="max-w-[1200px] mx-auto p-6">
+    <header class="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <h1><img src="/static/logo.png" alt="SEKT6R" class="h-12 w-auto" /></h1>
+      <nav class="flex gap-2 text-sm flex-wrap items-center">
+        <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
+        <a href="/lore" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Lore</a>
+        <a href="/story" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Story</a>
+        <a href="/chronik" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Chronik</a>
+        <a href="/konflikte" class="px-3 py-1.5 rounded bg-red-700 text-white">Beef</a>
+        <a href="/mittler" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Mittler</a>
+        <a href="/personnel" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Personal</a>
+        <a href="/ranking" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Ranking</a>
+        <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
+      </nav>
+    </header>
+
+    <section class="mb-4 flex items-start justify-between gap-4 flex-wrap">
+      <div>
+        <h2 class="text-xl font-semibold mb-1">🩸 Beef / Konflikte</h2>
+        <p class="text-xs text-zinc-400 max-w-2xl">
+          Selbst gemeldet: mit wem hat jede Gruppierung Stress. Fließt automatisch
+          in die <strong>Auftrags-Generierung</strong> ein (als feindliche Beziehung).
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <button x-show="!editMode" @click="editMode = true"
+                class="text-sm px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded">✎ Bearbeiten</button>
+        <button x-show="editMode" @click="save()"
+                class="text-sm px-3 py-1.5 bg-green-700 hover:bg-green-600 rounded">✓ Speichern</button>
+        <button x-show="editMode" @click="editMode = false; load()"
+                class="text-sm px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded">Abbrechen</button>
+      </div>
+    </section>
+
+    <p x-show="saved" class="text-xs text-green-400 mb-3">Gespeichert ✓</p>
+
+    <!-- Anzeige -->
+    <div x-show="!editMode" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <template x-for="row in rows" :key="row.name">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+          <div class="font-semibold text-zinc-100 mb-2" x-text="row.name"></div>
+          <div x-show="row.enemies.length" class="flex flex-wrap gap-1.5">
+            <template x-for="e in row.enemies" :key="e">
+              <span class="px-2 py-0.5 rounded bg-red-900/60 border border-red-800 text-red-200 text-xs" x-text="e"></span>
+            </template>
+          </div>
+          <div x-show="!row.enemies.length" class="text-xs text-zinc-500">— kein Beef —</div>
+        </div>
+      </template>
+      <p x-show="!rows.length" class="text-zinc-500">Noch keine Konflikte erfasst.</p>
+    </div>
+
+    <!-- Bearbeiten: pro Gruppierung ein Feld (Feinde komma-getrennt) -->
+    <div x-show="editMode" class="space-y-2">
+      <p class="text-xs text-zinc-400 mb-2">Feinde je Gruppierung, durch Komma getrennt. Leer = kein Beef.</p>
+      <template x-for="name in crewNames" :key="name">
+        <div class="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded px-3 py-2">
+          <span class="w-56 shrink-0 text-sm text-zinc-200" x-text="name"></span>
+          <input type="text" x-model="draft[name]"
+                 placeholder="z.B. Blue Union, LCPD"
+                 class="flex-1 bg-zinc-950 border border-zinc-800 rounded px-3 py-1.5 text-sm" />
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <script>
+    function konfliktePage() {
+      return {
+        conflicts: {},   // {name: [enemies]}
+        crewNames: [],
+        draft: {},       // {name: "komma, string"}
+        editMode: false,
+        saved: false,
+        get rows() {
+          // nur Gruppierungen mit Eintrag (auch leere Liste) anzeigen, alphabetisch
+          return Object.keys(this.conflicts).sort((a, b) => a.localeCompare(b))
+            .map(name => ({ name, enemies: this.conflicts[name] || [] }));
+        },
+        async init() { await this.load(); },
+        async load() {
+          try {
+            const r = await fetch("/api/conflicts", { credentials: "include" });
+            const data = await r.json();
+            this.conflicts = data.conflicts || {};
+            this.crewNames = data.crew_names || [];
+            // draft aus conflicts + allen crewNames aufbauen
+            const d = {};
+            for (const n of this.crewNames) d[n] = (this.conflicts[n] || []).join(", ");
+            // auch Namen, die in conflicts stehen aber (noch) nicht als crew gelistet
+            for (const n of Object.keys(this.conflicts)) if (!(n in d)) d[n] = (this.conflicts[n] || []).join(", ");
+            this.draft = d;
+          } catch (e) { /* silent */ }
+        },
+        async save() {
+          const out = {};
+          for (const [name, str] of Object.entries(this.draft)) {
+            const enemies = (str || "").split(",").map(s => s.trim()).filter(Boolean);
+            if (enemies.length) out[name] = enemies;
+          }
+          try {
+            const r = await fetch("/api/conflicts", {
+              method: "PUT", credentials: "include",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ conflicts: out }),
+            });
+            if (!r.ok) throw new Error(await r.text());
+            const data = await r.json();
+            this.conflicts = data.conflicts || {};
+            this.editMode = false;
+            this.saved = true;
+            setTimeout(() => { this.saved = false; }, 2500);
+          } catch (e) { alert("Speichern fehlgeschlagen: " + (e.message || e)); }
+        },
+      };
+    }
+  </script>
+</body>
+</html>

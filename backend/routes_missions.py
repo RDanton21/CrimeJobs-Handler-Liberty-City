@@ -36,6 +36,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .ai import get_provider
 from .auth import require_admin
 from .config import settings
+from .conflicts import conflicts_for
 from .db import get_session
 from .models import Crew, CrewRelation, Mission, MissionStatus, SystemPrompt, Top3TitlePoolMessage
 from .personnel_ai import generate_personnel_brief as ai_personnel_brief
@@ -348,6 +349,30 @@ async def _load_context(session: AsyncSession, crew: Crew, extra: str) -> Missio
                 "notes": r.notes,
             }
         )
+
+    # Selbst gemeldeter Beef/Konflikt (siehe /konflikte) einspeisen — als
+    # feindliche Beziehung, damit die KI ihn bei Auftraegen beruecksichtigt.
+    beef = conflicts_for(crew.name)
+    if beef:
+        by_name = {r["name"].strip().lower(): r for r in relations}
+        for enemy in beef:
+            key = (enemy or "").strip().lower()
+            if not key:
+                continue
+            existing = by_name.get(key)
+            if existing:
+                note = (existing.get("notes") or "").strip()
+                existing["notes"] = (note + " · " if note else "") + "🔥 aktueller Beef (selbst gemeldet)"
+                existing["relation_type"] = "hostile"
+            else:
+                entry = {
+                    "name": enemy,
+                    "story": "",
+                    "relation_type": "hostile",
+                    "notes": "🔥 aktueller Beef (selbst gemeldet)",
+                }
+                relations.append(entry)
+                by_name[key] = entry
 
     hist_q = await session.execute(
         select(Mission)

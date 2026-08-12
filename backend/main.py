@@ -9,6 +9,7 @@ from .auth import require_admin
 from .config import settings
 from .db import init_db
 from .routes_chronik import router as chronik_router
+from .routes_conflicts import router as conflicts_router
 from .routes_crews import router as crews_router
 from .routes_dashboard import router as dashboard_router
 from .routes_expiry import router as expiry_router
@@ -50,6 +51,13 @@ app.include_router(slots_router)
 app.include_router(public_slots_router)
 app.include_router(relations_survey_router)
 app.include_router(chronik_router)
+app.include_router(conflicts_router)
+
+
+@app.get("/konflikte")
+async def conflicts_page(_user: str = Depends(require_admin)):
+    """Uebersicht: wer hat mit wem Beef (selbst gemeldet)."""
+    return FileResponse(str(FRONTEND_DIR / "konflikte.html"))
 
 
 @app.get("/api/health")
