@@ -6,12 +6,12 @@
   <title>Crime Automation — Crew</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260810g" />
+  <link rel="stylesheet" href="/static/style.css?v=20260812a" />
   <style>[x-cloak] { display: none !important; }</style>
 </head>
 <body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
   <div x-data="crewPage()" x-init="init()" class="max-w-screen-2xl mx-auto p-6">
-    <header class="flex items-center justify-between mb-6">
+    <header class="sticky top-0 z-40 -mx-6 px-6 py-3 mb-8 bg-zinc-950/90 backdrop-blur border-b border-zinc-800/70 flex items-center justify-between gap-4 flex-wrap">
       <div>
         <a href="/" class="text-sm text-zinc-400 hover:text-zinc-100">← Dashboard</a>
         <h1 class="text-3xl font-bold mt-1">
@@ -20,18 +20,21 @@
           <span x-text="crew.name || '...'"></span>
         </h1>
       </div>
-      <nav class="flex gap-3 text-sm">
-        <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
-        <a href="/archive" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Archiv</a>
-        <a href="/lore" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Lore</a>
-        <a href="/story" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Story</a>
-        <a href="/chronik" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Chronik</a>
-        <a href="/konflikte" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Beef</a>
-        <a href="/mittler" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Mittler</a>
-        <a href="/personnel" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Personal</a>
-        <a href="/ranking" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Ranking</a>
-        <a href="/settings" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Settings</a>
-      </nav>
+      <nav class="flex items-center gap-1 text-sm flex-wrap">
+          <a href="/" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Dashboard</a>
+          <a href="/archive" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Archiv</a>
+          <a href="/personnel" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Personal</a>
+          <a href="/ranking" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Ranking</a>
+          <span class="w-px h-5 bg-zinc-800 mx-1 hidden md:inline-block"></span>
+          <a href="/lore" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Lore</a>
+          <a href="/story" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Story</a>
+          <a href="/chronik" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Chronik</a>
+          <a href="/konflikte" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Beef</a>
+          <a href="/mittler" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Mittler</a>
+          <a href="/beziehungen" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Beziehungen</a>
+          <span class="w-px h-5 bg-zinc-800 mx-1 hidden md:inline-block"></span>
+          <a href="/settings" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">⚙ Settings</a>
+        </nav>
     </header>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -976,6 +979,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20260810g"></script>
+  <script src="/static/app.js?v=20260812a"></script>
 </body>
 </html>

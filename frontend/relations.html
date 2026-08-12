@@ -6,28 +6,37 @@
   <title>Crime Automation — Beziehungs-Erhebung</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260808a" />
+  <link rel="stylesheet" href="/static/style.css?v=20260812a" />
 </head>
 <body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
   <div x-data="relationsSurvey()" x-init="init()" class="max-w-screen-2xl mx-auto p-6">
 
-    <header class="flex items-center justify-between mb-8 flex-wrap gap-3">
+    <header class="sticky top-0 z-40 -mx-6 px-6 py-3 mb-8 bg-zinc-950/90 backdrop-blur border-b border-zinc-800/70 flex items-center justify-between gap-4 flex-wrap">
       <div>
         <a href="/" class="text-sm text-zinc-500 hover:text-zinc-300">← Dashboard</a>
         <h1 class="text-2xl font-bold mt-1">Beziehungs-Erhebung</h1>
       </div>
-      <nav class="flex gap-2 text-sm flex-wrap items-center">
-        <a href="/" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Dashboard</a>
-        <a href="/lore" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Lore</a>
-        <a href="/ranking" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Ranking</a>
-        <a href="/konflikte" class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700">Beef</a>
-        <a href="/beziehungen" class="px-3 py-1.5 rounded bg-red-700 text-white">Beziehungen</a>
-        <button @click="loadAll()" :disabled="loading"
-                class="px-3 py-1.5 rounded bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50">
-          <span x-show="!loading">↻ Aktualisieren</span>
-          <span x-show="loading">Lade…</span>
-        </button>
-      </nav>
+      <nav class="flex items-center gap-1 text-sm flex-wrap">
+          <a href="/" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Dashboard</a>
+          <a href="/archive" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Archiv</a>
+          <a href="/personnel" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Personal</a>
+          <a href="/ranking" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Ranking</a>
+          <span class="w-px h-5 bg-zinc-800 mx-1 hidden md:inline-block"></span>
+          <a href="/lore" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Lore</a>
+          <a href="/story" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Story</a>
+          <a href="/chronik" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Chronik</a>
+          <a href="/konflikte" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Beef</a>
+          <a href="/mittler" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Mittler</a>
+          <a href="/beziehungen" class="px-3 py-1.5 rounded-lg bg-red-700/90 text-white font-medium">Beziehungen</a>
+          <span class="w-px h-5 bg-zinc-800 mx-1 hidden md:inline-block"></span>
+          <a href="/settings" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">⚙ Settings</a>
+          <span class="w-px h-5 bg-zinc-800 mx-1 hidden md:inline-block"></span>
+          <button @click="loadAll()" :disabled="loading"
+                  class="px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-300 hover:bg-zinc-800 disabled:opacity-50 transition">
+            <span x-show="!loading">↻ Aktualisieren</span>
+            <span x-show="loading">Lade…</span>
+          </button>
+        </nav>
     </header>
 
     <p x-show="error" x-text="error" class="mb-4 p-3 rounded bg-red-950 border border-red-800 text-red-300 text-sm"></p>
@@ -532,6 +541,6 @@
     </section>
   </div>
 
-  <script src="/static/app.js?v=20260808a"></script>
+  <script src="/static/app.js?v=20260812a"></script>
 </body>
 </html>
