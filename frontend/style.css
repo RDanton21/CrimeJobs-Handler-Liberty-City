@@ -287,3 +287,44 @@ html.light header[class*="bg-zinc-950/"] { background: rgba(250,250,251,0.92) !i
 .theme-toggle .tt-moon { display: none; }
 html.light .theme-toggle .tt-sun { display: none; }
 html.light .theme-toggle .tt-moon { display: inline; }
+
+/* ── Day-Mode: Lore/Story-Prosa (Farben oben sind dark-hardcoded) ── */
+html.light .prose-lore,
+html.light .prose-lore p,
+html.light .prose-lore ul,
+html.light .prose-lore ol { color: #26292f; }
+html.light .prose-lore h2 { color: #14161c; }
+html.light .prose-lore h3 { color: #1c1f26; }
+html.light .prose-lore h4 { color: #26292f; }
+html.light .prose-lore strong { color: #0e1013; }
+html.light .prose-lore em { color: #1c1f26; }
+html.light .prose-lore a { color: #b91c1c; }
+html.light .prose-lore blockquote {
+  color: #5a5f6a;
+  background: rgba(185, 28, 28, 0.06);
+  border-left-color: #b91c1c;
+}
+html.light .prose-lore code {
+  background: #f1f2f4; color: #b91c1c; border-color: #dcdee3;
+}
+html.light .prose-lore hr { border-color: #d4d6db; }
+html.light .prose-lore th, html.light .prose-lore td { border-color: #d4d6db; }
+html.light .prose-lore pre { background: #f4f5f7; border-color: #dcdee3; }
+html.light .prose-lore pre code { color: #33373f; }
+
+/* ── Day-Mode: .md-Markdown (Mittler-Seite, dark-hardcoded Style-Block) ── */
+html.light .md h1 { color: #14161c; border-bottom-color: #d4d6db; }
+html.light .md h2 { color: #1c1f26; border-bottom-color: #dcdee3; }
+html.light .md h3, html.light .md h4 { color: #26292f; }
+html.light .md p, html.light .md li, html.light .md td { color: #33373f; }
+html.light .md strong { color: #0e1013; }
+html.light .md em { color: #5a5f6a; }
+html.light .md code { background: #f1f2f4; color: #b45309; }
+html.light .md pre { background: #f4f5f7; border-color: #dcdee3; }
+html.light .md pre code { color: #33373f; }
+html.light .md blockquote { color: #5a5f6a; }
+html.light .md th, html.light .md td { border-color: #d4d6db; }
+html.light .md th { background: #eceef1; color: #14161c; }
+html.light .md hr { border-top-color: #d4d6db; }
+html.light .md a { color: #1d4ed8; }
+html.light .md a:hover { color: #1e40af; }
