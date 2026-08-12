@@ -1558,12 +1558,16 @@ function crewPage() {
       } catch (e) { alert("Senden fehlgeschlagen: " + (e.message || e)); }
       finally { this.bossMsgBusy = false; }
     },
-    // Fertigen (ggf. editierten) Boss-Text — optional mit Bild — in den
-    // Boss-Feedback-Channel senden (Multipart).
+    // Fertigen (ggf. editierten) Boss-Text — optional mit Bild(ern) — in den
+    // Boss-Feedback-Channel senden (Multipart). Ohne Text + mit Bildern
+    // werden nur die Bilder gesendet (ersetzt den frueheren Extra-Block).
     async sendBossMessage() {
       const text = (this.bossMsgPreview || "").trim();
-      if (!text) { alert("Kein Text zum Senden."); return; }
-      if (!confirm("Diese Boss-Nachricht in den Boss-Feedback-Channel senden?")) return;
+      if (!text && !this.bossMsgImages.length) { alert("Text erzeugen oder mindestens ein Bild wählen."); return; }
+      const msg = text
+        ? "Diese Boss-Nachricht in den Boss-Feedback-Channel senden?"
+        : "Nur die Bild(er) in den Boss-Feedback-Channel senden?";
+      if (!confirm(msg)) return;
       this.bossMsgBusy = true;
       try {
         const fd = new FormData();
