@@ -7,7 +7,17 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260812a" />
+  <link rel="stylesheet" href="/static/style.css?v=20260812c" />
+  <script>
+    /* Day-Mode-Bootstrap: Klasse VOR dem ersten Paint setzen (kein Flash) */
+    (function () {
+      try { if (localStorage.getItem('sektor_theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}
+      window.__toggleTheme = function () {
+        var light = document.documentElement.classList.toggle('light');
+        try { localStorage.setItem('sektor_theme', light ? 'light' : 'dark'); } catch (e) {}
+      };
+    })();
+  </script>
   <style>
     /* GitHub-artiges Markdown-Rendering, Dark-Theme */
     .md h1 { font-size: 1.75rem; font-weight: 700; color: #fafafa; border-bottom: 1px solid #3f3f46; padding-bottom: 0.5rem; margin: 1.5rem 0 1rem; }
@@ -52,6 +62,10 @@
           <a href="/beziehungen" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Beziehungen</a>
           <span class="w-px h-5 bg-zinc-800 mx-1 hidden md:inline-block"></span>
           <a href="/settings" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">⚙ Settings</a>
+        <button type="button" onclick="__toggleTheme()" title="Hell / Dunkel umschalten"
+                  class="theme-toggle px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">
+            <span class="tt-sun">☀️</span><span class="tt-moon">🌙</span>
+          </button>
         </nav>
     </header>
 
@@ -311,6 +325,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20260812a"></script>
+  <script src="/static/app.js?v=20260812c"></script>
 </body>
 </html>

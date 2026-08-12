@@ -186,3 +186,104 @@ select option:disabled,
 body.cine select option:disabled {
   color: #8a8a92 !important;
 }
+
+/* ═════════════════════════════════════════════════════════════
+   ☀️ DAY-MODE (html.light) — zentrale Light-Schicht.
+   Die Seiten sind mit dunklen Tailwind-Klassen gebaut; hier wird
+   pro Klassen-Familie hell übersteuert. Toggle: Button in der Nav,
+   Persistenz via localStorage ('sektor_theme'), Bootstrap-Script
+   im <head> jeder Seite (kein Flash).
+   ═════════════════════════════════════════════════════════════ */
+
+/* Grundfläche: Kino-Hintergrundbild bleibt, wird aber hell überblendet */
+html.light body.cine { background-color: #eef0f2; color: #1f2430; }
+html.light body.cine::after {
+  background:
+    radial-gradient(ellipse at center, rgba(244,245,246,0.82) 30%, rgba(233,235,238,0.95) 100%),
+    linear-gradient(180deg, rgba(246,247,248,0.90) 0%, rgba(240,241,243,0.95) 100%);
+}
+html.light body { color: #1f2430; }
+
+/* Flächen */
+html.light .bg-zinc-950, html.light [class*="bg-zinc-950/"] { background-color: rgba(255,255,255,0.92) !important; }
+html.light body.cine .bg-zinc-900, html.light .bg-zinc-900, html.light [class*="bg-zinc-900/"] {
+  background: rgba(255,255,255,0.88) !important;
+  border-color: #d9dbe0 !important;
+}
+html.light .bg-zinc-800, html.light [class*="bg-zinc-800/"] { background-color: #e6e7ea !important; }
+html.light .bg-zinc-700 { background-color: #d9dbe0 !important; }
+html.light [class*="hover:bg-zinc-800"]:hover,
+html.light [class*="hover:bg-zinc-700"]:hover { background-color: #d2d4da !important; }
+html.light body.cine input, html.light body.cine select, html.light body.cine textarea,
+html.light input, html.light select, html.light textarea {
+  background: #ffffff !important; color: #1f2430 !important; border-color: #c9ccd3 !important;
+}
+
+/* Text */
+html.light .text-zinc-100, html.light .text-white:not([class*="bg-"]) { color: #14161c !important; }
+html.light .text-zinc-200 { color: #23262e !important; }
+html.light .text-zinc-300 { color: #383c46 !important; }
+html.light .text-zinc-400 { color: #4c515c !important; }
+html.light .text-zinc-500 { color: #646a76 !important; }
+html.light .text-zinc-600 { color: #8a8f9a !important; }
+html.light body.cine h1, html.light body.cine h2, html.light body.cine h3 { color: #14161c; }
+
+/* Ränder */
+html.light .border-zinc-800, html.light [class*="border-zinc-800/"] { border-color: #dcdee3 !important; }
+html.light .border-zinc-700, html.light [class*="border-zinc-700/"] { border-color: #c9ccd3 !important; }
+html.light .border-zinc-600 { border-color: #b6bac2 !important; }
+
+/* Farbige Text-Töne abdunkeln (auf hell sonst unlesbar) */
+html.light [class*="text-green-2"], html.light [class*="text-green-3"], html.light [class*="text-green-4"] { color: #15803d !important; }
+html.light [class*="text-red-2"],   html.light [class*="text-red-3"],   html.light [class*="text-red-4"]   { color: #b91c1c !important; }
+html.light [class*="text-amber-2"], html.light [class*="text-amber-3"], html.light [class*="text-amber-4"] { color: #b45309 !important; }
+html.light [class*="text-yellow-3"],html.light [class*="text-yellow-4"] { color: #a16207 !important; }
+html.light [class*="text-sky-2"],   html.light [class*="text-sky-3"],   html.light [class*="text-sky-4"]   { color: #0369a1 !important; }
+html.light [class*="text-blue-2"],  html.light [class*="text-blue-3"],  html.light [class*="text-blue-4"]  { color: #1d4ed8 !important; }
+html.light [class*="text-purple-2"],html.light [class*="text-purple-3"],html.light [class*="text-purple-4"]{ color: #7e22ce !important; }
+html.light [class*="text-indigo-2"],html.light [class*="text-indigo-3"] { color: #4338ca !important; }
+html.light [class*="text-emerald-2"],html.light [class*="text-emerald-3"]{ color: #047857 !important; }
+
+/* Farbige Flächen (nur die dunklen 900/950er — kräftige Buttons 500–700 bleiben) */
+html.light [class*="bg-green-9"]  { background-color: #e7f6ec !important; }
+html.light [class*="bg-red-9"]    { background-color: #fdeaea !important; }
+html.light [class*="bg-amber-9"]  { background-color: #fdf3df !important; }
+html.light [class*="bg-yellow-9"] { background-color: #fdf7d8 !important; }
+html.light [class*="bg-sky-9"]    { background-color: #e5f3fb !important; }
+html.light [class*="bg-blue-9"]   { background-color: #e7eefc !important; }
+html.light [class*="bg-purple-9"] { background-color: #f4eafc !important; }
+html.light [class*="bg-indigo-9"] { background-color: #eaedfc !important; }
+html.light [class*="border-green-7"],  html.light [class*="border-green-8"]  { border-color: #86cf9d !important; }
+html.light [class*="border-red-7"],    html.light [class*="border-red-8"],   html.light [class*="border-red-9"] { border-color: #f0a8a8 !important; }
+html.light [class*="border-amber-5"],  html.light [class*="border-amber-7"], html.light [class*="border-amber-8"], html.light [class*="border-amber-9"] { border-color: #e5b76a !important; }
+html.light [class*="border-yellow-7"]  { border-color: #e3cf6b !important; }
+html.light [class*="border-sky-5"],    html.light [class*="border-sky-7"]    { border-color: #7cc0e8 !important; }
+html.light [class*="border-blue-5"],   html.light [class*="border-blue-7"]   { border-color: #9ab8f2 !important; }
+html.light [class*="border-purple-8"]  { border-color: #cfa8ee !important; }
+
+/* Tabellen, Code, Lore-Prosa */
+html.light body.cine table thead, html.light table thead { background: #eceef1 !important; }
+html.light body.cine tbody tr:hover, html.light tbody tr:hover { background: rgba(0,0,0,0.045) !important; }
+html.light .prose-lore th { background: #eceef1; color: #14161c; }
+html.light .prose-lore tr:nth-child(even) td { background: #f6f7f8; }
+
+/* Scrollbar + Dropdowns */
+html.light ::-webkit-scrollbar-track { background: #e8eaed; }
+html.light ::-webkit-scrollbar-thumb { background: #b9bdc6; }
+html.light ::-webkit-scrollbar-thumb:hover { background: #9aa0ab; }
+html.light select { color-scheme: light; }
+html.light select option, html.light body.cine select option {
+  background-color: #ffffff !important; color: #1f2430 !important;
+}
+html.light select option:disabled, html.light body.cine select option:disabled { color: #9aa0ab !important; }
+
+/* Logo bleibt auf dunklem Chip lesbar */
+html.light header img[src*="logo"] { background: #141719; padding: 4px 10px; border-radius: 10px; }
+
+/* Sticky-Header hell */
+html.light header[class*="bg-zinc-950/"] { background: rgba(250,250,251,0.92) !important; border-bottom-color: #dcdee3 !important; }
+
+/* Toggle-Icons: dunkel zeigt ☀️ (wechselt zu hell), hell zeigt 🌙 */
+.theme-toggle .tt-moon { display: none; }
+html.light .theme-toggle .tt-sun { display: none; }
+html.light .theme-toggle .tt-moon { display: inline; }
