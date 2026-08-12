@@ -148,6 +148,7 @@ function dashboard() {
     personnelPostToast: "",                     // kurze Bestätigung nach erfolgreichem Post
     searchQuery: "",
     showBulk: false,
+    bulkImages: [],
     bulkScope: "all",
     bulkDistrict: "",
     bulkSelectedCrews: [],
@@ -207,10 +208,18 @@ function dashboard() {
       if (this.bulkDeadlineUnit === "day") return n * 60 * 24;
       return n;
     },
+    pickBulkImages(evt) {
+      this.bulkImages = Array.from((evt.target && evt.target.files) || []);
+    },
+    clearBulkImages() {
+      this.bulkImages = [];
+      if (this.$refs.bulkImgInput) this.$refs.bulkImgInput.value = "";
+    },
     async sendBulk() {
       const text = (this.bulkContent || "").trim();
       const targets = this.bulkTargets;
-      if (this.bulkMode === "manual" && !text) { alert("Bitte Auftragstext eingeben."); return; }
+      const hasImages = (this.bulkImages || []).length > 0;
+      if (this.bulkMode === "manual" && !text && !hasImages) { alert("Bitte Auftragstext oder Bild angeben."); return; }
       if (this.bulkMode === "ai_rewrite" && !text) { alert("Bitte Roh-Input eingeben."); return; }
       if (targets.length === 0) { alert("Keine Empfänger ausgewählt."); return; }
 
@@ -269,17 +278,22 @@ function dashboard() {
 
     async _bulkDispatch(targets) {
       const text = (this.bulkPreviewText || "").trim();
-      if (!text) return;
+      const imgs = this.bulkImages || [];
+      if (!text && !imgs.length) return;
       const fixedTargets = [...targets];
       this.bulkSending = true;
       this.bulkBusyLabel = `Sende ${fixedTargets.length} parallel…`;
       const minutes = this._bulkDeadlineMinutes();
       try {
-        const results = await api.post("/api/missions/bulk_send", {
-          crew_ids: fixedTargets.map(c => c.id),
-          content: text,
-          deadline_minutes: minutes,
-        });
+        const fd = new FormData();
+        fd.append("crew_ids", JSON.stringify(fixedTargets.map(c => c.id)));
+        fd.append("content", text);
+        if (minutes) fd.append("deadline_minutes", String(minutes));
+        for (const img of imgs) fd.append("images", img);
+        const resp = await fetch("/api/missions/bulk_send",
+                                 { method: "POST", body: fd, credentials: "include" });
+        if (!resp.ok) throw new Error(`${resp.status}: ${await resp.text()}`);
+        const results = await resp.json();
         const ok = results.filter(r => r.ok).length;
         const failed = results.filter(r => !r.ok);
         let resultText = `Gesendet: ${ok}/${fixedTargets.length}`;
@@ -292,6 +306,7 @@ function dashboard() {
           this.bulkContent = "";
           this.bulkPreviewText = "";
           this.bulkDeadlineValue = "";
+          this.clearBulkImages();
           this.bulkPhase = "input";
         }
       } catch (e) {

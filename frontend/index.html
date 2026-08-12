@@ -6,7 +6,7 @@
   <title>Crime Automation — Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260812e" />
+  <link rel="stylesheet" href="/static/style.css?v=20260812f" />
   <script>
     /* Day-Mode-Bootstrap: Klasse VOR dem ersten Paint setzen (kein Flash) */
     (function () {
@@ -342,8 +342,19 @@
         </div>
 
         <textarea x-model="bulkContent" rows="4"
-                  :placeholder="bulkMode === 'manual' ? 'Auftragstext (1:1 an alle Empfänger)' : (bulkMode === 'ai_rewrite' ? 'Roh-Input — Klartext, was passieren soll. KI schreibt es pro Gang individuell um.' : 'Hinweise an die KI (optional, darf leer bleiben). KI generiert pro Gang aus Story+Beziehungen.')"
+                  :placeholder="bulkMode === 'manual' ? 'Auftragstext (1:1 an alle Empfänger) — bei Bild optional' : (bulkMode === 'ai_rewrite' ? 'Roh-Input — Klartext, was passieren soll. KI schreibt es pro Gang individuell um.' : 'Hinweise an die KI (optional, darf leer bleiben). KI generiert pro Gang aus Story+Beziehungen.')"
                   class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm"></textarea>
+
+        <!-- Bild(er) an alle senden — nur im Klartext-Modus (kein KI-Eingriff) -->
+        <div x-show="bulkMode === 'manual'" class="flex items-center gap-2 flex-wrap text-xs text-zinc-400">
+          <span>📎 Bild(er) an alle senden (optional, mehrere möglich):</span>
+          <input type="file" accept="image/*" multiple x-ref="bulkImgInput" @change="pickBulkImages($event)"
+                 class="text-xs text-zinc-400" />
+          <span x-show="bulkImages.length" class="text-sky-300"
+                x-text="bulkImages.length + ' Bild(er): ' + bulkImages.map(f => f.name).join(', ')"></span>
+          <button x-show="bulkImages.length" @click="clearBulkImages()"
+                  class="text-zinc-500 hover:text-zinc-300">✕</button>
+        </div>
 
         <div class="grid grid-cols-3 gap-2">
           <input type="number" min="0" x-model.number="bulkDeadlineValue"
@@ -359,7 +370,7 @@
 
         <div class="flex items-center gap-3">
           <button @click="sendBulk()"
-                  :disabled="bulkSending || bulkTargets.length === 0 || (bulkMode !== 'ai_generate' && !bulkContent.trim())"
+                  :disabled="bulkSending || bulkTargets.length === 0 || (bulkMode !== 'ai_generate' && !bulkContent.trim() && !bulkImages.length)"
                   class="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 rounded font-medium">
             <span x-show="!bulkSending && bulkMode === 'manual'">📤 An <span x-text="bulkTargets.length"></span> Gang<span x-show="bulkTargets.length !== 1">s</span> senden</span>
             <span x-show="!bulkSending && bulkMode !== 'manual'">⚙ Vorschau für <span x-text="bulkTargets.length"></span> Gang<span x-show="bulkTargets.length !== 1">s</span> erstellen</span>
@@ -583,6 +594,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20260812e"></script>
+  <script src="/static/app.js?v=20260812f"></script>
 </body>
 </html>

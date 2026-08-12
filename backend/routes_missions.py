@@ -679,43 +679,75 @@ async def create_manual_mission(
 
 @router.post("/bulk_send")
 async def bulk_send(
-    payload: BulkSendRequest, session: AsyncSession = Depends(get_session)
+    crew_ids: str = Form(...),
+    content: str = Form(""),
+    deadline_minutes: int | None = Form(None),
+    scheduled_send_at: str = Form(""),
+    images: list[UploadFile] = File(default=[]),
+    session: AsyncSession = Depends(get_session),
 ):
-    """Bulk-Variante: erstellt für jede Crew eine manuelle Mission und sendet
-    sie parallel via Bot (5 gleichzeitig). Returns Liste mit Status pro Crew."""
-    text = payload.content.strip()
-    if not text:
-        raise HTTPException(400, "content darf nicht leer sein")
-    if not payload.crew_ids:
+    """Bulk-Variante (Multipart): erstellt für jede Crew eine manuelle Mission
+    (Text und/oder Bild) und sendet sie parallel via Bot. Bei mehreren Bildern
+    geht das erste mit dem Auftrag mit, die weiteren als Folge-Post."""
+    try:
+        ids = json.loads(crew_ids) if crew_ids else []
+        ids = [int(x) for x in ids]
+    except (ValueError, TypeError):
+        raise HTTPException(400, "crew_ids ungültig")
+    text = (content or "").strip()
+    if not ids:
         return []
 
+    # Bilder in den geteilten Media-Ordner speichern (Bot liest von dort)
+    image_paths: list[str] = []
+    for img in (images or [])[:10]:
+        if img is None or not (img.filename or "").strip():
+            continue
+        ext = Path(img.filename).suffix.lower() or ".png"
+        if ext not in {".png", ".jpg", ".jpeg", ".gif", ".webp"}:
+            raise HTTPException(400, f"Bild-Format nicht unterstützt: {img.filename}")
+        target_dir = Path(settings.image_dir)
+        target_dir.mkdir(parents=True, exist_ok=True)
+        target = target_dir / f"bulk_{uuid4().hex}{ext}"
+        async with aiofiles.open(target, "wb") as f:
+            await f.write(await img.read())
+        image_paths.append(str(target))
+
+    if not text and not image_paths:
+        raise HTTPException(400, "Text oder mindestens ein Bild erforderlich")
+
     deadline_at = None
-    if payload.deadline_minutes and payload.deadline_minutes > 0:
-        deadline_at = datetime.utcnow() + timedelta(minutes=payload.deadline_minutes)
-    schedule_at = _normalize_naive_utc(payload.scheduled_send_at)
+    if deadline_minutes and deadline_minutes > 0:
+        deadline_at = datetime.utcnow() + timedelta(minutes=deadline_minutes)
+    schedule_at = None
+    if (scheduled_send_at or "").strip():
+        try:
+            schedule_at = _normalize_naive_utc(datetime.fromisoformat(scheduled_send_at))
+        except (ValueError, TypeError):
+            schedule_at = None
 
-    # KI-Vorschlag fürs Personal-Briefing — einmal generieren mit erster
-    # Crew als Kontext, dann allen Missions zuweisen (sonst 21 KI-Calls).
-    # Der User kann pro Crew im Dashboard-Widget nachschärfen.
+    # KI-Personal nur bei Text (ein Bild-Broadcast braucht keinen NPC-Bedarf)
     personnel = ""
-    first_crew = None
-    for cid in payload.crew_ids:
-        first_crew = await session.get(Crew, cid)
+    if text:
+        first_crew = None
+        for cid in ids:
+            first_crew = await session.get(Crew, cid)
+            if first_crew:
+                break
         if first_crew:
-            break
-    if first_crew:
-        personnel = await _generate_personnel_safe(
-            session, text, first_crew.name, first_crew.district or ""
-        )
+            personnel = await _generate_personnel_safe(
+                session, text, first_crew.name, first_crew.district or ""
+            )
     personnel_stamp = datetime.utcnow() if personnel else None
+    primary_image = image_paths[0] if image_paths else ""
 
-    # Phase 1: Missions sequentiell anlegen + Names sammeln
+    # Phase 1: Missions anlegen
     creations: list[dict] = []
-    for cid in payload.crew_ids:
+    for cid in ids:
         crew = await session.get(Crew, cid)
         if not crew:
             creations.append({"crew_id": cid, "name": f"#{cid}", "mission": None,
-                              "error": "Crew nicht gefunden"})
+                              "channel": "", "error": "Crew nicht gefunden"})
             continue
         mission = Mission(
             crew_id=crew.id,
@@ -725,6 +757,7 @@ async def bulk_send(
             content_generated=text,
             content_final=text,
             discord_channel_id=crew.discord_channel_id,
+            image_path=primary_image,
             status=MissionStatus.DRAFT,
             deadline_at=deadline_at,
             scheduled_send_at=schedule_at,
@@ -732,13 +765,13 @@ async def bulk_send(
             personnel_updated_at=personnel_stamp,
         )
         session.add(mission)
-        creations.append({"crew_id": cid, "name": crew.name, "mission": mission, "error": None})
+        creations.append({"crew_id": cid, "name": crew.name, "mission": mission,
+                          "channel": crew.discord_channel_id, "error": None})
     await session.commit()
     for entry in creations:
         if entry["mission"]:
             await session.refresh(entry["mission"])
 
-    # Wenn Schedule: nicht jetzt senden, Bot picks up
     if schedule_at:
         return [
             {
@@ -751,7 +784,7 @@ async def bulk_send(
             for e in creations
         ]
 
-    # Phase 2: parallele Bot-Sends, max 5 gleichzeitig
+    extra_images = image_paths[1:]  # weitere Bilder als Folge-Post
     sem = asyncio.Semaphore(5)
 
     async def _send_one(entry: dict) -> dict:
@@ -772,6 +805,17 @@ async def bulk_send(
                         "crew_id": entry["crew_id"], "name": entry["name"], "ok": False,
                         "mission_id": m.id, "error": f"Bot {r.status_code}: {r.text[:200]}",
                     }
+                # Weitere Bilder als Folge-Post in denselben Channel
+                if extra_images and entry["channel"]:
+                    try:
+                        async with httpx.AsyncClient(timeout=30.0) as cli:
+                            await cli.post(
+                                f"{settings.bot_api_url}/send_file",
+                                json={"channel_id": entry["channel"], "content": "",
+                                      "file_paths": extra_images},
+                            )
+                    except Exception:
+                        pass
                 return {
                     "crew_id": entry["crew_id"], "name": entry["name"], "ok": True,
                     "mission_id": m.id, "error": None,
