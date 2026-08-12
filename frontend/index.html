@@ -6,7 +6,7 @@
   <title>Crime Automation — Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link rel="stylesheet" href="/static/style.css?v=20260812d" />
+  <link rel="stylesheet" href="/static/style.css?v=20260812e" />
   <script>
     /* Day-Mode-Bootstrap: Klasse VOR dem ersten Paint setzen (kein Flash) */
     (function () {
@@ -424,6 +424,12 @@
                   class="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200 text-sm">×</button>
         </div>
         <span class="w-px h-6 bg-zinc-800 mx-1 hidden md:inline-block"></span>
+        <button @click="enableNotifs()" @contextmenu.prevent="toggleNotifSound()"
+                :title="soundOn ? 'Benachrichtigungen aktiv (Ton an). Klick = OS-Erlaubnis holen · Rechtsklick = Ton aus' : 'Ton aus. Klick = aktivieren'"
+                class="px-3 py-2 rounded-lg text-sm border border-zinc-700 hover:bg-zinc-800 transition whitespace-nowrap"
+                :class="soundOn ? 'text-sky-300 border-sky-800/60' : 'text-zinc-400'">
+          <span x-text="soundOn ? '🔔' : '🔕'"></span>
+        </button>
         <button @click="archiveAllActive()" :disabled="archivingAll"
                 title="Alle aktiven Aufträge archivieren + Zusatzinfo-Channels leeren"
                 class="px-3 py-2 rounded-lg text-sm border border-amber-800/60 text-amber-300 hover:bg-amber-900/40 disabled:opacity-50 transition whitespace-nowrap">
@@ -577,6 +583,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=20260812d"></script>
+  <script src="/static/app.js?v=20260812e"></script>
 </body>
 </html>

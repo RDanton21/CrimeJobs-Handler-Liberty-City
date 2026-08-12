@@ -128,6 +128,8 @@ function dashboard() {
     wizardIsError: false,
     notifications: {},
     seenAt: JSON.parse(localStorage.getItem("crewSeenAt") || "{}"),
+    _notifBaseline: false,   // erster Load setzt nur den Ausgangsstand (kein Alarm)
+    soundOn: localStorage.getItem("crewSoundOn") !== "0",  // Ton bei neuer Nachricht (Default an)
     archivingAll: false,
     archivingCrew: {},
     // Personal-Bedarf Live-Feed
@@ -457,8 +459,79 @@ function dashboard() {
         const data = await api.get("/api/crews/notifications");
         const map = {};
         for (const n of data) map[n.crew_id] = n.latest_boss_message_at;
+        // Neue Nachrichten erkennen (neuer als letzter Stand UND noch ungesehen)
+        if (this._notifBaseline) {
+          const fresh = [];
+          for (const [cid, ts] of Object.entries(map)) {
+            if (!ts) continue;
+            const prev = this.notifications[cid];
+            const seen = this.seenAt[cid];
+            const newerThanPrev = !prev || new Date(ts).getTime() > new Date(prev).getTime();
+            const unseen = !seen || new Date(ts).getTime() > new Date(seen).getTime();
+            if (newerThanPrev && unseen) {
+              const crew = (this.crews || []).find(c => String(c.id) === String(cid));
+              fresh.push(crew ? crew.name : ("Gang #" + cid));
+            }
+          }
+          if (fresh.length) this._notifyNewMessages(fresh);
+        } else {
+          this._notifBaseline = true;  // erster Poll = Ausgangsstand, nicht alarmieren
+        }
         this.notifications = map;
       } catch (e) { /* Bot offline -> silent */ }
+    },
+    _notifyNewMessages(names) {
+      const uniq = [...new Set(names)];
+      const label = uniq.length === 1
+        ? `💬 Neue Nachricht: ${uniq[0]}`
+        : `💬 ${uniq.length} neue Nachrichten (${uniq.slice(0, 3).join(", ")}${uniq.length > 3 ? "…" : ""})`;
+      // sichtbarer Toast (bestehende Toast-Box wiederverwenden)
+      this.personnelToast = label;
+      clearTimeout(this._crewToastT);
+      this._crewToastT = setTimeout(() => { if (this.personnelToast === label) this.personnelToast = ""; }, 6000);
+      // Ton
+      this._playPing();
+      // Browser-/OS-Notification (best effort, auch bei aktivem Tab)
+      try {
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("Crime Automation — Boss-Feedback", { body: label, icon: "/static/logo.png" });
+        }
+      } catch (e) {}
+    },
+    _playPing() {
+      if (!this.soundOn) return;
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        this._audioCtx = this._audioCtx || new Ctx();
+        const ctx = this._audioCtx;
+        if (ctx.state === "suspended") ctx.resume();
+        const now = ctx.currentTime;
+        [880, 1320].forEach((freq, i) => {
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.type = "sine"; o.frequency.value = freq;
+          o.connect(g); g.connect(ctx.destination);
+          const t = now + i * 0.13;
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+          o.start(t); o.stop(t + 0.18);
+        });
+      } catch (e) {}
+    },
+    // 🔔-Button: OS-Permission holen, Ton an, Test-Ping (entsperrt den AudioContext)
+    async enableNotifs() {
+      this.soundOn = true;
+      localStorage.setItem("crewSoundOn", "1");
+      this._playPing();
+      if ("Notification" in window && Notification.permission !== "granted") {
+        try { await Notification.requestPermission(); } catch (e) {}
+      }
+    },
+    toggleNotifSound() {
+      this.soundOn = !this.soundOn;
+      localStorage.setItem("crewSoundOn", this.soundOn ? "1" : "0");
+      if (this.soundOn) this._playPing();
     },
     hasUnread(c) {
       const latest = this.notifications[c.id];
