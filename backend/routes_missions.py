@@ -1270,8 +1270,9 @@ def _build_manual_top3_embed(entries: list[dict], *, title: str) -> dict:
     medals = {0: "🥇", 1: "🥈", 2: "🥉"}
     day_label = _event_day_label()
     header_lines = [
-        f"💀 **Stand: {day_label}**",
-        "_Vom Boss festgelegt — die Spitze des Tages._",
+        "💀 **Wer heute Ergebnisse von Bedeutung geliefert hat, steht jetzt oben.**",
+        "_Kein Lärm, keine Ausreden — nur Arbeit, die zählt. Die Krone sitzt bei niemandem fest._",
+        f"`Stand: {day_label}`",
     ]
     fields: list[dict] = []
     for i, e in enumerate(entries[:3]):
