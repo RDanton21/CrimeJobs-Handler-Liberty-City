@@ -131,6 +131,12 @@ async def ranking_page(_user: str = Depends(require_admin)):
     return FileResponse(str(FRONTEND_DIR / "ranking.html"))
 
 
+@app.get("/top3")
+async def manual_top3_page(_user: str = Depends(require_admin)):
+    """Reiter: Tages-Top-3 von Hand setzen und posten."""
+    return FileResponse(str(FRONTEND_DIR / "top3.html"))
+
+
 @app.get("/beziehungen")
 async def relations_page(_user: str = Depends(require_admin)):
     return FileResponse(str(FRONTEND_DIR / "relations.html"))

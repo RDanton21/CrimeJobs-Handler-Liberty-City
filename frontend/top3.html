@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crime Automation — Tages-Top 3</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css?v=20260813a" />
+  <script>
+    /* Day-Mode-Bootstrap: Klasse VOR dem ersten Paint setzen (kein Flash) */
+    (function () {
+      try { if (localStorage.getItem('sektor_theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}
+      window.__toggleTheme = function () {
+        var light = document.documentElement.classList.toggle('light');
+        try { localStorage.setItem('sektor_theme', light ? 'light' : 'dark'); } catch (e) {}
+      };
+    })();
+  </script>
+  <style>[x-cloak]{display:none !important;}</style>
+</head>
+<body class="cine bg-zinc-950 text-zinc-100 min-h-screen">
+  <div x-data="top3Page()" x-init="init()" x-cloak class="max-w-4xl mx-auto p-6">
+    <header class="sticky top-0 z-40 -mx-6 px-6 py-3 mb-8 bg-zinc-950/90 backdrop-blur border-b border-zinc-800/70 flex items-center justify-between gap-4 flex-wrap">
+      <h1><img src="/static/logo.png" alt="SEKT6R" class="h-10 w-auto" /></h1>
+      <nav class="flex items-center gap-1 text-sm flex-wrap">
+          <a href="/" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Dashboard</a>
+          <a href="/archive" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Archiv</a>
+          <a href="/personnel" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Personal</a>
+          <a href="/ranking" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Ranking</a>
+          <a href="/top3" class="px-3 py-1.5 rounded-lg bg-red-700/90 text-white font-medium">🥇 Tages-Top 3</a>
+          <span class="w-px h-5 bg-zinc-800 mx-1 hidden md:inline-block"></span>
+          <a href="/lore" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Lore</a>
+          <a href="/story" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Story</a>
+          <a href="/chronik" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Chronik</a>
+          <a href="/konflikte" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Beef</a>
+          <a href="/mittler" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Mittler</a>
+          <a href="/beziehungen" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">Beziehungen</a>
+          <span class="w-px h-5 bg-zinc-800 mx-1 hidden md:inline-block"></span>
+          <a href="/settings" class="px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">⚙ Settings</a>
+        <button type="button" onclick="__toggleTheme()" title="Hell / Dunkel umschalten"
+                  class="theme-toggle px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/70 transition">
+            <span class="tt-sun">☀️</span><span class="tt-moon">🌙</span>
+          </button>
+        </nav>
+    </header>
+
+    <section class="mb-4">
+      <h2 class="text-xl font-semibold mb-1">🥇 Tages-Top 3 (manuell)</h2>
+      <p class="text-xs text-zinc-400 max-w-2xl">
+        Setze die Spitze des Tages von Hand — unabhängig von den Punkten.
+        Speichern sichert die Auswahl; <strong>Jetzt posten</strong> schickt sie als
+        Hype-Embed in den Top-3-Channel (ersetzt den vorherigen Top-3-Post).
+      </p>
+    </section>
+
+    <!-- Status -->
+    <p x-show="msg" x-text="msg"
+       class="text-sm mb-3 whitespace-pre-line px-3 py-2 rounded"
+       :class="msgIsError ? 'bg-red-900/30 border border-red-800 text-red-300' : 'bg-green-900/30 border border-green-800 text-green-300'"></p>
+
+    <!-- Plätze -->
+    <div class="space-y-3 mb-5">
+      <template x-for="(row, idx) in places" :key="idx">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex items-start gap-4">
+          <div class="text-3xl leading-none pt-1" x-text="medals[idx]"></div>
+          <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-zinc-400 block mb-1" x-text="`Platz ${idx+1} — Crew`"></label>
+              <select x-model.number="row.crew_id"
+                      class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm">
+                <option :value="null">— wählen —</option>
+                <template x-for="c in crews" :key="c.crew_id">
+                  <option :value="c.crew_id" x-text="c.district ? `${c.name} · ${c.district}` : c.name"></option>
+                </template>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs text-zinc-400 block mb-1">Notiz (optional)</label>
+              <input type="text" x-model="row.note" maxlength="120"
+                     placeholder="z.B. beste Aufklärung am Hafen"
+                     class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <!-- Titel + Intro -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+      <div>
+        <label class="text-xs text-zinc-400 block mb-1">Embed-Titel</label>
+        <input type="text" x-model="title"
+               class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+      </div>
+      <div>
+        <label class="text-xs text-zinc-400 block mb-1">Begleittext über dem Embed (optional)</label>
+        <input type="text" x-model="intro"
+               placeholder="z.B. @everyone"
+               class="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-sm" />
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex items-center gap-2 flex-wrap mb-6">
+      <button @click="save()" :disabled="busy"
+              class="px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 rounded text-sm font-medium">
+        <span x-show="!saving">💾 Speichern</span><span x-show="saving">Speichere…</span>
+      </button>
+      <button @click="post()" :disabled="busy || !hasEntries"
+              title="Speichert und postet die Top 3 in den Top-3-Channel"
+              class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 rounded text-sm font-medium">
+        <span x-show="!posting">🥇 Jetzt posten</span><span x-show="posting">Sende…</span>
+      </button>
+      <span class="text-xs text-zinc-500 ml-auto">
+        <template x-if="channelId"><span>Top-3-Channel: <code x-text="channelId"></code></span></template>
+        <template x-if="!channelId"><span class="text-amber-400">⚠ Kein Top-3-Channel in Settings gesetzt</span></template>
+      </span>
+    </div>
+
+    <!-- Vorschau -->
+    <section>
+      <h3 class="text-sm font-semibold text-zinc-400 mb-2">Vorschau</h3>
+      <div class="rounded-lg border-l-4 border-red-700 bg-zinc-900 border border-zinc-800 p-4">
+        <div class="font-semibold mb-1" x-text="title || '🥇 Die Spitze von Liberty City'"></div>
+        <div class="text-xs text-zinc-400 mb-3">💀 Stand: heute — Von der Spielleitung gesetzt</div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <template x-for="(e, i) in resolvedPreview" :key="i">
+            <div class="bg-zinc-950/60 border border-zinc-800 rounded p-3">
+              <div class="font-medium" x-text="`${medals[i]} ${e.name}`"></div>
+              <div class="text-xs text-zinc-400 italic" x-text="e.district || '—'"></div>
+              <div x-show="e.note" class="text-xs text-zinc-300 mt-1" x-text="e.note"></div>
+            </div>
+          </template>
+          <template x-if="resolvedPreview.length === 0">
+            <div class="text-sm text-zinc-500">Noch keine Crews gewählt.</div>
+          </template>
+        </div>
+        <div x-show="lastPostedAt" class="text-xs text-zinc-500 mt-3">
+          Zuletzt gepostet: <span x-text="lastPostedAt"></span>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="/static/app.js?v=20260813a"></script>
+</body>
+</html>

@@ -189,6 +189,8 @@ from .schemas import (
     BossMessagePreviewRequest,
     BossMessageSendRequest,
     BulkSendRequest,
+    ManualTop3PostRequest,
+    ManualTop3Save,
     MissionGenerateRequest,
     MissionManualRequest,
     MissionOut,
@@ -1256,6 +1258,197 @@ async def post_ranking_to_discord(
         "mode": mode,
         "replaced_previous": payload.replace_previous,
     }
+
+
+# ---------------------------------------------------------------------------
+# Manuelle Tages-Top-3 (von Hand gesetzt statt aus Punkten berechnet)
+# ---------------------------------------------------------------------------
+
+def _build_manual_top3_embed(entries: list[dict], *, title: str) -> dict:
+    """Podest-Embed wie der automatische Top-3-Post, aber mit von Hand
+    gesetzten Plätzen. entries = [{name, district, note}] in Reihenfolge 1..3."""
+    medals = {0: "🥇", 1: "🥈", 2: "🥉"}
+    day_label = _event_day_label()
+    header_lines = [
+        f"💀 **Stand: {day_label}**",
+        "_Von der Spielleitung gesetzt — die Spitze des Tages._",
+    ]
+    fields: list[dict] = []
+    for i, e in enumerate(entries[:3]):
+        medal = medals.get(i, f"#{i + 1}")
+        name = (e.get("name") or "?").strip() or "?"
+        district = (e.get("district") or "").strip() or "—"
+        note = (e.get("note") or "").strip()
+        value = f"_{district}_"
+        if note:
+            value += f"\n{note}"
+        fields.append({"name": f"{medal} {name}", "value": value, "inline": True})
+    while len(fields) < 3 and fields:
+        fields.append({"name": "​", "value": "​", "inline": True})
+
+    return {
+        "title": title or "🥇 Die Spitze von Liberty City",
+        "description": "\n".join(header_lines),
+        "color": 0xB91C1C,
+        "footer": {"text": "Liberty City RP · Niemand behält lange die Krone"},
+        "timestamp": datetime.utcnow().isoformat(),
+        "fields": fields,
+    }
+
+
+async def _resolve_manual_entries(
+    entries: list[dict], session: AsyncSession
+) -> list[dict]:
+    """Ergänzt name/district je Eintrag aus der Crew-DB (per crew_id),
+    Fallback = frei getippter name. Leere Einträge werden verworfen."""
+    ids = [e["crew_id"] for e in entries if e.get("crew_id")]
+    crew_map: dict[int, Crew] = {}
+    if ids:
+        res = await session.execute(select(Crew).where(Crew.id.in_(ids)))
+        crew_map = {c.id: c for c in res.scalars().all()}
+    out: list[dict] = []
+    for e in entries:
+        cid = e.get("crew_id")
+        crew = crew_map.get(cid) if cid else None
+        name = (crew.name if crew else (e.get("name") or "")).strip()
+        district = (crew.district if crew else "") or ""
+        if not name:
+            continue  # leerer Platz -> überspringen
+        out.append({
+            "crew_id": cid,
+            "name": name,
+            "district": district,
+            "note": (e.get("note") or "").strip(),
+        })
+    return out
+
+
+@router.get("/manual-top3")
+async def get_manual_top3(session: AsyncSession = Depends(get_session)):
+    """Liefert die gespeicherte manuelle Tages-Top-3 (aufgelöst mit Namen/
+    Stadtteil) plus den konfigurierten Top-3-Channel."""
+    raw = (await settings_get(session, "manual_top3_json", "")).strip()
+    data: dict = {}
+    if raw:
+        try:
+            data = json.loads(raw)
+        except (ValueError, TypeError):
+            data = {}
+    entries = await _resolve_manual_entries(data.get("entries", []) or [], session)
+    channel_id = (await settings_get(session, "ranking_top3_channel_id", "")).strip()
+    return {
+        "title": data.get("title") or "🥇 Die Spitze von Liberty City",
+        "intro": data.get("intro") or "",
+        "entries": entries,
+        "date": data.get("date") or "",
+        "updated_at": data.get("updated_at") or "",
+        "last_posted_at": data.get("last_posted_at") or "",
+        "channel_id": channel_id,
+    }
+
+
+@router.put("/manual-top3")
+async def save_manual_top3(
+    payload: ManualTop3Save, session: AsyncSession = Depends(get_session)
+):
+    """Speichert die manuell gesetzte Tages-Top-3 (ohne zu posten)."""
+    from .settings_store import set_value as _set_setting
+
+    raw = (await settings_get(session, "manual_top3_json", "")).strip()
+    prev: dict = {}
+    if raw:
+        try:
+            prev = json.loads(raw)
+        except (ValueError, TypeError):
+            prev = {}
+
+    entries = [
+        {"crew_id": e.crew_id, "name": (e.name or "").strip(), "note": (e.note or "").strip()}
+        for e in payload.entries
+    ]
+    now = datetime.now()
+    data = {
+        "title": (payload.title or "🥇 Die Spitze von Liberty City").strip(),
+        "intro": (payload.intro or "").strip(),
+        "entries": entries,
+        "date": now.date().isoformat(),
+        "updated_at": now.isoformat(timespec="seconds"),
+        "last_posted_at": prev.get("last_posted_at") or "",
+    }
+    await _set_setting(session, "manual_top3_json", json.dumps(data, ensure_ascii=False))
+    resolved = await _resolve_manual_entries(entries, session)
+    return {"ok": True, "saved": len(resolved), "entries": resolved}
+
+
+@router.post("/manual-top3/post")
+async def post_manual_top3(
+    payload: ManualTop3PostRequest, session: AsyncSession = Depends(get_session)
+):
+    """Postet die gespeicherte manuelle Tages-Top-3 als Hype-Embed in den
+    Top-3-Channel (ersetzt optional den vorherigen Top-3-Post)."""
+    from .settings_store import set_value as _set_setting
+
+    raw = (await settings_get(session, "manual_top3_json", "")).strip()
+    data: dict = {}
+    if raw:
+        try:
+            data = json.loads(raw)
+        except (ValueError, TypeError):
+            data = {}
+    entries = await _resolve_manual_entries(data.get("entries", []) or [], session)
+    if not entries:
+        raise HTTPException(400, "Keine Top-3 gesetzt — bitte zuerst Plätze eintragen und speichern.")
+
+    channel_id = (payload.channel_id or "").strip()
+    if not channel_id:
+        channel_id = (await settings_get(session, "ranking_top3_channel_id", "")).strip()
+    if not channel_id:
+        raise HTTPException(400, "Kein Top-3-Channel gesetzt (Settings → Top-3-Channel-ID).")
+
+    embed = _build_manual_top3_embed(entries, title=data.get("title") or "🥇 Die Spitze von Liberty City")
+
+    # Vorherigen Top-3-Post ersetzen (teilt sich die Message-ID mit dem Auto-Post,
+    # damit im Channel immer nur EINE aktuelle Top-3 steht).
+    if payload.replace_previous:
+        prev_msg_id = (await settings_get(session, "ranking_top3_last_message_id", "")).strip()
+        if prev_msg_id:
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as cli:
+                    await cli.post(
+                        f"{settings.bot_api_url}/delete_message",
+                        json={"channel_id": channel_id, "message_id": prev_msg_id},
+                    )
+            except Exception:
+                pass
+
+    body = {"channel_id": channel_id, "embed": embed}
+    intro = (data.get("intro") or "").strip()
+    if intro:
+        body["content"] = intro
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as cli:
+            r = await cli.post(f"{settings.bot_api_url}/send_embed", json=body)
+    except Exception as exc:
+        raise HTTPException(503, f"Bot nicht erreichbar: {exc}") from exc
+    if r.status_code >= 400:
+        raise HTTPException(502, f"Bot Fehler: {r.text}")
+
+    new_msg_id = (r.json() or {}).get("message_id") or ""
+    if new_msg_id:
+        try:
+            await _set_setting(session, "ranking_top3_last_message_id", str(new_msg_id))
+        except Exception:
+            pass
+
+    # last_posted_at im JSON aktualisieren
+    data["last_posted_at"] = datetime.now().isoformat(timespec="seconds")
+    try:
+        await _set_setting(session, "manual_top3_json", json.dumps(data, ensure_ascii=False))
+    except Exception:
+        pass
+
+    return {"ok": True, "message_id": new_msg_id, "crews_posted": len(entries)}
 
 
 @router.get("/stats")

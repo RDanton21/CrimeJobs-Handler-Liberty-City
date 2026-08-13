@@ -3695,3 +3695,111 @@ function relationsSurvey() {
     },
   };
 }
+
+// ---------------------------------------------------------------------------
+// Tages-Top-3 (manuell setzen + posten) — /top3
+// ---------------------------------------------------------------------------
+function top3Page() {
+  return {
+    medals: ["🥇", "🥈", "🥉"],
+    crews: [],
+    places: [
+      { crew_id: null, note: "" },
+      { crew_id: null, note: "" },
+      { crew_id: null, note: "" },
+    ],
+    title: "🥇 Die Spitze von Liberty City",
+    intro: "",
+    channelId: "",
+    lastPostedAt: "",
+    saving: false,
+    posting: false,
+    msg: "",
+    msgIsError: false,
+
+    get busy() { return this.saving || this.posting; },
+    get hasEntries() { return this.places.some(p => p.crew_id); },
+    // Vorschau: aufgelöste, nicht-leere Plätze in Reihenfolge
+    get resolvedPreview() {
+      const byId = {};
+      for (const c of this.crews) byId[c.crew_id] = c;
+      const out = [];
+      for (const p of this.places) {
+        if (!p.crew_id) continue;
+        const c = byId[p.crew_id];
+        if (!c) continue;
+        out.push({ name: c.name, district: c.district || "", note: (p.note || "").trim() });
+      }
+      return out;
+    },
+
+    async init() {
+      await this.loadCrews();
+      await this.loadSaved();
+    },
+
+    async loadCrews() {
+      try {
+        // crime_only=false => alle aktiven Crews (auch Zivil) zur Auswahl
+        const data = await api.get("/api/missions/ranking?crime_only=false");
+        this.crews = (data.crews || []).map(c => ({
+          crew_id: c.crew_id, name: c.name, district: c.district || "",
+        })).sort((a, b) => a.name.localeCompare(b.name));
+      } catch (e) { this._flash("Crews konnten nicht geladen werden: " + e.message, true); }
+    },
+
+    async loadSaved() {
+      try {
+        const d = await api.get("/api/missions/manual-top3");
+        this.channelId = d.channel_id || "";
+        this.lastPostedAt = d.last_posted_at || "";
+        if (d.title) this.title = d.title;
+        this.intro = d.intro || "";
+        const entries = d.entries || [];
+        for (let i = 0; i < 3; i++) {
+          const e = entries[i];
+          this.places[i] = e
+            ? { crew_id: e.crew_id ?? null, note: e.note || "" }
+            : { crew_id: null, note: "" };
+        }
+      } catch (e) { /* noch nichts gespeichert -> Defaults */ }
+    },
+
+    _payload() {
+      return {
+        title: (this.title || "").trim() || "🥇 Die Spitze von Liberty City",
+        intro: (this.intro || "").trim(),
+        entries: this.places
+          .filter(p => p.crew_id)
+          .map(p => ({ crew_id: p.crew_id, note: (p.note || "").trim() })),
+      };
+    },
+
+    async save() {
+      this.saving = true; this.msg = "";
+      try {
+        const r = await api.put("/api/missions/manual-top3", this._payload());
+        this._flash(`Gespeichert ✓ (${r.saved} Plätze)`, false);
+      } catch (e) { this._flash("Speichern fehlgeschlagen: " + e.message, true); }
+      finally { this.saving = false; }
+    },
+
+    async post() {
+      if (!this.hasEntries) { this._flash("Bitte zuerst mindestens eine Crew wählen.", true); return; }
+      this.posting = true; this.msg = "";
+      try {
+        // erst speichern, dann posten (so ist der Post immer aktuell)
+        await api.put("/api/missions/manual-top3", this._payload());
+        const r = await api.post("/api/missions/manual-top3/post", { replace_previous: true });
+        this._flash(`🥇 Gepostet ✓ (${r.crews_posted} Crews)`, false);
+        await this.loadSaved();
+      } catch (e) { this._flash("Posten fehlgeschlagen: " + e.message, true); }
+      finally { this.posting = false; }
+    },
+
+    _flash(text, isError) {
+      this.msg = text; this.msgIsError = !!isError;
+      if (!isError) setTimeout(() => { if (this.msg === text) this.msg = ""; }, 4000);
+    },
+  };
+}

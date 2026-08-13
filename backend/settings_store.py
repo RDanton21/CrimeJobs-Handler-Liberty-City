@@ -30,6 +30,8 @@ KEYS = {
     "ranking_top3_crime_only",
     "ranking_top3_title",
     "ranking_top3_intro",
+    # Manuell gesetzte Tages-Top-3 (JSON: title/intro/entries/date/…)
+    "manual_top3_json",
     # IDs der letzten geposteten Messages — fürs Auto-Replace
     "ranking_daily_last_message_id",
     "ranking_top3_last_message_id",

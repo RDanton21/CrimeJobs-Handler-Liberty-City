@@ -150,6 +150,24 @@ class RankingPostRequest(BaseModel):
     replace_previous: bool = True  # vorheriges Embed im Channel löschen vorm neuen Post
 
 
+class ManualTop3Entry(BaseModel):
+    """Ein Platz der manuell gesetzten Tages-Top-3."""
+    crew_id: int | None = None   # bevorzugt: Auswahl aus Crew-Liste
+    name: str = ""               # Fallback, falls keine Crew-ID (frei getippt)
+    note: str = ""               # optionale Begründung/Zeile unter dem Namen
+
+
+class ManualTop3Save(BaseModel):
+    title: str = "🥇 Die Spitze von Liberty City"
+    intro: str = ""              # optionaler Begleittext über dem Embed
+    entries: list[ManualTop3Entry] = []
+
+
+class ManualTop3PostRequest(BaseModel):
+    channel_id: str = ""         # leer = ranking_top3_channel_id aus Settings
+    replace_previous: bool = True
+
+
 class MissionUpdate(BaseModel):
     content_final: str | None = None
     image_path: str | None = None
