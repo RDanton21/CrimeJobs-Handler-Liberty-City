@@ -1271,7 +1271,7 @@ def _build_manual_top3_embed(entries: list[dict], *, title: str) -> dict:
     day_label = _event_day_label()
     header_lines = [
         f"💀 **Stand: {day_label}**",
-        "_Von der Spielleitung gesetzt — die Spitze des Tages._",
+        "_Vom Boss festgelegt — die Spitze des Tages._",
     ]
     fields: list[dict] = []
     for i, e in enumerate(entries[:3]):
