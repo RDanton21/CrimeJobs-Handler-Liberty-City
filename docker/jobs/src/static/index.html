@@ -224,6 +224,13 @@
             <!-- Admin-Aktionen: nur fuer Admins, der Server prueft zusaetzlich -->
             <template x-if="me.is_admin">
               <div class="flex items-center gap-2 flex-wrap">
+                <a href="https://crime.bots.sektorrp.eu/"
+                   title="Zurück zum Crime-Dashboard"
+                   class="headline px-2.5 py-1 rounded border border-[#b98a4a]/50 bg-[#b98a4a]/15
+                          text-[#d9ae6e] text-[11px] font-medium tracking-wider
+                          hover:bg-[#b98a4a]/30 hover:border-[#b98a4a] transition-colors">
+                  ← Crime
+                </a>
                 <button @click="openStats()"
                         class="headline px-2.5 py-1 rounded border border-[#3d4a4d] bg-[#17191b]/80
                                text-zinc-300 text-[11px] font-medium tracking-wider
