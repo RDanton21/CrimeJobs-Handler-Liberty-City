@@ -400,9 +400,10 @@
         <template x-if="currentDay()">
           <div>
             <template x-if="currentDay().missions.length === 0">
-              <p class="text-zinc-400 text-sm text-center py-12 [text-shadow:0_1px_6px_rgba(0,0,0,0.8)]">
-                Keine Aufträge mit Personal-Bedarf an diesem Tag.
-              </p>
+              <div class="py-6 flex justify-center">
+                <img src="/static/padrino.png?v=2" alt=""
+                     class="w-full max-w-3xl rounded-lg shadow-2xl" />
+              </div>
             </template>
 
             <!-- Auf sehr breiten Screens zweispaltig, sonst eine Spalte -->
